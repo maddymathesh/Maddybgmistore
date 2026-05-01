@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Reviews — Maddy BGMI Store</title>
+    <meta name="description" content="Real reviews from 2000+ happy buyers. South India's most trusted BGMI store.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body>
+
+    <!-- FLOATING WHATSAPP -->
+    <a class="wa-float" href="https://wa.me/+919025391516" target="_blank" title="WhatsApp Us">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                    </svg>
+    </a>
+
+    <!-- NAV -->
+    <nav>
+        <a class="nav-logo" href="/"><em>MADDY</em> BGMI STORE</a>
+        <ul class="nav-links">
+            <li><a href="/" id="nav-home">Home</a></li>
+            <li><a href="/buy" id="nav-buy">Buy</a></li>
+            <li><a href="/sell" id="nav-sell">Sell</a></li>
+            <li><a href="/recovery" id="nav-recovery">Recovery</a></li>
+            <li><a href="/reviews" id="nav-reviews" class="active">Reviews</a></li>
+            <li><a href="/connectwithus" id="nav-connect">Connect With Us</a></li>
+            <li>
+                <a href="https://wa.me/+919025391516" target="_blank" class="nav-btn">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                    </svg>
+                    WhatsApp
+                </a>
+            </li>
+        </ul>
+        <div class="hamburger" id="ham" onclick="toggleMenu()">
+            <span></span><span></span><span></span>
+        </div>
+    </nav>
+
+    <!-- MOBILE MENU -->
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="/" id="mnav-home">Home</a>
+        <a href="/buy" id="mnav-buy">Buy</a>
+        <a href="/sell" id="mnav-sell">Sell</a>
+        <a href="/recovery" id="mnav-recovery">Recovery</a>
+        <a href="/reviews" id="mnav-reviews" class="active">Reviews</a>
+        <a href="/connectwithus" id="mnav-connect">Connect With Us</a>
+        <a href="https://wa.me/+919025391516" target="_blank" style="color:var(--green)!important;">💬 WhatsApp Us</a>
+    </div>
+
+    <!-- TICKER -->
+    <div class="ticker-wrap">
+        <div class="ticker-track">
+            <span class="ticker-item">⭐ Trusted Since 2019</span>
+            <span class="ticker-item">🛡️ Safe Single Logins</span>
+            <span class="ticker-item">✅ 2000+ Happy Buyers</span>
+            <span class="ticker-item">🎮 Verified BGMI Accounts</span>
+            <span class="ticker-item">⚡ Fast Delivery</span>
+            <span class="ticker-item">🏆 South India's #1 Store</span>
+            <span class="ticker-item">⭐ Trusted Since 2019</span>
+            <span class="ticker-item">🛡️ Safe Single Logins</span>
+            <span class="ticker-item">✅ 2000+ Happy Buyers</span>
+            <span class="ticker-item">🎮 Verified BGMI Accounts</span>
+            <span class="ticker-item">⚡ Fast Delivery</span>
+            <span class="ticker-item">🏆 South India's #1 Store</span>
+        </div>
+    </div>
+
+<!-- ============================================================ -->
+    <!-- REVIEWS PAGE -->
+    <!-- ============================================================ -->
+    <div id="page-reviews" class="page">
+        <div class="page-header">
+            <div class="badge" style="animation:none;">⭐ Reviews &amp; Sold Proofs</div>
+            <h1>What Our <span class="g">Buyers Say</span></h1>
+            <p>Real reviews from real buyers. Every deal verified and completed successfully.</p>
+        </div>
+
+        <section class="section">
+
+            <!-- REVIEW IMAGES SECTION -->
+            <div style="margin-bottom:50px;">
+                <div class="slabel" style="margin-bottom:16px;">📸 Sold Proofs &amp; Screenshots</div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;"
+                    id="review-images-grid">
+                    <!--
+          =====================================================
+          HOW TO ADD YOUR REVIEW IMAGES:
+          Place your review images in the "images/" folder
+          of your project (e.g., images/review1.jpg, images/review2.jpg)
+          Then add them below using this format:
+          =====================================================
+        -->
+                    <div
+                        style="border-radius:12px;overflow:hidden;border:1px solid var(--border-gold);aspect-ratio:9/16;background:var(--card);display:flex;align-items:center;justify-content:center;">
+                        <img src="images/review1.jpg" alt="Review Proof 1"
+                            style="width:100%;height:100%;object-fit:cover;"
+                            onerror="this.parentElement.innerHTML='<div style=\'text-align:center;color:var(--muted);padding:20px;font-size:12px;\'>📸<br>review1.jpg<br><small>Add to images/ folder</small></div>'">
+                    </div>
+                    <div
+                        style="border-radius:12px;overflow:hidden;border:1px solid var(--border-gold);aspect-ratio:9/16;background:var(--card);display:flex;align-items:center;justify-content:center;">
+                        <img src="images/review2.jpg" alt="Review Proof 2"
+                            style="width:100%;height:100%;object-fit:cover;"
+                            onerror="this.parentElement.innerHTML='<div style=\'text-align:center;color:var(--muted);padding:20px;font-size:12px;\'>📸<br>review2.jpg<br><small>Add to images/ folder</small></div>'">
+                    </div>
+                    <!-- Add more images below as needed: -->
+                    <!-- <div style="border-radius:12px;overflow:hidden;border:1px solid var(--border-gold);aspect-ratio:9/16;background:var(--card);">
+          <img src="images/review3.jpg" alt="Review Proof 3" style="width:100%;height:100%;object-fit:cover;">
+        </div> -->
+                </div>
+                <p
+                    style="color:var(--muted);font-size:12px;margin-top:14px;padding:12px;background:var(--card);border-radius:8px;border:1px solid var(--border);">
+                    💡 <strong style="color:var(--text);">For GitHub hosting:</strong> Place your review images inside
+                    an <code style="color:var(--gold);">images/</code> folder alongside your <code
+                        style="color:var(--gold);">index.html</code> file. They will automatically display here.
+                </p>
+            </div>
+
+            <!-- 2026 TEXT REVIEWS -->
+            <div class="review-year-badge">⭐ 2026 Reviews</div>
+            <div class="reviews-grid">
+
+                <div class="review-card">
+                    <div class="review-top">
+                        <div class="review-avatar">AK</div>
+                        <div>
+                            <div class="review-name">Arun Kumar</div>
+                            <div class="review-date">April 2026</div>
+                        </div>
+                    </div>
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">Got my account within 5 minutes of payment. Maddy bhai is 100% legit. Rare
+                        X-suit was there as promised. Will come back again!</p>
+                    <div class="sold-proof-badge">✅ Sold Proof Verified</div>
+                </div>
+
+                <div class="review-card">
+                    <div class="review-top">
+                        <div class="review-avatar" style="background:linear-gradient(135deg,var(--green),#16A34A);">RS
+                        </div>
+                        <div>
+                            <div class="review-name">Rithik S</div>
+                            <div class="review-date">March 2026</div>
+                        </div>
+                    </div>
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">Sold my account here. Got paid immediately after transfer. Transparent
+                        process and no issues. Highly recommended for sellers too!</p>
+                    <div class="sold-proof-badge">✅ Sold Proof Verified</div>
+                </div>
+
+                <div class="review-card">
+                    <div class="review-top">
+                        <div class="review-avatar" style="background:linear-gradient(135deg,#1E90FF,#00BFFF);">PV</div>
+                        <div>
+                            <div class="review-name">Praveen V</div>
+                            <div class="review-date">March 2026</div>
+                        </div>
+                    </div>
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">Custom account was exactly what I asked for. Maddy found exactly the skins I
+                        wanted within my ₹15,000 budget. Super happy!</p>
+                    <div class="sold-proof-badge">✅ Sold Proof Verified</div>
+                </div>
+
+                <div class="review-card">
+                    <div class="review-top">
+                        <div class="review-avatar" style="background:linear-gradient(135deg,#8B5CF6,#6D28D9);">MK</div>
+                        <div>
+                            <div class="review-name">Mohammed K</div>
+                            <div class="review-date">Feb 2026</div>
+                        </div>
+                    </div>
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">Been buying from Maddy store for 2 years. Always trusted, always fast, always
+                        genuine. Nobody beats this store in India!</p>
+                    <div class="sold-proof-badge">✅ Sold Proof Verified</div>
+                </div>
+
+                <div class="review-card">
+                    <div class="review-top">
+                        <div class="review-avatar" style="background:linear-gradient(135deg,#EF4444,#DC2626);">SK</div>
+                        <div>
+                            <div class="review-name">Suresh K</div>
+                            <div class="review-date">Jan 2026</div>
+                        </div>
+                    </div>
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">Got a premium account with 5 X-suits and Conqueror frame. Maddy bhai
+                        explained everything clearly. No hidden charges. Pure trust!</p>
+                    <div class="sold-proof-badge">✅ Sold Proof Verified</div>
+                </div>
+
+                <div class="review-card">
+                    <div class="review-top">
+                        <div class="review-avatar" style="background:linear-gradient(135deg,#F59E0B,#D97706);">NR</div>
+                        <div>
+                            <div class="review-name">Nandha R</div>
+                            <div class="review-date">Jan 2026</div>
+                        </div>
+                    </div>
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">Hold &amp; Sell service was amazing. Got ₹5000 more than what others offered
+                        me. Will always sell through Maddy bhai!</p>
+                    <div class="sold-proof-badge">✅ Sold Proof Verified</div>
+                </div>
+
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- 2025 REVIEWS -->
+            <div class="review-year-badge"
+                style="background:linear-gradient(135deg,rgba(255,107,53,.5),rgba(255,215,0,.4));">🔥 2025 Reviews</div>
+            <div class="reviews-grid">
+
+                <div class="review-card">
+                    <div class="review-top">
+                        <div class="review-avatar" style="background:linear-gradient(135deg,#10B981,#059669);">VR</div>
+                        <div>
+                            <div class="review-name">Vasanth R</div>
+                            <div class="review-date">Dec 2025</div>
+                        </div>
+                    </div>
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">Fast delivery, safe login, and very responsive support. Got my account in
+                        under 10 minutes. This is the real deal!</p>
+                    <div class="sold-proof-badge">✅ Sold Proof Verified</div>
+                </div>
+
+                <div class="review-card">
+                    <div class="review-top">
+                        <div class="review-avatar" style="background:linear-gradient(135deg,#EC4899,#BE185D);">DM</div>
+                        <div>
+                            <div class="review-name">Dharani M</div>
+                            <div class="review-date">Nov 2025</div>
+                        </div>
+                    </div>
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">Perfect experience. Bought a mid-range account for ₹8000. Great value with
+                        good skins. Maddy bhai is very professional.</p>
+                    <div class="sold-proof-badge">✅ Sold Proof Verified</div>
+                </div>
+
+                <div class="review-card">
+                    <div class="review-top">
+                        <div class="review-avatar" style="background:linear-gradient(135deg,#6366F1,#4F46E5);">KP</div>
+                        <div>
+                            <div class="review-name">Karthik P</div>
+                            <div class="review-date">Oct 2025</div>
+                        </div>
+                    </div>
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">I was skeptical at first, but Maddy bhai's transparency and proof system
+                        convinced me. No regrets. Fully recommend.</p>
+                    <div class="sold-proof-badge">✅ Sold Proof Verified</div>
+                </div>
+
+            </div>
+
+            <!-- CTA -->
+            <div
+                style="margin-top:50px;text-align:center;padding:40px;background:var(--card);border:1px solid var(--border-gold);border-radius:var(--radius);">
+                <div class="slabel" style="text-align:center;">Share Your Experience</div>
+                <h3 style="font-family:var(--font-h);font-size:26px;font-weight:700;margin:10px 0 14px;">Already a <span
+                        class="g">Happy Buyer?</span></h3>
+                <p style="color:var(--muted);font-size:14px;margin-bottom:24px;">Your review helps other players trust
+                    the platform and make safe decisions.</p>
+                <a href="https://wa.me/+919025391516?text=Hi!%20I%20want%20to%20submit%20my%20review%20for%20Maddy%20BGMI%20Store."
+                    target="_blank" class="btn btn-gold">⭐ Submit Your Review</a>
+            </div>
+        </section>
+
+        <footer>
+            <div class="footer-bottom" style="border-top:1px solid var(--border-gold);padding-top:22px;">
+                <div>© 2026 Maddy BGMI Store — Made with ❤️ in South India</div>
+                <div style="display:flex;gap:14px;">
+                    <a style="color:var(--muted);text-decoration:none;cursor:pointer;"
+                        href="/">Home</a>
+                    <a style="color:var(--muted);text-decoration:none;cursor:pointer;" href="/buy">Buy</a>
+                    <a href="https://wa.me/+919025391516" target="_blank"
+                        style="color:var(--green);text-decoration:none;">WhatsApp</a>
+                </div>
+            </div>
+        </footer>
+
+    <script src="/shared.js"></script>
+    
+    <script>
+        
+        // Highlight active nav on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            var id = 'reviews';
+            ['nav-' + id, 'mnav-' + id].forEach(function(sel) {
+                var el = document.getElementById(sel);
+                if (el) el.classList.add('active');
+            });
+        });
+    </script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,13 @@
+RewriteEngine On
+
+# Redirect root to /home
+RewriteRule ^$ /home [R=301,L]
+
+# Serve static files and directories directly
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# For all other paths, let the folder's index.html handle it (no fallback needed since we have real folders)
+# This ensures any unknown path is still handled gracefully
+RewriteRule ^(.*)$ /index.html [L]

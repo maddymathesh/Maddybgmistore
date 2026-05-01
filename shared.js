@@ -1,25 +1,25 @@
 const pages = ['home', 'buy', 'sell', 'recovery', 'reviews', 'connect'];
 
 const PAGE_PATHS = {
-    home: '../home/',
-    buy: '../buy/',
-    sell: '../sell/',
-    recovery: '../recovery/',
-    reviews: '../reviews/',
-    connect: '../connectwithus/'
+    home: '/home/',
+    buy: '/buy/',
+    sell: '/sell/',
+    recovery: '/recovery/',
+    reviews: '/reviews/',
+    connect: '/connectwithus/'
 };
 
 const PATH_TO_PAGE = {
-    '../home/': 'home', '../home/': 'home',
-    '../buy/': 'buy',
-    '../sell/': 'sell',
-    '../recovery/': 'recovery',
-    '../reviews/': 'reviews',
-    '../connectwithus/': 'connect', '/connetwithus': 'connect'
+    '/home/': 'home', '/home/': 'home',
+    '/buy/': 'buy',
+    '/sell/': 'sell',
+    '/recovery/': 'recovery',
+    '/reviews/': 'reviews',
+    '/connectwithus/': 'connect', '/connetwithus': 'connect'
 };
 
 function navigate(id) {
-    const path = PAGE_PATHS[id] || '/';
+    const path = PAGE_PATHS[id] || '/home/';
     window.location.href = path;
 }
 

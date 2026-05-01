@@ -2634,14 +2634,13 @@
     <script>
         const pages = ['home', 'buy', 'sell', 'recovery', 'reviews', 'connect'];
 
-        function showPage(id) {
+        function showPage(id, pushState = true) {
             if (!pages.includes(id)) id = 'home';
-            window.location.hash = id;
-        }
-
-        function renderPage() {
-            let id = window.location.hash.substring(1);
-            if (!pages.includes(id)) id = 'home';
+            
+            if (pushState) {
+                const newPath = id === 'home' ? '/' : '/' + (id === 'connect' ? 'connectwithus' : id);
+                window.history.pushState({ page: id }, '', newPath);
+            }
 
             pages.forEach(p => {
                 const pageEl = document.getElementById('page-' + p);
@@ -2661,13 +2660,36 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        window.addEventListener('hashchange', renderPage);
-        window.addEventListener('DOMContentLoaded', () => {
-            if (!window.location.hash) {
-                window.location.hash = 'home';
+        function renderPage() {
+            let path = window.location.pathname.substring(1).replace(/\/$/, "");
+            let id = path || 'home';
+            
+            if (window.location.hash) {
+                id = window.location.hash.substring(1);
+            }
+            
+            if (id.includes('index.html')) id = 'home';
+
+            if (id === 'connectwithus' || id === 'connetwithus') {
+                id = 'connect';
+            }
+
+            if (!pages.includes(id)) {
+                id = 'home';
+            }
+            showPage(id, false);
+        }
+
+        window.addEventListener('popstate', (e) => {
+            if (e.state && e.state.page) {
+                showPage(e.state.page, false);
             } else {
                 renderPage();
             }
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderPage();
         });
 
         function toggleMenu() {

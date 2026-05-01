@@ -2635,20 +2635,40 @@
         const pages = ['home', 'buy', 'sell', 'recovery', 'reviews', 'connect'];
 
         function showPage(id) {
+            if (!pages.includes(id)) id = 'home';
+            window.location.hash = id;
+        }
+
+        function renderPage() {
+            let id = window.location.hash.substring(1);
+            if (!pages.includes(id)) id = 'home';
+
             pages.forEach(p => {
-                document.getElementById('page-' + p).classList.remove('active');
+                const pageEl = document.getElementById('page-' + p);
+                if(pageEl) pageEl.classList.remove('active');
                 const navEl = document.getElementById('nav-' + p);
                 const mnavEl = document.getElementById('mnav-' + p);
                 if (navEl) navEl.classList.remove('active');
                 if (mnavEl) mnavEl.classList.remove('active');
             });
-            document.getElementById('page-' + id).classList.add('active');
+            
+            const targetPage = document.getElementById('page-' + id);
+            if(targetPage) targetPage.classList.add('active');
             const navEl = document.getElementById('nav-' + id);
             const mnavEl = document.getElementById('mnav-' + id);
             if (navEl) navEl.classList.add('active');
             if (mnavEl) mnavEl.classList.add('active');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+
+        window.addEventListener('hashchange', renderPage);
+        window.addEventListener('DOMContentLoaded', () => {
+            if (!window.location.hash) {
+                window.location.hash = 'home';
+            } else {
+                renderPage();
+            }
+        });
 
         function toggleMenu() {
             document.getElementById('mobileMenu').classList.toggle('open');

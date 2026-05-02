@@ -6,8 +6,8 @@ import { Gamepad2, ShoppingCart, Banknote, CheckCircle, Zap, Shield, Star, Troph
 
 const connectChannels = [
   {
-    name: "WhatsApp Group",
-    desc: "Official Active Group",
+    name: "WhatsApp",
+    desc: "Official WhatsApp Group",
     href: "https://chat.whatsapp.com/Itiwa47TCSoJnlmNvJalVG",
     color: "#22C55E",
     bg: "rgba(34,197,94,0.12)",
@@ -19,8 +19,8 @@ const connectChannels = [
     ),
   },
   {
-    name: "Telegram Channel",
-    desc: "@maddy_bgmistore",
+    name: "Telegram",
+    desc: "Official Telegram Channel",
     href: "https://t.me/maddy_bgmistore",
     color: "#229ED9",
     bg: "rgba(34,158,217,0.12)",
@@ -33,7 +33,7 @@ const connectChannels = [
   },
   {
     name: "Instagram",
-    desc: "@maddy_bgmistore",
+    desc: "Official Instagram",
     href: "https://www.instagram.com/maddy_bgmistore/",
     color: "#E1306C",
     bg: "rgba(225,48,108,0.12)",
@@ -46,7 +46,7 @@ const connectChannels = [
   },
   {
     name: "YouTube",
-    desc: "Maddy BGMI Store",
+    desc: "Official Youtube Channel",
     href: "https://www.youtube.com/channel/UCvQJ9PCTM4-hNpKH8R8lJTw",
     color: "#FF0000",
     bg: "rgba(255,0,0,0.12)",
@@ -87,8 +87,8 @@ export default function Home() {
             Buy and sell verified BGMI accounts safely — budget to premium. Trusted by 2000+ players since 2019.
           </p>
           <div style={{ display:"flex", gap:"14px", justifyContent:"center", flexWrap:"wrap" }}>
-            <Link to="/buy" className="btn btn-gold" style={{ display:"inline-flex", alignItems:"center", gap:"7px" }}><ShoppingCart size={15} /> Browse Accounts</Link>
-            <Link to="/sell" className="btn btn-outline" style={{ display:"inline-flex", alignItems:"center", gap:"7px" }}><Banknote size={15} /> Sell My Account</Link>
+            <Link to="/buy" className="btn btn-gold" style={{ display:"inline-flex", alignItems:"center", gap:"7px" }}><ShoppingCart size={15} /> Buy An Account</Link>
+            <Link to="/sell" className="btn btn-outline" style={{ display:"inline-flex", alignItems:"center", gap:"7px" }}><Banknote size={15} /> Sell Your Account</Link>
           </div>
           <div style={{ display:"flex", gap:"24px", justifyContent:"center", marginTop:"40px", flexWrap:"wrap" }}>
             {[
@@ -118,18 +118,24 @@ export default function Home() {
         <div className="slabel">What We Offer</div>
         <h2 className="stitle">Buy or Sell — We've Got You</h2>
         <p className="ssub">Choose what you're looking for below and we'll take care of the rest.</p>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap:"20px", maxWidth:"900px" }}>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap:"20px", maxWidth:"1200px" }}>
           <div style={{ background:"linear-gradient(135deg,rgba(255,107,53,.25),rgba(255,215,0,.12)),var(--card)", border:"1px solid var(--border-gold)", borderRadius:"18px", padding:"36px 32px", minHeight:"220px", display:"flex", flexDirection:"column", justifyContent:"flex-end", cursor:"pointer", transition:"transform .25s", position:"relative" }}>
             <div style={{ position:"absolute", top:"28px", right:"28px", opacity:.2, color:"var(--gold)" }}><ShoppingCart size={52} /></div>
             <h3 style={{ fontFamily:"var(--font-h)", fontSize:"26px", fontWeight:700, marginBottom:"8px" }}>Buy an Account</h3>
             <p style={{ color:"var(--muted)", fontSize:"13px", marginBottom:"20px" }}>Choose from ready stock or get a custom account built to your exact specs and budget.</p>
-            <Link to="/buy" className="btn btn-gold" style={{ alignSelf:"flex-start", display:"inline-flex", alignItems:"center", gap:"7px" }}><ShoppingCart size={14} />Browse Accounts →</Link>
+            <Link to="/readystocks" className="btn btn-gold" style={{ alignSelf:"flex-start", display:"inline-flex", alignItems:"center", gap:"7px" }}><ShoppingCart size={14} />Buy Now →</Link>
           </div>
           <div style={{ background:"linear-gradient(135deg,rgba(34,197,94,.18),rgba(30,144,255,.1)),var(--card)", border:"1px solid var(--border-gold)", borderRadius:"18px", padding:"36px 32px", minHeight:"220px", display:"flex", flexDirection:"column", justifyContent:"flex-end", cursor:"pointer", transition:"transform .25s", position:"relative" }}>
             <div style={{ position:"absolute", top:"28px", right:"28px", opacity:.2, color:"#22C55E" }}><Banknote size={52} /></div>
             <h3 style={{ fontFamily:"var(--font-h)", fontSize:"26px", fontWeight:700, marginBottom:"8px" }}>Sell Your Account</h3>
             <p style={{ color:"var(--muted)", fontSize:"13px", marginBottom:"20px" }}>Get maximum value for your BGMI account — instant payout or hold & sell for best price.</p>
             <Link to="/sell" className="btn btn-green" style={{ alignSelf:"flex-start", display:"inline-flex", alignItems:"center", gap:"7px" }}><Banknote size={14} />Sell Now →</Link>
+          </div>
+          <div style={{ background:"linear-gradient(135deg,rgba(168,85,247,.18),rgba(236,72,153,.1)),var(--card)", border:"1px solid var(--border-gold)", borderRadius:"18px", padding:"36px 32px", minHeight:"220px", display:"flex", flexDirection:"column", justifyContent:"flex-end", cursor:"pointer", transition:"transform .25s", position:"relative" }}>
+            <div style={{ position:"absolute", top:"28px", right:"28px", opacity:.2, color:"#A855F7" }}><Shield size={52} /></div>
+            <h3 style={{ fontFamily:"var(--font-h)", fontSize:"26px", fontWeight:700, marginBottom:"8px" }}>Account Recovery</h3>
+            <p style={{ color:"var(--muted)", fontSize:"13px", marginBottom:"20px" }}>Lost access to your account? We can help you recover it safely and securely.</p>
+            <Link to="/recovery" className="btn btn-outline" style={{ alignSelf:"flex-start", display:"inline-flex", alignItems:"center", gap:"7px" }}><Shield size={14} />Recover Now →</Link>
           </div>
         </div>
       </section>
@@ -264,8 +270,8 @@ export default function Home() {
         <h2 className="stitle">Why Are You Waiting For?</h2>
         <p style={{ color:"var(--muted)", marginBottom:"32px" }}>Join 2000+ players who found their dream BGMI account.</p>
         <div style={{ display:"flex", gap:"14px", justifyContent:"center", flexWrap:"wrap" }}>
-          <Link to="/buy" className="btn btn-gold" style={{ display:"inline-flex", alignItems:"center", gap:"7px" }}><ShoppingCart size={15} /> Buy an Account</Link>
-          <Link to="/sell" className="btn btn-green">💸 Sell My Account</Link>
+          <Link to="/buy" className="btn btn-gold" style={{ display:"inline-flex", alignItems:"center", gap:"7px" }}><ShoppingCart size={15} /> Buy An Account</Link>
+          <Link to="/sell" className="btn btn-green">💸 Sell Your Account</Link>
         </div>
       </section>
 

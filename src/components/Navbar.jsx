@@ -133,7 +133,7 @@ const navStyle = {
   position: "fixed", top: 0, left: 0, right: 0, zIndex: 999,
   display: "flex", alignItems: "center", justifyContent: "space-between",
   padding: "0 5%", height: "64px",
-  background: "rgba(8,10,15,0.97)", backdropFilter: "blur(24px)",
+  background: "rgba(8,10,15,0.97)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
   borderBottom: "1px solid rgba(255,215,0,0.18)",
 };
 const logoStyle = {
@@ -155,7 +155,7 @@ const hamburgerStyle = {
 const barStyle = { display: "block", width: "24px", height: "2px", background: "var(--gold)", borderRadius: "2px" };
 const mobileMenuStyle = {
   position: "fixed", top: "64px", left: 0, right: 0, zIndex: 998,
-  background: "rgba(8,10,15,0.98)", backdropFilter: "blur(20px)",
+  background: "rgba(8,10,15,0.98)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
   padding: "16px", borderBottom: "1px solid rgba(255,215,0,0.18)",
   display: "flex", flexDirection: "column", gap: "4px",
 };

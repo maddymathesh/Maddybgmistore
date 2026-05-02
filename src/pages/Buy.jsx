@@ -48,7 +48,7 @@ export default function Buy() {
             position: "relative", zIndex: 2, textAlign: "center",
             padding: "0 5%", maxWidth: "780px",
           }}>
-            <div className="badge" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "16px", backdropFilter: "blur(8px)" }}>
+            <div className="badge" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "16px", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
               <ShoppingCart size={14} /> Buy BGMI Accounts
             </div>
             <h1 style={{
@@ -82,7 +82,7 @@ export default function Buy() {
                 style={{
                   display: "inline-flex", alignItems: "center", gap: "8px",
                   padding: "13px 28px", borderRadius: "10px",
-                  background: "rgba(255,255,255,0.12)", backdropFilter: "blur(8px)",
+                  background: "rgba(255,255,255,0.12)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
                   border: "1px solid rgba(255,255,255,0.25)",
                   color: "#fff", fontFamily: "var(--font-h)", fontWeight: 700,
                   fontSize: "14px", textDecoration: "none", letterSpacing: "0.5px",

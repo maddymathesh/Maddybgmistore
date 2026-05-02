@@ -30,7 +30,7 @@ export default function Recovery() {
           <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 80% 50%, rgba(255,215,0,0.06) 0%, transparent 55%)" }} />
 
           <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "0 5%", maxWidth: "740px" }}>
-            <div className="badge" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "16px", backdropFilter: "blur(8px)" }}>
+            <div className="badge" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "16px", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
               <Shield size={14} /> Account Recovery
             </div>
             <h1 style={{

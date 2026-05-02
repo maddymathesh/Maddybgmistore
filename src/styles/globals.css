@@ -2,16 +2,26 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; font-size: 16px; }
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
 
 body {
   background: #080A0F;
   color: #EAEAEA;
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-b);
   font-size: 15px;
   line-height: 1.7;
   overflow-x: hidden;
   min-height: 100vh;
+  min-height: 100dvh;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-gold) var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 :root {
@@ -31,12 +41,12 @@ body {
   --green: #22C55E;
   --red: #EF4444;
   --radius: 14px;
-  --font-h: 'Rajdhani', sans-serif;
-  --font-b: 'Exo 2', sans-serif;
+  --font-h: 'Rajdhani', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-b: 'Exo 2', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-a { text-decoration: none; color: inherit; }
-button { cursor: pointer; border: none; background: none; font-family: inherit; }
+a { text-decoration: none; color: inherit; touch-action: manipulation; }
+button { cursor: pointer; border: none; background: none; font-family: inherit; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
 img { max-width: 100%; }
 
 /* ===== SCROLLBAR ===== */
@@ -157,7 +167,7 @@ textarea.input { resize: vertical; min-height: 100px; }
 select.input { cursor: pointer; }
 
 /* ===== MODAL ===== */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.8); backdrop-filter: blur(8px); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.8); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
 .modal { background: var(--bg3); border: 1px solid var(--border-gold); border-radius: 20px; padding: 36px 32px; width: 100%; max-width: 420px; position: relative; }
 .modal-close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 50%; background: var(--border); color: var(--muted); display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; border: none; }
 .modal-close:hover { background: var(--red); color: #fff; }

@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Allow: /buy
+Allow: /sell
+Allow: /recovery
+Allow: /reviews
+Allow: /connectwithus
+Allow: /readystocks
+
+# Block admin and login from indexing
+Disallow: /admin
+Disallow: /login
+
+# Block internal assets crawling
+Disallow: /assets/
+
+Sitemap: https://maddybgmistore.com/sitemap.xml

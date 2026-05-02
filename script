@@ -1,0 +1,1 @@
+mkdir -p /home/claude/maddybgmistoreog/src/{pages/admin,components,context,hooks,styles} && echo "Structure created"

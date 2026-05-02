@@ -3,6 +3,8 @@ import Navbar from "../components/Navbar";
 import Ticker from "../components/Ticker";
 import Footer from "../components/Footer";
 import { Gamepad2, ShoppingCart, Banknote, CheckCircle, Zap, Shield, Star, Trophy, Lock, Smartphone } from "lucide-react";
+import CountUp from "../components/CountUp";
+import LightRays from "../components/LightRays";
 
 const connectChannels = [
   {
@@ -78,6 +80,21 @@ export default function Home() {
         {/* Dark gradient overlay so text is readable */}
         <div style={{ position:"absolute", inset:0, zIndex:1, background:"linear-gradient(to bottom, rgba(8,10,15,0.55) 0%, rgba(8,10,15,0.72) 60%, rgba(8,10,15,0.97) 100%)" }} />
 
+        {/* Light Rays Effect */}
+        <div style={{ position: "absolute", inset: 0, zIndex: 1 }}>
+          <LightRays
+            raysOrigin="top-center"
+            raysColor="#FFD700"
+            raysSpeed={1.5}
+            lightSpread={0.8}
+            rayLength={1.2}
+            followMouse={true}
+            mouseInfluence={0.1}
+            noiseAmount={0.1}
+            distortion={0.05}
+          />
+        </div>
+
         <div style={{ position:"relative", zIndex:2, maxWidth:"820px", margin:"0 auto" }} className="fade-up">
           <div className="badge" style={{ display:"inline-flex", alignItems:"center", gap:"6px" }}><Gamepad2 size={14} /> South India's #1 Trusted BGMI Account Marketplace</div>
           <h1 style={{ fontFamily:"var(--font-h)", fontSize:"clamp(42px,8vw,92px)", fontWeight:700, lineHeight:1, letterSpacing:"2px", marginBottom:"22px" }}>
@@ -108,9 +125,30 @@ export default function Home() {
 
       {/* STATS */}
       <div className="stats-bar">
-        {[["2000+","Happy Buyers"],["₹60L+","Accounts Sold"],["7 Yrs","Trusted Since 2019"],["4.7 ★","Star Rated"]].map(([n,l]) => (
-          <div key={l} className="stat"><div className="stat-n">{n}</div><div className="stat-l">{l}</div></div>
-        ))}
+        <div className="stat">
+          <div className="stat-n">
+            <CountUp from={0} to={2000} duration={2} separator="," />+
+          </div>
+          <div className="stat-l">Happy Buyers</div>
+        </div>
+        <div className="stat">
+          <div className="stat-n">
+            ₹<CountUp from={0} to={60} duration={2} />L+
+          </div>
+          <div className="stat-l">Accounts Sold</div>
+        </div>
+        <div className="stat">
+          <div className="stat-n">
+            <CountUp from={0} to={7} duration={2} /> Yrs
+          </div>
+          <div className="stat-l">Trusted Since 2019</div>
+        </div>
+        <div className="stat">
+          <div className="stat-n">
+            <CountUp from={0} to={4.7} duration={2} /> ★
+          </div>
+          <div className="stat-l">Star Rated</div>
+        </div>
       </div>
 
       {/* BUY / SELL CARDS */}

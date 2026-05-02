@@ -112,10 +112,12 @@ export default function Buy() {
             <div style={{ background: "var(--card)", border: "1px solid rgba(255,215,0,0.2)", borderRadius: "14px", padding: "28px 32px", marginBottom: "24px" }}>
               <ol className="steps-list">
                 {[
-                  [<Gamepad2 size={16} />, "Watch the account preview video", "Each listing has a full YouTube video showing the account inventory."],
-                  [<Lock size={16} />, "Check login type & security", 'Single login accounts are "Safe & Secured". Dual login accounts come with an "Unlink Guarantee".'],
-                  [<Banknote size={16} />, "Pay 10% advance to reserve", "⚠ Advance is non-refundable. This locks the account for you."],
-                  [<CheckCircle size={16} />, "Pay remaining balance & get instant access", "Account credentials transferred immediately after payment confirmation."],
+                  [<Gamepad2 size={16} />, "Watch the account Inventory video and description", ""],
+                  [<Lock size={16} />, "Check the login and price details mentioned", ""],
+                  [<ShoppingCart size={16} />, "Click Buy now on using whats app or telegram button", ""],
+                  [<MessageCircle size={16} />, "Talk With Our Seller and Book The Account with 10% Advance of the accoutn worth", "(Booking Amount willl not refunded once booked)"],
+                  [<Banknote size={16} />, "Pay the Remaing Amount", "(UPI,BANK TRAnssfer,usdt,wise Transfer and Share a Screenshot after payment)"],
+                  [<Shield size={16} />, "Share Your Phone and Email", "To give the account safe seculry to your accesss"],
                 ].map(([icon, title, desc], i) => (
                   <li key={i}>
                     <div className="step-text">
@@ -139,7 +141,7 @@ export default function Buy() {
               onMouseEnter={e => { e.currentTarget.style.opacity = ".88"; e.currentTarget.style.transform = "translateY(-2px)"; }}
               onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
             >
-              <Gamepad2 size={17} /> View Ready Stock Accounts →
+              <Gamepad2 size={17} /> View Ready to Play Secured Accounts →
             </Link>
           </div>
         </section>
@@ -163,10 +165,12 @@ export default function Buy() {
             <div style={{ background: "var(--card)", border: "1px solid rgba(255,215,0,0.2)", borderRadius: "14px", padding: "28px 32px", marginBottom: "24px" }}>
               <ol className="steps-list">
                 {[
-                  [<MessageCircle size={16} />, "Share your budget", "E.g., ₹5,000 – ₹50,000 — we'll work within it."],
-                  [<Target size={16} />, "Tell us your requirements", "X-Suits, Gun Labs, Cars, Outfits, Rank — be as specific as you want."],
-                  [<Banknote size={16} />, "Complete the payment", "UPI / Bank Transfer / USDT / Liquid Cash — your choice."],
-                  [<CheckCircle size={16} />, "Receive your account", "Safe, secure, ready-to-use credentials delivered after confirmation."],
+                  [<Target size={16} />, "share your Requirments and Budget", "(Requirments Should be according to budget)"],
+                  [<Banknote size={16} />, "Pay The Advance Payment and wait for 24 - 48hrs", ""],
+                  [<Gamepad2 size={16} />, "We will find give the reqiment and give to u", ""],
+                  [<MessageCircle size={16} />, "Talk With Our Seller and Book The Account with 10% Advance of the accoutn worth", ""],
+                  [<Banknote size={16} />, "Pay the Remaing Amount", "(UPI,BANK TRAnssfer,usdt,wise Transfer and Share a Screenshot after payment)"],
+                  [<Shield size={16} />, "Share Your Phone and Email", "To give the account safe seculry to your accesss"],
                 ].map(([icon, title, desc], i) => (
                   <li key={i}>
                     <div className="step-text">

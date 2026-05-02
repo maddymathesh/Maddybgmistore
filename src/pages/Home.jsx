@@ -118,7 +118,7 @@ export default function Home() {
         <div className="slabel">What We Offer</div>
         <h2 className="stitle">Buy or Sell — We've Got You</h2>
         <p className="ssub">Choose what you're looking for below and we'll take care of the rest.</p>
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"20px", maxWidth:"900px" }}>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap:"20px", maxWidth:"900px" }}>
           <div style={{ background:"linear-gradient(135deg,rgba(255,107,53,.25),rgba(255,215,0,.12)),var(--card)", border:"1px solid var(--border-gold)", borderRadius:"18px", padding:"36px 32px", minHeight:"220px", display:"flex", flexDirection:"column", justifyContent:"flex-end", cursor:"pointer", transition:"transform .25s", position:"relative" }}>
             <div style={{ position:"absolute", top:"28px", right:"28px", opacity:.2, color:"var(--gold)" }}><ShoppingCart size={52} /></div>
             <h3 style={{ fontFamily:"var(--font-h)", fontSize:"26px", fontWeight:700, marginBottom:"8px" }}>Buy an Account</h3>
@@ -219,7 +219,7 @@ export default function Home() {
       <section className="section-alt">
         <div className="slabel">Our Story</div>
         <h2 className="stitle">About Maddy BGMI Store</h2>
-        <div style={{ background:"var(--card)", border:"1px solid var(--border-gold)", borderRadius:"var(--radius)", padding:"40px", display:"grid", gridTemplateColumns:"1fr 1fr", gap:"40px", alignItems:"start" }}>
+        <div style={{ background:"var(--card)", border:"1px solid var(--border-gold)", borderRadius:"var(--radius)", padding:"clamp(24px, 5vw, 40px)", display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(min(100%, 320px), 1fr))", gap:"40px", alignItems:"start" }}>
           <div>
             <h3 style={{ fontFamily:"var(--font-h)", fontSize:"24px", fontWeight:700, marginBottom:"16px" }}>From a Passion to South India's Most Trusted BGMI Marketplace</h3>
             <p style={{ color:"var(--muted)", fontSize:"14px", lineHeight:1.8, marginBottom:"12px" }}>Maddy BGMI Store's journey started in 2019 with the founding of Maddy Recovery Hub, recovering BGMI accounts and building a reputation of trust across South India.</p>

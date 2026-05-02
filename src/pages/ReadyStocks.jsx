@@ -105,25 +105,28 @@ function StockCard({ stock }) {
       </div>
 
       {/* Price + Buttons — gated behind login */}
-      <div style={{ padding: "16px 20px", display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-5 flex-wrap">
         {user ? (
           <>
-            <div style={{ fontFamily: "var(--font-h)", fontSize: "22px", fontWeight: 800, color: "var(--gold)", background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.25)", borderRadius: "10px", padding: "8px 18px" }}>
+            <div style={{ fontFamily: "var(--font-h)", fontSize: "22px", fontWeight: 800, color: "var(--gold)", background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.25)", borderRadius: "10px", padding: "8px 18px", alignSelf: "flex-start" }}>
               ₹{Number(stock.price).toLocaleString("en-IN")} INR
             </div>
             <a href={wa} target="_blank" rel="noreferrer"
-              style={{ display: "inline-flex", alignItems: "center", gap: "7px", padding: "10px 22px", borderRadius: "8px", background: "#22C55E", color: "#fff", fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "13px", textDecoration: "none", letterSpacing: "0.5px" }}>
+              className="w-full sm:w-auto"
+              style={{ display: "inline-flex", justifyContent: "center", alignItems: "center", gap: "7px", padding: "10px 22px", borderRadius: "8px", background: "#22C55E", color: "#fff", fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "13px", textDecoration: "none", letterSpacing: "0.5px" }}>
               <WaIcon /> BUY NOW
             </a>
             <a href="https://t.me/MBSxMADDY17" target="_blank" rel="noreferrer"
-              style={{ display: "inline-flex", alignItems: "center", gap: "7px", padding: "10px 22px", borderRadius: "8px", background: "#229ED9", color: "#fff", fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "13px", textDecoration: "none", letterSpacing: "0.5px" }}>
+              className="w-full sm:w-auto"
+              style={{ display: "inline-flex", justifyContent: "center", alignItems: "center", gap: "7px", padding: "10px 22px", borderRadius: "8px", background: "#229ED9", color: "#fff", fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "13px", textDecoration: "none", letterSpacing: "0.5px" }}>
               <TgIcon /> BUY NOW
             </a>
           </>
         ) : (
           <button
             onClick={() => navigate("/login", { state: { from: "/readystocks" } })}
-            style={{ display: "inline-flex", alignItems: "center", gap: "10px", padding: "12px 24px", borderRadius: "10px", background: "linear-gradient(135deg,rgba(255,215,0,0.12),rgba(255,215,0,0.06))", border: "1px solid rgba(255,215,0,0.35)", color: "var(--gold)", fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "13px", letterSpacing: "0.5px", cursor: "pointer", transition: "all .2s" }}
+            className="w-full sm:w-auto"
+            style={{ display: "inline-flex", justifyContent: "center", alignItems: "center", gap: "10px", padding: "12px 24px", borderRadius: "10px", background: "linear-gradient(135deg,rgba(255,215,0,0.12),rgba(255,215,0,0.06))", border: "1px solid rgba(255,215,0,0.35)", color: "var(--gold)", fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "13px", letterSpacing: "0.5px", cursor: "pointer", transition: "all .2s" }}
             onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,215,0,0.18)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
             onMouseLeave={e => { e.currentTarget.style.background = "linear-gradient(135deg,rgba(255,215,0,0.12),rgba(255,215,0,0.06))"; e.currentTarget.style.transform = "translateY(0)"; }}
           >

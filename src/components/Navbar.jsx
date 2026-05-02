@@ -32,7 +32,7 @@ export default function Navbar() {
           <img src="/logo.png" alt="Maddy BGMI Store" style={{ height: "44px", width: "auto", objectFit: "contain" }} />
         </Link>
 
-        <ul style={linksStyle}>
+        <ul className="hidden lg:flex items-center gap-1 list-none">
           {navLinks.map(l => (
             <li key={l.to}>
               <Link to={l.to} style={{ ...linkStyle, ...(pathname === l.to ? activeLinkStyle : {}) }}>
@@ -82,7 +82,7 @@ export default function Navbar() {
           </li>
         </ul>
 
-        <button onClick={() => setOpen(!open)} style={hamburgerStyle} aria-label="Menu">
+        <button onClick={() => setOpen(!open)} className="flex lg:hidden flex-col gap-[5px] cursor-pointer p-1 bg-transparent border-none" aria-label="Menu">
           <span style={barStyle} />
           <span style={barStyle} />
           <span style={barStyle} />

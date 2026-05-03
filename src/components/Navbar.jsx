@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import { Settings } from "lucide-react";
-import StaggeredMenu from "./StaggeredMenu";
 
 const navLinks = [
   { to: "/", label: "Home" },
@@ -15,6 +14,7 @@ const navLinks = [
 ];
 
 export default function Navbar() {
+  const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
   const { user, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
@@ -25,47 +25,14 @@ export default function Navbar() {
     navigate("/");
   };
 
-  const menuItems = [
-    { label: "Home", link: "/" },
-    { label: "Buy", link: "/buy" },
-    { label: "Sell", link: "/sell" },
-    { label: "Recovery", link: "/recovery" },
-    { label: "Reviews", link: "/reviews" },
-    { label: "Connect", link: "/connectwithus" },
-  ];
-
-  if (isAdmin) {
-    menuItems.push({ label: "Admin Panel", link: "/admin" });
-  }
-
-  if (user) {
-    menuItems.push({ 
-      label: "Logout", 
-      link: "#", 
-      onClick: async () => { 
-        await logout(); 
-        toast.success("Logged out!"); 
-        navigate("/"); 
-      } 
-    });
-  } else {
-    menuItems.push({ label: "Login", link: "/login" });
-  }
-
-  const socialItems = [
-    { label: "WhatsApp", link: "https://wa.me/+919025391516" },
-    { label: "Instagram", link: "https://www.instagram.com/maddy_bgmistore/" },
-    { label: "Telegram", link: "https://t.me/maddy_bgmistore" },
-  ];
-
   return (
     <>
-      <nav style={navStyle} className="hidden lg:flex items-center justify-between">
+      <nav style={navStyle}>
         <Link to="/" style={logoStyle}>
           <img src="/logo.png" alt="Maddy BGMI Store" style={{ height: "44px", width: "auto", objectFit: "contain" }} />
         </Link>
 
-        <ul className="flex items-center gap-1 list-none">
+        <ul className="hidden lg:flex items-center gap-1 list-none">
           {navLinks.map(l => (
             <li key={l.to}>
               <Link to={l.to} style={{ ...linkStyle, ...(pathname === l.to ? activeLinkStyle : {}) }}>
@@ -114,28 +81,57 @@ export default function Navbar() {
             </a>
           </li>
         </ul>
+
+        <button onClick={() => setOpen(!open)} className="flex lg:hidden flex-col gap-[5px] cursor-pointer p-1 bg-transparent border-none" aria-label="Menu">
+          <span style={barStyle} />
+          <span style={barStyle} />
+          <span style={barStyle} />
+        </button>
       </nav>
 
-      <div className="block lg:hidden">
-        <StaggeredMenu
-          isFixed={true}
-          position="right"
-          items={menuItems}
-          socialItems={socialItems}
-          displaySocials={true}
-          logoUrl="/logo.png"
-          colors={['rgba(255,107,53,0.9)', 'rgba(255,215,0,0.9)', 'rgba(8,10,15,0.98)']}
-          accentColor="var(--gold)"
-          menuButtonColor="#e9e9ef"
-          openMenuButtonColor="var(--gold)"
-        />
-      </div>
+      {open && (
+        <div style={mobileMenuStyle}>
+          {navLinks.map(l => (
+            <Link key={l.to} to={l.to} onClick={() => setOpen(false)}
+              style={{ ...mobileLinkStyle, ...(pathname === l.to ? { color: "var(--gold)", background: "var(--gold-dim)" } : {}) }}>
+              {l.label}
+            </Link>
+          ))}
+          {isAdmin && (
+            <Link to="/admin" onClick={() => setOpen(false)} style={{ ...mobileLinkStyle, color: "var(--gold)" }}>
+              ⚙ Admin Panel
+            </Link>
+          )}
+          {user ? (
+            <>
+              <div style={{ ...mobileLinkStyle, display: "flex", alignItems: "center", gap: "10px", color: "var(--muted)" }}>
+                {user.photoURL
+                  ? <img src={user.photoURL} alt="" style={{ width: "24px", height: "24px", borderRadius: "50%", border: "1px solid var(--gold)" }} />
+                  : <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "var(--gold)", display: "flex", alignItems: "center", justifyContent: "center", color: "#000", fontSize: "11px", fontWeight: 700 }}>{(user.displayName || "U")[0]}</div>
+                }
+                <span style={{ fontSize: "13px" }}>{user.displayName || user.email}</span>
+              </div>
+              <button onClick={handleLogout} style={{ ...mobileLinkStyle, textAlign: "left", cursor: "pointer", border: "none", background: "none", color: "#ef4444", fontFamily: "var(--font-body)" }}>
+                Logout
+              </button>
+            </>
+          ) : (
+            <Link to="/login" onClick={() => setOpen(false)} style={{ ...mobileLinkStyle, color: "var(--gold)" }}>
+              Login / Sign Up
+            </Link>
+          )}
+          <a href="https://wa.me/+919025391516" target="_blank" rel="noreferrer" style={{ ...mobileLinkStyle, color: "var(--green)" }}>
+            WhatsApp Us
+          </a>
+        </div>
+      )}
     </>
   );
 }
 
 const navStyle = {
   position: "fixed", top: 0, left: 0, right: 0, zIndex: 999,
+  display: "flex", alignItems: "center", justifyContent: "space-between",
   padding: "0 5%", height: "64px",
   background: "rgba(8,10,15,0.97)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
   borderBottom: "1px solid rgba(255,215,0,0.18)",
@@ -145,9 +141,26 @@ const logoStyle = {
   color: "var(--gold)", letterSpacing: "2px", textDecoration: "none",
   display: "flex", alignItems: "center", gap: "6px",
 };
+const linksStyle = { display: "flex", alignItems: "center", gap: "4px", listStyle: "none" };
 const linkStyle = {
   color: "var(--muted)", textDecoration: "none", fontSize: "12px",
   fontWeight: 600, letterSpacing: "1.2px", textTransform: "uppercase",
   padding: "8px 12px", borderRadius: "8px", transition: "all .2s",
 };
 const activeLinkStyle = { color: "var(--gold)", background: "var(--gold-dim)" };
+const hamburgerStyle = {
+  display: "none", flexDirection: "column", gap: "5px", cursor: "pointer",
+  padding: "4px", background: "none", border: "none",
+};
+const barStyle = { display: "block", width: "24px", height: "2px", background: "var(--gold)", borderRadius: "2px" };
+const mobileMenuStyle = {
+  position: "fixed", top: "64px", left: 0, right: 0, zIndex: 998,
+  background: "rgba(8,10,15,0.98)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+  padding: "16px", borderBottom: "1px solid rgba(255,215,0,0.18)",
+  display: "flex", flexDirection: "column", gap: "4px",
+};
+const mobileLinkStyle = {
+  color: "var(--muted)", textDecoration: "none", fontSize: "14px",
+  fontWeight: 600, letterSpacing: "1.2px", textTransform: "uppercase",
+  padding: "12px 16px", borderRadius: "8px", display: "block",
+};

@@ -37,8 +37,8 @@ const links = [
     Icon: WaIcon,
   },
   {
-    label: "WHATSAPP CHANNEL (PROOFS)",
-    href: "https://whatsapp.com/channel/0029VaAqUqaInlqnZZteEl2x",
+    label: "WHAT APP CHANNEL",
+    href: "https://whatsapp.com/channel/0029VbAuBtrIXnlpr3jvnN13",
     bg: "bg-[#25D366]",
     glow: "rgba(37,211,102,0.45)",
     Icon: WaIcon,
@@ -72,56 +72,75 @@ export default function ConnectWithUs() {
       <Navbar />
       <Ticker />
 
-      <main className="flex-grow flex flex-col items-center justify-center px-5 pt-[140px] pb-24 w-full">
-        {/* ── HEADING SECTION ─────────────────────────────────── */}
-        <div className="text-center mb-10 w-full max-w-2xl">
-          <p style={{ 
-            fontFamily: "var(--font-h)", fontSize: "12px", fontWeight: 900, 
-            letterSpacing: "3px", color: "#fff", textTransform: "uppercase", 
-            marginBottom: "12px", opacity: 0.9 
-          }}>
-            MADDY <span style={{ color: "var(--gold)" }}>BGMI STORE</span>
-          </p>
-          <h1 style={{
-            fontFamily: "var(--font-h)", fontSize: "clamp(36px, 6vw, 56px)",
-            fontWeight: 900, lineHeight: 1.1, marginBottom: "16px",
-            textShadow: "0 2px 20px rgba(0,0,0,0.5)",
-          }}>
-            Connect <span style={{ color: "#f97316" }}>With Us</span>
-          </h1>
-          <p style={{
-            color: "var(--muted)", fontSize: "clamp(14px, 2vw, 16px)",
-            margin: "0 auto",
-          }}>
-            Join our official channels for the latest listings, updates and proofs.
-          </p>
-        </div>
+      <main className="relative flex-grow flex flex-col items-center justify-center px-5 pt-[120px] pb-[100px] w-full">
+        {/* ── BACKGROUND BANNER ─────────────────────────────────── */}
+        <img
+          src="/connect-banner.jpg"
+          alt="Connect Banner" 
+          loading="lazy" 
+          decoding="async"
+          style={{
+            position: "absolute", inset: 0, width: "100%", height: "100%",
+            objectFit: "cover", objectPosition: "center 30%",
+            filter: "brightness(0.35)",
+            zIndex: 0
+          }}
+        />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(13,13,13,0.8) 0%, transparent 40%, rgba(13,13,13,0.95) 100%)", zIndex: 0 }} />
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 40%, rgba(249,115,22,0.15) 0%, transparent 60%)", zIndex: 0 }} />
 
-        {/* ── BUTTONS ─────────────────────────────────────────── */}
-        <div className="w-full max-w-[460px] flex flex-col gap-4">
-          {links.map(({ label, href, bg, glow, Icon }) => (
-            <a
-              key={label}
-              href={href}
-              target="_blank"
-              rel="noreferrer"
-              className={`
-                ${bg}
-                flex items-center justify-center gap-3
-                w-full h-[62px] rounded-xl
-                text-white font-black text-[13px] tracking-[1.5px] uppercase
-                transition-all duration-200
-                hover:scale-[1.02] hover:brightness-110 active:scale-95
-              `}
-              style={{
-                fontFamily: "var(--font-h)",
-                boxShadow: `0 8px 24px ${glow}`,
-              }}
-            >
-              <Icon />
-              {label}
-            </a>
-          ))}
+        {/* ── CONTENT (z-10) ─────────────────────────────────── */}
+        <div className="relative z-10 w-full flex flex-col items-center">
+          {/* ── HEADING SECTION ─────────────────────────────────── */}
+          <div className="text-center mb-10 w-full max-w-2xl">
+            <p style={{ 
+              fontFamily: "var(--font-h)", fontSize: "12px", fontWeight: 900, 
+              letterSpacing: "3px", color: "#fff", textTransform: "uppercase", 
+              marginBottom: "12px", opacity: 0.9 
+            }}>
+              MADDY <span style={{ color: "var(--gold)" }}>BGMI STORE</span>
+            </p>
+            <h1 style={{
+              fontFamily: "var(--font-h)", fontSize: "clamp(36px, 6vw, 56px)",
+              fontWeight: 900, lineHeight: 1.1, marginBottom: "16px",
+              textShadow: "0 2px 20px rgba(0,0,0,0.5)",
+            }}>
+              Connect <span style={{ color: "#f97316" }}>With Us</span>
+            </h1>
+            <p style={{
+              color: "var(--muted)", fontSize: "clamp(14px, 2vw, 16px)",
+              margin: "0 auto",
+            }}>
+              Join our official channels for the latest listings, updates and proofs.
+            </p>
+          </div>
+
+          {/* ── BUTTONS ─────────────────────────────────────────── */}
+          <div className="w-full max-w-[460px] flex flex-col gap-4">
+            {links.map(({ label, href, bg, glow, Icon }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noreferrer"
+                className={`
+                  ${bg}
+                  flex items-center justify-center gap-3
+                  w-full h-[62px] rounded-xl
+                  text-white font-black text-[13px] tracking-[1.5px] uppercase
+                  transition-all duration-200
+                  hover:scale-[1.02] hover:brightness-110 active:scale-95
+                `}
+                style={{
+                  fontFamily: "var(--font-h)",
+                  boxShadow: `0 8px 24px ${glow}`,
+                }}
+              >
+                <Icon />
+                {label}
+              </a>
+            ))}
+          </div>
         </div>
       </main>
 

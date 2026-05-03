@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import Ticker from "../components/Ticker";
 import Footer from "../components/Footer";
 import { Banknote, Zap, MessageCircle } from "lucide-react";
 
@@ -8,13 +7,12 @@ export default function Sell() {
   return (
     <>
       <Navbar />
-      <Ticker />
-      <div style={{ paddingTop: "84px" }}>
+      <div style={{ paddingTop: "102px" }}>
 
         {/* ── HERO BANNER ─────────────────────────────────── */}
         <section style={{
           position: "relative", width: "100%",
-          height: "clamp(300px, 52vw, 520px)",
+          minHeight: "95vh",
           overflow: "hidden", display: "flex",
           alignItems: "center", justifyContent: "center",
         }}>
@@ -65,47 +63,53 @@ export default function Sell() {
           </div>
         </section>
 
-        {/* HOLD & SELL */}
-        <section className="section-alt">
-          <div style={{ background:"var(--card)", border:"1px solid var(--border-gold)", borderRadius:"18px", overflow:"hidden", marginBottom:"28px" }}>
-            <div style={{ padding:"28px 32px 20px" }}>
-              <span className="badge-tag">🔒 Option 1</span>
-              <h2 className="stitle" style={{ marginTop:"12px" }}>Hold & Sell (Maximum Value)</h2>
-              <p style={{ color:"var(--muted)", maxWidth:"600px" }}>Get the best possible price by listing your account with us. We handle everything — evaluation, listing, and transfer.</p>
-            </div>
-            <div style={{ padding:"0 32px 32px" }}>
-              <ol className="steps-list">
-                <li><div className="step-text">🎥 <strong>Record a video of your account</strong><small>Show Inventory, Gun Labs, Supercars, Outfits, Rank — everything visible.</small></div></li>
-                <li><div className="step-text">📝 <strong>Provide a detailed description</strong><small>X-Suits, Gun Labs, rare items, upgrades. Don't know how? Just share login for evaluation.</small></div></li>
-                <li><div className="step-text">📊 <strong>We evaluate at current market value</strong><small>Fair, transparent pricing based on real market rates — no lowballing.</small></div></li>
-                <li><div className="step-text">📢 <strong>If you agree, we take over</strong><small>Secure one login · List in our group & channels · Sell within 1–2 weeks</small></div></li>
-                <li><div className="step-text">💰 <strong>Get paid after sale</strong><small>Account is securely transferred to buyer. Payment released to you immediately.</small></div></li>
-              </ol>
-              <a href="https://wa.me/+919025391516?text=Hi!%20I%20want%20to%20Hold%20and%20Sell%20my%20BGMI%20account." target="_blank" rel="noreferrer" className="btn btn-gold" style={{ marginTop:"24px" }}>
-                📤 Start Hold & Sell
-              </a>
-            </div>
-          </div>
-        </section>
-
-        {/* INSTANT SALE */}
+        {/* ── OPTIONS GRID ─────────────────────────────────── */}
         <section className="section">
-          <div style={{ background:"var(--card)", border:"1px solid var(--border-gold)", borderRadius:"18px", overflow:"hidden" }}>
-            <div style={{ padding:"28px 32px 20px" }}>
-              <span className="badge-tag">⚡ Option 2</span>
-              <h2 className="stitle" style={{ marginTop:"12px" }}>Instant Sale (Quick Cash)</h2>
-              <p style={{ color:"var(--muted)", maxWidth:"600px" }}>Need cash fast? Sell your account immediately without waiting for a buyer.</p>
+          <div style={{ 
+            display: "grid", 
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 400px), 1fr))", 
+            gap: "32px",
+            maxWidth: "1200px",
+            margin: "0 auto"
+          }}>
+            {/* HOLD & SELL */}
+            <div style={{ background:"var(--card)", border:"1px solid var(--border-gold)", borderRadius:"18px", overflow:"hidden", display: "flex", flexDirection: "column" }}>
+              <div style={{ padding:"28px 32px 20px" }}>
+                <span className="badge-tag">🔒 Option 1</span>
+                <h2 className="stitle" style={{ marginTop:"12px", fontSize: "24px" }}>Hold & Sell</h2>
+                <p style={{ color:"var(--muted)", fontSize: "14px" }}>Get maximum price by listing with us. We handle evaluation, marketing, and the transfer.</p>
+              </div>
+              <div style={{ padding:"0 32px 32px", flex: 1, display: "flex", flexDirection: "column" }}>
+                <ol className="steps-list" style={{ flex: 1 }}>
+                  <li><div className="step-text">🎥 <strong>Video & Details</strong><small>Show inventory, Gun Labs, cars & outfits.</small></div></li>
+                  <li><div className="step-text">📊 <strong>Evaluation</strong><small>Fair market pricing — no lowballing.</small></div></li>
+                  <li><div className="step-text">📢 <strong>Listing</strong><small>We list in our channels & find buyers.</small></div></li>
+                  <li><div className="step-text">💰 <strong>Payment</strong><small>Get paid immediately after secure sale.</small></div></li>
+                </ol>
+                <a href="https://wa.me/+919025391516?text=Hi!%20I%20want%20to%20Hold%20and%20Sell%20my%20BGMI%20account." target="_blank" rel="noreferrer" className="btn btn-gold" style={{ marginTop:"24px" }}>
+                  📤 Start Hold & Sell
+                </a>
+              </div>
             </div>
-            <div style={{ padding:"0 32px 32px" }}>
-              <ol className="steps-list">
-                <li><div className="step-text">🎥 <strong>Record a video of your account</strong><small>Show everything — Gun Labs, Outfits, Rank, Inventory.</small></div></li>
-                <li><div className="step-text">📝 <strong>Share details or give login for evaluation</strong><small>We'll assess the account value quickly and fairly.</small></div></li>
-                <li><div className="step-text">⚡ <strong>Get an instant price offer</strong><small>⚠️ May be slightly lower than market value — you're paying for speed and certainty.</small></div></li>
-                <li><div className="step-text">✅ <strong>Accept and get paid instantly</strong><small>We secure the account · Payment released immediately after verification 💰</small></div></li>
-              </ol>
-              <a href="https://wa.me/+919025391516?text=Hi!%20I%20want%20to%20sell%20my%20BGMI%20account%20instantly." target="_blank" rel="noreferrer" className="btn btn-green" style={{ marginTop:"24px" }}>
-                ⚡ Sell Instantly Now
-              </a>
+
+            {/* INSTANT SALE */}
+            <div style={{ background:"var(--card)", border:"1px solid var(--border-gold)", borderRadius:"18px", overflow:"hidden", display: "flex", flexDirection: "column" }}>
+              <div style={{ padding:"28px 32px 20px" }}>
+                <span className="badge-tag" style={{ background: "linear-gradient(135deg, #22C55E, #16A34A)" }}>⚡ Option 2</span>
+                <h2 className="stitle" style={{ marginTop:"12px", fontSize: "24px" }}>Instant Sale</h2>
+                <p style={{ color:"var(--muted)", fontSize: "14px" }}>Need cash now? Sell your account immediately without waiting for a buyer.</p>
+              </div>
+              <div style={{ padding:"0 32px 32px", flex: 1, display: "flex", flexDirection: "column" }}>
+                <ol className="steps-list" style={{ flex: 1 }}>
+                  <li><div className="step-text">🎥 <strong>Video Review</strong><small>Quick assessment of your account assets.</small></div></li>
+                  <li><div className="step-text">⚡ <strong>Price Offer</strong><small>Get an instant valuation for speed sale.</small></div></li>
+                  <li><div className="step-text">✅ <strong>Instant Payout</strong><small>Payment released immediately after verification.</small></div></li>
+                  <li><div className="step-text">🛡️ <strong>Secure Transfer</strong><small>Safe and fast account handover process.</small></div></li>
+                </ol>
+                <a href="https://wa.me/+919025391516?text=Hi!%20I%20want%20to%20sell%20my%20BGMI%20account%20instantly." target="_blank" rel="noreferrer" className="btn btn-green" style={{ marginTop:"24px" }}>
+                  ⚡ Sell Instantly Now
+                </a>
+              </div>
             </div>
           </div>
         </section>

@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { collection, query, orderBy, limit, getDocs, startAfter, doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import Navbar from "../components/Navbar";
-import Ticker from "../components/Ticker";
 import Footer from "../components/Footer";
 import ReviewForm from "../components/ReviewForm";
 import { Star, Loader2, ChevronDown } from "lucide-react";
@@ -89,13 +88,12 @@ export default function Reviews() {
   return (
     <>
       <Navbar />
-      <Ticker />
-      <div style={{ paddingTop: "84px" }}>
+      <div style={{ paddingTop: "102px" }}>
 
         {/* ── HERO BANNER ─────────────────────────────────── */}
         <section style={{
           position: "relative", width: "100%",
-          height: "clamp(300px, 50vw, 500px)",
+          minHeight: "95vh",
           overflow: "hidden", display: "flex",
           alignItems: "center", justifyContent: "center",
         }}>
@@ -140,10 +138,14 @@ export default function Reviews() {
             gap: "40px", 
             maxWidth: "1200px", 
             margin: "0 auto",
-            alignItems: "center" 
+            alignItems: "stretch" 
           }}>
             {/* Stats View */}
-            <div style={{ textAlign: "center", padding: "30px", background: "var(--card)", borderRadius: "20px", border: "1px solid var(--border-gold)" }}>
+            <div style={{ 
+              textAlign: "center", padding: "30px", background: "var(--card)", 
+              borderRadius: "20px", border: "1px solid var(--border-gold)",
+              display: "flex", flexDirection: "column", justifyContent: "center"
+            }}>
               <div style={{ fontSize: "64px", fontFamily: "var(--font-h)", fontWeight: 800, color: "var(--gold)", lineHeight: 1 }}>
                 {stats.averageRating ? stats.averageRating.toFixed(1) : "5.0"}
               </div>

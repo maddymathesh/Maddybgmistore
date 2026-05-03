@@ -1,6 +1,5 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import Ticker from "../components/Ticker";
 
 /* ─── SVG Icons ─────────────────────────────────────────────── */
 const WaIcon = () => (
@@ -68,11 +67,11 @@ const links = [
 
 export default function ConnectWithUs() {
   return (
-    <div className="bg-[#0d0d0d] min-h-screen text-white flex flex-col">
+    <>
       <Navbar />
-      <Ticker />
+      <div style={{ paddingTop: "102px" }}>
 
-      <main className="flex-grow flex flex-col items-center justify-center px-5 pt-[140px] pb-24 w-full">
+        <main className="flex flex-col items-center justify-center px-5 pt-12 pb-24 w-full" style={{ minHeight: "95vh" }}>
         {/* ── HEADING SECTION ─────────────────────────────────── */}
         <div className="text-center mb-10 w-full max-w-2xl">
           <p style={{ 
@@ -136,7 +135,8 @@ export default function ConnectWithUs() {
         <WaIcon />
       </a>
 
+      </div>
       <Footer />
-    </div>
+    </>
   );
 }

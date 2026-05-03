@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import Ticker from "../components/Ticker";
 import Footer from "../components/Footer";
 import {
   ShoppingCart, Lock, Banknote, CheckCircle,
@@ -11,13 +10,12 @@ export default function Buy() {
   return (
     <>
       <Navbar />
-      <Ticker />
-      <div style={{ paddingTop: "84px" }}>
+      <div style={{ paddingTop: "102px" }}>
 
         {/* ── HERO BANNER ─────────────────────────────────── */}
         <section style={{
           position: "relative", width: "100%",
-          height: "clamp(320px, 55vw, 560px)",
+          minHeight: "95vh",
           overflow: "hidden", display: "flex",
           alignItems: "center", justifyContent: "center",
         }}>
@@ -93,114 +91,57 @@ export default function Buy() {
           </div>
         </section>
 
-        {/* ── OPTION 1: READY SECURED ACCOUNTS ───── */}
-        <section className="section-alt">
-          <div style={{ maxWidth: "860px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "10px", flexWrap: "wrap" }}>
-              <span style={{
-                background: "linear-gradient(135deg,#3b82f6,#6366f1)", color: "#fff",
-                fontSize: "11px", fontWeight: 700, padding: "4px 12px", borderRadius: "100px",
-                fontFamily: "var(--font-h)", letterSpacing: "1px",
-                display:"inline-flex", alignItems:"center", gap:"5px",
-              }}><Star size={11} /> OPTION 1</span>
-              <h2 className="stitle" style={{ margin: 0, fontSize: "clamp(22px,4vw,36px)" }}>Ready Secured Accounts</h2>
-            </div>
-            <p className="ssub" style={{ marginBottom: "24px" }}>
-              Browse our verified, ready-to-play accounts. New listings posted regularly. Buy instantly via WhatsApp or Telegram.
-            </p>
-
-            <div style={{ background: "var(--card)", border: "1px solid rgba(255,215,0,0.2)", borderRadius: "14px", padding: "28px 32px", marginBottom: "24px" }}>
-              <ol className="steps-list">
-                {[
-                  [<Gamepad2 size={16} />, "Watch the account Inventory video and description", ""],
-                  [<Lock size={16} />, "Check the login and price details mentioned", ""],
-                  [<ShoppingCart size={16} />, "Click Buy now on using whats app or telegram button", ""],
-                  [<MessageCircle size={16} />, "Talk With Our Seller and Book The Account with 10% Advance of the accoutn worth", "(Booking Amount willl not refunded once booked)"],
-                  [<Banknote size={16} />, "Pay the Remaing Amount", "(UPI,BANK TRAnssfer,usdt,wise Transfer and Share a Screenshot after payment)"],
-                  [<Shield size={16} />, "Share Your Phone and Email", "To give the account safe seculry to your accesss"],
-                ].map(([icon, title, desc], i) => (
-                  <li key={i}>
-                    <div className="step-text">
-                      <span style={{ display:"inline-flex", alignItems:"center", gap:"6px", color:"var(--gold)" }}>{icon} <strong>{title}</strong></span>
-                      <small>{desc}</small>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </div>
-
-            <Link to="/readystocks" style={{
-              display: "inline-flex", alignItems: "center", gap: "10px",
-              padding: "14px 32px", borderRadius: "10px",
-              background: "linear-gradient(135deg,#3b82f6,#6366f1)",
-              color: "#fff", fontFamily: "var(--font-h)", fontWeight: 700,
-              fontSize: "15px", textDecoration: "none", letterSpacing: "0.5px",
-              transition: "opacity .2s, transform .2s",
-              boxShadow: "0 4px 20px rgba(99,102,241,0.35)",
-            }}
-              onMouseEnter={e => { e.currentTarget.style.opacity = ".88"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-              onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
-            >
-              <Gamepad2 size={17} /> View Ready to Play Secured Accounts →
-            </Link>
-          </div>
-        </section>
-
-        {/* ── OPTION 2: CUSTOM REQUIREMENT ─────────── */}
+        {/* ── OPTIONS GRID ─────────────────────────────────── */}
         <section className="section">
-          <div style={{ maxWidth: "860px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "10px", flexWrap: "wrap" }}>
-              <span style={{
-                background: "linear-gradient(135deg,#f97316,#ef4444)", color: "#fff",
-                fontSize: "11px", fontWeight: 700, padding: "4px 12px", borderRadius: "100px",
-                fontFamily: "var(--font-h)", letterSpacing: "1px",
-                display:"inline-flex", alignItems:"center", gap:"5px",
-              }}><Flame size={11} /> OPTION 2</span>
-              <h2 className="stitle" style={{ margin: 0, fontSize: "clamp(22px,4vw,36px)" }}>Custom Requirement Account</h2>
-            </div>
-            <p className="ssub" style={{ marginBottom: "24px" }}>
-              Get a personalized BGMI account based on your exact budget and preferences.
-            </p>
-
-            <div style={{ background: "var(--card)", border: "1px solid rgba(255,215,0,0.2)", borderRadius: "14px", padding: "28px 32px", marginBottom: "24px" }}>
-              <ol className="steps-list">
-                {[
-                  [<Target size={16} />, "share your Requirments and Budget", "(Requirments Should be according to budget)"],
-                  [<Banknote size={16} />, "Pay The Advance Payment and wait for 24 - 48hrs", ""],
-                  [<Gamepad2 size={16} />, "We will find give the reqiment and give to u", ""],
-                  [<MessageCircle size={16} />, "Talk With Our Seller and Book The Account with 10% Advance of the accoutn worth", ""],
-                  [<Banknote size={16} />, "Pay the Remaing Amount", "(UPI,BANK TRAnssfer,usdt,wise Transfer and Share a Screenshot after payment)"],
-                  [<Shield size={16} />, "Share Your Phone and Email", "To give the account safe seculry to your accesss"],
-                ].map(([icon, title, desc], i) => (
-                  <li key={i}>
-                    <div className="step-text">
-                      <span style={{ display:"inline-flex", alignItems:"center", gap:"6px", color:"var(--gold)" }}>{icon} <strong>{title}</strong></span>
-                      <small>{desc}</small>
-                    </div>
-                  </li>
-                ))}
-              </ol>
+          <div style={{ 
+            display: "grid", 
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 400px), 1fr))", 
+            gap: "32px",
+            maxWidth: "1200px",
+            margin: "0 auto"
+          }}>
+            {/* OPTION 1: READY SECURED ACCOUNTS */}
+            <div style={{ background:"var(--card)", border:"1px solid var(--border-gold)", borderRadius:"18px", overflow:"hidden", display: "flex", flexDirection: "column" }}>
+              <div style={{ padding:"28px 32px 20px" }}>
+                <span className="badge-tag" style={{ background: "linear-gradient(135deg, #3b82f6, #6366f1)" }}>⭐ Option 1</span>
+                <h2 className="stitle" style={{ marginTop:"12px", fontSize: "24px" }}>Ready Stocks</h2>
+                <p style={{ color:"var(--muted)", fontSize: "14px" }}>Browse our verified, ready-to-play accounts. New listings posted regularly.</p>
+              </div>
+              <div style={{ padding:"0 32px 32px", flex: 1, display: "flex", flexDirection: "column" }}>
+                <ol className="steps-list" style={{ flex: 1 }}>
+                  <li><div className="step-text">🎥 <strong>Watch Video</strong><small>Check inventory, Gun Labs & price details.</small></div></li>
+                  <li><div className="step-text">💬 <strong>Book Now</strong><small>Pay 10% advance to book your dream account.</small></div></li>
+                  <li><div className="step-text">💰 <strong>Complete Pay</strong><small>Pay remaining via UPI, Bank, or USDT.</small></div></li>
+                  <li><div className="step-text">🛡️ <strong>Fast Handover</strong><small>Safe transfer to your phone and email.</small></div></li>
+                </ol>
+                <Link to="/readystocks" className="btn" style={{ marginTop:"24px", background: "linear-gradient(135deg, #3b82f6, #6366f1)", color: "#fff" }}>
+                  <Gamepad2 size={16} style={{ marginRight: "8px" }} /> View Ready Stocks
+                </Link>
+              </div>
             </div>
 
-            <a
-              href="https://wa.me/+919025391516?text=Hi%20Maddy!%20I%20want%20a%20custom%20BGMI%20account.%20My%20budget%20is%20₹"
-              target="_blank" rel="noreferrer"
-              style={{
-                display: "inline-flex", alignItems: "center", gap: "10px",
-                padding: "14px 32px", borderRadius: "10px",
-                background: "#22C55E",
-                color: "#fff", fontFamily: "var(--font-h)", fontWeight: 700,
-                fontSize: "15px", textDecoration: "none", letterSpacing: "0.5px",
-                transition: "opacity .2s, transform .2s",
-                boxShadow: "0 4px 20px rgba(34,197,94,0.3)",
-              }}
-              onMouseEnter={e => { e.currentTarget.style.opacity = ".88"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-              onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
-            >
-              <MessageCircle size={17} /> Request Custom Account on WhatsApp →
-            </a>
+            {/* OPTION 2: CUSTOM REQUIREMENT */}
+            <div style={{ background:"var(--card)", border:"1px solid var(--border-gold)", borderRadius:"18px", overflow:"hidden", display: "flex", flexDirection: "column" }}>
+              <div style={{ padding:"28px 32px 20px" }}>
+                <span className="badge-tag" style={{ background: "linear-gradient(135deg, #f97316, #ef4444)" }}>🔥 Option 2</span>
+                <h2 className="stitle" style={{ marginTop:"12px", fontSize: "24px" }}>Custom Search</h2>
+                <p style={{ color:"var(--muted)", fontSize: "14px" }}>Get a personalized BGMI account based on your exact budget and specs.</p>
+              </div>
+              <div style={{ padding:"0 32px 32px", flex: 1, display: "flex", flexDirection: "column" }}>
+                <ol className="steps-list" style={{ flex: 1 }}>
+                  <li><div className="step-text">📝 <strong>Share Specs</strong><small>Tell us your requirements and budget.</small></div></li>
+                  <li><div className="step-text">💰 <strong>Advance Pay</strong><small>Small deposit to start the custom search.</small></div></li>
+                  <li><div className="step-text">🔍 <strong>We Find It</strong><small>We scan the market to find your perfect match.</small></div></li>
+                  <li><div className="step-text">✅ <strong>Finalize</strong><small>Pay the balance and get your custom account.</small></div></li>
+                </ol>
+                <a href="https://wa.me/+919025391516?text=Hi!%20I%20have%20a%20custom%20BGMI%20account%20requirement." target="_blank" rel="noreferrer" className="btn btn-green" style={{ marginTop:"24px" }}>
+                  <MessageCircle size={16} style={{ marginRight: "8px" }} /> Share Requirements
+                </a>
+              </div>
+            </div>
           </div>
         </section>
+
 
         {/* WHY TRUST US */}
         <section className="section-alt">

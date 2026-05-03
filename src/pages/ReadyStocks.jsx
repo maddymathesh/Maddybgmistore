@@ -4,7 +4,6 @@ import { db } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import Ticker from "../components/Ticker";
 import Footer from "../components/Footer";
 import { Search, Lock, Link2, MessageCircle, CheckCircle, ShoppingBag, Banknote } from "lucide-react";
 
@@ -168,11 +167,10 @@ export default function ReadyStocks() {
   return (
     <>
       <Navbar />
-      <Ticker />
-      <div style={{ paddingTop: "84px" }}>
+      <div style={{ paddingTop: "102px" }}>
 
         {/* ── HEADER ──────────────────────────────── */}
-        <section className="section" style={{ paddingBottom: "24px" }}>
+        <section className="section" style={{ minHeight: "95vh", paddingBottom: "24px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px", flexWrap: "wrap" }}>
             <span style={{ background: "linear-gradient(135deg,#3b82f6,#6366f1)", color: "#fff", fontSize: "11px", fontWeight: 700, padding: "4px 12px", borderRadius: "100px", fontFamily: "var(--font-h)", letterSpacing: "1px", display: "inline-flex", alignItems: "center", gap: "5px" }}>
               ⭐ OPTION 1

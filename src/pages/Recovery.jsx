@@ -1,5 +1,4 @@
 import Navbar from "../components/Navbar";
-import Ticker from "../components/Ticker";
 import Footer from "../components/Footer";
 import { Shield, Zap, CheckCircle } from "lucide-react";
 
@@ -7,13 +6,12 @@ export default function Recovery() {
   return (
     <>
       <Navbar />
-      <Ticker />
-      <div style={{ paddingTop: "84px" }}>
+      <div style={{ paddingTop: "102px" }}>
 
         {/* ── HERO BANNER ─────────────────────────────────── */}
         <section style={{
           position: "relative", width: "100%",
-          height: "clamp(300px, 52vw, 520px)",
+          minHeight: "95vh",
           overflow: "hidden", display: "flex",
           alignItems: "center", justifyContent: "center",
         }}>

@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import Ticker from "../components/Ticker";
 import Footer from "../components/Footer";
 import { Gamepad2, ShoppingCart, Banknote, CheckCircle, Zap, Shield, Star, Trophy, Lock, Smartphone } from "lucide-react";
 import CountUp from "../components/CountUp";
@@ -65,10 +64,10 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <Ticker />
+      <div style={{ paddingTop: "102px" }}>
 
-      {/* HERO */}
-      <section style={{ minHeight:"calc(100vh - 84px)", display:"flex", alignItems:"center", justifyContent:"center", textAlign:"center", padding:"80px 5% 60px", position:"relative", overflow:"hidden" }}>
+        {/* HERO */}
+        <section style={{ minHeight: "90vh", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "80px 5% 60px", position: "relative", overflow: "hidden" }}>
         {/* Brand Banner Background */}
         <img
           src="/hero-banner.jpg"
@@ -96,7 +95,7 @@ export default function Home() {
         </div>
 
         <div style={{ position:"relative", zIndex:2, maxWidth:"820px", margin:"0 auto" }} className="fade-up">
-          <div className="badge" style={{ display:"inline-flex", alignItems:"center", gap:"6px" }}><Gamepad2 size={14} /> South India's #1 Trusted BGMI Account Marketplace</div>
+          <div className="badge">South India's #1 Trusted BGMI Account Marketplace</div>
           <h1 style={{ fontFamily:"var(--font-h)", fontSize:"clamp(42px,8vw,92px)", fontWeight:700, lineHeight:1, letterSpacing:"2px", marginBottom:"22px" }}>
             Your Dream<br /><span className="g">BGMI Account</span><br />Awaits
           </h1>
@@ -151,8 +150,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* BUY / SELL CARDS */}
-      <section className="section">
+      {/* BUY / SELL / RECOVERY GRID */}
+           <section className="section">
         <div className="slabel">What We Offer</div>
         <h2 className="stitle">Buy or Sell — We've Got You</h2>
         <p className="ssub">Choose what you're looking for below and we'll take care of the rest.</p>
@@ -260,7 +259,7 @@ export default function Home() {
       </section>
 
       {/* ABOUT */}
-      <section className="section-alt">
+         <section className="section-alt">
         <div className="slabel">Our Story</div>
         <h2 className="stitle">About Maddy BGMI Store</h2>
         <div style={{ background:"var(--card)", border:"1px solid var(--border-gold)", borderRadius:"var(--radius)", padding:"clamp(24px, 5vw, 40px)", display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(min(100%, 320px), 1fr))", gap:"40px", alignItems:"start" }}>
@@ -313,6 +312,7 @@ export default function Home() {
         </div>
       </section>
 
+      </div>
       <Footer />
     </>
   );

@@ -1,7 +1,9 @@
-import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { lazy, Suspense, useEffect } from "react";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ScrollDownIndicator from "./components/ScrollDownIndicator";
+import WhatsAppFloat from "./components/WhatsAppFloat";
 
 // ── Lazy-loaded pages (code splitting per route) ─────────────
 const Home          = lazy(() => import("./pages/Home"));
@@ -15,6 +17,15 @@ const Login         = lazy(() => import("./pages/Login"));
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
 
 // Minimal full-screen loading state
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  // console.log(pathname)
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
 function PageLoader() {
   return (
     <div style={{
@@ -36,6 +47,7 @@ function PageLoader() {
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Toaster
         position="top-right"
         toastOptions={{
@@ -47,6 +59,8 @@ export default function App() {
         }}
       />
       <Suspense fallback={<PageLoader />}>
+        <ScrollDownIndicator />
+        <WhatsAppFloat />
         <Routes>
           {/* Public Pages */}
           <Route path="/"             element={<Home />} />

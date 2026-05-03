@@ -25,7 +25,9 @@ service cloud.firestore {
     match /reviews/{docId} {
       allow read: if true;
       allow delete, update: if isAdmin();
-      allow create: if request.resource.data.keys().hasAll(['name', 'rating', 'comment'])
+      allow create: if request.auth != null
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.keys().hasAll(['name', 'rating', 'comment', 'uid'])
                     && request.resource.data.rating >= 1
                     && request.resource.data.rating <= 5
                     && request.resource.data.name is string
@@ -37,10 +39,11 @@ service cloud.firestore {
     match /globals/reviewStats {
       allow read: if true;
       // Allow the client transaction to update stats securely
-      allow update: if request.resource.data.totalReviews is number
+      allow update: if request.auth != null
+                    && request.resource.data.totalReviews is number
                     && request.resource.data.averageRating is number;
       // Allow initial creation if it doesn't exist
-      allow create: if true;
+      allow create: if request.auth != null;
     }
 
     // ── Deny all other collections by default ──────────────────

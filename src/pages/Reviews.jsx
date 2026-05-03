@@ -203,6 +203,15 @@ export default function Reviews() {
                     </div>
 
                     <p className="review-text">{r.comment || r.text}</p>
+                    {r.imageUrl && (
+                      <div style={{ margin: "12px 0", borderRadius: "8px", overflow: "hidden", border: "1px solid var(--border-gold)" }}>
+                        <img 
+                          src={r.imageUrl} 
+                          alt="BGMI Account Lobby Screenshot" 
+                          style={{ width: "100%", maxHeight: "250px", objectFit: "cover", display: "block" }} 
+                        />
+                      </div>
+                    )}
                     <span className="review-verified">✅ Verified Buyer</span>
                   </div>
                 ))}

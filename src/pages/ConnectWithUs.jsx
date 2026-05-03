@@ -68,56 +68,37 @@ const links = [
 
 export default function ConnectWithUs() {
   return (
-    <div className="bg-[#0d0d0d] min-h-screen text-white">
+    <div className="bg-[#0d0d0d] min-h-screen text-white flex flex-col">
       <Navbar />
       <Ticker />
 
-      {/* ── HERO BANNER ─────────────────────────────────── */}
-      <div style={{ paddingTop: "84px" }}>
-        <section style={{
-          position: "relative", width: "100%",
-          height: "clamp(280px, 46vw, 460px)",
-          overflow: "hidden", display: "flex",
-          alignItems: "center", justifyContent: "center",
-        }}>
-          <img
-            src="/connect-banner.jpg"
-            alt="BGMI parachute action scene" loading="lazy" decoding="async"
-            style={{
-              position: "absolute", inset: 0, width: "100%", height: "100%",
-              objectFit: "cover", objectPosition: "center 35%",
-              filter: "brightness(0.55)",
-            }}
-          />
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(13,13,13,0.5) 0%, transparent 30%, transparent 55%, rgba(13,13,13,0.97) 100%)" }} />
-          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 40%, rgba(249,115,22,0.08) 0%, transparent 55%)" }} />
+      <main className="flex-grow flex flex-col items-center justify-center px-5 pt-[140px] pb-24 w-full">
+        {/* ── HEADING SECTION ─────────────────────────────────── */}
+        <div className="text-center mb-10 w-full max-w-2xl">
+          <p style={{ 
+            fontFamily: "var(--font-h)", fontSize: "12px", fontWeight: 900, 
+            letterSpacing: "3px", color: "#fff", textTransform: "uppercase", 
+            marginBottom: "12px", opacity: 0.9 
+          }}>
+            MADDY <span style={{ color: "var(--gold)" }}>BGMI STORE</span>
+          </p>
+          <h1 style={{
+            fontFamily: "var(--font-h)", fontSize: "clamp(36px, 6vw, 56px)",
+            fontWeight: 900, lineHeight: 1.1, marginBottom: "16px",
+            textShadow: "0 2px 20px rgba(0,0,0,0.5)",
+          }}>
+            Connect <span style={{ color: "#f97316" }}>With Us</span>
+          </h1>
+          <p style={{
+            color: "var(--muted)", fontSize: "clamp(14px, 2vw, 16px)",
+            margin: "0 auto",
+          }}>
+            Join our official channels for the latest listings, updates and proofs.
+          </p>
+        </div>
 
-          <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "0 5%" }}>
-            <p style={{ fontFamily: "var(--font-h)", fontSize: "11px", fontWeight: 900, letterSpacing: "3px", color: "#fff", textTransform: "uppercase", marginBottom: "10px", opacity: 0.8 }}>
-              MADDY <span style={{ color: "#FFD700" }}>BGMI STORE</span>
-            </p>
-            <h1 style={{
-              fontFamily: "var(--font-h)", fontSize: "clamp(30px,5.5vw,66px)",
-              fontWeight: 900, lineHeight: 1.1, marginBottom: "12px",
-              textShadow: "0 2px 20px rgba(0,0,0,0.7)",
-            }}>
-              Connect <span style={{ color: "#f97316" }}>With Us</span>
-            </h1>
-            <p style={{
-              color: "rgba(200,200,200,0.85)", fontSize: "clamp(13px,1.5vw,16px)",
-              maxWidth: "420px", margin: "0 auto",
-              textShadow: "0 1px 8px rgba(0,0,0,0.5)",
-            }}>
-              Join our official channels for the latest listings, updates and proofs.
-            </p>
-          </div>
-        </section>
-      </div>
-
-      <main className="flex flex-col items-center px-5 pt-10 pb-32">
-
-        {/* ── Buttons ── */}
-        <div className="w-full max-w-[420px] flex flex-col gap-3">
+        {/* ── BUTTONS ─────────────────────────────────────────── */}
+        <div className="w-full max-w-[460px] flex flex-col gap-4">
           {links.map(({ label, href, bg, glow, Icon }) => (
             <a
               key={label}
@@ -130,11 +111,11 @@ export default function ConnectWithUs() {
                 w-full h-[62px] rounded-xl
                 text-white font-black text-[13px] tracking-[1.5px] uppercase
                 transition-all duration-200
-                hover:scale-[1.02] hover:brightness-110
+                hover:scale-[1.02] hover:brightness-110 active:scale-95
               `}
               style={{
                 fontFamily: "var(--font-h)",
-                boxShadow: `0 6px 24px ${glow}`,
+                boxShadow: `0 8px 24px ${glow}`,
               }}
             >
               <Icon />
@@ -142,7 +123,6 @@ export default function ConnectWithUs() {
             </a>
           ))}
         </div>
-
       </main>
 
       {/* ── Floating WhatsApp ── */}
@@ -150,7 +130,7 @@ export default function ConnectWithUs() {
         href="https://wa.me/+919025391516"
         target="_blank"
         rel="noreferrer"
-        className="fixed bottom-7 right-7 z-50 w-14 h-14 bg-[#25D366] rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+        className="fixed bottom-7 right-7 z-50 w-14 h-14 bg-[#25D366] rounded-full flex items-center justify-center hover:scale-110 active:scale-95 transition-transform"
         style={{ boxShadow: "0 4px 20px rgba(37,211,102,0.5)" }}
       >
         <WaIcon />

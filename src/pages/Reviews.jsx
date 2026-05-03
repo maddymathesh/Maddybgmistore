@@ -1,26 +1,90 @@
 import { useEffect, useState } from "react";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { collection, query, orderBy, limit, getDocs, startAfter, doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import Navbar from "../components/Navbar";
 import Ticker from "../components/Ticker";
 import Footer from "../components/Footer";
-import { Star, MessageCircle } from "lucide-react";
+import ReviewForm from "../components/ReviewForm";
+import { Star, Loader2, ChevronDown } from "lucide-react";
 
 export default function Reviews() {
   const [reviews, setReviews] = useState([]);
+  const [stats, setStats] = useState({ averageRating: 0, totalReviews: 0 });
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [lastVisible, setLastVisible] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+
+  // Load overall stats
+  const fetchStats = async () => {
+    try {
+      const statsDoc = await getDoc(doc(db, "globals", "reviewStats"));
+      if (statsDoc.exists()) {
+        setStats(statsDoc.data());
+      }
+    } catch (err) {
+      console.error("Failed to load review stats:", err);
+    }
+  };
+
+  // Load paginated reviews
+  const fetchReviews = async (isLoadMore = false) => {
+    if (isLoadMore) setLoadingMore(true);
+    else setLoading(true);
+
+    try {
+      let q = query(collection(db, "reviews"), orderBy("createdAt", "desc"), limit(6));
+      
+      if (isLoadMore && lastVisible) {
+        q = query(collection(db, "reviews"), orderBy("createdAt", "desc"), startAfter(lastVisible), limit(6));
+      }
+
+      const snap = await getDocs(q);
+      
+      if (!snap.empty) {
+        const newReviews = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        setReviews(prev => isLoadMore ? [...prev, ...newReviews] : newReviews);
+        setLastVisible(snap.docs[snap.docs.length - 1]);
+        setHasMore(snap.docs.length === 6);
+      } else {
+        setHasMore(false);
+      }
+    } catch (err) {
+      console.error("Reviews fetch error:", err);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
 
   useEffect(() => {
-    const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
-    const unsub = onSnapshot(q, (snap) => {
-      setReviews(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-      setLoading(false);
-    }, (err) => {
-      console.error("Reviews fetch error:", err);
-      setLoading(false);
-    });
-    return unsub;
+    fetchStats();
+    fetchReviews();
   }, []);
+
+  // Handle optimistic UI update when a user submits a review
+  const handleReviewAdded = (newReview) => {
+    setReviews(prev => [newReview, ...prev]);
+    // Optimistically update stats
+    setStats(prev => ({
+      totalReviews: prev.totalReviews + 1,
+      averageRating: ((prev.averageRating * prev.totalReviews) + newReview.rating) / (prev.totalReviews + 1)
+    }));
+  };
+
+  const formatRelativeTime = (timestamp) => {
+    if (!timestamp) return "Just now";
+    // Check if it's a Firestore timestamp or a JS Date/ms
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp.toMillis ? timestamp.toMillis() : timestamp);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+
+    if (diffInSeconds < 60) return "Just now";
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+    return date.toLocaleDateString();
+  };
 
   return (
     <>
@@ -49,7 +113,7 @@ export default function Reviews() {
 
           <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "0 5%", maxWidth: "740px" }}>
             <div className="badge" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "16px", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
-              <Star size={13} fill="var(--gold)" color="var(--gold)" /> Reviews &amp; Sold Proofs
+              <Star size={13} fill="var(--gold)" color="var(--gold)" /> Trusted Community
             </div>
             <h1 style={{
               fontFamily: "var(--font-h)", fontSize: "clamp(30px,5.5vw,66px)",
@@ -68,11 +132,44 @@ export default function Reviews() {
           </div>
         </section>
 
-        {/* Reviews grid */}
-        <section className="section-alt">
+        {/* ── STATS & REVIEW FORM ─────────────────────────── */}
+        <section className="section" style={{ paddingBottom: "40px" }}>
+          <div style={{ 
+            display: "grid", 
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))", 
+            gap: "40px", 
+            maxWidth: "1200px", 
+            margin: "0 auto",
+            alignItems: "center" 
+          }}>
+            {/* Stats View */}
+            <div style={{ textAlign: "center", padding: "30px", background: "var(--card)", borderRadius: "20px", border: "1px solid var(--border-gold)" }}>
+              <div style={{ fontSize: "64px", fontFamily: "var(--font-h)", fontWeight: 800, color: "var(--gold)", lineHeight: 1 }}>
+                {stats.averageRating ? stats.averageRating.toFixed(1) : "5.0"}
+              </div>
+              <div style={{ display: "flex", justifyContent: "center", gap: "4px", margin: "12px 0 16px" }}>
+                {[1,2,3,4,5].map(i => (
+                  <Star key={i} size={24} fill="var(--gold)" color="var(--gold)" />
+                ))}
+              </div>
+              <div style={{ color: "var(--muted)", fontSize: "15px", fontWeight: 600 }}>
+                Based on {stats.totalReviews || 0} reviews
+              </div>
+            </div>
+
+            {/* Review Form Component */}
+            <ReviewForm onReviewAdded={handleReviewAdded} />
+          </div>
+        </section>
+
+        {/* ── REVIEWS GRID ─────────────────────────────────── */}
+        <section className="section-alt" style={{ paddingTop: "60px" }}>
+          <h2 className="stitle" style={{ textAlign: "center", marginBottom: "40px" }}>Latest Reviews</h2>
+          
           {loading ? (
             <div style={{ textAlign: "center", padding: "80px", color: "var(--muted)" }}>
-              Loading reviews...
+              <Loader2 className="animate-spin mx-auto" size={40} style={{ color: "var(--gold)", marginBottom: "16px" }} />
+              <p>Loading authentic reviews...</p>
             </div>
           ) : reviews.length === 0 ? (
             <div style={{ textAlign: "center", padding: "80px", color: "var(--muted)" }}>
@@ -80,70 +177,55 @@ export default function Reviews() {
               <p>No reviews yet. Be the first to leave one!</p>
             </div>
           ) : (
-            <div className="reviews-grid">
-              {reviews.map((r) => <ReviewCard key={r.id} r={r} />)}
-            </div>
+            <>
+              <div className="reviews-grid">
+                {reviews.map((r) => (
+                  <div key={r.id} className="review-card">
+                    <div className="review-top">
+                      <div className="review-avatar">
+                        {(r.name || "?").slice(0, 2).toUpperCase()}
+                      </div>
+                      <div>
+                        <div className="review-name">{r.name || "Anonymous"}</div>
+                        <div className="review-date">{formatRelativeTime(r.createdAt || r.clientDate)}</div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", gap: "2px", margin: "10px 0 8px" }}>
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          size={14}
+                          fill={i < (r.rating || 5) ? "var(--gold)" : "transparent"}
+                          color={i < (r.rating || 5) ? "var(--gold)" : "rgba(255,215,0,0.25)"}
+                        />
+                      ))}
+                    </div>
+
+                    <p className="review-text">{r.comment || r.text}</p>
+                    <span className="review-verified">✅ Verified Buyer</span>
+                  </div>
+                ))}
+              </div>
+
+              {hasMore && (
+                <div style={{ textAlign: "center", marginTop: "40px" }}>
+                  <button 
+                    onClick={() => fetchReviews(true)} 
+                    className="btn btn-outline"
+                    disabled={loadingMore}
+                    style={{ minWidth: "160px", justifyContent: "center" }}
+                  >
+                    {loadingMore ? <Loader2 className="animate-spin" size={16} /> : <><ChevronDown size={16} /> Load More</>}
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </section>
 
-        {/* CTA */}
-        <section className="section-alt" style={{ textAlign: "center" }}>
-          <h2 className="stitle">Already a Happy Buyer?</h2>
-          <p style={{ color: "var(--muted)", marginBottom: "24px" }}>
-            Your review helps other players trust the platform and make safe decisions.
-          </p>
-          <a
-            href="https://wa.me/+919025391516?text=Hi!%20I%20want%20to%20submit%20my%20review%20for%20Maddy%20BGMI%20Store."
-            target="_blank" rel="noreferrer"
-            className="btn btn-gold"
-            style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}
-          >
-            <MessageCircle size={15} /> Submit Your Review
-          </a>
-        </section>
       </div>
       <Footer />
     </>
-  );
-}
-
-function ReviewCard({ r }) {
-  const avatarText = r.initials || (r.name || "?").slice(0, 2).toUpperCase();
-  const stars = Math.min(5, Math.max(1, Number(r.stars) || 5));
-
-  return (
-    <div className="review-card">
-      <div className="review-top">
-        {r.image ? (
-          <img
-            src={r.image}
-            alt={r.name}
-            style={{ width: "40px", height: "40px", borderRadius: "50%", objectFit: "cover", border: "2px solid var(--gold)" }}
-            onError={e => { e.currentTarget.style.display = "none"; }}
-          />
-        ) : (
-          <div className="review-avatar">{avatarText}</div>
-        )}
-        <div>
-          <div className="review-name">{r.name}</div>
-          <div className="review-date">{r.date || ""}</div>
-        </div>
-      </div>
-
-      {/* Stars */}
-      <div style={{ display: "flex", gap: "2px", margin: "10px 0 8px" }}>
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Star
-            key={i}
-            size={14}
-            fill={i < stars ? "var(--gold)" : "transparent"}
-            color={i < stars ? "var(--gold)" : "rgba(255,215,0,0.25)"}
-          />
-        ))}
-      </div>
-
-      <p className="review-text">{r.text}</p>
-      <span className="review-verified">✅ Sold Proof Verified</span>
-    </div>
   );
 }

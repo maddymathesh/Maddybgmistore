@@ -21,10 +21,26 @@ service cloud.firestore {
 
     // ── reviews collection ─────────────────────────────────────
     // Public: anyone can read reviews
-    // Write: only admins can add / delete reviews
+    // Write: public can create with validation, only admins can delete/update
     match /reviews/{docId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow delete, update: if isAdmin();
+      allow create: if request.resource.data.keys().hasAll(['name', 'rating', 'comment'])
+                    && request.resource.data.rating >= 1
+                    && request.resource.data.rating <= 5
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() > 1
+                    && request.resource.data.comment is string;
+    }
+
+    // ── globals collection (Review Stats) ──────────────────────
+    match /globals/reviewStats {
+      allow read: if true;
+      // Allow the client transaction to update stats securely
+      allow update: if request.resource.data.totalReviews is number
+                    && request.resource.data.averageRating is number;
+      // Allow initial creation if it doesn't exist
+      allow create: if true;
     }
 
     // ── Deny all other collections by default ──────────────────

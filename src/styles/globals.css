@@ -18,10 +18,17 @@ body {
   overflow-x: hidden;
   min-height: 100vh;
   min-height: 100dvh;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   scrollbar-width: thin;
   scrollbar-color: var(--border-gold) var(--bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== A11Y FOCUS ===== */
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
 }
 
 :root {

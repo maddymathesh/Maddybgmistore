@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, memo } from 'react';
 import { Renderer, Program, Triangle, Mesh } from 'ogl';
 import './LightRays.css';
 
@@ -396,4 +396,4 @@ void main() {
   return <div ref={containerRef} className={`light-rays-container ${className}`.trim()} />;
 };
 
-export default LightRays;
+export default memo(LightRays);

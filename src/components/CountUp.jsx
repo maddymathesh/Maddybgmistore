@@ -1,7 +1,7 @@
 import { useInView, useMotionValue, useSpring } from 'motion/react';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, memo } from 'react';
 
-export default function CountUp({
+const CountUp = memo(function CountUp({
   to,
   from = 0,
   direction = 'up',
@@ -98,4 +98,6 @@ export default function CountUp({
   }, [springValue, formatValue]);
 
   return <span className={className} ref={ref} />;
-}
+});
+
+export default CountUp;

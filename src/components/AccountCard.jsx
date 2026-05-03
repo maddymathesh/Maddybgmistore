@@ -12,7 +12,9 @@ const TgIcon = () => (
   </svg>
 );
 
-export default function AccountCard({ stock }) {
+import { memo } from 'react';
+
+export default memo(function AccountCard({ stock }) {
   const wa = `https://wa.me/+919025391516?text=Hi%20Maddy!%20I%20am%20interested%20in%20the%20account%20listed%20for%20₹${stock.price}.%20${encodeURIComponent(stock.title)}`;
   const tg = `https://t.me/MBSxMADDY17`;
 
@@ -176,4 +178,4 @@ export default function AccountCard({ stock }) {
       </div>
     </div>
   );
-}
+});

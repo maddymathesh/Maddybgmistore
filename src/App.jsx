@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollDownIndicator from "./components/ScrollDownIndicator";
+import WhatsAppFloat from "./components/WhatsAppFloat";
 
 // ── Lazy-loaded pages (code splitting per route) ─────────────
 const Home          = lazy(() => import("./pages/Home"));
@@ -59,6 +60,7 @@ export default function App() {
       />
       <Suspense fallback={<PageLoader />}>
         <ScrollDownIndicator />
+        <WhatsAppFloat />
         <Routes>
           {/* Public Pages */}
           <Route path="/"             element={<Home />} />

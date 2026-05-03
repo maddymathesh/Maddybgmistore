@@ -46,7 +46,7 @@ export default function Buy() {
             position: "relative", zIndex: 2, textAlign: "center",
             padding: "0 5%", maxWidth: "780px",
           }}>
-            <div className="badge" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "16px", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
+            <div className="badge" style={{ marginBottom: "20px" }}>
               <ShoppingCart size={14} /> Buy BGMI Accounts
             </div>
             <h1 style={{
@@ -95,47 +95,84 @@ export default function Buy() {
         <section className="section">
           <div style={{ 
             display: "grid", 
-            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 400px), 1fr))", 
-            gap: "32px",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 420px), 1fr))", 
+            gap: "40px",
             maxWidth: "1200px",
-            margin: "0 auto"
+            margin: "0 auto",
+            alignItems: "stretch" 
           }}>
             {/* OPTION 1: READY SECURED ACCOUNTS */}
-            <div style={{ background:"var(--card)", border:"1px solid var(--border-gold)", borderRadius:"18px", overflow:"hidden", display: "flex", flexDirection: "column" }}>
-              <div style={{ padding:"28px 32px 20px" }}>
-                <span className="badge-tag" style={{ background: "linear-gradient(135deg, #3b82f6, #6366f1)" }}>⭐ Option 1</span>
-                <h2 className="stitle" style={{ marginTop:"12px", fontSize: "24px" }}>Ready Stocks</h2>
-                <p style={{ color:"var(--muted)", fontSize: "14px" }}>Browse our verified, ready-to-play accounts. New listings posted regularly.</p>
+            <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px", flexWrap: "wrap" }}>
+                <span className="badge" style={{ background: "linear-gradient(135deg,#3b82f6,#6366f1)", border: "none" }}>
+                  <Star size={11} fill="#fff" /> OPTION 1
+                </span>
+                <h2 className="stitle" style={{ margin: 0, fontSize: "clamp(24px,4vw,32px)" }}>Ready Stocks</h2>
               </div>
-              <div style={{ padding:"0 32px 32px", flex: 1, display: "flex", flexDirection: "column" }}>
+              <p className="ssub" style={{ marginBottom: "24px", minHeight: "44px" }}>
+                Browse our verified, ready-to-play accounts. New listings posted regularly. Buy instantly via WhatsApp or Telegram.
+              </p>
+
+              <div style={{ background: "var(--card)", border: "1px solid rgba(255,215,0,0.15)", borderRadius: "18px", padding: "32px", marginBottom: "24px", flex: 1, display: "flex", flexDirection: "column" }}>
                 <ol className="steps-list" style={{ flex: 1 }}>
-                  <li><div className="step-text">🎥 <strong>Watch Video</strong><small>Check inventory, Gun Labs & price details.</small></div></li>
-                  <li><div className="step-text">💬 <strong>Book Now</strong><small>Pay 10% advance to book your dream account.</small></div></li>
-                  <li><div className="step-text">💰 <strong>Complete Pay</strong><small>Pay remaining via UPI, Bank, or USDT.</small></div></li>
-                  <li><div className="step-text">🛡️ <strong>Fast Handover</strong><small>Safe transfer to your phone and email.</small></div></li>
+                  {[
+                    [<Gamepad2 size={16} />, "Watch the account Inventory video", "Check Gun Labs, cars, and outfits."],
+                    [<Lock size={16} />, "Check login & price details", "Verified and secured account credentials."],
+                    [<ShoppingCart size={16} />, "Click Buy Now button", "Direct access to WhatsApp or Telegram."],
+                    [<MessageCircle size={16} />, "Book with 10% Advance", "Secure your account instantly (Non-refundable)."],
+                    [<Banknote size={16} />, "Complete the Payment", "UPI, Bank Transfer, USDT, or Wise."],
+                    [<Shield size={16} />, "Fast Account Handover", "Secure transfer to your phone and email."],
+                  ].map(([icon, title, desc], i) => (
+                    <li key={i}>
+                      <div className="step-text">
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--gold)", marginBottom: "2px" }}>
+                          {icon} <strong style={{ fontSize: "15px" }}>{title}</strong>
+                        </div>
+                        <small style={{ display: "block", color: "var(--muted)", fontSize: "12px" }}>{desc}</small>
+                      </div>
+                    </li>
+                  ))}
                 </ol>
-                <Link to="/readystocks" className="btn" style={{ marginTop:"24px", background: "linear-gradient(135deg, #3b82f6, #6366f1)", color: "#fff" }}>
-                  <Gamepad2 size={16} style={{ marginRight: "8px" }} /> View Ready Stocks
+                <Link to="/readystocks" className="btn btn-gold" style={{ marginTop: "24px", width: "100%", justifyContent: "center" }}>
+                  <Gamepad2 size={18} /> View Ready Stocks →
                 </Link>
               </div>
             </div>
 
             {/* OPTION 2: CUSTOM REQUIREMENT */}
-            <div style={{ background:"var(--card)", border:"1px solid var(--border-gold)", borderRadius:"18px", overflow:"hidden", display: "flex", flexDirection: "column" }}>
-              <div style={{ padding:"28px 32px 20px" }}>
-                <span className="badge-tag" style={{ background: "linear-gradient(135deg, #f97316, #ef4444)" }}>🔥 Option 2</span>
-                <h2 className="stitle" style={{ marginTop:"12px", fontSize: "24px" }}>Custom Search</h2>
-                <p style={{ color:"var(--muted)", fontSize: "14px" }}>Get a personalized BGMI account based on your exact budget and specs.</p>
+            <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px", flexWrap: "wrap" }}>
+                <span className="badge" style={{ background: "linear-gradient(135deg,#f97316,#ef4444)", border: "none" }}>
+                  <Flame size={11} fill="#fff" /> OPTION 2
+                </span>
+                <h2 className="stitle" style={{ margin: 0, fontSize: "clamp(24px,4vw,32px)" }}>Custom Search</h2>
               </div>
-              <div style={{ padding:"0 32px 32px", flex: 1, display: "flex", flexDirection: "column" }}>
+              <p className="ssub" style={{ marginBottom: "24px", minHeight: "44px" }}>
+                Get a personalized BGMI account based on your exact budget and preferences.
+              </p>
+
+              <div style={{ background: "var(--card)", border: "1px solid rgba(255,215,0,0.15)", borderRadius: "18px", padding: "32px", marginBottom: "24px", flex: 1, display: "flex", flexDirection: "column" }}>
                 <ol className="steps-list" style={{ flex: 1 }}>
-                  <li><div className="step-text">📝 <strong>Share Specs</strong><small>Tell us your requirements and budget.</small></div></li>
-                  <li><div className="step-text">💰 <strong>Advance Pay</strong><small>Small deposit to start the custom search.</small></div></li>
-                  <li><div className="step-text">🔍 <strong>We Find It</strong><small>We scan the market to find your perfect match.</small></div></li>
-                  <li><div className="step-text">✅ <strong>Finalize</strong><small>Pay the balance and get your custom account.</small></div></li>
+                  {[
+                    [<Target size={16} />, "Share Requirements & Budget", "Tell us exactly what you need."],
+                    [<Banknote size={16} />, "Pay Advance (₹500 - ₹1000)", "Wait 24-48 hours for our search results."],
+                    [<Gamepad2 size={16} />, "Review the Options", "We find the best accounts matching your specs."],
+                    [<MessageCircle size={16} />, "Finalize & Book", "Talk with us to lock your choice with 10%."],
+                    [<Banknote size={16} />, "Pay the Remaining Balance", "Secure payment via any trusted method."],
+                    [<Shield size={16} />, "Secure Account Delivery", "Full access transferred to your own details."],
+                  ].map(([icon, title, desc], i) => (
+                    <li key={i}>
+                      <div className="step-text">
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--gold)", marginBottom: "2px" }}>
+                          {icon} <strong style={{ fontSize: "15px" }}>{title}</strong>
+                        </div>
+                        <small style={{ display: "block", color: "var(--muted)", fontSize: "12px" }}>{desc}</small>
+                      </div>
+                    </li>
+                  ))}
                 </ol>
-                <a href="https://wa.me/+919025391516?text=Hi!%20I%20have%20a%20custom%20BGMI%20account%20requirement." target="_blank" rel="noreferrer" className="btn btn-green" style={{ marginTop:"24px" }}>
-                  <MessageCircle size={16} style={{ marginRight: "8px" }} /> Share Requirements
+                <a href="https://wa.me/+919025391516?text=Hi!%20I%20have%20a%20custom%20BGMI%20account%20requirement." target="_blank" rel="noreferrer" className="btn btn-green" style={{ marginTop: "24px", width: "100%", justifyContent: "center" }}>
+                  <MessageCircle size={18} /> Request Custom Account →
                 </a>
               </div>
             </div>
@@ -144,7 +181,7 @@ export default function Buy() {
 
 
         {/* WHY TRUST US */}
-        <section className="section-alt">
+       <section className="section-alt">
           <h2 className="stitle" style={{ display:"flex", alignItems:"center", gap:"10px" }}>
             <Shield size={28} style={{ color:"var(--gold)" }} /> Why Trust Maddy Store?
           </h2>

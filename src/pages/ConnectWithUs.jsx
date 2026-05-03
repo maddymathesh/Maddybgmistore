@@ -36,14 +36,14 @@ const links = [
     Icon: WaIcon,
   },
   {
-    label: "WHATSAPP CHANNEL (PROOFS)",
+    label: "WHATSAPP CHANNEL",
     href: "https://whatsapp.com/channel/0029VaAqUqaInlqnZZteEl2x",
     bg: "bg-[#25D366]",
     glow: "rgba(37,211,102,0.45)",
     Icon: WaIcon,
   },
   {
-    label: "TELEGRAM CHANNEL (PROOFS)",
+    label: "TELEGRAM CHANNEL",
     href: "https://t.me/maddy_bgmistore",
     bg: "bg-[#229ED9]",
     glow: "rgba(34,158,217,0.45)",
@@ -71,33 +71,65 @@ export default function ConnectWithUs() {
       <Navbar />
       <div style={{ paddingTop: "102px" }}>
 
-        <main className="flex flex-col items-center justify-center px-5 pt-12 pb-24 w-full" style={{ minHeight: "95vh" }}>
-        {/* ── HEADING SECTION ─────────────────────────────────── */}
-        <div className="text-center mb-10 w-full max-w-2xl">
-          <p style={{ 
-            fontFamily: "var(--font-h)", fontSize: "12px", fontWeight: 900, 
-            letterSpacing: "3px", color: "#fff", textTransform: "uppercase", 
-            marginBottom: "12px", opacity: 0.9 
-          }}>
-            MADDY <span style={{ color: "var(--gold)" }}>BGMI STORE</span>
-          </p>
-          <h1 style={{
-            fontFamily: "var(--font-h)", fontSize: "clamp(36px, 6vw, 56px)",
-            fontWeight: 900, lineHeight: 1.1, marginBottom: "16px",
-            textShadow: "0 2px 20px rgba(0,0,0,0.5)",
-          }}>
-            Connect <span style={{ color: "#f97316" }}>With Us</span>
-          </h1>
-          <p style={{
-            color: "var(--muted)", fontSize: "clamp(14px, 2vw, 16px)",
-            margin: "0 auto",
-          }}>
-            Join our official channels for the latest listings, updates and proofs.
-          </p>
-        </div>
+        {/* ── HERO BANNER ─────────────────────────────────── */}
+        <section style={{
+          position: "relative", width: "100%",
+          minHeight: "95vh",
+          overflow: "hidden", display: "flex",
+          alignItems: "center", justifyContent: "center",
+          flexDirection: "column",
+        }}>
+          {/* Background image */}
+          <img
+            src="/connect-banner.jpg"
+            alt="BGMI Community Connect" loading="lazy" decoding="async"
+            style={{
+              position: "absolute", inset: 0,
+              width: "100%", height: "100%",
+              objectFit: "cover", objectPosition: "center 40%",
+              filter: "brightness(0.6)",
+            }}
+          />
+          {/* Gradient overlays — top + bottom fade */}
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "linear-gradient(to bottom, rgba(8,10,15,0.55) 0%, transparent 35%, transparent 55%, rgba(8,10,15,0.95) 100%)",
+          }} />
+          {/* Subtle vignette */}
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "radial-gradient(ellipse at center, rgba(255,215,0,0.04) 0%, transparent 60%)",
+          }} />
 
-        {/* ── BUTTONS ─────────────────────────────────────────── */}
-        <div className="w-full max-w-[460px] flex flex-col gap-4">
+          {/* HEADING SECTION CONTENT */}
+          <div className="text-center mb-10 w-full max-w-2xl px-5" style={{ position: "relative", zIndex: 2 }}>
+            <p className="badge" style={{ marginBottom: "20px" }}>
+              MADDY <span style={{ color: "var(--gold)", marginLeft: "4px" }}>BGMI STORE</span>
+            </p>
+            <h1 style={{
+              fontFamily: "var(--font-h)", fontSize: "clamp(36px, 6vw, 68px)",
+              fontWeight: 900, lineHeight: 1.1, marginBottom: "16px",
+              textShadow: "0 2px 20px rgba(0,0,0,0.7)",
+            }}>
+              Connect <span style={{ color: "var(--gold)" }}>With Us</span>
+            </h1>
+            <p style={{
+              color: "rgba(234,234,234,0.9)", fontSize: "clamp(15px, 2vw, 19px)",
+              maxWidth: "520px", margin: "20px auto", lineHeight: 1.6,
+              textShadow: "0 1px 10px rgba(0,0,0,0.5)",
+            }}>
+              Join our official channels for the latest listings, exclusive updates, and successful deal proofs.
+            </p>
+          </div>
+
+          {/* ── BUTTONS ─────────────────────────────────────────── */}
+          <div className="w-full max-w-[500px] gap-4 px-5"
+            style={{ 
+              position: "relative", zIndex: 2, 
+              display: "grid", 
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))" 
+            }}
+          >
           {links.map(({ label, href, bg, glow, Icon }) => (
             <a
               key={label}
@@ -106,13 +138,18 @@ export default function ConnectWithUs() {
               rel="noreferrer"
               className={`
                 ${bg}
-                flex items-center justify-center gap-3
-                w-full h-[62px] rounded-xl
+                 gap-3
+               h-[62px] rounded-xl
                 text-white font-black text-[13px] tracking-[1.5px] uppercase
                 transition-all duration-200
                 hover:scale-[1.02] hover:brightness-110 active:scale-95
               `}
               style={{
+                // width: "60%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "0 30px",
                 fontFamily: "var(--font-h)",
                 boxShadow: `0 8px 24px ${glow}`,
               }}
@@ -121,19 +158,8 @@ export default function ConnectWithUs() {
               {label}
             </a>
           ))}
-        </div>
-      </main>
-
-      {/* ── Floating WhatsApp ── */}
-      <a
-        href="https://wa.me/+919025391516"
-        target="_blank"
-        rel="noreferrer"
-        className="fixed bottom-7 right-7 z-50 w-14 h-14 bg-[#25D366] rounded-full flex items-center justify-center hover:scale-110 active:scale-95 transition-transform"
-        style={{ boxShadow: "0 4px 20px rgba(37,211,102,0.5)" }}
-      >
-        <WaIcon />
-      </a>
+          </div>
+        </section>
 
       </div>
       <Footer />

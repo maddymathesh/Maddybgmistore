@@ -110,7 +110,7 @@ export default function Reviews() {
           <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 60%, rgba(255,165,0,0.08) 0%, transparent 55%)" }} />
 
           <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "0 5%", maxWidth: "740px" }}>
-            <div className="badge" style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "16px", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
+            <div className="badge" style={{ marginBottom: "20px" }}>
               <Star size={13} fill="var(--gold)" color="var(--gold)" /> Trusted Community
             </div>
             <h1 style={{
@@ -234,6 +234,7 @@ export default function Reviews() {
             </>
           )}
         </section>
+
 
       </div>
       <Footer />

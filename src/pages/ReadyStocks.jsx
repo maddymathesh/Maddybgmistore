@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { Search, Lock, Link2, MessageCircle, CheckCircle, ShoppingBag, Banknote } from "lucide-react";
+import { Search, Lock, Link2, MessageCircle, CheckCircle, ShoppingBag, Banknote, ShoppingCart } from "lucide-react";
 
 // ── YouTube embed helper ──────────────────────────────────────
 function getEmbed(url) {
@@ -169,20 +169,46 @@ export default function ReadyStocks() {
       <Navbar />
       <div style={{ paddingTop: "102px" }}>
 
-        {/* ── HEADER ──────────────────────────────── */}
-        <section className="section" style={{ minHeight: "95vh", paddingBottom: "24px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px", flexWrap: "wrap" }}>
-            <span style={{ background: "linear-gradient(135deg,#3b82f6,#6366f1)", color: "#fff", fontSize: "11px", fontWeight: 700, padding: "4px 12px", borderRadius: "100px", fontFamily: "var(--font-h)", letterSpacing: "1px", display: "inline-flex", alignItems: "center", gap: "5px" }}>
-              ⭐ OPTION 1
-            </span>
-            <h1 className="stitle" style={{ fontSize: "clamp(22px,4vw,36px)", margin: 0 }}>
-              Ready Secured Accounts{" "}
-              <span style={{ fontSize: "16px", color: "var(--muted)", fontFamily: "var(--font-body)", fontWeight: 400 }}>(Buy Instantly)</span>
+        {/* ── CINEMATIC HERO ──────────────────────────────── */}
+        <section style={{
+          position: "relative", width: "100%",
+          minHeight: "95vh",
+          overflow: "hidden", display: "flex",
+          alignItems: "center", justifyContent: "center",
+        }}>
+          <img
+            src="/ready-stocks-banner.png"
+            alt="BGMI Premium Accounts" loading="lazy" decoding="async"
+            style={{
+              position: "absolute", inset: 0, width: "100%", height: "100%",
+              objectFit: "cover", objectPosition: "top",
+              filter: "brightness(0.55) contrast(1.1)",
+            }}
+          />
+          {/* Gradient Overlays */}
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(8,10,15,0.4) 0%, transparent 40%, transparent 60%, rgba(8,10,15,0.98) 100%)" }} />
+          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 30% 50%, rgba(255,215,0,0.06) 0%, transparent 60%)" }} />
+
+          <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "0 5%", maxWidth: "820px" }}>
+            <div className="badge" style={{ marginBottom: "20px" }}>
+              <ShoppingCart size={14} /> LIVE INVENTORY
+            </div>
+            <h1 style={{
+              fontFamily: "var(--font-h)", fontSize: "clamp(34px, 6vw, 72px)",
+              fontWeight: 900, lineHeight: 1, marginBottom: "18px",
+              textShadow: "0 4px 30px rgba(0,0,0,0.8)",
+            }}>
+              Ready To Play <br />
+              <span className="g">Accounts</span>
             </h1>
+            <p style={{
+              color: "rgba(234,234,234,0.9)", fontSize: "clamp(24px, 1.8vw, 28px)",
+              maxWidth: "580px", margin: "0 auto", lineHeight: 1.6,
+              textShadow: "0 2px 10px rgba(0,0,0,0.5)",
+            }}>
+              Browse South India's most trusted inventory. Verified logins, instant access, and the best prices guaranteed.
+            </p>
           </div>
-          <p className="ssub" style={{ margin: "0" }}>
-            Browse our available premium accounts. New listings posted regularly on our official channels.
-          </p>
         </section>
 
         {/* ── 1. SEARCH BAR ───────────────────────── */}

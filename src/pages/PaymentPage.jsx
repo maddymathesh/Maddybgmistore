@@ -146,12 +146,7 @@ export default function SecurePay() {
                   onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(66,133,244,0.35)"; }}
                   onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.25)"; }}>
                     {/* Google Pay Logo */}
-                    <svg width="38" height="24" viewBox="0 0 38 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <text x="0" y="18" fontFamily="Arial" fontWeight="700" fontSize="16" fill="#4285F4">G</text>
-                      <text x="11" y="18" fontFamily="Arial" fontWeight="700" fontSize="16" fill="#EA4335">P</text>
-                      <text x="21" y="18" fontFamily="Arial" fontWeight="700" fontSize="16" fill="#4285F4">a</text>
-                      <text x="29" y="18" fontFamily="Arial" fontWeight="700" fontSize="16" fill="#34A853">y</text>
-                    </svg>
+                    <img src="/gpay-logo.svg" alt="Google Pay" style={{ width: "38px", height: "38px", objectFit: "contain", background: "#fff", borderRadius: "8px", padding: "4px" }} />
                     <div style={{ textAlign: "left" }}>
                       <div style={{ fontSize: "13px", color: "#888", fontWeight: 500, lineHeight: 1 }}>Pay with</div>
                       <div style={{ fontSize: "16px", fontWeight: 700, color: "#3c4043", lineHeight: 1.4 }}>Google Pay</div>
@@ -171,13 +166,7 @@ export default function SecurePay() {
                   onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(95,37,159,0.55)"; }}
                   onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 12px rgba(95,37,159,0.35)"; }}>
                     {/* PhonePe Logo Icon */}
-                    <div style={{ width: "38px", height: "38px", background: "#fff", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <svg width="24" height="24" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="20" cy="20" r="20" fill="#5f259f"/>
-                        <path d="M14 12h7.5a6.5 6.5 0 0 1 0 13H18v7l-4-4V12z" fill="#fff"/>
-                        <circle cx="21.5" cy="18.5" r="2.5" fill="#5f259f"/>
-                      </svg>
-                    </div>
+                    <img src="/phonepe-logo.svg" alt="PhonePe" style={{ width: "38px", height: "38px", objectFit: "contain", background: "#fff", borderRadius: "8px" }} />
                     <div style={{ textAlign: "left" }}>
                       <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.7)", fontWeight: 500, lineHeight: 1 }}>Pay with</div>
                       <div style={{ fontSize: "16px", fontWeight: 700, lineHeight: 1.4 }}>PhonePe</div>
@@ -197,12 +186,7 @@ export default function SecurePay() {
                   onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,185,241,0.5)"; }}
                   onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,185,241,0.25)"; }}>
                     {/* Paytm Logo */}
-                    <div style={{ width: "38px", height: "38px", background: "#fff", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, padding: "3px" }}>
-                      <svg viewBox="0 0 60 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="34">
-                        <text x="0" y="16" fontFamily="Arial" fontWeight="900" fontSize="16" fill="#002970">Pay</text>
-                        <text x="28" y="16" fontFamily="Arial" fontWeight="900" fontSize="16" fill="#00b9f1">tm</text>
-                      </svg>
-                    </div>
+                    <img src="/paytm-logo.svg" alt="Paytm" style={{ width: "38px", height: "38px", objectFit: "contain", background: "#fff", borderRadius: "8px", padding: "4px" }} />
                     <div style={{ textAlign: "left" }}>
                       <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.7)", fontWeight: 500, lineHeight: 1 }}>Pay with</div>
                       <div style={{ fontSize: "16px", fontWeight: 700, lineHeight: 1.4 }}>Paytm</div>
@@ -223,14 +207,7 @@ export default function SecurePay() {
                   onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(255,215,0,0.15)"; }}
                   onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.3)"; }}>
                     {/* UPI Logo */}
-                    <div style={{ width: "38px", height: "38px", background: "rgba(255,215,0,0.1)", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, border: "1px solid rgba(255,215,0,0.2)" }}>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="3" y="6" width="18" height="13" rx="2" stroke="#FFD700" strokeWidth="1.5"/>
-                        <path d="M3 10h18" stroke="#FFD700" strokeWidth="1.5"/>
-                        <path d="M7 15h4" stroke="#FFD700" strokeWidth="1.5" strokeLinecap="round"/>
-                        <circle cx="17" cy="15" r="1.5" fill="#FFD700"/>
-                      </svg>
-                    </div>
+                    <img src="/upi-logo.svg" alt="UPI" style={{ width: "38px", height: "38px", objectFit: "contain", background: "#fff", borderRadius: "8px", padding: "4px" }} />
                     <div style={{ textAlign: "left" }}>
                       <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.5)", fontWeight: 500, lineHeight: 1 }}>Open any</div>
                       <div style={{ fontSize: "16px", fontWeight: 700, lineHeight: 1.4, color: "var(--gold)" }}>Other UPI App</div>

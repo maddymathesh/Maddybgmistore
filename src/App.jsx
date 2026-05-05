@@ -15,7 +15,7 @@ const ConnectWithUs = lazy(() => import("./pages/ConnectWithUs"));
 const ReadyStocks   = lazy(() => import("./pages/ReadyStocks"));
 const Login         = lazy(() => import("./pages/Login"));
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
-const SecurePay     = lazy(() => import("./pages/SecurePay"));
+const PaymentPage   = lazy(() => import("./pages/PaymentPage"));
 
 // Minimal full-screen loading state
 function ScrollToTop() {
@@ -72,7 +72,7 @@ export default function App() {
           <Route path="/connectwithus" element={<ConnectWithUs />} />
           <Route path="/readystocks"  element={<ReadyStocks />} />
           <Route path="/login"        element={<Login />} />
-          <Route path="/secure-pay"   element={<SecurePay />} />
+          <Route path="/secure-pay"   element={<PaymentPage />} />
 
           {/* Admin - Firebase protected */}
           <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />

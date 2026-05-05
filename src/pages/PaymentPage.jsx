@@ -8,10 +8,26 @@ import {
   AlertTriangle, CreditCard, ChevronDown, ChevronUp, Lock
 } from "lucide-react";
 
-export default function SecurePay() {
+export default function PaymentPage() {
   const { user } = useAuth();
   const [showBank, setShowBank] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  // PIN Protection State
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [pin, setPin] = useState("");
+  const [error, setError] = useState("");
+
+  const handleUnlock = (e) => {
+    e.preventDefault();
+    if (pin === "7777") {
+      setIsUnlocked(true);
+      setError("");
+    } else {
+      setError("Incorrect PIN. Please try again.");
+      setPin("");
+    }
+  };
 
   const handleCopyUpi = () => {
     navigator.clipboard.writeText(upiId).then(() => {
@@ -64,9 +80,70 @@ export default function SecurePay() {
             }} />
 
             <div style={{ position: "relative", zIndex: 1 }}>
-              <div style={{ display: "inline-flex", background: "rgba(34,197,94,0.1)", padding: "12px", borderRadius: "50%", marginBottom: "16px" }}>
-                <ShieldCheck size={32} color="#22c55e" />
-              </div>
+              {!isUnlocked ? (
+                // --- PIN ENTRY SCREEN ---
+                <div style={{ padding: "20px 0" }}>
+                  <div style={{ display: "inline-flex", background: "rgba(255,215,0,0.1)", padding: "16px", borderRadius: "50%", marginBottom: "20px" }}>
+                    <Lock size={36} color="var(--gold)" />
+                  </div>
+                  <h1 style={{ fontFamily: "var(--font-h)", fontSize: "24px", marginBottom: "8px", color: "#fff" }}>Secured Payment page</h1>
+                  <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "14px", marginBottom: "24px" }}>
+                    Please enter the PIN provided by admin to access the payment details.
+                  </p>
+                  
+                  <form onSubmit={handleUnlock} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
+                    <input 
+                      type="password"
+                      maxLength={6}
+                      placeholder="Enter PIN"
+                      value={pin}
+                      onChange={(e) => setPin(e.target.value)}
+                      style={{
+                        background: "rgba(255,255,255,0.05)",
+                        border: "1px solid rgba(255,215,0,0.3)",
+                        padding: "14px 20px",
+                        borderRadius: "10px",
+                        color: "#fff",
+                        fontSize: "20px",
+                        textAlign: "center",
+                        letterSpacing: "4px",
+                        width: "200px",
+                        outline: "none",
+                        transition: "border-color 0.2s"
+                      }}
+                      autoFocus
+                    />
+                    {error && <div style={{ color: "#ef4444", fontSize: "13px", fontWeight: "600" }}>{error}</div>}
+                    
+                    <button 
+                      type="submit"
+                      style={{
+                        background: "var(--gold)",
+                        color: "#000",
+                        fontWeight: "700",
+                        padding: "14px 32px",
+                        borderRadius: "10px",
+                        border: "none",
+                        cursor: "pointer",
+                        fontSize: "15px",
+                        marginTop: "8px",
+                        width: "200px",
+                        boxShadow: "0 4px 14px rgba(255,215,0,0.3)",
+                        transition: "transform 0.2s"
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-2px)"}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
+                    >
+                      Unlock
+                    </button>
+                  </form>
+                </div>
+              ) : (
+                // --- PAYMENT DETAILS SCREEN ---
+                <>
+                  <div style={{ display: "inline-flex", background: "rgba(34,197,94,0.1)", padding: "12px", borderRadius: "50%", marginBottom: "16px" }}>
+                    <ShieldCheck size={32} color="#22c55e" />
+                  </div>
               <h1 style={{ fontFamily: "var(--font-h)", fontSize: "28px", marginBottom: "8px", color: "#fff" }}>Secure Checkout</h1>
               <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "14px", marginBottom: "30px" }}>
                 Scan the QR code or click a button below to complete your payment securely.
@@ -312,6 +389,8 @@ export default function SecurePay() {
                   </div>
                 </div>
               </div>
+                </>
+              )}
             </div>
           </div>
         </div>

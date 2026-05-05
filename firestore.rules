@@ -46,6 +46,14 @@ service cloud.firestore {
       allow create: if request.auth != null;
     }
 
+    // ── payment_links collection ───────────────────────────────
+    // Public: anyone can read to verify payment link validity
+    // Write: only admins can create/update/delete payment links
+    match /payment_links/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // ── Deny all other collections by default ──────────────────
     match /{document=**} {
       allow read, write: if false;

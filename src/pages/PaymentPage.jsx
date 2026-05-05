@@ -1,31 +1,81 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useAuth } from "../context/AuthContext";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase";
 import { 
   ShieldCheck, CheckCircle, Copy,
-  AlertTriangle, CreditCard, ChevronDown, ChevronUp, Lock
+  AlertTriangle, CreditCard, ChevronDown, ChevronUp, Lock, XCircle
 } from "lucide-react";
 
 export default function PaymentPage() {
   const { user } = useAuth();
+  const { paymentId } = useParams();
+
+  const [isValidLink, setIsValidLink] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [paymentData, setPaymentData] = useState(null);
+
   const [showBank, setShowBank] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // PIN Protection State
+  // PIN Protection State for Page
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
 
+  // PIN Protection State for Bank Details
+  const [bankUnlocked, setBankUnlocked] = useState(false);
+  const [bankPin, setBankPin] = useState("");
+  const [bankError, setBankError] = useState("");
+
+  useEffect(() => {
+    const checkLink = async () => {
+      if (!paymentId) {
+        setIsValidLink(false);
+        setLoading(false);
+        return;
+      }
+      try {
+        const docRef = doc(db, "payment_links", paymentId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists() && docSnap.data().status === "active") {
+          setPaymentData(docSnap.data());
+          setIsValidLink(true);
+        } else {
+          setIsValidLink(false);
+        }
+      } catch (err) {
+        console.error("Error fetching payment link:", err);
+        setIsValidLink(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkLink();
+  }, [paymentId]);
+
   const handleUnlock = (e) => {
     e.preventDefault();
-    if (pin === "7777") {
+    if (pin === "9025") {
       setIsUnlocked(true);
       setError("");
     } else {
       setError("Incorrect PIN. Please try again.");
       setPin("");
+    }
+  };
+
+  const handleBankUnlock = (e) => {
+    e.preventDefault();
+    if (bankPin === "1516") {
+      setBankUnlocked(true);
+      setBankError("");
+    } else {
+      setBankError("Incorrect PIN.");
+      setBankPin("");
     }
   };
 
@@ -36,9 +86,26 @@ export default function PaymentPage() {
     });
   };
 
-  // User Specific Details
-  const upiId = "maddyxpay@ybl";
-  const payeeName = "MATHESHWARAN R";
+  // Secure dynamic loading via client-side obfuscation
+  const encryptedUpi = paymentData?.encryptedUpi || "VFFWUUBIQlRAcEtXVQ==";
+  const encryptedName = paymentData?.encryptedName || "dHFmfXxjemJ4YnN7GWI=";
+
+  const decrypt = (base64, key) => {
+    try {
+      const text = atob(base64);
+      let result = "";
+      for (let i = 0; i < text.length; i++) {
+        result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+      }
+      return result;
+    } catch {
+      return "";
+    }
+  };
+
+  // User Specific Details (Dynamically Decrypted)
+  const upiId = isUnlocked ? decrypt(encryptedUpi, pin) : "";
+  const payeeName = isUnlocked ? decrypt(encryptedName, pin) : "";
   const currency = "INR";
   
   // Base UPI Link
@@ -48,6 +115,41 @@ export default function PaymentPage() {
   const gpayLink = `gpay://upi/pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&cu=${currency}`;
   const phonepeLink = `phonepe://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&cu=${currency}`;
   const paytmLink = `paytmmp://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&cu=${currency}`;
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div style={{ paddingTop: "84px", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#080a0f", color: "#fff" }}>
+          Loading secure payment gateway...
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (!isValidLink) {
+    return (
+      <>
+        <Navbar />
+        <div style={{ paddingTop: "84px", minHeight: "100vh", display: "flex", flexDirection: "column", background: "#080a0f" }}>
+          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px" }}>
+            <div style={{ background: "var(--card)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: "16px", padding: "40px 30px", maxWidth: "500px", width: "100%", textAlign: "center" }}>
+              <div style={{ display: "inline-flex", background: "rgba(239,68,68,0.1)", padding: "16px", borderRadius: "50%", marginBottom: "20px" }}>
+                <XCircle size={36} color="#ef4444" />
+              </div>
+              <h1 style={{ fontFamily: "var(--font-h)", fontSize: "24px", marginBottom: "8px", color: "#fff" }}>Link Invalid or Expired</h1>
+              <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "14px", marginBottom: "24px" }}>
+                This payment link is no longer active. Please contact support for a new link.
+              </p>
+              <Link to="/connectwithus" className="btn btn-gold" style={{ display: "inline-block", padding: "12px 24px" }}>Contact Support</Link>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
@@ -318,7 +420,38 @@ export default function PaymentPage() {
                     background: "rgba(10,12,20,0.6)", border: "1px solid rgba(255,215,0,0.15)",
                     textAlign: "left", animation: "slideDown 0.3s ease-out"
                   }}>
-                    {user ? (
+                    {!bankUnlocked ? (
+                      <form onSubmit={handleBankUnlock} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", padding: "10px 0" }}>
+                        <Lock size={24} color="rgba(255,255,255,0.3)" style={{ marginBottom: "4px" }} />
+                        <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.6)", marginBottom: "8px", textAlign: "center" }}>
+                          Enter the secondary PIN to unlock bank details.
+                        </p>
+                        <input 
+                          type="password"
+                          maxLength={4}
+                          placeholder="Bank PIN"
+                          value={bankPin}
+                          onChange={(e) => setBankPin(e.target.value)}
+                          style={{
+                            background: "rgba(255,255,255,0.05)",
+                            border: "1px solid rgba(255,215,0,0.3)",
+                            padding: "10px 16px",
+                            borderRadius: "8px",
+                            color: "#fff",
+                            fontSize: "16px",
+                            textAlign: "center",
+                            letterSpacing: "4px",
+                            width: "160px",
+                            outline: "none"
+                          }}
+                          autoFocus
+                        />
+                        {bankError && <div style={{ color: "#ef4444", fontSize: "12px", fontWeight: "600" }}>{bankError}</div>}
+                        <button type="submit" className="btn btn-gold" style={{ padding: "8px 24px", fontSize: "13px" }}>
+                          Unlock Bank Details
+                        </button>
+                      </form>
+                    ) : (
                       <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                         <div>
                           <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", textTransform: "uppercase" }}>Bank Name</div>
@@ -344,20 +477,6 @@ export default function PaymentPage() {
                           <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", textTransform: "uppercase" }}>Branch</div>
                           <div style={{ fontSize: "14px", fontWeight: "600", color: "#fff" }}>Alagusenai</div>
                         </div>
-                      </div>
-                    ) : (
-                      <div style={{ textAlign: "center", padding: "10px 0" }}>
-                        <Lock size={24} color="rgba(255,255,255,0.3)" style={{ marginBottom: "12px" }} />
-                        <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.6)", marginBottom: "16px" }}>
-                          Login required to view bank transfer details for security.
-                        </p>
-                        <Link to="/login" style={{
-                          display: "inline-block", padding: "8px 24px", borderRadius: "6px",
-                          background: "var(--gold)", color: "#000", fontWeight: "700",
-                          textDecoration: "none", fontSize: "13px"
-                        }}>
-                          Login Now
-                        </Link>
                       </div>
                     )}
                   </div>

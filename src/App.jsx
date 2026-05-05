@@ -72,7 +72,7 @@ export default function App() {
           <Route path="/connectwithus" element={<ConnectWithUs />} />
           <Route path="/readystocks"  element={<ReadyStocks />} />
           <Route path="/login"        element={<Login />} />
-          <Route path="/secure-pay"   element={<PaymentPage />} />
+          <Route path="/pay/:paymentId" element={<PaymentPage />} />
 
           {/* Admin - Firebase protected */}
           <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />

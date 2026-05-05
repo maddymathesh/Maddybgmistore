@@ -164,7 +164,11 @@ export default function ReviewForm({ onReviewAdded }) {
         maxWidth: "600px",
         margin: "0 auto",
         textAlign: "center",
-        boxShadow: "0 10px 30px rgba(0,0,0,0.5)"
+        boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center"
       }}>
         <h3 style={{ fontFamily: "var(--font-h)", fontSize: "22px", fontWeight: 700, marginBottom: "16px" }}>
           Write a Review
@@ -187,7 +191,11 @@ export default function ReviewForm({ onReviewAdded }) {
       padding: "28px 24px",
       maxWidth: "600px",
       margin: "0 auto",
-      boxShadow: "0 10px 30px rgba(0,0,0,0.5)"
+      boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+      height: "100%",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center"
     }}>
       <h3 style={{ fontFamily: "var(--font-h)", fontSize: "22px", fontWeight: 700, marginBottom: "16px" }}>
         Write a Review

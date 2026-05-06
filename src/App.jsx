@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { ReactLenis } from "lenis/react";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -15,7 +15,9 @@ const Reviews = lazy(() => import("./pages/Reviews"));
 const ConnectWithUs = lazy(() => import("./pages/ConnectWithUs"));
 const ReadyStocks = lazy(() => import("./pages/ReadyStocks"));
 const Login = lazy(() => import("./pages/Login"));
+const PaymentPage=lazy(()=>import("./pages/PaymentPage"));
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
+const PageNotFound = lazy(() => import("./pages/PageNotFound"));
 
 // Scroll to top on route change
 function ScrollToTop() {
@@ -26,6 +28,15 @@ function ScrollToTop() {
   }, [pathname]);
 
   return null;
+}
+
+function DefaultLayout() {
+  return (
+    <>
+      <Outlet />
+      <ScrollDownIndicator />
+    </>
+  );
 }
 
 // Loader (kept same)
@@ -79,67 +90,89 @@ export default function App() {
         }}
       />
 
-      <ScrollDownIndicator />
       <WhatsAppFloat />
 
       <Routes>
-        {/* Each route has its own Suspense */}
-        <Route
-          path="/"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <Home />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/buy"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <Buy />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/sell"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <Sell />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/recovery"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <Recovery />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/reviews"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <Reviews />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/connectwithus"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <ConnectWithUs />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/readystocks"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <ReadyStocks />
-            </Suspense>
-          }
-        />
+        <Route element={<DefaultLayout />}>
+          <Route
+            path="/"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <Home />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/buy"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <Buy />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/sell"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <Sell />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/recovery"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <Recovery />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/reviews"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <Reviews />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/connectwithus"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <ConnectWithUs />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/readystocks"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <ReadyStocks />
+              </Suspense>
+            }
+          />
+
+              <Route
+            path="/pay/:paymentId"
+            element={
+              <Suspense fallback={ <PageLoader />}>
+                <PaymentPage />
+              </Suspense>
+            }
+          />
+
+          {/* Protected route */}
+          <Route
+            path="/admin"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              </Suspense>
+            }
+          />
+        </Route>
+
         <Route
           path="/login"
           element={
@@ -148,15 +181,11 @@ export default function App() {
             </Suspense>
           }
         />
-
-        {/* Protected route */}
         <Route
-          path="/admin"
+          path="*"
           element={
             <Suspense fallback={<PageLoader />}>
-              <ProtectedRoute>
-                <AdminDashboard />
-              </ProtectedRoute>
+              <PageNotFound />
             </Suspense>
           }
         />

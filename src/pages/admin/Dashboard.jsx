@@ -19,7 +19,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Navbar from "../../components/Navbar";
-import { LogOut, Plus, Trash2, Pencil, Star } from "lucide-react";
+import { LogOut, Plus, Trash2, Pencil, Star, Copy } from "lucide-react";
 
 // ── Shared label style ────────────────────────────────────────
 const ls = {
@@ -60,6 +60,10 @@ export default function AdminDashboard() {
   const [reviewForm, setReviewForm] = useState(EMPTY_REVIEW);
   const [savingReview, setSavingReview] = useState(false);
 
+  // ── Payment Links state ───────────────────────────────────
+  const [paymentLinks, setPaymentLinks] = useState([]);
+  const [generatingLink, setGeneratingLink] = useState(false);
+
   // ── Real-time listeners ────────────────────────────────────
   useEffect(() => {
     const q1 = query(collection(db, "products"), orderBy("createdAt", "desc"));
@@ -72,7 +76,12 @@ export default function AdminDashboard() {
       setReviews(snap.docs.map(d => ({ id: d.id, ...d.data() })))
     );
 
-    return () => { u1(); u2(); };
+    const q3 = query(collection(db, "payment_links"), orderBy("createdAt", "desc"));
+    const u3 = onSnapshot(q3, snap =>
+      setPaymentLinks(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+    );
+
+    return () => { u1(); u2(); u3(); };
   }, []);
 
   // Guard: redirect non-admins
@@ -166,6 +175,44 @@ export default function AdminDashboard() {
     } catch (e) { toast.error(e.message); }
   };
 
+  // ── Payment Links CRUD ─────────────────────────────────────
+  const generatePaymentLink = async () => {
+    setGeneratingLink(true);
+    try {
+      await addDoc(collection(db, "payment_links"), {
+        encryptedUpi: "VFFWUUBIQlRAcEtXVQ==",
+        encryptedName: "dHFmfXxjemJ4YnN7GWI=",
+        status: "active",
+        createdAt: serverTimestamp(),
+      });
+      toast.success("Payment link generated!");
+    } catch (e) {
+      toast.error(e.message);
+    } finally {
+      setGeneratingLink(false);
+    }
+  };
+
+  const copyPaymentLink = (id) => {
+    const url = `${window.location.origin}/pay/${id}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Link copied!");
+  };
+
+  const togglePaymentLinkStatus = async (id, current) => {
+    const next = current === "active" ? "revoked" : "active";
+    await updateDoc(doc(db, "payment_links", id), { status: next });
+    toast.success(`Link marked as ${next}`);
+  };
+
+  const deletePaymentLink = async (id) => {
+    if (!confirm("Delete this link?")) return;
+    try {
+      await deleteDoc(doc(db, "payment_links", id));
+      toast.success("Deleted!");
+    } catch (e) { toast.error(e.message); }
+  };
+
   // ── Render ─────────────────────────────────────────────────
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
@@ -191,8 +238,8 @@ export default function AdminDashboard() {
         </div>
 
         {/* ── Tabs ── */}
-        <div style={{ display: "flex", gap: "4px", marginBottom: "28px", borderBottom: "1px solid rgba(255,215,0,0.15)" }}>
-          {[["products", "Manage Products"], ["reviews", "Manage Reviews"]].map(([key, label]) => (
+        <div style={{ display: "flex", gap: "4px", marginBottom: "28px", borderBottom: "1px solid rgba(255,215,0,0.15)", overflowX: "auto" }}>
+          {[["products", "Manage Products"], ["reviews", "Manage Reviews"], ["payments", "Payment Links"]].map(([key, label]) => (
             <button key={key} onClick={() => setTab(key)}
               style={{
                 padding: "10px 24px", fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "12px",
@@ -397,6 +444,54 @@ export default function AdminDashboard() {
                     style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: "6px", padding: "6px 8px", cursor: "pointer", color: "#ef4444", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <Trash2 size={13} />
                   </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════ PAYMENTS TAB ═══════════ */}
+        {tab === "payments" && (
+          <div style={{ background: "var(--card)", border: "1px solid rgba(255,215,0,0.18)", borderRadius: "14px", padding: "24px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <Plus size={18} style={{ color: "var(--gold)" }} />
+                <span style={{ fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "16px" }}>Dynamic Payment Links</span>
+              </div>
+              <button onClick={generatePaymentLink} disabled={generatingLink} className="btn btn-gold" style={{ fontFamily: "var(--font-h)", fontWeight: 700, padding: "10px 20px" }}>
+                {generatingLink ? "Generating..." : "Generate Payment Page"}
+              </button>
+            </div>
+            
+            <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,215,0,0.1)", borderRadius: "10px", overflow: "hidden" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 100px 150px 100px", gap: "8px", padding: "12px 20px", background: "rgba(255,215,0,0.04)", borderBottom: "1px solid rgba(255,215,0,0.12)" }}>
+                {["Link ID", "Status", "Created", "Actions"].map((h, i) => (
+                  <span key={h} style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: i === 0 ? "var(--muted)" : "var(--gold)" }}>{h}</span>
+                ))}
+              </div>
+              {paymentLinks.length === 0 ? (
+                <div style={{ padding: "60px", textAlign: "center", color: "var(--muted)", fontSize: "14px" }}>No active payment links.</div>
+              ) : paymentLinks.map((l, i) => (
+                <div key={l.id} style={{ display: "grid", gridTemplateColumns: "1fr 100px 150px 100px", gap: "8px", alignItems: "center", padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.04)", background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.02)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div style={{ fontWeight: 700, fontSize: "13px", color: "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{l.id}</div>
+                    <button onClick={() => copyPaymentLink(l.id)} style={{ background: "transparent", border: "none", color: "var(--gold)", cursor: "pointer", padding: "4px" }} title="Copy Link">
+                      <Copy size={14} />
+                    </button>
+                  </div>
+                  <button onClick={() => togglePaymentLinkStatus(l.id, l.status)}
+                    style={{ padding: "4px 10px", borderRadius: "100px", fontSize: "11px", fontWeight: 700, cursor: "pointer", border: "none", background: l.status === "active" ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.15)", color: l.status === "active" ? "#22C55E" : "#ef4444" }}>
+                    {l.status}
+                  </button>
+                  <div style={{ fontSize: "12px", color: "var(--muted)" }}>
+                    {l.createdAt ? new Date(l.createdAt.seconds * 1000).toLocaleDateString() : "Just now"}
+                  </div>
+                  <div style={{ display: "flex", gap: "6px" }}>
+                    <button onClick={() => deletePaymentLink(l.id)}
+                      style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: "6px", padding: "6px 8px", cursor: "pointer", color: "#ef4444" }}>
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

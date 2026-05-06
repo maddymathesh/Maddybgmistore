@@ -140,9 +140,14 @@ export default function ConnectWithUs() {
                 ${bg}
                 flex items-center justify-center gap-3 sm:gap-4
                 h-[56px] sm:h-[62px] rounded-xl
+<<<<<<< HEAD
                 text-white text-[16px] sm:text-[20px] tracking-[1px] sm:tracking-[1.5px] uppercase
                 transition-all duration-200
                 font-extrabold
+=======
+                text-white font-black text-[12px] sm:text-[13px] tracking-[1px] sm:tracking-[1.5px] uppercase
+                transition-all duration-200
+>>>>>>> 77e2c5b308d099845ea36e1c34fd68d2f67c1bef
                 hover:scale-[1.02] hover:brightness-110 active:scale-[0.98]
               `}
               style={{

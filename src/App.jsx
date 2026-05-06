@@ -1,53 +1,73 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import { ReactLenis } from "lenis/react";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollDownIndicator from "./components/ScrollDownIndicator";
 import WhatsAppFloat from "./components/WhatsAppFloat";
 
-// ── Lazy-loaded pages (code splitting per route) ─────────────
-const Home          = lazy(() => import("./pages/Home"));
-const Buy           = lazy(() => import("./pages/Buy"));
-const Sell          = lazy(() => import("./pages/Sell"));
-const Recovery      = lazy(() => import("./pages/Recovery"));
-const Reviews       = lazy(() => import("./pages/Reviews"));
+// ── Lazy-loaded pages ─────────────
+const Home = lazy(() => import("./pages/Home"));
+const Buy = lazy(() => import("./pages/Buy"));
+const Sell = lazy(() => import("./pages/Sell"));
+const Recovery = lazy(() => import("./pages/Recovery"));
+const Reviews = lazy(() => import("./pages/Reviews"));
 const ConnectWithUs = lazy(() => import("./pages/ConnectWithUs"));
-const ReadyStocks   = lazy(() => import("./pages/ReadyStocks"));
-const Login         = lazy(() => import("./pages/Login"));
+const ReadyStocks = lazy(() => import("./pages/ReadyStocks"));
+const Login = lazy(() => import("./pages/Login"));
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
 
-// Minimal full-screen loading state
+// Scroll to top on route change
 function ScrollToTop() {
   const { pathname } = useLocation();
-  // console.log(pathname)
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+
   return null;
 }
 
+// Loader (kept same)
 function PageLoader() {
   return (
-    <div style={{
-      minHeight: "100vh", display: "flex",
-      alignItems: "center", justifyContent: "center",
-      background: "#0a0c14",
-    }}>
-      <div style={{
-        width: "40px", height: "40px", borderRadius: "50%",
-        border: "3px solid rgba(255,215,0,0.15)",
-        borderTopColor: "#FFD700",
-        animation: "spin 0.7s linear infinite",
-      }} />
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#0a0c14",
+      }}
+    >
+      <div
+        style={{
+          width: "40px",
+          height: "40px",
+          borderRadius: "50%",
+          border: "3px solid rgba(255,215,0,0.15)",
+          borderTopColor: "#FFD700",
+          animation: "spin 0.7s linear infinite",
+        }}
+      />
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
 
 export default function App() {
-  return (
+  // Delay Lenis to avoid blocking initial render
+  const [enableSmooth, setEnableSmooth] = useState(false);
+
+  useEffect(() => {
+    setEnableSmooth(true);
+  }, []);
+
+  const AppContent = (
     <BrowserRouter>
       <ScrollToTop />
+
+      {/* Global UI (NOT blocked anymore) */}
       <Toaster
         position="top-right"
         toastOptions={{
@@ -58,25 +78,106 @@ export default function App() {
           },
         }}
       />
-      <Suspense fallback={<PageLoader />}>
-        <ScrollDownIndicator />
-        <WhatsAppFloat />
-        <Routes>
-          {/* Public Pages */}
-          <Route path="/"             element={<Home />} />
-          <Route path="/buy"          element={<Buy />} />
-          <Route path="/sell"         element={<Sell />} />
-          <Route path="/recovery"     element={<Recovery />} />
-          <Route path="/reviews"      element={<Reviews />} />
-          <Route path="/connectwithus" element={<ConnectWithUs />} />
-          <Route path="/readystocks"  element={<ReadyStocks />} />
-          <Route path="/login"        element={<Login />} />
 
-          {/* Admin - Firebase protected */}
-          <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-        </Routes>
-      </Suspense>
+      <ScrollDownIndicator />
+      <WhatsAppFloat />
+
+      <Routes>
+        {/* Each route has its own Suspense */}
+        <Route
+          path="/"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <Home />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/buy"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <Buy />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/sell"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <Sell />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/recovery"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <Recovery />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/reviews"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <Reviews />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/connectwithus"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <ConnectWithUs />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/readystocks"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <ReadyStocks />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <Login />
+            </Suspense>
+          }
+        />
+
+        {/* Protected route */}
+        <Route
+          path="/admin"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            </Suspense>
+          }
+        />
+      </Routes>
     </BrowserRouter>
   );
-}
 
+  // Apply Lenis only after initial render
+  return enableSmooth ? (
+    <ReactLenis
+      root
+      options={{
+        duration: 0.8,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        orientation: "vertical",
+        smoothWheel: true,
+      }}
+    >
+      {AppContent}
+    </ReactLenis>
+  ) : (
+    AppContent
+  );
+}

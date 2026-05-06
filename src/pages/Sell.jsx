@@ -17,7 +17,7 @@ export default function Sell() {
           alignItems: "center", justifyContent: "center",
         }}>
           <img
-            src="/sell-banner.jpg"
+            src="/sell-banner.webp"
             alt="BGMI Soldier in wheat field" loading="lazy" decoding="async"
             style={{
               position: "absolute", inset: 0, width: "100%", height: "100%",

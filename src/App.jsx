@@ -16,7 +16,6 @@ const ConnectWithUs = lazy(() => import("./pages/ConnectWithUs"));
 const ReadyStocks = lazy(() => import("./pages/ReadyStocks"));
 const Login = lazy(() => import("./pages/Login"));
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
-const PaymentPage   = lazy(() => import("./pages/PaymentPage"));
 
 // Scroll to top on route change
 function ScrollToTop() {
@@ -79,23 +78,6 @@ export default function App() {
           },
         }}
       />
-<<<<<<< HEAD
-=======
-      <Suspense fallback={<PageLoader />}>
-        <ScrollDownIndicator />
-        <WhatsAppFloat />
-        <Routes>
-          {/* Public Pages */}
-          <Route path="/"             element={<Home />} />
-          <Route path="/buy"          element={<Buy />} />
-          <Route path="/sell"         element={<Sell />} />
-          <Route path="/recovery"     element={<Recovery />} />
-          <Route path="/reviews"      element={<Reviews />} />
-          <Route path="/connectwithus" element={<ConnectWithUs />} />
-          <Route path="/readystocks"  element={<ReadyStocks />} />
-          <Route path="/login"        element={<Login />} />
-          <Route path="/pay/:paymentId" element={<PaymentPage />} />
->>>>>>> 77e2c5b308d099845ea36e1c34fd68d2f67c1bef
 
       <ScrollDownIndicator />
       <WhatsAppFloat />

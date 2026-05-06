@@ -15,6 +15,7 @@ const Reviews = lazy(() => import("./pages/Reviews"));
 const ConnectWithUs = lazy(() => import("./pages/ConnectWithUs"));
 const ReadyStocks = lazy(() => import("./pages/ReadyStocks"));
 const Login = lazy(() => import("./pages/Login"));
+const PaymentPage=lazy(()=>import("./pages/PaymentPage"));
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
 const PageNotFound = lazy(() => import("./pages/PageNotFound"));
 
@@ -149,6 +150,16 @@ export default function App() {
               </Suspense>
             }
           />
+
+              <Route
+            path="/pay/:paymentId"
+            element={
+              <Suspense fallback={ <PageLoader />}>
+                <PaymentPage />
+              </Suspense>
+            }
+          />
+
           {/* Protected route */}
           <Route
             path="/admin"

@@ -13,16 +13,6 @@ const navLinks = [
   { to: "/connectwithus", label: "Connect" },
 ];
 
-const tickerItems = [
-  "Safe & Verified Accounts",
-  "2000+ Happy Buyers",
-  "₹60 Lakhs+ Worth Sold",
-  "Secure Single Logins",
-  "UPI · Bank · USDT · Cash",
-  "Trusted Since 2019",
-  "Budget to Premium Range",
-  "Face-to-Face Deals Available",
-];
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -36,7 +26,6 @@ export default function Navbar() {
     navigate("/");
   };
 
-  const doubledTicker = [...tickerItems, ...tickerItems];
 
   return (
     <header style={headerStyle}>
@@ -102,17 +91,6 @@ export default function Navbar() {
         </button>
       </nav>
 
-      {/* Ticker integrated in Navbar */}
-      <div className="ticker-wrap">
-        <div className="ticker-inner">
-          {doubledTicker.map((item, i) => (
-            <span key={i} className="ticker-item" style={{ display: "inline-flex", alignItems: "center", gap: "12px" }}>
-              <img src="/logo.png" alt="" style={{ height: "16px", width: "auto", opacity: 0.8 }} />
-              {item}
-            </span>
-          ))}
-        </div>
-      </div>
 
       {open && (
         <div style={mobileMenuStyle}>

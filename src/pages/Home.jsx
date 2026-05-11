@@ -97,7 +97,7 @@ export default function Home() {
         <div style={{ position:"relative", zIndex:2, maxWidth:"820px", margin:"0 auto" }} className="fade-up">
           <div className="badge">South India's #1 Trusted BGMI Account Marketplace</div>
           <h1 style={{ fontFamily:"var(--font-h)", fontSize:"clamp(42px,8vw,92px)", fontWeight:700, lineHeight:1, letterSpacing:"2px", marginBottom:"22px" }}>
-            Your Dream<br /><span className="g">BGMI Account</span><br />Awaits
+            Your changed<br /><span className="g">BGMI Account</span><br />Awaits
           </h1>
           <p style={{ color:"var(--muted)", fontSize:"clamp(14px,2vw,17px)", maxWidth:"560px", margin:"0 auto 40px" }}>
             Buy and sell verified BGMI accounts safely — budget to premium. Trusted by 2000+ players since 2019.

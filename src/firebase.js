@@ -5,6 +5,8 @@ import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  // IMPORTANT: Set VITE_FIREBASE_AUTH_DOMAIN=maddybgmistore.in (your custom domain)
+  // NOT bgmistore-80f64.firebaseapp.com — the cross-origin redirect kills WebView sessions.
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,

@@ -281,7 +281,7 @@ export default function ReviewForm({ onReviewAdded }) {
             }}>
               <ImageIcon size={32} color="var(--gold)" style={{ marginBottom: "8px" }} />
               <span style={{ fontSize: "14px", color: "var(--text)" }}>Click to upload screenshot</span>
-              <span style={{ fontSize: "12px", color: "var(--muted)", marginTop: "4px" }}>PNG, JPG up to 5MB</span>
+              <span style={{ fontSize: "12px", color: "var(--muted)", marginTop: "4px" }}>PNG, JPG, WEBP up to 5MB</span>
               <input
                 type="file"
                 accept="image/*"

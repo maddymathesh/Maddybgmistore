@@ -31,7 +31,7 @@ export default function Navbar() {
     <header style={headerStyle}>
       <nav style={navStyle}>
         <Link to="/" style={logoStyle}>
-          <img src="/logo.png" alt="Maddy BGMI Store" style={{ height: "44px", width: "auto", objectFit: "contain" }} />
+          <img src="/logo.png" alt="Maddy BGMI Store" className="logo-img" />
         </Link>
 
         <ul className="hidden lg:flex items-center gap-1 list-none">
@@ -91,6 +91,17 @@ export default function Navbar() {
         </button>
       </nav>
 
+      {/* Ticker integrated in Navbar */}
+      <div className="ticker-wrap">
+        <div className="ticker-inner">
+          {doubledTicker.map((item, i) => (
+            <span key={i} className="ticker-item" style={{ display: "inline-flex", alignItems: "center", gap: "12px" }}>
+              <img src="/logo.png" alt="" className="logo-ticker" />
+              {item}
+            </span>
+          ))}
+        </div>
+      </div>
 
       {open && (
         <div style={mobileMenuStyle}>

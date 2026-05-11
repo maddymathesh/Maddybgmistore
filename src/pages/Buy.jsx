@@ -21,7 +21,7 @@ export default function Buy() {
         }}>
           {/* Background image */}
           <img
-            src="/buy-banner.jpg"
+            src="/buy-banner.webp"
             alt="BGMI Battlefield" loading="lazy" decoding="async"
             style={{
               position: "absolute", inset: 0,

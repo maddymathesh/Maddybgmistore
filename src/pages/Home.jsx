@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { Gamepad2, ShoppingCart, Banknote, CheckCircle, Zap, Shield, Star, Trophy, Lock, Smartphone } from "lucide-react";
+import { Gamepad2, ShoppingCart, Banknote, CheckCircle, Zap, Shield, Star, Trophy, Lock, Smartphone,CircleDollarSign } from "lucide-react";
 import CountUp from "../components/CountUp";
 import LightRays from "../components/LightRays";
 
@@ -70,7 +70,7 @@ export default function Home() {
         <section style={{ minHeight: "90vh", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "80px 5% 60px", position: "relative", overflow: "hidden" }}>
         {/* Brand Banner Background */}
         <img
-          src="/hero-banner.jpg"
+          src="/hero-banner.webp"
           alt="BGMI battlefield hero banner"
           fetchpriority="high"
           decoding="async"
@@ -87,7 +87,7 @@ export default function Home() {
             raysSpeed={1.5}
             lightSpread={0.8}
             rayLength={1.2}
-            followMouse={true}
+            followMouse={false}
             mouseInfluence={0.1}
             noiseAmount={0.1}
             distortion={0.05}
@@ -97,7 +97,7 @@ export default function Home() {
         <div style={{ position:"relative", zIndex:2, maxWidth:"820px", margin:"0 auto" }} className="fade-up">
           <div className="badge">South India's #1 Trusted BGMI Account Marketplace</div>
           <h1 style={{ fontFamily:"var(--font-h)", fontSize:"clamp(42px,8vw,92px)", fontWeight:700, lineHeight:1, letterSpacing:"2px", marginBottom:"22px" }}>
-            Your Dream<br /><span className="g">BGMI Account</span><br />Awaits
+            Your changed<br /><span className="g">BGMI Account</span><br />Awaits
           </h1>
           <p style={{ color:"var(--muted)", fontSize:"clamp(14px,2vw,17px)", maxWidth:"560px", margin:"0 auto 40px" }}>
             Buy and sell verified BGMI accounts safely — budget to premium. Trusted by 2000+ players since 2019.
@@ -166,7 +166,7 @@ export default function Home() {
             <div style={{ position:"absolute", top:"28px", right:"28px", opacity:.2, color:"#22C55E" }}><Banknote size={52} /></div>
             <h3 style={{ fontFamily:"var(--font-h)", fontSize:"26px", fontWeight:700, marginBottom:"8px" }}>Sell Your Account</h3>
             <p style={{ color:"var(--muted)", fontSize:"13px", marginBottom:"20px" }}>Get maximum value for your BGMI account — instant payout or hold & sell for best price.</p>
-            <Link to="/sell" className="btn btn-green" style={{ alignSelf:"flex-start", display:"inline-flex", alignItems:"center", gap:"7px" }}><Banknote size={14} />Sell Now →</Link>
+            <Link to="/sell" className="btn btn-green" style={{ alignSelf:"flex-start", display:"inline-flex", alignItems:"center", gap:"7px" }}><CircleDollarSign size={14} />Sell Now →</Link>
           </div>
           <div style={{ background:"linear-gradient(135deg,rgba(168,85,247,.18),rgba(236,72,153,.1)),var(--card)", border:"1px solid var(--border-gold)", borderRadius:"18px", padding:"36px 32px", minHeight:"220px", display:"flex", flexDirection:"column", justifyContent:"flex-end", cursor:"pointer", transition:"transform .25s", position:"relative" }}>
             <div style={{ position:"absolute", top:"28px", right:"28px", opacity:.2, color:"#A855F7" }}><Shield size={52} /></div>
@@ -308,7 +308,7 @@ export default function Home() {
         <p style={{ color:"var(--muted)", marginBottom:"32px" }}>Join 2000+ players who found their dream BGMI account.</p>
         <div style={{ display:"flex", gap:"14px", justifyContent:"center", flexWrap:"wrap" }}>
           <Link to="/buy" className="btn btn-gold" style={{ display:"inline-flex", alignItems:"center", gap:"7px" }}><ShoppingCart size={15} /> Buy An Account</Link>
-          <Link to="/sell" className="btn btn-green">💸 Sell Your Account</Link>
+          <Link to="/sell" className="btn btn-green"><CircleDollarSign size={15} /> Sell Your Account</Link>
         </div>
       </section>
 

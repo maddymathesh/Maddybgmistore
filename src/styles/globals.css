@@ -9,7 +9,6 @@
 }
 
 html {
-  scroll-behavior: smooth;
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
@@ -31,10 +30,46 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Custom Brand Cursor on desktop */
+@media (pointer: fine) {
+
+  body,
+  a,
+  button,
+  [role="button"],
+  input,
+  textarea,
+  select {
+    cursor: url("data:image/svg+xml,%3Csvg width='19' height='23' viewBox='0 0 19 23' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0.0163927 2.02202C0.0136971 1.67335 0.108149 1.33081 0.289166 1.03279C0.470182 0.734775 0.730611 0.493051 1.04127 0.334708C1.35193 0.176364 1.70054 0.107657 2.04805 0.136285C2.39556 0.164913 2.72823 0.289746 3.00879 0.496794L18.1122 11.6495C19.5625 12.7198 18.8142 15.0238 17.0118 15.0377L9.60132 15.095C9.31363 15.0971 9.03027 15.1652 8.7731 15.2942C8.51593 15.4231 8.29184 15.6094 8.11811 15.8387L3.53485 21.9107C2.45502 23.3423 0.173517 22.5883 0.15964 20.7934L0.0163927 2.02202Z' fill='%23ffd700'/%3E%3C/svg%3E"), auto !important;
+  }
+}
+
 /* ===== A11Y FOCUS ===== */
 :focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 4px;
+}
+
+/* ===== LENIS SMOOTH SCROLL ===== */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
 }
 
 :root {
@@ -1037,8 +1072,42 @@ select.input {
 .user-profile-group:hover .user-dropdown {
   opacity: 1;
   visibility: visible;
-  transform: translateY(0);
+  transform: translateX(0);
 }
+
+/* ===== LOGO STYLING ===== */
+.logo-img {
+  height: 44px;
+  width: 44px;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-gold);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  mix-blend-mode: difference;
+  filter: brightness(1.1);
+}
+
+.logo-img:hover {
+  transform: scale(1.1) rotate(8deg);
+  border-color: var(--gold);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+.logo-ticker {
+  height: 18px;
+  width: 18px;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  border-radius: 50%;
+  opacity: 0.8;
+  mix-blend-mode: difference;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+
+
+
 
 .dropdown-item {
   display: flex;
@@ -1085,7 +1154,7 @@ select.input {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4);
+  box-shadow: 0px 0px 25px rgba(37, 211, 102, 0.4);
   z-index: 2000;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   cursor: pointer;

@@ -13,6 +13,16 @@ const navLinks = [
   { to: "/connectwithus", label: "Connect" },
 ];
 
+const tickerItems = [
+  "Safe & Verified Accounts",
+  "2000+ Happy Buyers",
+  "₹60 Lakhs+ Worth Sold",
+  "Secure Single Logins",
+  "UPI · Bank · USDT · Cash",
+  "Trusted Since 2019",
+  "Budget to Premium Range",
+  "Face-to-Face Deals Available",
+];
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -26,6 +36,7 @@ export default function Navbar() {
     navigate("/");
   };
 
+  const doubledTicker = [...tickerItems, ...tickerItems];
 
   return (
     <header style={headerStyle}>

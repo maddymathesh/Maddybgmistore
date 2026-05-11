@@ -20,17 +20,22 @@ export default function Login() {
     if (user) navigate(isAdmin ? "/admin" : from, { replace: true });
   }, [user, isAdmin, navigate, from]);
 
-  const googleLogin = async () => {
-    try {
-      setLoading(true);
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-      toast.success("Logged in successfully!");
-    } catch (e) {
-      toast.error(e.message);
-    } finally {
-      setLoading(false);
-    }
+  const googleLogin = () => {
+    setLoading(true);
+    const provider = new GoogleAuthProvider();
+    
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        console.log("Login Success");
+        toast.success("Logged in successfully!");
+      })
+      .catch((error) => {
+        console.log(error);
+        toast.error(error.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   return (

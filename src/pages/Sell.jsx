@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { Banknote, Zap, MessageCircle, Lock } from "lucide-react";
+import { Banknote, Zap, MessageCircle, Lock, Video, FileText, BarChart, ShieldCheck, Megaphone, Clock, Handshake, CheckCircle } from "lucide-react";
 
 export default function Sell() {
   return (
@@ -79,25 +79,27 @@ export default function Sell() {
                 <span className="badge" style={{ background: "linear-gradient(135deg,#f59e0b,#d97706)", border: "none" }}>
                   <Lock size={11} fill="#fff" /> OPTION 1
                 </span>
-                <h2 className="stitle" style={{ margin: 0, fontSize: "clamp(24px,4vw,32px)" }}>Hold & Sell</h2>
+                <h2 className="stitle" style={{ margin: 0, fontSize: "clamp(24px,4vw,32px)" }}>Hold & Sell (Maximum Value)</h2>
               </div>
               <p className="ssub" style={{ marginBottom: "24px", minHeight: "44px" }}>
-                Get the maximum price by listing with us. We handle the evaluation, marketing, and final secure transfer.
+                Get the maximum price by listing with us. We handle the evaluation, marketing, and secure transfer. It may take a few days to a week.
               </p>
 
               <div style={{ background: "var(--card)", border: "1px solid rgba(255,215,0,0.15)", borderRadius: "18px", padding: "32px", marginBottom: "24px", flex: 1, display: "flex", flexDirection: "column" }}>
                 <ol className="steps-list" style={{ flex: 1 }}>
                   {[
-                    ["🎥", "Record Account Video", "Show Inventory, Gun Labs, Supercars, and Outfits."],
-                    ["📝", "Detailed Description", "List X-Suits and rare items (or give login for evaluation)."],
-                    ["📊", "Market Evaluation", "We price it fairly based on current real market rates."],
-                    ["📢", "Listing & Marketing", "We list in our VIP group & channels (Sale in 1-2 weeks)."],
-                    ["💰", "Secure Payment", "Get paid immediately after the secure account handover."],
+                    [<Video size={16} />, "Record Account Video", "Show Inventory, Gun Labs, Supercars, and Outfits."],
+                    [<FileText size={16} />, "Provide Details", "Give login for evaluation of X-Suits and rare items."],
+                    [<BarChart size={16} />, "Market Evaluation", "We set a fair price aiming for maximum market sale."],
+                    [<ShieldCheck size={16} />, "Secure Handover", "Transfer the account to us to secure it for buyers."],
+                    [<Megaphone size={16} />, "Listing & Marketing", "We list your account in our VIP channels."],
+                    [<Clock size={16} />, "Find a Buyer", "Wait a few days to a week for the right buyer."],
+                    [<Banknote size={16} />, "Get Paid", "Get full agreed amount securely once it is sold."],
                   ].map(([icon, title, desc], i) => (
                     <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: "16px", padding: "14px 0", borderBottom: "1px solid var(--border)" }}>
                       <div className="step-text">
                         <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--gold)", marginBottom: "2px" }}>
-                          <span style={{ fontSize: "16px" }}>{icon}</span> <strong style={{ fontSize: "15px" }}>{title}</strong>
+                          {icon} <strong style={{ fontSize: "15px" }}>{title}</strong>
                         </div>
                         <small style={{ display: "block", color: "var(--muted)", fontSize: "12px" }}>{desc}</small>
                       </div>
@@ -105,7 +107,7 @@ export default function Sell() {
                   ))}
                 </ol>
                 <a href="https://wa.me/+919025391516?text=Hi!%20I%20want%20to%20Hold%20and%20Sell%20my%20BGMI%20account." target="_blank" rel="noreferrer" className="btn btn-gold" style={{ marginTop: "24px", width: "100%", justifyContent: "center" }}>
-                  📤 Start Hold & Sell →
+                  <MessageCircle size={18} style={{ marginRight: "6px" }} /> Start Hold & Sell →
                 </a>
               </div>
             </div>
@@ -116,24 +118,26 @@ export default function Sell() {
                 <span className="badge" style={{ background: "linear-gradient(135deg,#22c55e,#16a34a)", border: "none" }}>
                   <Zap size={11} fill="#fff" /> OPTION 2
                 </span>
-                <h2 className="stitle" style={{ margin: 0, fontSize: "clamp(24px,4vw,32px)" }}>Instant Sale</h2>
+                <h2 className="stitle" style={{ margin: 0, fontSize: "clamp(24px,4vw,32px)" }}>Instant Sell (Immediate Cash)</h2>
               </div>
               <p className="ssub" style={{ marginBottom: "24px", minHeight: "44px" }}>
-                Need cash fast? Sell your account immediately to us without waiting for a private buyer.
+                Need cash fast? Sell your account immediately to us at a lower fixed price without waiting for a buyer.
               </p>
 
               <div style={{ background: "var(--card)", border: "1px solid rgba(255,215,0,0.15)", borderRadius: "18px", padding: "32px", marginBottom: "24px", flex: 1, display: "flex", flexDirection: "column" }}>
                 <ol className="steps-list" style={{ flex: 1 }}>
                   {[
-                    ["🎥", "Quick Video Review", "Share a recording of your account assets for review."],
-                    ["📝", "Assessment & Details", "We'll evaluate the account value quickly and fairly."],
-                    ["⚡", "Instant Price Offer", "Get a direct offer for a fast sale (Speed guaranteed)."],
-                    ["✅", "Accept & Get Paid", "We secure the account and release payment instantly."],
+                    [<Video size={16} />, "Quick Video Review", "Share a quick screen recording of account assets."],
+                    [<FileText size={16} />, "Fast Assessment", "We quickly assess the account's base value."],
+                    [<Zap size={16} />, "Instant Offer", "We give you a lower, fixed-price immediate offer."],
+                    [<Handshake size={16} />, "Accept the Offer", "You agree to the instant cash offer."],
+                    [<ShieldCheck size={16} />, "Account Security", "Transfer credentials for our team to verify & secure."],
+                    [<Banknote size={16} />, "Instant Payout", "Get paid instantly via UPI/Bank once secured."],
                   ].map(([icon, title, desc], i) => (
                     <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: "16px", padding: "14px 0", borderBottom: "1px solid var(--border)" }}>
                       <div className="step-text">
                         <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--gold)", marginBottom: "2px" }}>
-                          <span style={{ fontSize: "16px" }}>{icon}</span> <strong style={{ fontSize: "15px" }}>{title}</strong>
+                          {icon} <strong style={{ fontSize: "15px" }}>{title}</strong>
                         </div>
                         <small style={{ display: "block", color: "var(--muted)", fontSize: "12px" }}>{desc}</small>
                       </div>
@@ -141,7 +145,7 @@ export default function Sell() {
                   ))}
                 </ol>
                 <a href="https://wa.me/+919025391516?text=Hi!%20I%20want%20to%20sell%20my%20BGMI%20account%20instantly." target="_blank" rel="noreferrer" className="btn btn-green" style={{ marginTop: "24px", width: "100%", justifyContent: "center" }}>
-                  ⚡ Sell Instantly Now →
+                  <Zap size={18} style={{ marginRight: "6px" }} /> Sell Instantly Now →
                 </a>
               </div>
             </div>
@@ -150,14 +154,16 @@ export default function Sell() {
 
         {/* WHY */}
         <section className="section-alt">
-          <h2 className="stitle">🛡️ Why Choose Maddy Store?</h2>
+          <h2 className="stitle" style={{ display:"flex", alignItems:"center", gap:"10px", justifyContent:"center" }}>
+            <ShieldCheck size={28} style={{ color:"var(--gold)" }} /> Why Choose Maddy Store?
+          </h2>
           <div className="why-grid" style={{ maxWidth:"800px", marginBottom:"32px" }}>
             {["Trusted Since 2019","Safe & Secure Handling","Transparent Pricing Always","Fast Payouts After Sale"].map(w => (
-              <div key={w} className="why-item"><div className="why-check">✔</div><span>{w}</span></div>
+              <div key={w} className="why-item"><div className="why-check"><CheckCircle size={16} /></div><span>{w}</span></div>
             ))}
           </div>
-          <a href="https://wa.me/+919025391516?text=Hi!%20I%20need%20help%20selling%20my%20BGMI%20account." target="_blank" rel="noreferrer" className="btn btn-green">
-            💬 WhatsApp +91 90253 91516
+          <a href="https://wa.me/+919025391516?text=Hi!%20I%20need%20help%20selling%20my%20BGMI%20account." target="_blank" rel="noreferrer" className="btn btn-green" style={{ display:"inline-flex", alignItems:"center", gap:"8px", justifyContent:"center" }}>
+            <MessageCircle size={15} /> Contact Us on WhatsApp
           </a>
         </section>
       </div>

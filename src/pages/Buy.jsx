@@ -73,19 +73,19 @@ export default function Buy() {
                 fontSize: "14px", textDecoration: "none", letterSpacing: "0.5px",
                 boxShadow: "0 4px 20px rgba(99,102,241,0.4)",
               }}>
-                <Gamepad2 size={16} /> Ready Stock Accounts
+                <Gamepad2 size={16} /> Ready to Play Accounts
               </Link>
               <a href="https://wa.me/+919025391516?text=Hi%20Maddy!%20I%20want%20a%20custom%20BGMI%20account."
                 target="_blank" rel="noreferrer"
                 style={{
                   display: "inline-flex", alignItems: "center", gap: "8px",
                   padding: "13px 28px", borderRadius: "10px",
-                  background: "rgba(255,255,255,0.12)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
-                  border: "1px solid rgba(255,255,255,0.25)",
+                  background: "linear-gradient(135deg,#f97316,#ef4444)",
                   color: "#fff", fontFamily: "var(--font-h)", fontWeight: 700,
                   fontSize: "14px", textDecoration: "none", letterSpacing: "0.5px",
+                  boxShadow: "0 4px 20px rgba(249,115,22,0.4)",
                 }}>
-                <MessageCircle size={16} /> Custom Account
+                <MessageCircle size={16} /> Customized Account
               </a>
             </div>
           </div>
@@ -107,7 +107,7 @@ export default function Buy() {
                 <span className="badge" style={{ background: "linear-gradient(135deg,#3b82f6,#6366f1)", border: "none" }}>
                   <Star size={11} fill="#fff" /> OPTION 1
                 </span>
-                <h2 className="stitle" style={{ margin: 0, fontSize: "clamp(24px,4vw,32px)" }}>Ready Stocks</h2>
+                <h2 className="stitle" style={{ margin: 0, fontSize: "clamp(24px,4vw,32px)" }}>Ready to Play</h2>
               </div>
               <p className="ssub" style={{ marginBottom: "24px", minHeight: "44px" }}>
                 Browse our verified, ready-to-play accounts. New listings posted regularly. Buy instantly via WhatsApp or Telegram.
@@ -145,7 +145,7 @@ export default function Buy() {
                 <span className="badge" style={{ background: "linear-gradient(135deg,#f97316,#ef4444)", border: "none" }}>
                   <Flame size={11} fill="#fff" /> OPTION 2
                 </span>
-                <h2 className="stitle" style={{ margin: 0, fontSize: "clamp(24px,4vw,32px)" }}>Custom Search</h2>
+                <h2 className="stitle" style={{ margin: 0, fontSize: "clamp(24px,4vw,32px)" }}>Customized Account</h2>
               </div>
               <p className="ssub" style={{ marginBottom: "24px", minHeight: "44px" }}>
                 Get a personalized BGMI account based on your exact budget and preferences.
@@ -171,9 +171,14 @@ export default function Buy() {
                     </li>
                   ))}
                 </ol>
-                <a href="https://wa.me/+919025391516?text=Hi!%20I%20have%20a%20custom%20BGMI%20account%20requirement." target="_blank" rel="noreferrer" className="btn btn-green" style={{ marginTop: "24px", width: "100%", justifyContent: "center" }}>
-                  <MessageCircle size={18} /> Request Custom Account →
-                </a>
+                <div style={{ display: "flex", gap: "12px", marginTop: "24px", flexDirection: "column" }}>
+                  <a href="https://wa.me/+919025391516?text=Hi!%20I%20have%20a%20custom%20BGMI%20account%20requirement." target="_blank" rel="noreferrer" className="btn btn-green" style={{ width: "100%", justifyContent: "center" }}>
+                    <MessageCircle size={18} /> request On Whats app
+                  </a>
+                  <a href="https://t.me/MBSxMADDY17" target="_blank" rel="noreferrer" className="btn" style={{ width: "100%", justifyContent: "center", display: "inline-flex", alignItems: "center", gap: "7px", background: "#229ED9", color: "#fff", border: "1px solid #229ED9", borderRadius: "12px", padding: "14px 24px", fontSize: "14px", fontWeight: 700 }}>
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" /></svg> request On Telegram
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -193,10 +198,14 @@ export default function Buy() {
               </div>
             ))}
           </div>
-          <div style={{ marginTop: "32px" }}>
+          <div style={{ marginTop: "32px", display: "flex", gap: "14px", justifyContent: "center", flexWrap: "wrap" }}>
             <a href="https://wa.me/+919025391516?text=Hi!%20I%20need%20help%20with%20buying%20a%20BGMI%20account." target="_blank" rel="noreferrer" className="btn btn-green"
               style={{ display:"inline-flex", alignItems:"center", gap:"8px" }}>
               <MessageCircle size={15} /> Contact Us on WhatsApp
+            </a>
+            <a href="https://t.me/MBSxMADDY17" target="_blank" rel="noreferrer" className="btn"
+              style={{ display:"inline-flex", alignItems:"center", gap:"8px", background: "#229ED9", color: "#fff", border: "1px solid #229ED9", borderRadius: "12px", padding: "14px 24px", fontSize: "14px", fontWeight: 700 }}>
+              <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" /></svg> Contact Us on Telegram
             </a>
           </div>
         </section>

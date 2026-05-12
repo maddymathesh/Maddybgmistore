@@ -8,8 +8,8 @@ import LightRays from "../components/LightRays";
 const connectChannels = [
   {
     name: "WhatsApp",
-    desc: "Official WhatsApp Group",
-    href: "https://chat.whatsapp.com/Itiwa47TCSoJnlmNvJalVG",
+    desc: "Official WhatsApp Channel",
+    href: "https://whatsapp.com/channel/0029VbAuBtrIXnlpr3jvnN13",
     color: "#22C55E",
     bg: "rgba(34,197,94,0.12)",
     border: "rgba(34,197,94,0.3)",

@@ -1,28 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import {
-  GoogleAuthProvider,
-  signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
-} from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import { Lock } from "lucide-react";
-
-// Detect Android/iOS WebView — these environments block window.open()
-// so signInWithPopup silently falls back to redirect, losing session state.
-function isWebView() {
-  const ua = navigator.userAgent || "";
-  return (
-    /wv/.test(ua) ||                                        // Android WebView flag
-    /Android.*Version\/[\d.]+.*Chrome/.test(ua) ||          // Old Android WebView
-    ua.includes("CPH2609") ||                               // Specific device fallback
-    (window.Android !== undefined) ||                       // Android JS bridge present
-    (!window.chrome && /Android/.test(ua))                  // Chrome missing = WebView
-  );
-}
 
 export default function Login() {
   const { user, isAdmin } = useAuth();
@@ -30,27 +12,10 @@ export default function Login() {
   const location = useLocation();
   const [loading, setLoading] = useState(false);
 
+  // Where to go after login — default /readystocks for regular users
   const from = location.state?.from || "/readystocks";
 
-  // On mount: handle the result coming back from signInWithRedirect
-  useEffect(() => {
-    setLoading(true);
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result?.user) {
-          toast.success("Logged in successfully!");
-        }
-      })
-      .catch((error) => {
-        if (error.code !== "auth/no-current-user") {
-          console.error(error);
-          toast.error(error.message);
-        }
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  // Redirect once Firebase auth state resolves
+  // If already logged in, redirect appropriately
   useEffect(() => {
     if (user) navigate(isAdmin ? "/admin" : from, { replace: true });
   }, [user, isAdmin, navigate, from]);
@@ -58,25 +23,19 @@ export default function Login() {
   const googleLogin = () => {
     setLoading(true);
     const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: "select_account" });
-
-    if (isWebView()) {
-      // WebView: popup is blocked — use redirect flow instead
-      signInWithRedirect(auth, provider).catch((error) => {
-        console.error(error);
+    
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        console.log("Login Success");
+        toast.success("Logged in successfully!");
+      })
+      .catch((error) => {
+        console.log(error);
         toast.error(error.message);
+      })
+      .finally(() => {
         setLoading(false);
       });
-    } else {
-      // Normal browser: use popup as before
-      signInWithPopup(auth, provider)
-        .then(() => toast.success("Logged in successfully!"))
-        .catch((error) => {
-          console.error(error);
-          toast.error(error.message);
-        })
-        .finally(() => setLoading(false));
-    }
   };
 
   return (

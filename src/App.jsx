@@ -16,6 +16,7 @@ const XsuitGift = lazy(() => import("./pages/services/XsuitGift"));
 const SupercarGift = lazy(() => import("./pages/services/SupercarGift"));
 const Recovery = lazy(() => import("./pages/Recovery"));
 const Reviews = lazy(() => import("./pages/Reviews"));
+const ProofAndFeedback = lazy(() => import("./pages/ProofAndFeedback"));
 const ConnectWithUs = lazy(() => import("./pages/ConnectWithUs"));
 const ReadyStocks = lazy(() => import("./pages/ReadyStocks"));
 const Login = lazy(() => import("./pages/Login"));
@@ -167,6 +168,14 @@ export default function App() {
             element={
               <Suspense fallback={<PageLoader />}>
                 <Reviews />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/proofs"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <ProofAndFeedback />
               </Suspense>
             }
           />

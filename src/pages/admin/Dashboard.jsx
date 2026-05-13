@@ -59,6 +59,12 @@ export default function AdminDashboard() {
   const [reviews, setReviews] = useState([]);
   const [reviewForm, setReviewForm] = useState(EMPTY_REVIEW);
   const [savingReview, setSavingReview] = useState(false);
+  const [approvingId, setApprovingId] = useState(null);
+
+  // ── Proofs state ──────────────────────────────────────────
+  const [proofs, setProofs] = useState([]);
+  const [proofForm, setProofForm] = useState({ title: "", imageUrl: "" });
+  const [savingProof, setSavingProof] = useState(false);
 
   // ── Payment Links state ───────────────────────────────────
   const [paymentLinks, setPaymentLinks] = useState([]);
@@ -81,7 +87,12 @@ export default function AdminDashboard() {
       setPaymentLinks(snap.docs.map(d => ({ id: d.id, ...d.data() })))
     );
 
-    return () => { u1(); u2(); u3(); };
+    const q4 = query(collection(db, "proofs"), orderBy("createdAt", "desc"));
+    const u4 = onSnapshot(q4, snap =>
+      setProofs(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+    );
+
+    return () => { u1(); u2(); u3(); u4(); };
   }, []);
 
   // Guard: redirect non-admins
@@ -157,6 +168,7 @@ export default function AdminDashboard() {
         trackingId: reviewForm.trackingId || "",
         date: reviewForm.date || new Date().toLocaleString("en-IN", { month: "long", year: "numeric" }),
         initials: getInitials(reviewForm.name),
+        status: "approved",
         createdAt: serverTimestamp(),
       });
       toast.success("Review published!");
@@ -174,6 +186,65 @@ export default function AdminDashboard() {
       await deleteDoc(doc(db, "reviews", id));
       toast.success("Review deleted");
     } catch (e) { toast.error(e.message); }
+  };
+
+  const approveReview = async (review) => {
+    setApprovingId(review.id);
+    try {
+      const statsRef = doc(db, "globals", "reviewStats");
+      
+      // Update status to approved
+      await updateDoc(doc(db, "reviews", review.id), { status: "approved" });
+
+      // Update global stats
+      const { getDoc, runTransaction } = await import("firebase/firestore");
+      await runTransaction(db, async (transaction) => {
+        const statsDoc = await transaction.get(statsRef);
+        let total = 0;
+        let avg = 0;
+
+        if (statsDoc.exists()) {
+          total = statsDoc.data().totalReviews || 0;
+          avg = statsDoc.data().averageRating || 0;
+        }
+
+        const newTotal = total + 1;
+        const newAvg = ((avg * total) + (Number(review.stars) || Number(review.rating) || 5)) / newTotal;
+
+        transaction.set(statsRef, {
+          totalReviews: newTotal,
+          averageRating: newAvg
+        }, { merge: true });
+      });
+
+      toast.success("Review approved!");
+    } catch (e) {
+      toast.error("Approval failed: " + e.message);
+    } finally {
+      setApprovingId(null);
+    }
+  };
+
+  // ── Proofs CRUD ────────────────────────────────────────────
+  const saveProof = async () => {
+    if (!proofForm.imageUrl) return toast.error("Image URL is required");
+    setSavingProof(true);
+    try {
+      await addDoc(collection(db, "proofs"), {
+        title: proofForm.title || "Proof of Delivery",
+        imageUrl: proofForm.imageUrl,
+        createdAt: serverTimestamp(),
+      });
+      toast.success("Proof added!");
+      setProofForm({ title: "", imageUrl: "" });
+    } catch (e) { toast.error(e.message); }
+    finally { setSavingProof(false); }
+  };
+
+  const deleteProof = async (id) => {
+    if (!confirm("Delete this proof?")) return;
+    await deleteDoc(doc(db, "proofs", id));
+    toast.success("Deleted");
   };
 
   // ── Payment Links CRUD ─────────────────────────────────────
@@ -240,7 +311,12 @@ export default function AdminDashboard() {
 
         {/* ── Tabs ── */}
         <div style={{ display: "flex", gap: "4px", marginBottom: "28px", borderBottom: "1px solid rgba(255,215,0,0.15)", overflowX: "auto" }}>
-          {[["products", "Manage Products"], ["reviews", "Manage Reviews"], ["payments", "Payment Links"]].map(([key, label]) => (
+          {[
+            ["products", "Manage Products"],
+            ["reviews", "Manage Reviews"],
+            ["payments", "Payment Links"],
+            ["proofs", "Manage Proofs"]
+          ].map(([key, label]) => (
             <button key={key} onClick={() => setTab(key)}
               style={{
                 padding: "10px 24px", fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "12px",
@@ -431,23 +507,85 @@ export default function AdminDashboard() {
               {reviews.length === 0 ? (
                 <div style={{ padding: "60px", textAlign: "center", color: "var(--muted)", fontSize: "14px" }}>No reviews yet.</div>
               ) : reviews.map((r) => (
-                <div key={r.id} style={{ display: "grid", gridTemplateColumns: "1fr 80px 60px", gap: "8px", alignItems: "center", padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                <div key={r.id} style={{ display: "grid", gridTemplateColumns: "1fr 80px 100px", gap: "8px", alignItems: "center", padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <div style={{ width: 34, height: 34, borderRadius: "50%", background: "linear-gradient(135deg,var(--gold),var(--orange))", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-h)", fontWeight: 700, color: "#000", fontSize: "12px", flexShrink: 0 }}>
+                    <div style={{ width: 34, height: 34, borderRadius: "50%", background: r.status === "pending" ? "var(--muted)" : "linear-gradient(135deg,var(--gold),var(--orange))", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-h)", fontWeight: 700, color: "#000", fontSize: "12px", flexShrink: 0 }}>
                       {r.initials || getInitials(r.name)}
                     </div>
                     <div>
-                      <div style={{ fontWeight: 700, fontSize: "13px" }}>{r.name}</div>
-                      <div style={{ fontSize: "12px", color: "var(--muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "200px" }}>{r.text}</div>
+                      <div style={{ fontWeight: 700, fontSize: "13px", display: "flex", alignItems: "center", gap: "6px" }}>
+                        {r.name}
+                        {r.status === "pending" && <span style={{ fontSize: "9px", color: "var(--orange)", border: "1px solid var(--orange)", padding: "1px 4px", borderRadius: "4px", textTransform: "uppercase" }}>Pending</span>}
+                      </div>
+                      <div style={{ fontSize: "12px", color: "var(--muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "200px" }}>{r.text || r.comment}</div>
                     </div>
                   </div>
                   <div style={{ display: "flex", gap: "2px" }}>
-                    {Array.from({ length: Number(r.stars) || 5 }).map((_, j) => (
+                    {Array.from({ length: Number(r.stars) || Number(r.rating) || 5 }).map((_, j) => (
                       <Star key={j} size={12} fill="var(--gold)" color="var(--gold)" />
                     ))}
                   </div>
-                  <button onClick={() => deleteReview(r.id)}
-                    style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: "6px", padding: "6px 8px", cursor: "pointer", color: "#ef4444", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ display: "flex", gap: "6px" }}>
+                    {r.status === "pending" && (
+                      <button onClick={() => approveReview(r)} disabled={approvingId === r.id}
+                        style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.2)", borderRadius: "6px", padding: "6px 8px", cursor: "pointer", color: "#22C55E", fontSize: "10px", fontWeight: 700 }}>
+                        {approvingId === r.id ? "..." : "APPROVE"}
+                      </button>
+                    )}
+                    <button onClick={() => deleteReview(r.id)}
+                      style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: "6px", padding: "6px 8px", cursor: "pointer", color: "#ef4444", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════ PROOFS TAB ═══════════ */}
+        {tab === "proofs" && (
+          <div style={{ display: "grid", gridTemplateColumns: "minmax(300px,380px) 1fr", gap: "24px", alignItems: "start" }}>
+            <div style={{ background: "var(--card)", border: "1px solid rgba(255,215,0,0.18)", borderRadius: "14px", padding: "24px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "20px" }}>
+                <Plus size={18} style={{ color: "var(--gold)" }} />
+                <span style={{ fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "16px" }}>Add Proof Image</span>
+              </div>
+              <div style={{ display: "grid", gap: "12px" }}>
+                <div>
+                  <label style={ls}>Title / Caption</label>
+                  <input className="input" placeholder="e.g. UC Purchase Success" value={proofForm.title}
+                    onChange={e => setProofForm({ ...proofForm, title: e.target.value })} />
+                </div>
+                <div>
+                  <label style={ls}>Image URL * (ImgBB/Cloudinary)</label>
+                  <input className="input" placeholder="https://i.ibb.co/..." value={proofForm.imageUrl}
+                    onChange={e => setProofForm({ ...proofForm, imageUrl: e.target.value })} />
+                </div>
+                <button onClick={saveProof} disabled={savingProof} className="btn btn-gold"
+                  style={{ width: "100%", justifyContent: "center", fontFamily: "var(--font-h)", fontWeight: 700, letterSpacing: "1px" }}>
+                  {savingProof ? "Saving..." : "ADD PROOF"}
+                </button>
+              </div>
+            </div>
+
+            <div style={{ background: "var(--card)", border: "1px solid rgba(255,215,0,0.18)", borderRadius: "14px", overflow: "hidden" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "80px 1fr 60px", gap: "8px", padding: "12px 20px", background: "rgba(255,215,0,0.04)", borderBottom: "1px solid rgba(255,215,0,0.12)" }}>
+                {["Preview", "Details", "Actions"].map((h, i) => (
+                  <span key={h} style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: i === 0 ? "var(--muted)" : "var(--gold)" }}>{h}</span>
+                ))}
+              </div>
+              {proofs.length === 0 ? (
+                <div style={{ padding: "60px", textAlign: "center", color: "var(--muted)", fontSize: "14px" }}>No proofs yet.</div>
+              ) : proofs.map((p) => (
+                <div key={p.id} style={{ display: "grid", gridTemplateColumns: "80px 1fr 60px", gap: "8px", alignItems: "center", padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                  <img src={p.imageUrl} alt="" style={{ width: "50px", height: "50px", objectFit: "cover", borderRadius: "4px", border: "1px solid var(--border-gold)" }} />
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: "13px" }}>{p.title}</div>
+                    <div style={{ fontSize: "11px", color: "var(--muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "250px" }}>{p.imageUrl}</div>
+                  </div>
+                  <button onClick={() => deleteProof(p.id)}
+                    style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: "6px", padding: "6px 8px", cursor: "pointer", color: "#ef4444" }}>
                     <Trash2 size={13} />
                   </button>
                 </div>

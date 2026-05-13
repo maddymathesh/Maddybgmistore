@@ -103,33 +103,20 @@ export default function ReviewForm({ onReviewAdded }) {
         comment: comment.trim(),
         imageUrl: imageUrl,
         uid: user.uid,
+        status: "pending",
         // We use Date.now() locally for optimistic UI updates
         clientDate: Date.now()
       };
 
       await runTransaction(db, async (transaction) => {
-        const statsDoc = await transaction.get(statsRef);
-        let total = 0;
-        let avg = 0;
-
-        if (statsDoc.exists()) {
-          total = statsDoc.data().totalReviews || 0;
-          avg = statsDoc.data().averageRating || 0;
-        }
-
-        const newTotal = total + 1;
-        const newAvg = ((avg * total) + rating) / newTotal;
-
-        transaction.set(statsRef, {
-          totalReviews: newTotal,
-          averageRating: newAvg
-        }, { merge: true });
-
+        // We no longer update the stats document immediately.
+        // Stats should only be updated when an admin approves the review.
+        
         // Include serverTimestamp for accurate sorting in DB
         transaction.set(newReviewRef, { ...newReviewData, createdAt: serverTimestamp() });
       });
 
-      toast.success("Review submitted successfully!");
+      toast.success("Review submitted! Awaiting admin approval.");
       localStorage.setItem("lastReviewSubmit", Date.now().toString());
       setCooldown(60);
       setRating(0);
@@ -137,13 +124,8 @@ export default function ReviewForm({ onReviewAdded }) {
       setComment("");
       removeImage();
       
-      if (onReviewAdded) {
-        onReviewAdded({
-          id: newReviewRef.id,
-          ...newReviewData,
-          createdAt: { toMillis: () => Date.now() } // Mock timestamp for immediate UI rendering
-        });
-      }
+      // Removed the optimistic UI update that calls onReviewAdded
+      // because the review is pending and shouldn't appear yet.
       
     } catch (err) {
       console.error(err);

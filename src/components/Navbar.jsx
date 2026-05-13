@@ -23,7 +23,13 @@ const navLinks = [
     ],
   },
   { to: "/recovery", label: "Recovery" },
-  { to: "/reviews", label: "Reviews" },
+  {
+    label: "Customer Stories",
+    subLinks: [
+      { to: "/reviews", label: "Buyer Reviews" },
+      { to: "/proofs", label: "Proof & Feedback" },
+    ],
+  },
   { to: "/connectwithus", label: "Connect" },
 ];
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { collection, query, orderBy, limit, getDocs, startAfter, doc, getDoc } from "firebase/firestore";
+import { collection, query, orderBy, limit, getDocs, startAfter, doc, getDoc, where } from "firebase/firestore";
 import { db } from "../firebase";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -32,10 +32,10 @@ export default function Reviews() {
     else setLoading(true);
 
     try {
-      let q = query(collection(db, "reviews"), orderBy("createdAt", "desc"), limit(6));
+      let q = query(collection(db, "reviews"), where("status", "==", "approved"), orderBy("createdAt", "desc"), limit(6));
       
       if (isLoadMore && lastVisible) {
-        q = query(collection(db, "reviews"), orderBy("createdAt", "desc"), startAfter(lastVisible), limit(6));
+        q = query(collection(db, "reviews"), where("status", "==", "approved"), orderBy("createdAt", "desc"), startAfter(lastVisible), limit(6));
       }
 
       const snap = await getDocs(q);
@@ -161,6 +161,11 @@ export default function Reviews() {
 
             {/* Review Form Component */}
             <ReviewForm onReviewAdded={handleReviewAdded} />
+          </div>
+          <div style={{ textAlign: "center", marginTop: "40px", opacity: 0.8 }}>
+            <p style={{ fontSize: "13px", color: "var(--muted)", fontStyle: "italic" }}>
+              * All reviews undergo a verification process to ensure authenticity. Approved reviews appear here within 24 hours.
+            </p>
           </div>
         </section>
 

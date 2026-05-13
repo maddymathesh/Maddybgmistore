@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
-import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
-import { db } from "../firebase";
+import { supabase } from "../supabase";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { Search, Lock, Link2, MessageCircle, CheckCircle, ShoppingBag, Banknote, ShoppingCart } from "lucide-react";
+import { Search, Lock, Link2, MessageCircle, CheckCircle, ShoppingBag, Banknote, ShoppingCart, Loader2 } from "lucide-react";
 
 // ── YouTube embed helper ──────────────────────────────────────
 function getEmbed(url) {
@@ -33,7 +32,7 @@ const TgIcon = () => (
 
 // ── Login badge ───────────────────────────────────────────────
 function LoginBadge({ type }) {
-  const t = type.toLowerCase();
+  const t = (type || "").toLowerCase();
   const isX = t.includes("twitter") || t === "x";
   const isFb = t.includes("facebook") || t.includes("fb");
   return (
@@ -53,8 +52,8 @@ function LoginBadge({ type }) {
 function StockCard({ stock }) {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const embed = getEmbed(stock.youtubeUrl || stock.videoUrl);
-  const loginBadges = (stock.loginType || "").split(",").map(l => l.trim()).filter(Boolean);
+  const embed = getEmbed(stock.youtube_url || stock.video_url);
+  const loginBadges = (stock.login_type || "").split(",").map(l => l.trim()).filter(Boolean);
   const loginCount = loginBadges.length;
   const wa = `https://wa.me/+919025391516?text=Hi%20Maddy!%20I%20want%20to%20buy%20this%20account%20listed%20for%20₹${stock.price}.%20${encodeURIComponent(stock.title)}`;
 
@@ -64,7 +63,7 @@ function StockCard({ stock }) {
       {/* Tier badge */}
       <div style={{ padding: "14px 20px 0", display: "flex", alignItems: "center", gap: "8px" }}>
         <span style={{ background: "linear-gradient(135deg,#f97316,#ef4444)", color: "#fff", fontSize: "11px", fontWeight: 700, padding: "3px 10px", borderRadius: "100px", letterSpacing: "1px", fontFamily: "var(--font-h)", textTransform: "uppercase" }}>
-          🔥 {stock.category || stock.tier || "Premium"} Account
+          🔥 {stock.category || "Premium"} Account
         </span>
       </div>
 
@@ -100,10 +99,10 @@ function StockCard({ stock }) {
 
       {/* Details */}
       <div style={{ padding: "14px 20px", maxHeight: "200px", overflowY: "auto", fontSize: "13px", color: "var(--muted)", lineHeight: 2, whiteSpace: "pre-line", borderBottom: "1px solid rgba(255,255,255,0.06)", scrollbarWidth: "thin", scrollbarColor: "rgba(255,215,0,0.15) transparent" }}>
-        {stock.description || stock.details}
+        {stock.description}
       </div>
 
-      {/* Price + Buttons — gated behind login */}
+      {/* Price + Buttons */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-5 flex-wrap">
         {user ? (
           <>
@@ -126,8 +125,6 @@ function StockCard({ stock }) {
             onClick={() => navigate("/login", { state: { from: "/readystocks" } })}
             className="w-full sm:w-auto"
             style={{ display: "inline-flex", justifyContent: "center", alignItems: "center", gap: "10px", padding: "12px 24px", borderRadius: "10px", background: "linear-gradient(135deg,rgba(255,215,0,0.12),rgba(255,215,0,0.06))", border: "1px solid rgba(255,215,0,0.35)", color: "var(--gold)", fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "13px", letterSpacing: "0.5px", cursor: "pointer", transition: "all .2s" }}
-            onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,215,0,0.18)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "linear-gradient(135deg,rgba(255,215,0,0.12),rgba(255,215,0,0.06))"; e.currentTarget.style.transform = "translateY(0)"; }}
           >
             <Lock size={15} /> Login to See Price
           </button>
@@ -146,20 +143,23 @@ export default function ReadyStocks() {
   const [status, setStatus] = useState("available");
 
   useEffect(() => {
-    const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
-    const unsub = onSnapshot(q, snap => {
-      setStocks(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    const fetchStocks = async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (!error) setStocks(data);
       setLoading(false);
-    }, err => { console.error(err); setLoading(false); });
-    return unsub;
+    };
+    fetchStocks();
   }, []);
 
   const filtered = stocks.filter(s => {
     const matchSearch = !search ||
       s.title?.toLowerCase().includes(search.toLowerCase()) ||
-      s.description?.toLowerCase().includes(search.toLowerCase()) ||
-      s.loginType?.toLowerCase().includes(search.toLowerCase());
-    const matchCat = category === "all" || s.category?.toLowerCase().replace(" ", "") === category.toLowerCase().replace(" ", "");
+      s.description?.toLowerCase().includes(search.toLowerCase());
+    const matchCat = category === "all" || s.category?.toLowerCase() === category.toLowerCase();
     const matchStatus = status === "all" || (status === "available" ? s.status === "available" : s.status !== "available");
     return matchSearch && matchCat && matchStatus;
   });
@@ -168,166 +168,36 @@ export default function ReadyStocks() {
     <>
       <Navbar />
       <div style={{ paddingTop: "102px" }}>
-
-        {/* ── CINEMATIC HERO ──────────────────────────────── */}
-        <section style={{
-          position: "relative", width: "100%",
-          minHeight: "95vh",
-          overflow: "hidden", display: "flex",
-          alignItems: "center", justifyContent: "center",
-        }}>
-          <img
-            src="/ready-stocks-banner.png"
-            alt="BGMI Premium Accounts" loading="lazy" decoding="async"
-            style={{
-              position: "absolute", inset: 0, width: "100%", height: "100%",
-              objectFit: "cover", objectPosition: "top",
-              filter: "brightness(0.55) contrast(1.1)",
-            }}
-          />
-          {/* Gradient Overlays */}
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(8,10,15,0.4) 0%, transparent 40%, transparent 60%, rgba(8,10,15,0.98) 100%)" }} />
-          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 30% 50%, rgba(255,215,0,0.06) 0%, transparent 60%)" }} />
-
-          <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "0 5%", maxWidth: "820px" }}>
-            <div className="badge" style={{ marginBottom: "20px" }}>
-              <ShoppingCart size={14} /> LIVE INVENTORY
-            </div>
-            <h1 style={{
-              fontFamily: "var(--font-h)", fontSize: "clamp(34px, 6vw, 72px)",
-              fontWeight: 900, lineHeight: 1, marginBottom: "18px",
-              textShadow: "0 4px 30px rgba(0,0,0,0.8)",
-            }}>
-              Ready To Play <br />
-              <span className="g">Accounts</span>
-            </h1>
-            <p style={{
-              color: "rgba(234,234,234,0.9)", fontSize: "clamp(24px, 1.8vw, 28px)",
-              maxWidth: "580px", margin: "0 auto", lineHeight: 1.6,
-              textShadow: "0 2px 10px rgba(0,0,0,0.5)",
-            }}>
-              Browse South India's most trusted inventory. Verified logins, instant access, and the best prices guaranteed.
-            </p>
+        
+        <section style={{ position: "relative", width: "100%", minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <img src="/ready-stocks-banner.png" alt="Banner" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.4)" }} />
+          <div style={{ position: "relative", zIndex: 2, textAlign: "center" }}>
+             <h1 style={{ fontFamily: "var(--font-h)", fontSize: "clamp(34px, 6vw, 72px)", fontWeight: 900 }}>Ready To Play <br/><span className="g">Accounts</span></h1>
           </div>
         </section>
 
-        {/* ── 1. SEARCH BAR ───────────────────────── */}
-        <section className="section-alt" style={{ paddingTop: "0", paddingBottom: "0" }}>
-          <div style={{ maxWidth: "960px", marginBottom: "24px" }}>
-            <div style={{ background: "var(--card)", border: "1px solid rgba(255,215,0,0.18)", borderRadius: "14px", padding: "16px 20px", display: "flex", gap: "16px", alignItems: "center", flexWrap: "wrap" }}>
-              {/* Search input */}
-              <div style={{ position: "relative", flex: 1, minWidth: "200px" }}>
-                <Search size={16} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--muted)", pointerEvents: "none" }} />
-                <input
-                  type="text"
-                  placeholder="Search ID, skins, guns..."
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  style={{
-                    width: "100%", background: "var(--bg)", border: "1px solid rgba(255,215,0,0.2)",
-                    borderRadius: "8px", padding: "10px 14px 10px 38px", fontSize: "13px",
-                    color: "var(--text)", outline: "none", boxSizing: "border-box",
-                  }}
-                />
-              </div>
-              {/* Filters */}
-              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                <select value={category} onChange={e => setCategory(e.target.value)}
-                  style={{ background: "var(--bg)", border: "1px solid rgba(255,215,0,0.2)", borderRadius: "8px", padding: "10px 14px", fontSize: "13px", color: "var(--text)", minWidth: "140px", cursor: "pointer" }}>
-                  <option value="all">All Categories</option>
-                  <option value="budget">Budget</option>
-                  <option value="midrange">Mid Range</option>
-                  <option value="premium">Premium</option>
-                  <option value="ultrapremium">Ultra Premium</option>
-                </select>
-                <select value={status} onChange={e => setStatus(e.target.value)}
-                  style={{ background: "var(--bg)", border: "1px solid rgba(255,215,0,0.2)", borderRadius: "8px", padding: "10px 14px", fontSize: "13px", color: "var(--text)", minWidth: "140px", cursor: "pointer" }}>
-                  <option value="all">All Status</option>
-                  <option value="available">Available Only</option>
-                  <option value="sold">Sold Out</option>
-                </select>
-              </div>
-              {/* Result count */}
-              {!loading && (
-                <span style={{ fontSize: "12px", color: "var(--muted)", whiteSpace: "nowrap" }}>
-                  {filtered.length} account{filtered.length !== 1 ? "s" : ""} found
-                </span>
-              )}
+        <section className="section-alt">
+          <div style={{ maxWidth: "960px", margin: "0 auto" }}>
+            <div style={{ background: "var(--card)", padding: "16px", borderRadius: "14px", display: "flex", gap: "16px", flexWrap: "wrap", marginBottom: "32px" }}>
+              <input type="text" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} className="input" style={{ flex: 1 }} />
+              <select value={category} onChange={e => setCategory(e.target.value)} className="input" style={{ width: "180px" }}>
+                <option value="all">All Categories</option>
+                <option value="budget">Budget</option>
+                <option value="midrange">Mid Range</option>
+                <option value="premium">Premium</option>
+                <option value="ultrapremium">Ultra Premium</option>
+              </select>
             </div>
-          </div>
 
-          {/* ── 2. ACCOUNT LISTINGS ──────────────────── */}
-          <div style={{ maxWidth: "960px" }}>
             {loading ? (
-              <div style={{ textAlign: "center", padding: "80px", color: "var(--muted)" }}>
-                <div style={{ fontSize: "32px", marginBottom: "12px", animation: "spin 1s linear infinite" }}>⏳</div>
-                Loading available accounts...
-              </div>
-            ) : filtered.length === 0 ? (
-              <div style={{ background: "var(--card)", border: "1px solid var(--border-gold)", borderRadius: "14px", padding: "60px 40px", textAlign: "center" }}>
-                <ShoppingBag size={48} style={{ color: "var(--muted)", marginBottom: "16px" }} />
-                <h3 style={{ fontFamily: "var(--font-h)", fontSize: "22px", marginBottom: "8px" }}>
-                  {search || category !== "all" || status !== "available" ? "No Matches Found" : "No Accounts Available Right Now"}
-                </h3>
-                <p style={{ color: "var(--muted)", marginBottom: "28px" }}>
-                  {search ? "Try a different search term." : "New accounts are listed regularly. Join our channels to get notified instantly!"}
-                </p>
-                <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
-                  <a href="https://chat.whatsapp.com/Itiwa47TCSoJnlmNvJalVG" target="_blank" rel="noreferrer" className="btn btn-gold" style={{ display: "inline-flex", alignItems: "center", gap: "7px" }}><WaIcon /> WhatsApp Group</a>
-                  <a href="https://t.me/maddy_bgmistore" target="_blank" rel="noreferrer" className="btn btn-tg" style={{ display: "inline-flex", alignItems: "center", gap: "7px" }}><TgIcon /> Telegram Channel</a>
-                </div>
-              </div>
+              <div style={{ textAlign: "center", padding: "100px" }}><Loader2 className="animate-spin mx-auto" size={40} style={{ color: "var(--gold)" }} /></div>
             ) : (
               filtered.map(stock => <StockCard key={stock.id} stock={stock} />)
             )}
           </div>
         </section>
 
-        {/* ── 3. HOW TO BUY ────────────────────────── */}
-        <section className="section">
-          <div style={{ maxWidth: "960px" }}>
-            <div className="slabel" style={{ marginBottom: "12px" }}>📋 Procedure to Buy</div>
-            <h2 className="stitle" style={{ marginBottom: "8px" }}>How to Purchase</h2>
-            <p className="ssub" style={{ marginBottom: "28px" }}>Contact us on WhatsApp for enquiry — we'll guide you through the process.</p>
-
-            <div style={{ display: "grid", gap: "12px", marginBottom: "32px" }}>
-              {[
-                [<MessageCircle size={20} />, "Contact Us for Enquiry", "Reach out on WhatsApp or Telegram with your preferred account."],
-                [<CheckCircle size={20} />, "Verify Account Details", "We'll send you full account screenshots and live verification."],
-                [<Banknote size={20} />, "Pay 10% Advance to Reserve", "Non-refundable advance locks the account exclusively for you."],
-                [<CheckCircle size={20} />, "Pay Remaining & Get Access", "Credentials transferred immediately after full payment confirmation."],
-              ].map(([icon, title, desc], i) => (
-                <div key={i} style={{ display: "flex", gap: "16px", alignItems: "flex-start", background: "var(--card)", border: "1px solid rgba(255,215,0,0.1)", borderRadius: "12px", padding: "16px 20px" }}>
-                  <div style={{ color: "var(--gold)", marginTop: "1px", flexShrink: 0 }}>{icon}</div>
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: "14px", marginBottom: "3px" }}>{title}</div>
-                    <div style={{ fontSize: "13px", color: "var(--muted)", lineHeight: 1.6 }}>{desc}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-              <a href="https://wa.me/+919025391516?text=Hi%20Maddy!%20I%20want%20to%20enquire%20about%20a%20BGMI%20account." target="_blank" rel="noreferrer"
-                className="btn btn-gold" style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                <WaIcon /> Contact Us on WhatsApp
-              </a>
-              <a href="https://t.me/MBSxMADDY17" target="_blank" rel="noreferrer"
-                className="btn btn-tg" style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                <TgIcon /> Message on Telegram
-              </a>
-            </div>
-          </div>
-        </section>
-
       </div>
-
-      {/* Floating WhatsApp */}
-      <a href="https://wa.me/+919025391516" target="_blank" rel="noreferrer"
-        style={{ position: "fixed", bottom: "28px", right: "28px", zIndex: 50, width: "56px", height: "56px", background: "#25D366", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 20px rgba(37,211,102,0.5)", textDecoration: "none" }}>
-        <WaIcon />
-      </a>
-
       <Footer />
     </>
   );

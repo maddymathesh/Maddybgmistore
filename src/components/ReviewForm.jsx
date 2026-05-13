@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { storage } from "../firebase";
+// Removed Firebase Storage imports
 import { supabase } from "../utils/supabase";
 import toast from "react-hot-toast";
 import { Star, Loader2, LogIn, Image as ImageIcon, X } from "lucide-react";
@@ -52,6 +51,20 @@ export default function ReviewForm({ onReviewAdded }) {
     setImagePreview(null);
   };
 
+  // Mock AI Sentiment Analysis
+  const checkAIApproval = (text) => {
+    const positiveWords = ["good", "great", "awesome", "best", "safe", "secured", "trusted", "fast", "legit", "nice", "excellent", "perfect", "maddy", "mbs"];
+    const negativeWords = ["bad", "scam", "fake", "worst", "slow", "terrible", "poor", "hate", "fraud"];
+    
+    const lowerText = text.toLowerCase();
+    
+    // Simple logic: If it contains positive words and no negative words, it's auto-approved
+    const hasPositive = positiveWords.some(word => lowerText.includes(word));
+    const hasNegative = negativeWords.some(word => lowerText.includes(word));
+    
+    return hasPositive && !hasNegative;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!user) return toast.error("Login required");
@@ -64,15 +77,26 @@ export default function ReviewForm({ onReviewAdded }) {
     try {
       let imageUrl = null;
       if (image) {
-        const storageRef = ref(storage, `reviews/${user.uid}_${Date.now()}`);
-        const uploadTask = uploadBytesResumable(storageRef, image);
-        await new Promise((resolve, reject) => {
-          uploadTask.on("state_changed", snap => setUploadProgress((snap.bytesTransferred / snap.totalBytes) * 100), reject, async () => {
-            imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
-            resolve();
-          });
-        });
+        const fileExt = image.name.split('.').pop();
+        const fileName = `${user.uid}_${Date.now()}.${fileExt}`;
+        const filePath = `lobby_screenshots/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('reviews')
+          .upload(filePath, image);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('reviews')
+          .getPublicUrl(filePath);
+          
+        imageUrl = publicUrl;
       }
+
+      // AI Analysis
+      const isAIApproved = checkAIApproval(comment);
+      const initialStatus = isAIApproved ? 'approved' : 'pending';
 
       const { data, error } = await supabase.from('reviews').insert([{
         name: name.trim(),
@@ -80,12 +104,17 @@ export default function ReviewForm({ onReviewAdded }) {
         text: comment.trim(),
         image_url: imageUrl,
         uid: user.uid,
-        status: 'pending'
+        status: initialStatus
       }]).select().single();
 
       if (error) throw error;
 
-      toast.success("Submitted! Awaiting approval.");
+      if (isAIApproved) {
+        toast.success("Review published instantly! (AI Approved)");
+      } else {
+        toast.success("Submitted! Awaiting manual approval.");
+      }
+
       localStorage.setItem("lastReviewSubmit", Date.now().toString());
       setCooldown(60);
       setRating(0);
@@ -94,7 +123,7 @@ export default function ReviewForm({ onReviewAdded }) {
       if (onReviewAdded) onReviewAdded(data);
     } catch (err) {
       console.error(err);
-      toast.error("Error submitting review");
+      toast.error("Error submitting review: " + (err.message || "Unknown error"));
     } finally {
       setSubmitting(false);
     }

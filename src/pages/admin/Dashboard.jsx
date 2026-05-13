@@ -10,7 +10,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Navbar from "../../components/Navbar";
-import { LogOut, Plus, Trash2, Pencil, Star, Copy, Users, TrendingUp, DollarSign } from "lucide-react";
+import { LogOut, Plus, Trash2, Pencil, Star, Copy, Users, TrendingUp, DollarSign, Camera } from "lucide-react";
 
 // ── Shared label style ────────────────────────────────────────
 const ls = {
@@ -36,8 +36,23 @@ const EMPTY_CUSTOMER = {
 };
 const EMPTY_SALE = {
   transaction_id: "", product_id: "", customer_id: "",
-  mode_of_deal: "Direct", logins: "",
-  owner_price: "", sold_price: "",
+  owner_price: "", sold_price: "", profit: 0,
+  mode_of_deal: "Telegram",
+  deal_date: new Date().toISOString().split('T')[0],
+  link: "",
+  logins: "",
+  unlinking_1: "",
+  unlink_range_1: "",
+  unlink_guarantee_1: "",
+  unlinking_2: "",
+  unlink_range_2: "",
+  unlink_guarantee_2: "",
+  credentials: "",
+  owner_phone: "",
+  seller_phone: "",
+  reseller_phone: "",
+  buyer_phone: "",
+  account_owner: ""
 };
 
 function getInitials(name) {
@@ -62,8 +77,9 @@ export default function AdminDashboard() {
   const [approvingId, setApprovingId] = useState(null);
 
   const [proofs, setProofs] = useState([]);
-  const [proofForm, setProofForm] = useState({ title: "", imageUrl: "" });
+  const [proofForm, setProofForm] = useState({ title: "", imageUrl: "", month: new Date().toLocaleString('default', { month: 'long', year: 'numeric' }) });
   const [savingProof, setSavingProof] = useState(false);
+  const [proofImage, setProofImage] = useState(null);
 
   const [paymentLinks, setPaymentLinks] = useState([]);
   const [generatingLink, setGeneratingLink] = useState(false);
@@ -169,14 +185,20 @@ export default function AdminDashboard() {
     finally { setSavingReview(false); }
   };
 
-  const approveReview = async (review) => {
-    setApprovingId(review.id);
+  const approveReview = async (id) => {
     try {
-      await supabase.from('reviews').update({ status: 'approved' }).eq('id', review.id);
+      await supabase.from('reviews').update({ status: 'approved' }).eq('id', id);
       toast.success("Review approved!");
       fetchData();
     } catch (e) { toast.error(e.message); }
-    finally { setApprovingId(null); }
+  };
+
+  const rejectReview = async (id) => {
+    try {
+      await supabase.from('reviews').update({ status: 'rejected' }).eq('id', id);
+      toast.success("Review rejected!");
+      fetchData();
+    } catch (e) { toast.error(e.message); }
   };
 
   const deleteReview = async (id) => {
@@ -187,12 +209,30 @@ export default function AdminDashboard() {
 
   // ── Proofs CRUD ────────────────────────────────────────────
   const saveProof = async () => {
-    if (!proofForm.imageUrl) return toast.error("Image URL required");
+    if (!proofImage && !proofForm.imageUrl) return toast.error("Image is required");
     setSavingProof(true);
     try {
-      await supabase.from('proofs').insert([{ title: proofForm.title, image_url: proofForm.imageUrl }]);
+      let url = proofForm.imageUrl;
+      if (proofImage) {
+        const fileExt = proofImage.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        const filePath = `proofs/${fileName}`;
+        const { error: uploadError } = await supabase.storage.from('reviews').upload(filePath, proofImage);
+        if (uploadError) throw uploadError;
+        const { data: { publicUrl } } = supabase.storage.from('reviews').getPublicUrl(filePath);
+        url = publicUrl;
+      }
+
+      const { error } = await supabase.from('proofs').insert([{ 
+        title: proofForm.title || "Deal Proof", 
+        image_url: url,
+        month: proofForm.month 
+      }]);
+      if (error) throw error;
+
       toast.success("Proof added!");
-      setProofForm({ title: "", imageUrl: "" });
+      setProofForm({ title: "", imageUrl: "", month: new Date().toLocaleString('default', { month: 'long', year: 'numeric' }) });
+      setProofImage(null);
       fetchData();
     } catch (e) { toast.error(e.message); }
     finally { setSavingProof(false); }
@@ -219,19 +259,17 @@ export default function AdminDashboard() {
 
   // ── Sales CRUD ──────────────────────────────────────────────
   const saveSale = async () => {
-    if (!saleForm.transaction_id || !saleForm.product_id || !saleForm.customer_id) return toast.error("Required fields missing");
+    if (!saleForm.sold_price) return toast.error("Sold Price is required");
     setSavingSale(true);
     try {
-      const data = {
-        transaction_id: saleForm.transaction_id,
-        product_id: saleForm.product_id,
-        customer_id: saleForm.customer_id,
-        mode_of_deal: saleForm.mode_of_deal,
-        logins: saleForm.logins,
+      const profit = Number(saleForm.sold_price) - Number(saleForm.owner_price || 0);
+      const { error } = await supabase.from('sales').insert([{ 
+        ...saleForm, 
+        profit,
         owner_price: Number(saleForm.owner_price),
-        sold_price: Number(saleForm.sold_price),
-      };
-      await supabase.from('sales').insert([data]);
+        sold_price: Number(saleForm.sold_price)
+      }]);
+      if (error) throw error;
       toast.success("Sale recorded!");
       setSaleForm(EMPTY_SALE);
       fetchData();
@@ -396,19 +434,97 @@ export default function AdminDashboard() {
                 <button onClick={saveReview} disabled={savingReview} className="btn btn-gold">Publish Review</button>
               </div>
             </div>
-            <div style={{ background: "var(--card)", borderRadius: "14px", overflow: "hidden" }}>
-              {reviews.map(r => (
-                <div key={r.id} style={{ display: "flex", justifyContent: "space-between", padding: "16px", borderBottom: "1px solid var(--border)" }}>
-                  <div>
-                    <div style={{ fontWeight: 700 }}>{r.name} {r.status === 'pending' && <span style={{ color: "var(--orange)", fontSize: "10px" }}>PENDING</span>}</div>
-                    <div style={{ fontSize: "12px", color: "var(--muted)" }}>{r.text}</div>
+            <div style={{ background: "var(--card)", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.05)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+              <div style={{ padding: "20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(255,215,0,0.02)" }}>
+                <h3 style={{ fontSize: "16px", fontWeight: 700 }}>Review Management</h3>
+                <span style={{ fontSize: "12px", color: "var(--muted)" }}>{reviews.length} Total</span>
+              </div>
+              
+              <div style={{ maxHeight: "700px", overflowY: "auto" }}>
+                {reviews.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--muted)" }}>
+                    <p>No reviews submitted yet.</p>
                   </div>
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    {r.status === 'pending' && <button onClick={() => approveReview(r)} style={{ color: "var(--green)" }}><Star size={16}/></button>}
-                    <button onClick={() => deleteReview(r.id)} style={{ color: "#ef4444" }}><Trash2 size={16}/></button>
+                ) : reviews.map(r => (
+                  <div key={r.id} style={{ padding: "20px", borderBottom: "1px solid var(--border)", display: "grid", gridTemplateColumns: "auto 1fr auto", gap: "20px", alignItems: "start" }}>
+                    {r.image_url && (
+                      <div style={{ width: "80px", height: "80px", borderRadius: "8px", overflow: "hidden", border: "1px solid var(--border)" }}>
+                        <img src={r.image_url} alt="Lobby" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      </div>
+                    )}
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px" }}>
+                        <span style={{ fontWeight: 700 }}>{r.name}</span>
+                        <span style={{ display: "flex", gap: "2px" }}>
+                          {[...Array(5)].map((_, i) => <Star key={i} size={10} fill={i < r.stars ? "var(--gold)" : "transparent"} color="var(--gold)" />)}
+                        </span>
+                        <span style={{ 
+                          fontSize: "10px", fontWeight: 800, padding: "2px 8px", borderRadius: "100px",
+                          background: r.status === 'approved' ? "rgba(34,197,94,0.1)" : r.status === 'rejected' ? "rgba(239,68,68,0.1)" : "rgba(251,191,36,0.1)",
+                          color: r.status === 'approved' ? "#22c55e" : r.status === 'rejected' ? "#ef4444" : "#f59e0b",
+                          border: `1px solid ${r.status === 'approved' ? "rgba(34,197,94,0.3)" : r.status === 'rejected' ? "rgba(239,68,68,0.3)" : "rgba(251,191,36,0.3)"}`,
+                          textTransform: "uppercase"
+                        }}>
+                          {r.status}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: "13px", color: "var(--text)", lineHeight: 1.5, marginBottom: "8px" }}>{r.text}</div>
+                      <div style={{ fontSize: "11px", color: "var(--muted)" }}>Submitted on {new Date(r.created_at).toLocaleDateString()}</div>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                      {r.status !== 'approved' && (
+                        <button onClick={() => approveReview(r.id)} className="btn btn-gold btn-sm" style={{ padding: "6px 12px", fontSize: "11px" }}>Approve</button>
+                      )}
+                      {r.status !== 'rejected' && (
+                        <button onClick={() => rejectReview(r.id)} className="btn btn-outline btn-sm" style={{ padding: "6px 12px", fontSize: "11px", color: "#ef4444" }}>Reject</button>
+                      )}
+                      <button onClick={() => deleteReview(r.id)} style={{ background: "none", border: "none", color: "var(--muted)", cursor: "pointer", fontSize: "11px", marginTop: "4px" }}>Delete Permanently</button>
+                    </div>
                   </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* PROOFS TAB */}
+        {tab === "proofs" && (
+          <div style={{ display: "grid", gridTemplateColumns: "350px 1fr", gap: "24px" }}>
+            <div style={{ background: "var(--card)", padding: "24px", borderRadius: "14px", border: "1px solid var(--border-gold)" }}>
+              <h3 style={{ marginBottom: "20px" }}><Camera size={18}/> Add Proof</h3>
+              <div style={{ display: "grid", gap: "12px" }}>
+                <input className="input" placeholder="Title (e.g. Payment Proof)" value={proofForm.title} onChange={e => setProofForm({...proofForm, title: e.target.value})} />
+                <input className="input" placeholder="Month (e.g. May 2026)" value={proofForm.month} onChange={e => setProofForm({...proofForm, month: e.target.value})} />
+                
+                <div style={{ border: "2px dashed var(--border-gold)", padding: "20px", borderRadius: "8px", textAlign: "center" }}>
+                  {proofImage ? (
+                    <div style={{ fontSize: "12px", color: "var(--green)" }}>{proofImage.name} selected</div>
+                  ) : (
+                    <label style={{ cursor: "pointer" }}>
+                      <div style={{ fontSize: "12px" }}>Click to Upload Proof Image</div>
+                      <input type="file" hidden onChange={e => setProofImage(e.target.files[0])} />
+                    </label>
+                  )}
                 </div>
-              ))}
+
+                <button onClick={saveProof} disabled={savingProof} className="btn btn-gold w-full">
+                  {savingProof ? "Uploading..." : "Save Proof"}
+                </button>
+              </div>
+            </div>
+            <div style={{ background: "var(--card)", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.05)", overflow: "hidden" }}>
+              <div style={{ padding: "20px", borderBottom: "1px solid var(--border)", background: "rgba(255,215,0,0.02)" }}>
+                <h3 style={{ fontSize: "16px", fontWeight: 700 }}>Proof Gallery</h3>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "12px", padding: "20px", maxHeight: "600px", overflowY: "auto" }}>
+                {proofs.map(p => (
+                  <div key={p.id} style={{ position: "relative", aspectRatio: "1/1", borderRadius: "8px", overflow: "hidden", border: "1px solid var(--border)" }}>
+                    <img src={p.image_url} alt="Proof" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <button onClick={() => deleteProof(p.id)} style={{ position: "absolute", top: "5px", right: "5px", background: "rgba(239,68,68,0.8)", border: "none", color: "#fff", borderRadius: "4px", padding: "4px", cursor: "pointer" }}><Trash2 size={12}/></button>
+                    <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "rgba(0,0,0,0.6)", color: "#fff", fontSize: "10px", padding: "4px", textAlign: "center" }}>{p.month}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -439,47 +555,101 @@ export default function AdminDashboard() {
 
         {/* SALES TAB */}
         {tab === "sales" && (
-          <div style={{ display: "grid", gridTemplateColumns: "350px 1fr", gap: "24px" }}>
-            <div style={{ background: "var(--card)", padding: "24px", borderRadius: "14px", border: "1px solid var(--border-gold)" }}>
-              <h3 style={{ marginBottom: "20px" }}><TrendingUp size={18}/> Record Sale</h3>
-              <div style={{ display: "grid", gap: "12px" }}>
-                <input className="input" placeholder="Transaction ID (e.g. MSID-001)" value={saleForm.transaction_id} onChange={e => setSaleForm({...saleForm, transaction_id: e.target.value})} />
-                <select className="input" value={saleForm.product_id} onChange={e => setSaleForm({...saleForm, product_id: e.target.value})}>
-                  <option value="">Select Product</option>
-                  {products.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
-                </select>
-                <select className="input" value={saleForm.customer_id} onChange={e => setSaleForm({...saleForm, customer_id: e.target.value})}>
-                  <option value="">Select Customer</option>
-                  {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
-                <input className="input" placeholder="Owner Price" type="number" value={saleForm.owner_price} onChange={e => setSaleForm({...saleForm, owner_price: e.target.value})} />
-                <input className="input" placeholder="Sold Price" type="number" value={saleForm.sold_price} onChange={e => setSaleForm({...saleForm, sold_price: e.target.value})} />
-                <button onClick={saveSale} disabled={savingSale} className="btn btn-gold">Record Sale</button>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "24px" }}>
+            <div style={{ background: "var(--card)", padding: "32px", borderRadius: "14px", border: "1px solid var(--border-gold)" }}>
+              <h3 style={{ marginBottom: "24px", fontSize: "20px", display: "flex", alignItems: "center", gap: "10px" }}><TrendingUp size={20}/> Comprehensive Deal Record</h3>
+              
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "32px" }}>
+                
+                {/* SECTION 1: GENERAL & LOGINS */}
+                <div>
+                  <h4 style={sh}>1. Deal & Login Details</h4>
+                  <div style={sg}>
+                    <div><label style={sl}>Transaction ID</label><input className="input" placeholder="e.g. MSID-311" value={saleForm.transaction_id} onChange={e => setSaleForm({...saleForm, transaction_id: e.target.value})} /></div>
+                    <div><label style={sl}>Mode of Deal</label><input className="input" placeholder="e.g. Telegram / WhatsApp" value={saleForm.mode_of_deal} onChange={e => setSaleForm({...saleForm, mode_of_deal: e.target.value})} /></div>
+                    <div><label style={sl}>Deal Date</label><input className="input" type="date" value={saleForm.deal_date} onChange={e => setSaleForm({...saleForm, deal_date: e.target.value})} /></div>
+                    <div><label style={sl}>Deal Link</label><input className="input" placeholder="t.me/..." value={saleForm.link} onChange={e => setSaleForm({...saleForm, link: e.target.value})} /></div>
+                    <div><label style={sl}>Current Logins</label><input className="input" placeholder="e.g. FB, Twitter, Apple" value={saleForm.logins} onChange={e => setSaleForm({...saleForm, logins: e.target.value})} /></div>
+                    <div><label style={sl}>Login Credentials / ID Code</label><input className="input" placeholder="#MSID..." value={saleForm.credentials} onChange={e => setSaleForm({...saleForm, credentials: e.target.value})} /></div>
+                  </div>
+                </div>
+
+                {/* SECTION 2: UNLINKING PROCESS */}
+                <div>
+                  <h4 style={sh}>2. Unlinking Process</h4>
+                  <div style={sg}>
+                    <div><label style={sl}>1st Login Under Unlink</label><input className="input" placeholder="e.g. Twitter" value={saleForm.unlinking_1} onChange={e => setSaleForm({...saleForm, unlinking_1: e.target.value})} /></div>
+                    <div><label style={sl}>1st Unlink Range</label><input className="input" placeholder="June 7 -> June 21" value={saleForm.unlink_range_1} onChange={e => setSaleForm({...saleForm, unlink_range_1: e.target.value})} /></div>
+                    <div><label style={sl}>1st Unlink Guarantee</label><input className="input" type="date" value={saleForm.unlink_guarantee_1} onChange={e => setSaleForm({...saleForm, unlink_guarantee_1: e.target.value})} /></div>
+                    <div style={{ height: "1px", background: "var(--border)", margin: "8px 0" }}></div>
+                    <div><label style={sl}>2nd Login Under Unlink</label><input className="input" placeholder="e.g. Facebook" value={saleForm.unlinking_2} onChange={e => setSaleForm({...saleForm, unlinking_2: e.target.value})} /></div>
+                    <div><label style={sl}>2nd Unlink Range</label><input className="input" placeholder="June 7 -> July 21" value={saleForm.unlink_range_2} onChange={e => setSaleForm({...saleForm, unlink_range_2: e.target.value})} /></div>
+                    <div><label style={sl}>2nd Unlink Guarantee</label><input className="input" type="date" value={saleForm.unlink_guarantee_2} onChange={e => setSaleForm({...saleForm, unlink_guarantee_2: e.target.value})} /></div>
+                  </div>
+                </div>
+
+                {/* SECTION 3: FINANCIALS & CONTACTS */}
+                <div>
+                  <h4 style={sh}>3. Financials & Contacts</h4>
+                  <div style={sg}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                      <div><label style={sl}>Owner Price</label><input className="input" type="number" value={saleForm.owner_price} onChange={e => setSaleForm({...saleForm, owner_price: e.target.value})} /></div>
+                      <div><label style={sl}>Sold Price</label><input className="input" type="number" value={saleForm.sold_price} onChange={e => setSaleForm({...saleForm, sold_price: e.target.value})} /></div>
+                    </div>
+                    <div><label style={sl}>Account Owner Name</label><input className="input" value={saleForm.account_owner} onChange={e => setSaleForm({...saleForm, account_owner: e.target.value})} /></div>
+                    <div><label style={sl}>Owner Phone</label><input className="input" value={saleForm.owner_phone} onChange={e => setSaleForm({...saleForm, owner_phone: e.target.value})} /></div>
+                    <div><label style={sl}>Seller Phone</label><input className="input" value={saleForm.seller_phone} onChange={e => setSaleForm({...saleForm, seller_phone: e.target.value})} /></div>
+                    <div><label style={sl}>Reseller Phone</label><input className="input" value={saleForm.reseller_phone} onChange={e => setSaleForm({...saleForm, reseller_phone: e.target.value})} /></div>
+                    <div><label style={sl}>Buyer Phone</label><input className="input" value={saleForm.buyer_phone} onChange={e => setSaleForm({...saleForm, buyer_phone: e.target.value})} /></div>
+                  </div>
+                </div>
+
+              </div>
+
+              <div style={{ marginTop: "32px", paddingTop: "24px", borderTop: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ fontSize: "18px", fontWeight: 700 }}>
+                  Estimated Profit: <span style={{ color: "var(--green)" }}>₹{(Number(saleForm.sold_price) - Number(saleForm.owner_price || 0)).toLocaleString("en-IN")}</span>
+                </div>
+                <div style={{ display: "flex", gap: "12px" }}>
+                   <select className="input" style={{ width: "auto" }} value={saleForm.product_id} onChange={e => setSaleForm({...saleForm, product_id: e.target.value})}>
+                     <option value="">Link to Product</option>
+                     {products.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
+                   </select>
+                   <button onClick={saveSale} disabled={savingSale} className="btn btn-gold" style={{ padding: "12px 40px" }}>Record Deal</button>
+                </div>
               </div>
             </div>
-            <div style={{ background: "var(--card)", borderRadius: "14px", overflow: "hidden" }}>
-              <table style={{ width: "100%", textAlign: "left", fontSize: "13px" }}>
-                <thead style={{ background: "rgba(255,215,0,0.05)" }}>
-                  <tr>
-                    <th style={{ padding: "12px" }}>ID</th>
-                    <th>Product</th>
-                    <th>Customer</th>
-                    <th>Sold</th>
-                    <th style={{ color: "var(--green)" }}>Profit</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sales.map(s => (
-                    <tr key={s.id} style={{ borderBottom: "1px solid var(--border)" }}>
-                      <td style={{ padding: "12px", fontWeight: 700 }}>{s.transaction_id}</td>
-                      <td>{s.products?.title}</td>
-                      <td>{s.customers?.name}</td>
-                      <td>₹{s.sold_price}</td>
-                      <td style={{ color: "var(--green)", fontWeight: 700 }}>₹{s.profit}</td>
+
+            <div style={{ background: "var(--card)", borderRadius: "14px", overflow: "hidden", border: "1px solid var(--border)" }}>
+               <div style={{ padding: "20px", background: "rgba(255,215,0,0.02)", borderBottom: "1px solid var(--border)", fontWeight: 700 }}>Recent Deals</div>
+               <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", textAlign: "left", fontSize: "13px", borderCollapse: "collapse" }}>
+                  <thead style={{ background: "rgba(255,215,0,0.05)", textTransform: "uppercase", letterSpacing: "1px" }}>
+                    <tr>
+                      <th style={{ padding: "14px" }}>Deal ID</th>
+                      <th>Account</th>
+                      <th>Owner</th>
+                      <th>Sold Price</th>
+                      <th style={{ color: "var(--green)" }}>Profit</th>
+                      <th>Logins</th>
+                      <th>1st Unlink</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {sales.map(s => (
+                      <tr key={s.id} style={{ borderBottom: "1px solid var(--border)" }}>
+                        <td style={{ padding: "14px", fontWeight: 700 }}>{s.transaction_id || "N/A"}</td>
+                        <td>{s.products?.title || "Manual Entry"}</td>
+                        <td>{s.account_owner || "—"}</td>
+                        <td>₹{Number(s.sold_price).toLocaleString("en-IN")}</td>
+                        <td style={{ color: "var(--green)", fontWeight: 700 }}>₹{Number(s.profit).toLocaleString("en-IN")}</td>
+                        <td><span style={{ fontSize: "11px", background: "var(--bg2)", padding: "2px 6px", borderRadius: "4px" }}>{s.logins || "None"}</span></td>
+                        <td>{s.unlinking_1 ? <span style={{ color: "var(--gold)", fontSize: "11px" }}>{s.unlinking_1} ({s.unlink_range_1})</span> : "—"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+               </div>
             </div>
           </div>
         )}
@@ -488,3 +658,8 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
+// ── New Section Styles ──────────────────────────────────────
+const sh = { fontSize: "14px", fontWeight: 800, color: "var(--gold)", marginBottom: "16px", textTransform: "uppercase", letterSpacing: "1px", borderLeft: "3px solid var(--gold)", paddingLeft: "10px" };
+const sg = { display: "grid", gap: "16px" };
+const sl = { display: "block", fontSize: "11px", fontWeight: 700, color: "var(--muted)", marginBottom: "6px", textTransform: "uppercase" };

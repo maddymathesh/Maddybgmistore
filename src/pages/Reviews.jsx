@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../supabase";
+import { supabase } from "../utils/supabase";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ReviewForm from "../components/ReviewForm";

@@ -5,7 +5,7 @@
  *   - isAdmin checked via AuthContext (UID match from .env)
  */
 import { useEffect, useState } from "react";
-import { supabase } from "../../supabase";
+import { supabase } from "../../utils/supabase";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -19,11 +19,13 @@ const ls = {
   textTransform: "uppercase", marginBottom: "7px",
 };
 
+const LOGIN_OPTIONS = ["Facebook", "X", "Apple ID", "Game Center", "Google Play Games"];
+
 // ── Empty form defaults ───────────────────────────────────────
 const EMPTY_PRODUCT = {
   title: "", description: "", price: "",
   category: "Budget", status: "available",
-  youtubeUrl: "", loginType: "",
+  youtubeUrl: "", loginType: [], // Store as array internally for checkboxes
 };
 const EMPTY_REVIEW = {
   name: "", text: "", stars: 5,
@@ -118,15 +120,17 @@ export default function AdminDashboard() {
         category: productForm.category,
         status: productForm.status,
         youtube_url: productForm.youtubeUrl,
-        login_type: productForm.loginType,
+        login_type: productForm.loginType.join(", "), // Join for database
         available: productForm.status === "available",
       };
       if (editId) {
-        await supabase.from('products').update(data).eq('id', editId);
+        const { error } = await supabase.from('products').update(data).eq('id', editId);
+        if (error) throw error;
         toast.success("Product updated!");
         setEditId(null);
       } else {
-        await supabase.from('products').insert([data]);
+        const { error } = await supabase.from('products').insert([data]);
+        if (error) throw error;
         toast.success("Product added!");
       }
       setProductForm(EMPTY_PRODUCT);
@@ -137,8 +141,12 @@ export default function AdminDashboard() {
 
   const deleteProduct = async (id) => {
     if (!confirm("Delete product?")) return;
-    await supabase.from('products').delete().eq('id', id);
-    fetchData();
+    const { error } = await supabase.from('products').delete().eq('id', id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Product deleted");
+      fetchData();
+    }
   };
 
   // ── Review CRUD ────────────────────────────────────────────
@@ -272,26 +280,106 @@ export default function AdminDashboard() {
             <div style={{ background: "var(--card)", padding: "24px", borderRadius: "14px", border: "1px solid var(--border-gold)" }}>
               <h3 style={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px" }}><Plus size={18}/> {editId ? "Edit" : "Add"} Product</h3>
               <div style={{ display: "grid", gap: "12px" }}>
-                <input className="input" placeholder="Title" value={productForm.title} onChange={e => setProductForm({...productForm, title: e.target.value})} />
-                <textarea className="input" placeholder="Description" value={productForm.description} onChange={e => setProductForm({...productForm, description: e.target.value})} />
-                <input className="input" type="number" placeholder="Price" value={productForm.price} onChange={e => setProductForm({...productForm, price: e.target.value})} />
+                <input className="input" placeholder="YouTube Video URL" value={productForm.youtubeUrl} onChange={e => setProductForm({...productForm, youtubeUrl: e.target.value})} />
+                <input className="input" placeholder="Account Title (e.g. M416 Maxed 60K UC)" value={productForm.title} onChange={e => setProductForm({...productForm, title: e.target.value})} />
+                <textarea className="input" placeholder="Account Description (items, skins, levels...)" rows={5} value={productForm.description} onChange={e => setProductForm({...productForm, description: e.target.value})} />
+                
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <input className="input" type="number" placeholder="Price (₹)" value={productForm.price} onChange={e => setProductForm({...productForm, price: e.target.value})} />
+                  <select className="input" value={productForm.category} onChange={e => setProductForm({...productForm, category: e.target.value})}>
+                    <option value="Budget">Budget</option>
+                    <option value="Mid Range">Mid Range</option>
+                    <option value="Premium">Premium</option>
+                    <option value="Ultra Premium">Ultra Premium</option>
+                  </select>
+                </div>
+
+                <div style={{ padding: "10px", background: "rgba(255,215,0,0.05)", borderRadius: "8px", border: "1px solid rgba(255,215,0,0.1)" }}>
+                  <label style={ls}>Login Type</label>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                    {LOGIN_OPTIONS.map(opt => (
+                      <label key={opt} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", cursor: "pointer" }}>
+                        <input type="checkbox" checked={productForm.loginType.includes(opt)} 
+                          onChange={e => {
+                            if (e.target.checked && productForm.loginType.length >= 2) {
+                              return toast.error("Maximum 2 login types allowed");
+                            }
+                            const val = e.target.checked 
+                              ? [...productForm.loginType, opt]
+                              : productForm.loginType.filter(t => t !== opt);
+                            setProductForm({...productForm, loginType: val});
+                          }} 
+                        />
+                        {opt}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
                 <select className="input" value={productForm.status} onChange={e => setProductForm({...productForm, status: e.target.value})}>
                   <option value="available">Available</option>
                   <option value="sold">Sold</option>
+                  <option value="coming_soon">Coming Soon</option>
                 </select>
-                <button onClick={saveProduct} disabled={savingProduct} className="btn btn-gold">{savingProduct ? "..." : "Save Product"}</button>
+                
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <button onClick={saveProduct} disabled={savingProduct} className="btn btn-gold" style={{ flex: 1 }}>
+                    {savingProduct ? "Saving..." : editId ? "Update Product" : "Save Product"}
+                  </button>
+                  {editId && (
+                    <button onClick={() => { setEditId(null); setProductForm(EMPTY_PRODUCT); }} className="btn btn-outline">Cancel</button>
+                  )}
+                </div>
               </div>
             </div>
-            <div style={{ background: "var(--card)", borderRadius: "14px", overflow: "hidden" }}>
-              {products.map(p => (
-                <div key={p.id} style={{ display: "flex", justifyContent: "space-between", padding: "16px", borderBottom: "1px solid var(--border)" }}>
-                  <div>
-                    <div style={{ fontWeight: 700 }}>{p.title}</div>
-                    <div style={{ fontSize: "12px", color: "var(--muted)" }}>₹{p.price} · {p.status}</div>
+            <div style={{ background: "var(--card)", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.05)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+              <div style={{ padding: "20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(255,215,0,0.02)" }}>
+                <h3 style={{ fontSize: "16px", fontWeight: 700 }}>Account Inventory</h3>
+                <span style={{ fontSize: "12px", color: "var(--muted)" }}>{products.length} Items</span>
+              </div>
+              
+              <div style={{ maxHeight: "700px", overflowY: "auto" }}>
+                {products.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "100px 20px", color: "var(--muted)" }}>
+                    <div style={{ fontSize: "40px", marginBottom: "16px" }}>📦</div>
+                    <p style={{ fontSize: "14px" }}>No accounts found in Supabase.</p>
+                    <p style={{ fontSize: "12px", marginTop: "8px" }}>Start by adding a new product on the left.</p>
                   </div>
-                  <button onClick={() => deleteProduct(p.id)} style={{ color: "#ef4444" }}><Trash2 size={16}/></button>
-                </div>
-              ))}
+                ) : products.map(p => (
+                  <div key={p.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px", borderBottom: "1px solid var(--border)", transition: "background .2s" }} className="product-item">
+                    <div style={{ flex: 1, minWidth: 0, marginRight: "16px" }}>
+                      <div style={{ fontWeight: 700, fontSize: "14px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", color: "var(--text)" }}>{p.title}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "4px" }}>
+                        <span style={{ fontSize: "13px", fontWeight: 800, color: "var(--gold)" }}>₹{Number(p.price).toLocaleString("en-IN")}</span>
+                        <span style={{ width: "3px", height: "3px", borderRadius: "50%", background: "var(--muted)" }}></span>
+                        <span style={{ 
+                          fontSize: "10px", 
+                          fontWeight: 900, 
+                          color: p.status === 'available' ? "var(--green)" : p.status === 'coming_soon' ? "var(--gold)" : "#ef4444",
+                          textTransform: "uppercase" 
+                        }}>
+                          {p.status.replace('_', ' ')}
+                        </span>
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", gap: "6px" }}>
+                      <button onClick={() => { 
+                        setEditId(p.id); 
+                        setProductForm({ 
+                          title: p.title || "", 
+                          description: p.description || "", 
+                          price: p.price || "", 
+                          category: p.category || "Budget", 
+                          status: p.status || "available", 
+                          youtubeUrl: p.youtube_url || "", 
+                          loginType: (p.login_type || "").split(", ").filter(Boolean) 
+                        }); 
+                      }} style={{ padding: "8px", borderRadius: "8px", background: "rgba(255,215,0,0.1)", color: "var(--gold)", border: "1px solid rgba(255,215,0,0.2)", cursor: "pointer", transition: "all .2s" }} title="Edit"><Pencil size={16}/></button>
+                      <button onClick={() => deleteProduct(p.id)} style={{ padding: "8px", borderRadius: "8px", background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", cursor: "pointer", transition: "all .2s" }} title="Delete"><Trash2 size={16}/></button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}

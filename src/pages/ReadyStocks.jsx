@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../supabase";
+import { supabase } from "../utils/supabase";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
@@ -31,19 +31,50 @@ const TgIcon = () => (
 );
 
 // ── Login badge ───────────────────────────────────────────────
+// ── Login badge ───────────────────────────────────────────────
 function LoginBadge({ type }) {
   const t = (type || "").toLowerCase();
-  const isX = t.includes("twitter") || t === "x";
-  const isFb = t.includes("facebook") || t.includes("fb");
+  
+  // Define icons/colors for each platform
+  let icon = "G";
+  let color = "#4285F4";
+  let bg = "rgba(66,133,244,0.15)";
+  let border = "rgba(66,133,244,0.4)";
+
+  if (t.includes("facebook") || t === "fb") {
+    icon = "f";
+    color = "#4A9FFF";
+    bg = "rgba(24,119,242,0.15)";
+    border = "rgba(24,119,242,0.4)";
+  } else if (t.includes("twitter") || t === "x") {
+    icon = "𝕏";
+    color = "#fff";
+    bg = "rgba(0,0,0,0.5)";
+    border = "rgba(255,255,255,0.2)";
+  } else if (t.includes("apple")) {
+    icon = "";
+    color = "#fff";
+    bg = "rgba(255,255,255,0.1)";
+    border = "rgba(255,255,255,0.3)";
+  } else if (t.includes("game center")) {
+    icon = "🎮";
+    color = "#FF4B2B";
+    bg = "rgba(255,75,43,0.15)";
+    border = "rgba(255,75,43,0.4)";
+  } else if (t.includes("google")) {
+    icon = "G";
+    color = "#4285F4";
+    bg = "rgba(66,133,244,0.15)";
+    border = "rgba(66,133,244,0.4)";
+  }
+
   return (
     <span style={{
       display: "inline-flex", alignItems: "center", gap: "5px",
       padding: "4px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: 600,
-      background: isX ? "rgba(0,0,0,0.5)" : isFb ? "rgba(24,119,242,0.15)" : "rgba(66,133,244,0.15)",
-      border: isX ? "1px solid rgba(255,255,255,0.2)" : isFb ? "1px solid rgba(24,119,242,0.4)" : "1px solid rgba(66,133,244,0.4)",
-      color: isX ? "#fff" : isFb ? "#4A9FFF" : "#4285F4",
+      background: bg, border: `1px solid ${border}`, color: color,
     }}>
-      {isX ? "𝕏" : isFb ? "f" : "G"} {type}
+      <span style={{ fontSize: "14px" }}>{icon}</span> {type}
     </span>
   );
 }
@@ -60,16 +91,9 @@ function StockCard({ stock }) {
   return (
     <div style={{ background: "var(--card)", border: "1px solid rgba(255,215,0,0.18)", borderRadius: "16px", overflow: "hidden", marginBottom: "24px" }}>
 
-      {/* Tier badge */}
-      <div style={{ padding: "14px 20px 0", display: "flex", alignItems: "center", gap: "8px" }}>
-        <span style={{ background: "linear-gradient(135deg,#f97316,#ef4444)", color: "#fff", fontSize: "11px", fontWeight: 700, padding: "3px 10px", borderRadius: "100px", letterSpacing: "1px", fontFamily: "var(--font-h)", textTransform: "uppercase" }}>
-          🔥 {stock.category || "Premium"} Account
-        </span>
-      </div>
-
-      {/* Video */}
+      {/* Video at top */}
       {embed && (
-        <div style={{ margin: "12px 20px 0", borderRadius: "10px", overflow: "hidden", background: "#000" }}>
+        <div style={{ borderRadius: "16px 16px 0 0", overflow: "hidden", background: "#000", borderBottom: "1px solid rgba(255,215,0,0.15)" }}>
           <div style={{ position: "relative", paddingBottom: "56.25%", height: 0 }}>
             <iframe src={embed} title="Account Preview"
               allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen
@@ -77,6 +101,23 @@ function StockCard({ stock }) {
           </div>
         </div>
       )}
+
+      {/* Tier badge + Status */}
+      <div style={{ padding: "16px 20px 0", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
+        <span style={{ background: "linear-gradient(135deg,#f97316,#ef4444)", color: "#fff", fontSize: "11px", fontWeight: 700, padding: "3px 10px", borderRadius: "100px", letterSpacing: "1px", fontFamily: "var(--font-h)", textTransform: "uppercase" }}>
+          🔥 {stock.category || "Premium"} Account
+        </span>
+        {stock.status && stock.status !== 'available' && (
+          <span style={{ 
+            background: stock.status === 'sold' ? "rgba(239,68,68,0.15)" : "rgba(251,191,36,0.15)", 
+            color: stock.status === 'sold' ? "#ef4444" : "#FBBF24",
+            border: stock.status === 'sold' ? "1px solid rgba(239,68,68,0.3)" : "1px solid rgba(251,191,36,0.3)",
+            fontSize: "10px", fontWeight: 800, padding: "3px 10px", borderRadius: "100px", textTransform: "uppercase" 
+          }}>
+            {stock.status.replace('_', ' ')}
+          </span>
+        )}
+      </div>
 
       {/* Title + badges */}
       <div style={{ padding: "16px 20px 12px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
@@ -103,30 +144,35 @@ function StockCard({ stock }) {
       </div>
 
       {/* Price + Buttons */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-5 flex-wrap">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-5 flex-wrap">
         {user ? (
           <>
-            <div style={{ fontFamily: "var(--font-h)", fontSize: "22px", fontWeight: 800, color: "var(--gold)", background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.25)", borderRadius: "10px", padding: "8px 18px", alignSelf: "flex-start" }}>
-              ₹{Number(stock.price).toLocaleString("en-IN")} INR
+            <div style={{ flex: 1, minWidth: "150px" }}>
+              <div style={{ fontSize: "11px", color: "var(--muted)", textTransform: "uppercase", fontWeight: 700, marginBottom: "4px", letterSpacing: "1px" }}>Price</div>
+              <div style={{ fontFamily: "var(--font-h)", fontSize: "24px", fontWeight: 900, color: "var(--gold)" }}>
+                ₹{Number(stock.price).toLocaleString("en-IN")}
+              </div>
             </div>
-            <a href={wa} target="_blank" rel="noreferrer"
-              className="w-full sm:w-auto"
-              style={{ display: "inline-flex", justifyContent: "center", alignItems: "center", gap: "7px", padding: "10px 22px", borderRadius: "8px", background: "#22C55E", color: "#fff", fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "13px", textDecoration: "none", letterSpacing: "0.5px" }}>
-              <WaIcon /> BUY NOW
-            </a>
-            <a href="https://t.me/MBSxMADDY17" target="_blank" rel="noreferrer"
-              className="w-full sm:w-auto"
-              style={{ display: "inline-flex", justifyContent: "center", alignItems: "center", gap: "7px", padding: "10px 22px", borderRadius: "8px", background: "#229ED9", color: "#fff", fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "13px", textDecoration: "none", letterSpacing: "0.5px" }}>
-              <TgIcon /> BUY NOW
-            </a>
+            <div style={{ display: "flex", gap: "10px", flex: 1, width: "100%", flexWrap: "wrap" }}>
+              <a href={wa} target="_blank" rel="noreferrer"
+                className="btn-wa"
+                style={{ flex: 1, minWidth: "140px", display: "inline-flex", justifyContent: "center", alignItems: "center", gap: "8px", padding: "12px 16px", borderRadius: "12px", background: "#22C55E", color: "#fff", fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "13px", textDecoration: "none", transition: "all .2s" }}>
+                <WaIcon /> WhatsApp
+              </a>
+              <a href="https://t.me/MBSxMADDY17" target="_blank" rel="noreferrer"
+                className="btn-tg"
+                style={{ flex: 1, minWidth: "140px", display: "inline-flex", justifyContent: "center", alignItems: "center", gap: "8px", padding: "12px 16px", borderRadius: "12px", background: "#229ED9", color: "#fff", fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "13px", textDecoration: "none", transition: "all .2s" }}>
+                <TgIcon /> Telegram
+              </a>
+            </div>
           </>
         ) : (
           <button
             onClick={() => navigate("/login", { state: { from: "/readystocks" } })}
-            className="w-full sm:w-auto"
-            style={{ display: "inline-flex", justifyContent: "center", alignItems: "center", gap: "10px", padding: "12px 24px", borderRadius: "10px", background: "linear-gradient(135deg,rgba(255,215,0,0.12),rgba(255,215,0,0.06))", border: "1px solid rgba(255,215,0,0.35)", color: "var(--gold)", fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "13px", letterSpacing: "0.5px", cursor: "pointer", transition: "all .2s" }}
+            className="w-full"
+            style={{ display: "inline-flex", justifyContent: "center", alignItems: "center", gap: "10px", padding: "14px 24px", borderRadius: "12px", background: "linear-gradient(135deg,rgba(255,215,0,0.12),rgba(255,215,0,0.06))", border: "1px solid rgba(255,215,0,0.35)", color: "var(--gold)", fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "14px", letterSpacing: "0.5px", cursor: "pointer", transition: "all .3s" }}
           >
-            <Lock size={15} /> Login to See Price
+            <Lock size={16} /> Login to See Price & Contact
           </button>
         )}
       </div>
@@ -140,7 +186,7 @@ export default function ReadyStocks() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
-  const [status, setStatus] = useState("available");
+  const [status, setStatus] = useState("all");
 
   useEffect(() => {
     const fetchStocks = async () => {
@@ -160,7 +206,7 @@ export default function ReadyStocks() {
       s.title?.toLowerCase().includes(search.toLowerCase()) ||
       s.description?.toLowerCase().includes(search.toLowerCase());
     const matchCat = category === "all" || s.category?.toLowerCase() === category.toLowerCase();
-    const matchStatus = status === "all" || (status === "available" ? s.status === "available" : s.status !== "available");
+    const matchStatus = status === "all" || s.status === status;
     return matchSearch && matchCat && matchStatus;
   });
 
@@ -180,12 +226,18 @@ export default function ReadyStocks() {
           <div style={{ maxWidth: "960px", margin: "0 auto" }}>
             <div style={{ background: "var(--card)", padding: "16px", borderRadius: "14px", display: "flex", gap: "16px", flexWrap: "wrap", marginBottom: "32px" }}>
               <input type="text" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} className="input" style={{ flex: 1 }} />
-              <select value={category} onChange={e => setCategory(e.target.value)} className="input" style={{ width: "180px" }}>
-                <option value="all">All Categories</option>
-                <option value="budget">Budget</option>
-                <option value="midrange">Mid Range</option>
-                <option value="premium">Premium</option>
-                <option value="ultrapremium">Ultra Premium</option>
+              <select value={category} onChange={e => setCategory(e.target.value)} className="input" style={{ width: "160px" }}>
+                <option value="all">All Tiers</option>
+                <option value="Budget">Budget</option>
+                <option value="Mid Range">Mid Range</option>
+                <option value="Premium">Premium</option>
+                <option value="Ultra Premium">Ultra Premium</option>
+              </select>
+              <select value={status} onChange={e => setStatus(e.target.value)} className="input" style={{ width: "160px" }}>
+                <option value="all">All Status</option>
+                <option value="available">Available</option>
+                <option value="coming_soon">Coming Soon</option>
+                <option value="sold">Sold</option>
               </select>
             </div>
 

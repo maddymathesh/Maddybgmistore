@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { storage } from "../firebase";
-import { supabase } from "../supabase";
+import { supabase } from "../utils/supabase";
 import toast from "react-hot-toast";
 import { Star, Loader2, LogIn, Image as ImageIcon, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";

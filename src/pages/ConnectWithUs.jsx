@@ -29,15 +29,8 @@ const YtIcon = () => (
 /* ─── Channel data ───────────────────────────────────────────── */
 const links = [
   {
-    label: "WHATSAPP GROUP",
-    href: "https://chat.whatsapp.com/Itiwa47TCSoJnlmNvJalVG",
-    bg: "bg-[#25D366]",
-    glow: "rgba(37,211,102,0.45)",
-    Icon: WaIcon,
-  },
-  {
     label: "WHATSAPP CHANNEL",
-    href: "https://whatsapp.com/channel/0029VaAqUqaInlqnZZteEl2x",
+    href: "https://whatsapp.com/channel/0029VbAuBtrIXnlpr3jvnN13",
     bg: "bg-[#25D366]",
     glow: "rgba(37,211,102,0.45)",
     Icon: WaIcon,
@@ -45,6 +38,13 @@ const links = [
   {
     label: "TELEGRAM CHANNEL",
     href: "https://t.me/maddy_bgmistore",
+    bg: "bg-[#229ED9]",
+    glow: "rgba(34,158,217,0.45)",
+    Icon: TgIcon,
+  },
+  {
+    label: "TELEGRAM CHANNEL [PROOFS]",
+    href: "https://t.me/maddy_bgmistoreproofs",
     bg: "bg-[#229ED9]",
     glow: "rgba(34,158,217,0.45)",
     Icon: TgIcon,
@@ -124,19 +124,19 @@ export default function ConnectWithUs() {
 
           {/* ── BUTTONS ─────────────────────────────────────────── */}
           <div className="w-full max-w-[420px] md:max-w-[500px] gap-3 sm:gap-4 px-4 sm:px-5 mx-auto"
-            style={{ 
-              position: "relative", zIndex: 2, 
-              display: "flex", 
+            style={{
+              position: "relative", zIndex: 2,
+              display: "flex",
               flexDirection: "column"
             }}
           >
-          {links.map(({ label, href, bg, glow, Icon }) => (
-            <a
-              key={label}
-              href={href}
-              target="_blank"
-              rel="noreferrer"
-              className={`
+            {links.map(({ label, href, bg, glow, Icon }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noreferrer"
+                className={`
                 ${bg}
                 flex items-center justify-center gap-3 sm:gap-4
                 h-[56px] sm:h-[62px] rounded-xl
@@ -150,19 +150,19 @@ export default function ConnectWithUs() {
 >>>>>>> 77e2c5b308d099845ea36e1c34fd68d2f67c1bef
                 hover:scale-[1.02] hover:brightness-110 active:scale-[0.98]
               `}
-              style={{
-                width: "100%",
-                padding: "0 20px",
-                fontFamily: "var(--font-h)",
-                boxShadow: `0 8px 24px ${glow}`,
-              }}
-            >
-              <span className="flex items-center justify-center w-[20px] h-[20px] sm:w-[24px] sm:h-[24px]">
-                <Icon />
-              </span>
-              <span style={{ flex: 1, textAlign: "center", transform: "translateX(-12px)" }}>{label}</span>
-            </a>
-          ))}
+                style={{
+                  width: "100%",
+                  padding: "0 20px",
+                  fontFamily: "var(--font-h)",
+                  boxShadow: `0 8px 24px ${glow}`,
+                }}
+              >
+                <span className="flex items-center justify-center w-[20px] h-[20px] sm:w-[24px] sm:h-[24px]">
+                  <Icon />
+                </span>
+                <span style={{ flex: 1, textAlign: "center", transform: "translateX(-12px)" }}>{label}</span>
+              </a>
+            ))}
           </div>
         </section>
 

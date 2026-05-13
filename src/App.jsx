@@ -10,12 +10,16 @@ import WhatsAppFloat from "./components/WhatsAppFloat";
 const Home = lazy(() => import("./pages/Home"));
 const Buy = lazy(() => import("./pages/Buy"));
 const Sell = lazy(() => import("./pages/Sell"));
+const Exchange = lazy(() => import("./pages/Exchange"));
+const UCPurchase = lazy(() => import("./pages/services/UCPurchase"));
+const XsuitGift = lazy(() => import("./pages/services/XsuitGift"));
+const SupercarGift = lazy(() => import("./pages/services/SupercarGift"));
 const Recovery = lazy(() => import("./pages/Recovery"));
 const Reviews = lazy(() => import("./pages/Reviews"));
 const ConnectWithUs = lazy(() => import("./pages/ConnectWithUs"));
 const ReadyStocks = lazy(() => import("./pages/ReadyStocks"));
 const Login = lazy(() => import("./pages/Login"));
-const PaymentPage=lazy(()=>import("./pages/PaymentPage"));
+const PaymentPage = lazy(() => import("./pages/PaymentPage"));
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
 const PageNotFound = lazy(() => import("./pages/PageNotFound"));
 
@@ -115,6 +119,38 @@ export default function App() {
             element={
               <Suspense fallback={<PageLoader />}>
                 <Sell />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/exchange"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <Exchange />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/services/uc"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <UCPurchase />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/services/xsuit"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <XsuitGift />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/services/supercar"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <SupercarGift />
               </Suspense>
             }
           />

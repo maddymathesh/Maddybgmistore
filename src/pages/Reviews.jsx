@@ -214,7 +214,14 @@ export default function Reviews() {
                         />
                       </div>
                     )}
-                    <span className="review-verified">✅ Verified Buyer</span>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px", marginTop: "12px" }}>
+                      <span className="review-verified">✅ Verified Buyer</span>
+                      {r.trackingId && (
+                        <span style={{ fontFamily: "var(--font-h)", fontSize: "12px", color: "var(--gold)", background: "rgba(255,215,0,0.1)", padding: "4px 10px", borderRadius: "6px", border: "1px solid rgba(255,215,0,0.2)" }}>
+                          Tracking ID: {r.trackingId}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

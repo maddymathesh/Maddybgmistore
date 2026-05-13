@@ -36,7 +36,7 @@ const EMPTY_PRODUCT = {
 };
 const EMPTY_REVIEW = {
   name: "", text: "", stars: 5,
-  image: "", date: "",
+  image: "", date: "", trackingId: "",
 };
 
 function getInitials(name) {
@@ -154,6 +154,7 @@ export default function AdminDashboard() {
         text: reviewForm.text,
         stars: Number(reviewForm.stars),
         image: reviewForm.image || "",
+        trackingId: reviewForm.trackingId || "",
         date: reviewForm.date || new Date().toLocaleString("en-IN", { month: "long", year: "numeric" }),
         initials: getInitials(reviewForm.name),
         createdAt: serverTimestamp(),
@@ -392,6 +393,11 @@ export default function AdminDashboard() {
                   <label style={ls}>Image Proof URL (optional)</label>
                   <input className="input" placeholder="https://i.imgur.com/..." value={reviewForm.image}
                     onChange={e => setReviewForm({ ...reviewForm, image: e.target.value })} />
+                </div>
+                <div>
+                  <label style={ls}>Tracking ID (optional)</label>
+                  <input className="input" placeholder="e.g. TRK-987654" value={reviewForm.trackingId}
+                    onChange={e => setReviewForm({ ...reviewForm, trackingId: e.target.value })} />
                 </div>
                 <div>
                   <label style={ls}>Review Text *</label>

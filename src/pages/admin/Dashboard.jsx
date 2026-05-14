@@ -21,33 +21,24 @@ const ls = {
   textTransform: "uppercase", marginBottom: "7px",
 };
 
-const LOGIN_OPTIONS = ["X", "Facebook", "Google Playgames", "Apple ID", "Game Center", "Whats App"];
-const GUARANTEE_OPTIONS = [
-  "37 days unlink Garuntee for Secondary Login",
-  "22 Days Unlink Garuntee for Secondary Login",
-  "75 Days Unlink Garuntee For Both logins",
-  "Single & Safe Login"
-];
+const LOGIN_OPTIONS = ["Facebook", "X", "Apple ID", "Game Center", "Google Play Games"];
 
 // ── Empty form defaults ───────────────────────────────────────
 const EMPTY_PRODUCT = {
   title: "", description: "", price: "",
   category: "Budget", status: "available",
-  youtubeUrl: "", 
-  primaryLogin: "X",
-  secondaryLogin: "null",
-  unlinkGuarantee: "Single & Safe Login"
+  youtubeUrl: "", loginType: [], // Store as array internally for checkboxes
 };
 const EMPTY_REVIEW = {
   name: "", text: "", stars: 5,
   image_url: "", tracking_id: "",
 };
-const EMPTY_UC = { uc_amount: "", bonus_uc: "", market_price: "", offer_price: "", status: "available", method: "view_login" };
+const EMPTY_UC = { uc_amount: "", market_price: "", offer_price: "" };
 const EMPTY_XSUIT = { name: "", price: "", image_url: "" };
 const EMPTY_CAR = { name: "", price: "", image_url: "", type: "One-Card" };
 const EMPTY_SALE = {
-  transaction_id: "",
-  owner_price: "", sold_price: "", profit: 0,
+  transaction_id: "", product_id: null, customer_id: null,
+  owner_price: "", sold_price: "",
   mode_of_deal: "Telegram",
   deal_date: new Date().toISOString().split('T')[0],
   link: "",
@@ -179,9 +170,7 @@ export default function AdminDashboard() {
         category: productForm.category,
         status: productForm.status,
         youtube_url: productForm.youtubeUrl,
-        primary_login: productForm.primaryLogin,
-        secondary_login: productForm.secondaryLogin === "null" ? null : productForm.secondaryLogin,
-        unlink_guarantee: productForm.unlinkGuarantee,
+        login_type: productForm.loginType.join(", "), // Join for database
         available: productForm.status === "available",
       };
       if (editId) {
@@ -298,19 +287,13 @@ export default function AdminDashboard() {
     if (!ucForm.uc_amount || !ucForm.offer_price) return toast.error("Required fields missing");
     setSavingUc(true);
     try {
-      const data = {
-        ...ucForm,
-        market_price: Number(ucForm.market_price),
-        offer_price: Number(ucForm.offer_price),
-        bonus_uc: Number(ucForm.bonus_uc || 0)
-      };
       if (ucEditId) {
-        const { error } = await supabase.from('uc_prices').update(data).eq('id', ucEditId);
+        const { error } = await supabase.from('uc_prices').update(ucForm).eq('id', ucEditId);
         if (error) throw error;
         toast.success("UC Pack updated!");
         setUcEditId(null);
       } else {
-        const { error } = await supabase.from('uc_prices').insert([data]);
+        const { error } = await supabase.from('uc_prices').insert([ucForm]);
         if (error) throw error;
         toast.success("UC Pack added!");
       }
@@ -434,21 +417,20 @@ export default function AdminDashboard() {
 
   // ── Sales CRUD ──────────────────────────────────────────────
   const saveSale = async () => {
+      console.log(saleForm);
     if (!saleForm.sold_price || !saleForm.owner_price) {
       return toast.error("Sold Price and Owner Price are required");
     }
-    console.log(saleForm);
     setSavingSale(true);
     try {
       const ownerPrice = Number(saleForm.owner_price);
       const soldPrice = Number(saleForm.sold_price);
-      const profit = soldPrice - ownerPrice;
+
 
       const { error } = await supabase.from('sales').insert([{ 
         ...saleForm, 
         owner_price: ownerPrice,
         sold_price: soldPrice,
-        profit: profit,
         updated_at: new Date().toISOString()
       }]);
 
@@ -521,25 +503,25 @@ export default function AdminDashboard() {
                   </select>
                 </div>
 
-                <div style={{ display: "grid", gap: "12px", padding: "12px", background: "rgba(255,215,0,0.05)", borderRadius: "10px", border: "1px solid rgba(255,215,0,0.12)" }}>
-                  <div>
-                    <label style={ls}>Primary Login</label>
-                    <select className="input" value={productForm.primaryLogin} onChange={e => setProductForm({...productForm, primaryLogin: e.target.value})}>
-                      {LOGIN_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label style={ls}>Secondary Login</label>
-                    <select className="input" value={productForm.secondaryLogin} onChange={e => setProductForm({...productForm, secondaryLogin: e.target.value})}>
-                      <option value="null">None (Single Login)</option>
-                      {LOGIN_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label style={ls}>Unlink Guarantee</label>
-                    <select className="input" value={productForm.unlinkGuarantee} onChange={e => setProductForm({...productForm, unlinkGuarantee: e.target.value})}>
-                      {GUARANTEE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                    </select>
+                <div style={{ padding: "10px", background: "rgba(255,215,0,0.05)", borderRadius: "8px", border: "1px solid rgba(255,215,0,0.1)" }}>
+                  <label style={ls}>Login Type</label>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                    {LOGIN_OPTIONS.map(opt => (
+                      <label key={opt} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", cursor: "pointer" }}>
+                        <input type="checkbox" checked={productForm.loginType.includes(opt)} 
+                          onChange={e => {
+                            if (e.target.checked && productForm.loginType.length >= 2) {
+                              return toast.error("Maximum 2 login types allowed");
+                            }
+                            const val = e.target.checked 
+                              ? [...productForm.loginType, opt]
+                              : productForm.loginType.filter(t => t !== opt);
+                            setProductForm({...productForm, loginType: val});
+                          }} 
+                        />
+                        {opt}
+                      </label>
+                    ))}
                   </div>
                 </div>
 
@@ -599,9 +581,7 @@ export default function AdminDashboard() {
                           category: p.category || "Budget", 
                           status: p.status || "available", 
                           youtubeUrl: p.youtube_url || "", 
-                          primaryLogin: p.primary_login || "X",
-                          secondaryLogin: p.secondary_login || "null",
-                          unlinkGuarantee: p.unlink_guarantee || "Single & Safe Login"
+                          loginType: (p.login_type || "").split(", ").filter(Boolean) 
                         }); 
                       }} style={{ padding: "8px", borderRadius: "8px", background: "rgba(255,215,0,0.1)", color: "var(--gold)", border: "1px solid rgba(255,215,0,0.2)", cursor: "pointer", transition: "all .2s" }} title="Edit"><Pencil size={16}/></button>
                       <button onClick={() => deleteProduct(p.id)} style={{ padding: "8px", borderRadius: "8px", background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", cursor: "pointer", transition: "all .2s" }} title="Delete"><Trash2 size={16}/></button>
@@ -792,32 +772,12 @@ export default function AdminDashboard() {
                   <input className="input" placeholder="e.g. 8,000 UC" value={ucForm.uc_amount} onChange={e => setUcForm({...ucForm, uc_amount: e.target.value})} />
                 </div>
                 <div>
-                  <label style={sl}>Bonus UC</label>
-                  <input className="input" placeholder="e.g. 60" type="number" value={ucForm.bonus_uc} onChange={e => setUcForm({...ucForm, bonus_uc: e.target.value})} />
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-                  <div>
-                    <label style={sl}>Market Price (₹)</label>
-                    <input className="input" placeholder="e.g. 7,500" type="number" value={ucForm.market_price} onChange={e => setUcForm({...ucForm, market_price: e.target.value})} />
-                  </div>
-                  <div>
-                    <label style={sl}>Our Offer Price (₹)</label>
-                    <input className="input" placeholder="e.g. 6,500" type="number" value={ucForm.offer_price} onChange={e => setUcForm({...ucForm, offer_price: e.target.value})} />
-                  </div>
+                  <label style={sl}>Market Price (₹)</label>
+                  <input className="input" placeholder="e.g. 7,500" type="number" value={ucForm.market_price} onChange={e => setUcForm({...ucForm, market_price: e.target.value})} />
                 </div>
                 <div>
-                  <label style={sl}>Purchase Method</label>
-                  <select className="input" value={ucForm.method} onChange={e => setUcForm({...ucForm, method: e.target.value})}>
-                    <option value="view_login">View Login UC (Facebook / X)</option>
-                    <option value="character_id">Character ID UC (In-game ID)</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={sl}>Status</label>
-                  <select className="input" value={ucForm.status} onChange={e => setUcForm({...ucForm, status: e.target.value})}>
-                    <option value="available">Available</option>
-                    <option value="sold_out">Sold Out</option>
-                  </select>
+                  <label style={sl}>Our Offer Price (₹)</label>
+                  <input className="input" placeholder="e.g. 6,500" type="number" value={ucForm.offer_price} onChange={e => setUcForm({...ucForm, offer_price: e.target.value})} />
                 </div>
                 <div style={{ display: "flex", gap: "8px" }}>
                   <button onClick={saveUc} disabled={savingUc} className="btn btn-gold w-full">{ucEditId ? "Update Pack" : "Save Pack"}</button>
@@ -827,24 +787,10 @@ export default function AdminDashboard() {
             </div>
             <div style={{ background: "var(--card)", borderRadius: "14px", overflow: "hidden", border: "1px solid var(--border)" }}>
               <div style={{ padding: "16px", fontWeight: 700, borderBottom: "1px solid var(--border)", background: "rgba(255,215,0,0.02)" }}>UC Price List</div>
-              {/* Market Demand Notice */}
-              <div style={{ margin: "16px", padding: "12px 16px", background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.25)", borderRadius: "10px", display: "flex", alignItems: "flex-start", gap: "10px" }}>
-                <span style={{ fontSize: "16px", flexShrink: 0 }}>💡</span>
-                <p style={{ margin: 0, fontSize: "12px", color: "rgba(251,191,36,0.85)", lineHeight: 1.7 }}>
-                  <strong>Note:</strong> UC prices fluctuate based on market demand and availability. Update prices regularly to reflect the current market rate.
-                </p>
-              </div>
               {ucPrices.map(u => (
-                <div key={u.id} style={{ display: "flex", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid var(--border)", opacity: u.status === 'sold_out' ? 0.6 : 1 }}>
+                <div key={u.id} style={{ display: "flex", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid var(--border)" }}>
                   <div>
-                    <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                      {u.uc_amount}
-                      {u.bonus_uc > 0 && <span style={{ fontSize: "10px", background: "var(--gold-dim)", color: "var(--gold)", padding: "2px 6px", borderRadius: "4px" }}>+{u.bonus_uc} Bonus</span>}
-                      <span style={{ fontSize: "10px", padding: "2px 8px", borderRadius: "4px", background: u.method === 'character_id' ? "rgba(249,115,22,0.1)" : "rgba(59,130,246,0.1)", color: u.method === 'character_id' ? "#f97316" : "#60a5fa", fontWeight: 700 }}>
-                        {u.method === 'character_id' ? "🎮 Char ID" : "🔑 View Login"}
-                      </span>
-                      {u.status === 'sold_out' && <span style={{ fontSize: "10px", background: "rgba(239,68,68,0.1)", color: "#ef4444", padding: "2px 6px", borderRadius: "4px" }}>SOLD OUT</span>}
-                    </div>
+                    <div style={{ fontWeight: 700 }}>{u.uc_amount}</div>
                     <div style={{ fontSize: "12px", color: "var(--muted)" }}>
                       Market: <span style={{ textDecoration: "line-through" }}>₹{u.market_price}</span>
                     </div>
@@ -852,17 +798,7 @@ export default function AdminDashboard() {
                   <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                     <div style={{ color: "var(--green)", fontWeight: 700 }}>₹{u.offer_price}</div>
                     <div style={{ display: "flex", gap: "6px" }}>
-                      <button onClick={() => { 
-                        setUcEditId(u.id); 
-                        setUcForm({ 
-                          uc_amount: u.uc_amount, 
-                          bonus_uc: u.bonus_uc || "",
-                          market_price: u.market_price, 
-                          offer_price: u.offer_price,
-                          status: u.status || "available",
-                          method: u.method || "view_login"
-                        }); 
-                      }} 
+                      <button onClick={() => { setUcEditId(u.id); setUcForm({ uc_amount: u.uc_amount, market_price: u.market_price, offer_price: u.offer_price }); }} 
                         style={{ color: "var(--gold)", background: "none", border: "none", cursor: "pointer" }}><Pencil size={14}/></button>
                       <button onClick={() => deleteUc(u.id)} style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}><Trash2 size={16}/></button>
                     </div>

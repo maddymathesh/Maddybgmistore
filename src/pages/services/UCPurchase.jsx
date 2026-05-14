@@ -1,27 +1,18 @@
 import { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import { MessageCircle, Send, Loader2, Zap, Clock, Shield, LogIn, Gamepad2, AlertTriangle, CheckCircle, ChevronRight } from "lucide-react";
+import { MessageCircle, Send, Loader2, Clock, Shield, LogIn, Gamepad2, AlertTriangle, CheckCircle } from "lucide-react";
 import { supabase } from "../../utils/supabase";
 
-// ── UC Coin SVG ────────────────────────────────────────────────
-const UcCoin = ({ size = 28 }) => (
-  <svg width={size} height={size} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="16" cy="16" r="15" fill="url(#ucGold)" stroke="#B8860B" strokeWidth="1.5"/>
-    <circle cx="16" cy="16" r="11" fill="url(#ucGold2)" stroke="#B8860B" strokeWidth="0.8" opacity="0.7"/>
-    <text x="16" y="21" textAnchor="middle" fontSize="11" fontWeight="900" fill="#7A5C00" fontFamily="Arial,sans-serif">UC</text>
-    <defs>
-      <radialGradient id="ucGold" cx="35%" cy="30%" r="70%">
-        <stop offset="0%" stopColor="#FFE566"/>
-        <stop offset="60%" stopColor="#FFD700"/>
-        <stop offset="100%" stopColor="#C8980A"/>
-      </radialGradient>
-      <radialGradient id="ucGold2" cx="40%" cy="35%" r="65%">
-        <stop offset="0%" stopColor="#FFF0A0" stopOpacity="0.8"/>
-        <stop offset="100%" stopColor="#FFD700" stopOpacity="0"/>
-      </radialGradient>
-    </defs>
-  </svg>
+// ── UC Image Icon ────────────────────────────────────────────
+const UcImg = ({ size = 28, style = {} }) => (
+  <img
+    src="/UC.png"
+    alt="UC"
+    width={size}
+    height={size}
+    style={{ objectFit: "contain", display: "inline-block", verticalAlign: "middle", ...style }}
+  />
 );
 
 // ── Method Procedures ─────────────────────────────────────────
@@ -66,9 +57,9 @@ function UcPackCard({ pack, accentColor, contactPrefix }) {
         </div>
       )}
 
-      {/* UC Coin top-right */}
-      <div style={{ position: "absolute", top: "18px", right: "18px" }}>
-        <UcCoin size={34} />
+      {/* UC Image top-right */}
+      <div style={{ position: "absolute", top: "16px", right: "16px" }}>
+        <UcImg size={38} />
       </div>
 
       {/* UC Amount */}
@@ -78,7 +69,7 @@ function UcPackCard({ pack, accentColor, contactPrefix }) {
         </div>
         {pack.bonus_uc > 0 && (
           <div style={{ color: "#FFD700", fontWeight: 700, fontSize: "13px", marginTop: "5px", display: "flex", alignItems: "center", gap: "5px" }}>
-            <UcCoin size={14} /> + {pack.bonus_uc} Bonus UC
+            <UcImg size={14} /> + {pack.bonus_uc} Bonus UC
           </div>
         )}
       </div>
@@ -146,7 +137,9 @@ export default function UCPurchase() {
 
         {/* ── HERO ───────────────────────────────────────────── */}
         <section style={{ padding: "80px 5% 48px", textAlign: "center", background: "linear-gradient(to bottom, rgba(255,215,0,0.05) 0%, transparent 100%)" }}>
-          <div className="badge" style={{ marginBottom: "20px" }}><Zap size={14} /> Instant Delivery</div>
+          <div className="badge" style={{ marginBottom: "20px" }}>
+            <UcImg size={16} style={{ marginRight: "4px" }} /> Instant Delivery
+          </div>
           <h1 className="stitle" style={{ fontSize: "clamp(34px,6vw,64px)", fontWeight: 900, marginBottom: "20px" }}>
             Premium <span style={{ color: "var(--gold)" }}>UC Purchase</span>
           </h1>
@@ -290,7 +283,7 @@ export default function UCPurchase() {
               </div>
             ) : activePacks.length === 0 ? (
               <div style={{ textAlign: "center", padding: "60px 20px", background: "var(--card)", borderRadius: "16px", border: "1px solid var(--border)" }}>
-                <UcCoin size={48} />
+                <UcImg size={52} />
                 <p style={{ color: "var(--muted)", marginTop: "16px", fontSize: "15px" }}>
                   No UC packs available for this method right now.<br />
                   <strong style={{ color: "var(--text)" }}>Contact us directly to check availability!</strong>

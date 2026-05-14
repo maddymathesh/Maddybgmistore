@@ -94,6 +94,7 @@ export default function AdminDashboard() {
 
   const [paymentLinks, setPaymentLinks] = useState([]);
   const [generatingLink, setGeneratingLink] = useState(false);
+  const [paymentForm, setPaymentForm] = useState({ customer_name: "", amount: "", note: "", expires_in: "24" });
 
   const [ucPrices, setUcPrices] = useState([]);
   const [ucForm, setUcForm] = useState(EMPTY_UC);
@@ -432,6 +433,49 @@ export default function AdminDashboard() {
     } catch (e) { toast.error(e.message); }
   };
 
+  // ── Payment Links ───────────────────────────────────────────
+  const generatePaymentLink = async () => {
+    if (!paymentForm.amount) return toast.error("Amount is required");
+    setGeneratingLink(true);
+    try {
+      const linkId = `PAY-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2,6).toUpperCase()}`;
+      const expiresAt = new Date(Date.now() + Number(paymentForm.expires_in) * 3600 * 1000).toISOString();
+      const { error } = await supabase.from('payment_links').insert([{
+        id: linkId,
+        customer_name: paymentForm.customer_name || "Customer",
+        amount: Number(paymentForm.amount),
+        note: paymentForm.note,
+        status: "active",
+        expires_at: expiresAt,
+      }]);
+      if (error) throw error;
+      toast.success(`Payment link generated! ID: ${linkId}`);
+      setPaymentForm({ customer_name: "", amount: "", note: "", expires_in: "24" });
+      fetchData();
+    } catch (e) { toast.error(e.message); }
+    finally { setGeneratingLink(false); }
+  };
+
+  const revokePaymentLink = async (id) => {
+    if (!confirm("Revoke this payment link? The customer won't be able to use it.")) return;
+    try {
+      const { error } = await supabase.from('payment_links').update({ status: "revoked" }).eq('id', id);
+      if (error) throw error;
+      toast.success("Link revoked");
+      fetchData();
+    } catch (e) { toast.error(e.message); }
+  };
+
+  const deletePaymentLink = async (id) => {
+    if (!confirm("Delete this payment link permanently?")) return;
+    try {
+      const { error } = await supabase.from('payment_links').delete().eq('id', id);
+      if (error) throw error;
+      toast.success("Link deleted");
+      fetchData();
+    } catch (e) { toast.error(e.message); }
+  };
+
   // ── Sales CRUD ──────────────────────────────────────────────
   const saveSale = async () => {
     if (!saleForm.sold_price) return toast.error("Sold Price is required");
@@ -475,6 +519,7 @@ export default function AdminDashboard() {
             ["supercars", "Supercar Gifts"],
             ["reviews", "Reviews"],
             ["proofs", "Proofs"],
+            ["payment_links", "🔗 Payment Links"],
             ["sales", "Sales Tracking"]
           ].map(([key, label]) => (
             <button key={key} onClick={() => setTab(key)}
@@ -1090,6 +1135,175 @@ export default function AdminDashboard() {
             </div>
           </div>
         )}
+
+        {/* PAYMENT LINKS TAB */}
+        {tab === "payment_links" && (() => {
+          const activeLinks = paymentLinks.filter(l => l.status === "active");
+          const revokedLinks = paymentLinks.filter(l => l.status !== "active");
+          const siteBase = window.location.origin;
+          return (
+            <div style={{ display: "grid", gap: "24px" }}>
+
+              {/* Generator Form */}
+              <div style={{ background: "var(--card)", padding: "28px", borderRadius: "14px", border: "1px solid var(--border-gold)" }}>
+                <h3 style={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px", fontSize: "16px" }}>
+                  <span style={{ fontSize: "20px" }}>🔗</span> Generate Payment Link
+                </h3>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "14px" }}>
+                  <div>
+                    <label style={sl}>Customer Name</label>
+                    <input className="input" placeholder="e.g. Ravi Kumar" value={paymentForm.customer_name} onChange={e => setPaymentForm({...paymentForm, customer_name: e.target.value})} />
+                  </div>
+                  <div>
+                    <label style={sl}>Amount (₹) *</label>
+                    <input className="input" type="number" placeholder="e.g. 4999" value={paymentForm.amount} onChange={e => setPaymentForm({...paymentForm, amount: e.target.value})} />
+                  </div>
+                  <div>
+                    <label style={sl}>Expires In</label>
+                    <select className="input" value={paymentForm.expires_in} onChange={e => setPaymentForm({...paymentForm, expires_in: e.target.value})}>
+                      <option value="6">6 Hours</option>
+                      <option value="12">12 Hours</option>
+                      <option value="24">24 Hours</option>
+                      <option value="48">48 Hours</option>
+                      <option value="72">72 Hours</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={sl}>Note (Optional)</label>
+                    <input className="input" placeholder="e.g. BGMI Account #XYZ" value={paymentForm.note} onChange={e => setPaymentForm({...paymentForm, note: e.target.value})} />
+                  </div>
+                </div>
+                <button
+                  onClick={generatePaymentLink}
+                  disabled={generatingLink}
+                  className="btn btn-gold"
+                  style={{ marginTop: "18px", padding: "12px 32px" }}
+                >
+                  {generatingLink ? "Generating..." : "⚡ Generate Payment Link"}
+                </button>
+              </div>
+
+              {/* Stats */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "14px" }}>
+                {[
+                  { label: "Total", value: paymentLinks.length, color: "var(--gold)" },
+                  { label: "Active", value: activeLinks.length, color: "#22c55e" },
+                  { label: "Revoked", value: revokedLinks.length, color: "#ef4444" },
+                ].map(s => (
+                  <div key={s.label} style={{ background: "var(--card)", borderRadius: "12px", padding: "18px", textAlign: "center", border: "1px solid var(--border)" }}>
+                    <div style={{ fontSize: "28px", fontWeight: 900, color: s.color }}>{s.value}</div>
+                    <div style={{ fontSize: "11px", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "1px" }}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Active Links Table */}
+              <div style={{ background: "var(--card)", borderRadius: "14px", overflow: "hidden", border: "1px solid rgba(34,197,94,0.2)" }}>
+                <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", background: "rgba(34,197,94,0.04)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <h3 style={{ fontSize: "14px", fontWeight: 800 }}>✅ Active Links</h3>
+                  <span style={{ fontSize: "11px", color: "var(--muted)" }}>{activeLinks.length} link{activeLinks.length !== 1 ? "s" : ""}</span>
+                </div>
+                {activeLinks.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "40px", color: "var(--muted)", fontSize: "14px" }}>No active links. Generate one above.</div>
+                ) : (
+                  <div style={{ overflowX: "auto" }}>
+                    <table style={{ width: "100%", fontSize: "13px", borderCollapse: "collapse", textAlign: "left" }}>
+                      <thead style={{ background: "rgba(255,215,0,0.04)", textTransform: "uppercase", fontSize: "10px", letterSpacing: "1px", color: "var(--muted)" }}>
+                        <tr>
+                          <th style={{ padding: "12px 16px" }}>Link ID</th>
+                          <th>Customer</th>
+                          <th>Amount</th>
+                          <th>Note</th>
+                          <th>Expires</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {activeLinks.map(link => {
+                          const fullUrl = `${siteBase}/payment/${link.id}`;
+                          const isExpired = link.expires_at && new Date(link.expires_at) < new Date();
+                          return (
+                            <tr key={link.id} style={{ borderBottom: "1px solid var(--border)", opacity: isExpired ? 0.6 : 1 }}>
+                              <td style={{ padding: "13px 16px", fontWeight: 700, fontFamily: "monospace", fontSize: "12px", color: "var(--gold)" }}>{link.id}</td>
+                              <td>{link.customer_name || "—"}</td>
+                              <td><strong style={{ color: "var(--green)" }}>₹{Number(link.amount).toLocaleString("en-IN")}</strong></td>
+                              <td style={{ color: "var(--muted)", fontSize: "12px" }}>{link.note || "—"}</td>
+                              <td style={{ fontSize: "11px", color: isExpired ? "#ef4444" : "var(--muted)" }}>
+                                {link.expires_at ? new Date(link.expires_at).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "No expiry"}
+                                {isExpired && <span style={{ marginLeft: "4px", fontWeight: 800 }}>(EXPIRED)</span>}
+                              </td>
+                              <td>
+                                <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                                  <button
+                                    onClick={() => { navigator.clipboard.writeText(fullUrl); toast.success("Link copied!"); }}
+                                    style={{ display: "flex", alignItems: "center", gap: "5px", padding: "6px 12px", borderRadius: "7px", background: "rgba(255,215,0,0.1)", color: "var(--gold)", border: "1px solid rgba(255,215,0,0.2)", cursor: "pointer", fontSize: "12px", fontWeight: 600 }}
+                                  >
+                                    <Copy size={12} /> Copy
+                                  </button>
+                                  <a
+                                    href={fullUrl} target="_blank" rel="noreferrer"
+                                    style={{ display: "flex", alignItems: "center", gap: "5px", padding: "6px 12px", borderRadius: "7px", background: "rgba(59,130,246,0.1)", color: "#60a5fa", border: "1px solid rgba(59,130,246,0.2)", fontSize: "12px", fontWeight: 600, textDecoration: "none" }}
+                                  >
+                                    Open
+                                  </a>
+                                  <button
+                                    onClick={() => revokePaymentLink(link.id)}
+                                    style={{ display: "flex", alignItems: "center", gap: "5px", padding: "6px 12px", borderRadius: "7px", background: "rgba(239,68,68,0.08)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", cursor: "pointer", fontSize: "12px", fontWeight: 600 }}
+                                  >
+                                    Revoke
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* Revoked / Old Links */}
+              {revokedLinks.length > 0 && (
+                <div style={{ background: "var(--card)", borderRadius: "14px", overflow: "hidden", border: "1px solid var(--border)" }}>
+                  <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", background: "rgba(239,68,68,0.03)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <h3 style={{ fontSize: "14px", fontWeight: 800, color: "#ef4444" }}>🚫 Revoked / Expired Links</h3>
+                    <span style={{ fontSize: "11px", color: "var(--muted)" }}>{revokedLinks.length} records</span>
+                  </div>
+                  <div style={{ overflowX: "auto" }}>
+                    <table style={{ width: "100%", fontSize: "13px", borderCollapse: "collapse", textAlign: "left", opacity: 0.7 }}>
+                      <thead style={{ background: "rgba(239,68,68,0.04)", textTransform: "uppercase", fontSize: "10px", letterSpacing: "1px", color: "var(--muted)" }}>
+                        <tr>
+                          <th style={{ padding: "12px 16px" }}>Link ID</th>
+                          <th>Customer</th>
+                          <th>Amount</th>
+                          <th>Status</th>
+                          <th>Delete</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {revokedLinks.map(link => (
+                          <tr key={link.id} style={{ borderBottom: "1px solid var(--border)" }}>
+                            <td style={{ padding: "12px 16px", fontFamily: "monospace", fontSize: "12px" }}>{link.id}</td>
+                            <td>{link.customer_name || "—"}</td>
+                            <td>₹{Number(link.amount).toLocaleString("en-IN")}</td>
+                            <td><span style={{ fontSize: "10px", background: "rgba(239,68,68,0.1)", color: "#ef4444", padding: "2px 8px", borderRadius: "4px", fontWeight: 800, textTransform: "uppercase" }}>{link.status}</span></td>
+                            <td>
+                              <button onClick={() => deletePaymentLink(link.id)} style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer" }}>
+                                <Trash2 size={14} />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+            </div>
+          );
+        })()}
 
       </div>
     </div>

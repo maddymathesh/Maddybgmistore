@@ -21,13 +21,22 @@ const ls = {
   textTransform: "uppercase", marginBottom: "7px",
 };
 
-const LOGIN_OPTIONS = ["Facebook", "X", "Apple ID", "Game Center", "Google Play Games"];
+const LOGIN_OPTIONS = ["X", "Facebook", "Google Playgames", "Apple ID", "Game Center", "Whats App"];
+const GUARANTEE_OPTIONS = [
+  "37 days unlink Garuntee for Secondary Login",
+  "22 Days Unlink Garuntee for Secondary Login",
+  "75 Days Unlink Garuntee For Both logins",
+  "Single & Safe Login",
+];
 
 // ── Empty form defaults ───────────────────────────────────────
 const EMPTY_PRODUCT = {
   title: "", description: "", price: "",
   category: "Budget", status: "available",
-  youtubeUrl: "", loginType: [], // Store as array internally for checkboxes
+  youtubeUrl: "",
+  primaryLogin: "X",
+  secondaryLogin: "null",
+  unlinkGuarantee: "Single & Safe Login",
 };
 const EMPTY_REVIEW = {
   name: "", text: "", stars: 5,
@@ -171,7 +180,9 @@ export default function AdminDashboard() {
         category: productForm.category,
         status: productForm.status,
         youtube_url: productForm.youtubeUrl,
-        login_type: productForm.loginType.join(", "), // Join for database
+        primary_login: productForm.primaryLogin,
+        secondary_login: productForm.secondaryLogin === "null" ? null : productForm.secondaryLogin,
+        unlink_guarantee: productForm.unlinkGuarantee,
         available: productForm.status === "available",
       };
       if (editId) {
@@ -548,25 +559,30 @@ export default function AdminDashboard() {
                   </select>
                 </div>
 
-                <div style={{ padding: "10px", background: "rgba(255,215,0,0.05)", borderRadius: "8px", border: "1px solid rgba(255,215,0,0.1)" }}>
-                  <label style={ls}>Login Type</label>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-                    {LOGIN_OPTIONS.map(opt => (
-                      <label key={opt} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", cursor: "pointer" }}>
-                        <input type="checkbox" checked={productForm.loginType.includes(opt)} 
-                          onChange={e => {
-                            if (e.target.checked && productForm.loginType.length >= 2) {
-                              return toast.error("Maximum 2 login types allowed");
-                            }
-                            const val = e.target.checked 
-                              ? [...productForm.loginType, opt]
-                              : productForm.loginType.filter(t => t !== opt);
-                            setProductForm({...productForm, loginType: val});
-                          }} 
-                        />
-                        {opt}
-                      </label>
-                    ))}
+                <div style={{ display: "grid", gap: "10px", padding: "14px", background: "rgba(255,215,0,0.05)", borderRadius: "10px", border: "1px solid rgba(255,215,0,0.12)" }}>
+                  <div>
+                    <label style={ls}>Primary Login</label>
+                    <select className="input" value={productForm.primaryLogin} onChange={e => setProductForm({...productForm, primaryLogin: e.target.value})}>
+                      {LOGIN_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={ls}>Secondary Login</label>
+                    <select className="input" value={productForm.secondaryLogin} onChange={e => setProductForm({...productForm, secondaryLogin: e.target.value})}>
+                      <option value="null">None (Single Login)</option>
+                      {LOGIN_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={ls}>Unlink Guarantee</label>
+                    <div style={{ display: "grid", gap: "8px", marginTop: "4px" }}>
+                      {GUARANTEE_OPTIONS.map(opt => (
+                        <label key={opt} style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "12px", cursor: "pointer", padding: "8px 10px", borderRadius: "8px", background: productForm.unlinkGuarantee === opt ? "rgba(255,215,0,0.12)" : "transparent", border: productForm.unlinkGuarantee === opt ? "1px solid rgba(255,215,0,0.3)" : "1px solid transparent", transition: "all 0.2s" }}>
+                          <input type="radio" name="unlinkGuarantee" value={opt} checked={productForm.unlinkGuarantee === opt} onChange={() => setProductForm({...productForm, unlinkGuarantee: opt})} style={{ accentColor: "var(--gold)" }} />
+                          <span style={{ color: productForm.unlinkGuarantee === opt ? "var(--gold)" : "var(--text)" }}>{opt}</span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
@@ -626,7 +642,9 @@ export default function AdminDashboard() {
                           category: p.category || "Budget", 
                           status: p.status || "available", 
                           youtubeUrl: p.youtube_url || "", 
-                          loginType: (p.login_type || "").split(", ").filter(Boolean) 
+                          primaryLogin: p.primary_login || "X",
+                          secondaryLogin: p.secondary_login || "null",
+                          unlinkGuarantee: p.unlink_guarantee || "Single & Safe Login"
                         }); 
                       }} style={{ padding: "8px", borderRadius: "8px", background: "rgba(255,215,0,0.1)", color: "var(--gold)", border: "1px solid rgba(255,215,0,0.2)", cursor: "pointer", transition: "all .2s" }} title="Edit"><Pencil size={16}/></button>
                       <button onClick={() => deleteProduct(p.id)} style={{ padding: "8px", borderRadius: "8px", background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", cursor: "pointer", transition: "all .2s" }} title="Delete"><Trash2 size={16}/></button>

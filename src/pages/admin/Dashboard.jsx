@@ -42,7 +42,7 @@ const EMPTY_REVIEW = {
   name: "", text: "", stars: 5,
   image_url: "", tracking_id: "",
 };
-const EMPTY_UC = { uc_amount: "", bonus_uc: "", market_price: "", offer_price: "", status: "available" };
+const EMPTY_UC = { uc_amount: "", bonus_uc: "", market_price: "", offer_price: "", status: "available", method: "view_login" };
 const EMPTY_XSUIT = { name: "", price: "", image_url: "" };
 const EMPTY_CAR = { name: "", price: "", image_url: "", type: "One-Card" };
 const EMPTY_SALE = {
@@ -783,13 +783,22 @@ export default function AdminDashboard() {
                   <label style={sl}>Bonus UC</label>
                   <input className="input" placeholder="e.g. 60" type="number" value={ucForm.bonus_uc} onChange={e => setUcForm({...ucForm, bonus_uc: e.target.value})} />
                 </div>
-                <div>
-                  <label style={sl}>Market Price (₹)</label>
-                  <input className="input" placeholder="e.g. 7,500" type="number" value={ucForm.market_price} onChange={e => setUcForm({...ucForm, market_price: e.target.value})} />
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                  <div>
+                    <label style={sl}>Market Price (₹)</label>
+                    <input className="input" placeholder="e.g. 7,500" type="number" value={ucForm.market_price} onChange={e => setUcForm({...ucForm, market_price: e.target.value})} />
+                  </div>
+                  <div>
+                    <label style={sl}>Our Offer Price (₹)</label>
+                    <input className="input" placeholder="e.g. 6,500" type="number" value={ucForm.offer_price} onChange={e => setUcForm({...ucForm, offer_price: e.target.value})} />
+                  </div>
                 </div>
                 <div>
-                  <label style={sl}>Our Offer Price (₹)</label>
-                  <input className="input" placeholder="e.g. 6,500" type="number" value={ucForm.offer_price} onChange={e => setUcForm({...ucForm, offer_price: e.target.value})} />
+                  <label style={sl}>Purchase Method</label>
+                  <select className="input" value={ucForm.method} onChange={e => setUcForm({...ucForm, method: e.target.value})}>
+                    <option value="view_login">View Login UC (Facebook / X)</option>
+                    <option value="character_id">Character ID UC (In-game ID)</option>
+                  </select>
                 </div>
                 <div>
                   <label style={sl}>Status</label>
@@ -816,9 +825,12 @@ export default function AdminDashboard() {
               {ucPrices.map(u => (
                 <div key={u.id} style={{ display: "flex", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid var(--border)", opacity: u.status === 'sold_out' ? 0.6 : 1 }}>
                   <div>
-                    <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
                       {u.uc_amount}
                       {u.bonus_uc > 0 && <span style={{ fontSize: "10px", background: "var(--gold-dim)", color: "var(--gold)", padding: "2px 6px", borderRadius: "4px" }}>+{u.bonus_uc} Bonus</span>}
+                      <span style={{ fontSize: "10px", padding: "2px 8px", borderRadius: "4px", background: u.method === 'character_id' ? "rgba(249,115,22,0.1)" : "rgba(59,130,246,0.1)", color: u.method === 'character_id' ? "#f97316" : "#60a5fa", fontWeight: 700 }}>
+                        {u.method === 'character_id' ? "🎮 Char ID" : "🔑 View Login"}
+                      </span>
                       {u.status === 'sold_out' && <span style={{ fontSize: "10px", background: "rgba(239,68,68,0.1)", color: "#ef4444", padding: "2px 6px", borderRadius: "4px" }}>SOLD OUT</span>}
                     </div>
                     <div style={{ fontSize: "12px", color: "var(--muted)" }}>
@@ -835,7 +847,8 @@ export default function AdminDashboard() {
                           bonus_uc: u.bonus_uc || "",
                           market_price: u.market_price, 
                           offer_price: u.offer_price,
-                          status: u.status || "available"
+                          status: u.status || "available",
+                          method: u.method || "view_login"
                         }); 
                       }} 
                         style={{ color: "var(--gold)", background: "none", border: "none", cursor: "pointer" }}><Pencil size={14}/></button>

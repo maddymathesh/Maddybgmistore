@@ -61,11 +61,16 @@ function LoginBadge({ type }) {
     color = "#FF4B2B";
     bg = "rgba(255,75,43,0.15)";
     border = "rgba(255,75,43,0.4)";
-  } else if (t.includes("google")) {
+  } else if (t.includes("google") || t.includes("playgames")) {
     icon = "G";
     color = "#4285F4";
     bg = "rgba(66,133,244,0.15)";
     border = "rgba(66,133,244,0.4)";
+  } else if (t.includes("whats app") || t.includes("whatsapp")) {
+    icon = "W";
+    color = "#25D366";
+    bg = "rgba(37,211,102,0.15)";
+    border = "rgba(37,211,102,0.4)";
   }
 
   return (
@@ -84,8 +89,12 @@ function StockCard({ stock }) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const embed = getEmbed(stock.youtube_url || stock.video_url);
-  const loginBadges = (stock.login_type || "").split(",").map(l => l.trim()).filter(Boolean);
-  const loginCount = loginBadges.length;
+  
+  // New login fields
+  const primaryLogin = stock.primary_login || stock.login_type?.split(",")[0]?.trim();
+  const secondaryLogin = stock.secondary_login;
+  const guarantee = stock.unlink_guarantee || (stock.login_type?.includes(",") ? "Unlink Guarantee" : "Safe & Secured");
+  
   const wa = `https://wa.me/+919025391516?text=Hi%20Maddy!%20I%20want%20to%20buy%20this%20account%20listed%20for%20₹${stock.price}.%20${encodeURIComponent(stock.title)}`;
 
   return (
@@ -125,16 +134,24 @@ function StockCard({ stock }) {
           🇮🇳 {stock.title}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-          {loginBadges.map((b, i) => <LoginBadge key={i} type={b} />)}
-          {loginCount >= 2 ? (
-            <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", padding: "4px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: 600, background: "rgba(251,191,36,0.12)", border: "1px solid rgba(251,191,36,0.35)", color: "#FBBF24" }}>
-              <Link2 size={11} /> Unlink Guarantee
-            </span>
-          ) : (
-            <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", padding: "4px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: 600, background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.35)", color: "#22C55E" }}>
-              <Lock size={11} /> Safe &amp; Secured
-            </span>
-          )}
+          {primaryLogin && <LoginBadge type={primaryLogin} />}
+          {secondaryLogin && <LoginBadge type={secondaryLogin} />}
+          
+          <span style={{ 
+            display: "inline-flex", 
+            alignItems: "center", 
+            gap: "5px", 
+            padding: "4px 12px", 
+            borderRadius: "20px", 
+            fontSize: "12px", 
+            fontWeight: 600, 
+            background: guarantee.toLowerCase().includes("single") ? "rgba(34,197,94,0.12)" : "rgba(251,191,36,0.12)", 
+            border: `1px solid ${guarantee.toLowerCase().includes("single") ? "rgba(34,197,94,0.35)" : "rgba(251,191,36,0.35)"}`, 
+            color: guarantee.toLowerCase().includes("single") ? "#22C55E" : "#FBBF24" 
+          }}>
+            {guarantee.toLowerCase().includes("single") ? <Lock size={11} /> : <Link2 size={11} />}
+            {guarantee}
+          </span>
         </div>
       </div>
 

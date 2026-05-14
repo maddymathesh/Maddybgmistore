@@ -11,8 +11,7 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Navbar from "../../components/Navbar";
 import { LogOut, Plus, Trash2, Pencil, Star, Copy, Users, TrendingUp, DollarSign, Camera, Coins, Zap, Car } from "lucide-react";
-import { storage, db } from "../../firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db } from "../../firebase";
 import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, orderBy } from "firebase/firestore";
 
 // ── Shared label style ────────────────────────────────────────
@@ -119,31 +118,46 @@ export default function AdminDashboard() {
 
   // ── Real-time listeners (Simulated with fetch on tab change or updates) ──
   const fetchData = async () => {
-    const { data: p } = await supabase.from('products').select('*').order('created_at', { ascending: false });
-    setProducts(p || []);
+    try {
+      const { data: p, error: pErr } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+      if (pErr) console.error("Products Fetch Error:", pErr);
+      setProducts(p || []);
 
-    const { data: r } = await supabase.from('reviews').select('*').order('created_at', { ascending: false });
-    setReviews(r || []);
+      const { data: r, error: rErr } = await supabase.from('reviews').select('*').order('created_at', { ascending: false });
+      if (rErr) console.error("Reviews Fetch Error:", rErr);
+      setReviews(r || []);
 
-    const { data: pl } = await supabase.from('payment_links').select('*').order('created_at', { ascending: false });
-    setPaymentLinks(pl || []);
+      const { data: pl, error: plErr } = await supabase.from('payment_links').select('*').order('created_at', { ascending: false });
+      if (plErr) console.error("Payment Links Fetch Error:", plErr);
+      setPaymentLinks(pl || []);
 
-    const { data: pr } = await supabase.from('proofs').select('*').order('created_at', { ascending: false });
-    setProofs(pr || []);
+      const { data: pr, error: prErr } = await supabase.from('proofs').select('*').order('created_at', { ascending: false });
+      if (prErr) console.error("Proofs Fetch Error:", prErr);
+      setProofs(pr || []);
 
-    const { data: uc } = await supabase.from('uc_prices').select('*').order('price', { ascending: true });
-    setUcPrices(uc || []);
+      const { data: uc, error: ucErr } = await supabase.from('uc_prices').select('*').order('offer_price', { ascending: true });
+      if (ucErr) console.error("UC Prices Fetch Error:", ucErr);
+      setUcPrices(uc || []);
 
-    const { data: xs } = await supabase.from('xsuit_gifts').select('*').order('price', { ascending: true });
-    setXsuits(xs || []);
+      const { data: xs, error: xsErr } = await supabase.from('xsuit_gifts').select('*').order('price', { ascending: true });
+      if (xsErr) console.error("Xsuits Fetch Error:", xsErr);
+      setXsuits(xs || []);
 
-    // Firebase Firestore for Supercars
-    const carQuery = query(collection(db, "supercar_gifts"), orderBy("type", "asc"), orderBy("price", "asc"));
-    const carSnap = await getDocs(carQuery);
-    setSupercars(carSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      // Firebase Firestore for Supercars
+      try {
+        const carQuery = query(collection(db, "supercar_gifts"), orderBy("type", "asc"), orderBy("price", "asc"));
+        const carSnap = await getDocs(carQuery);
+        setSupercars(carSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      } catch (carErr) {
+        console.error("Supercars Fetch Error:", carErr);
+      }
 
-    const { data: s } = await supabase.from('sales').select('*, products(title)').order('created_at', { ascending: false });
-    setSales(s || []);
+      const { data: s, error: sErr } = await supabase.from('sales').select('*, products(title)').order('created_at', { ascending: false });
+      if (sErr) console.error("Sales Fetch Error:", sErr);
+      setSales(s || []);
+    } catch (globalErr) {
+      console.error("Global Data Fetch Error:", globalErr);
+    }
   };
 
   useEffect(() => {
@@ -323,10 +337,20 @@ export default function AdminDashboard() {
     try {
       let url = xsuitForm.image_url;
       if (xsuitImage) {
-        const fileName = `${Date.now()}_${xsuitImage.name}`;
-        const storageRef = ref(storage, `xsuits/${fileName}`);
-        await uploadBytes(storageRef, xsuitImage);
-        url = await getDownloadURL(storageRef);
+        const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+        const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+        const formData = new FormData();
+        formData.append("file", xsuitImage);
+        formData.append("upload_preset", uploadPreset);
+        formData.append("folder", "mbs_xsuits");
+        
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+          method: "POST",
+          body: formData,
+        });
+        const json = await res.json();
+        if (json.error) throw new Error(json.error.message);
+        url = json.secure_url;
       }
 
       const data = { ...xsuitForm, image_url: url };
@@ -360,10 +384,20 @@ export default function AdminDashboard() {
     try {
       let url = carForm.image_url;
       if (carImage) {
-        const fileName = `${Date.now()}_${carImage.name}`;
-        const storageRef = ref(storage, `supercars/${fileName}`);
-        await uploadBytes(storageRef, carImage);
-        url = await getDownloadURL(storageRef);
+        const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+        const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+        const formData = new FormData();
+        formData.append("file", carImage);
+        formData.append("upload_preset", uploadPreset);
+        formData.append("folder", "mbs_supercars");
+        
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+          method: "POST",
+          body: formData,
+        });
+        const json = await res.json();
+        if (json.error) throw new Error(json.error.message);
+        url = json.secure_url;
       }
 
       const data = { 
@@ -376,11 +410,11 @@ export default function AdminDashboard() {
 
       if (carEditId) {
         await updateDoc(doc(db, "supercar_gifts", carEditId), data);
-        toast.success("Supercar updated in Firebase!");
+        toast.success("Supercar updated!");
         setCarEditId(null);
       } else {
         await addDoc(collection(db, "supercar_gifts"), { ...data, created_at: new Date().toISOString() });
-        toast.success("Supercar added to Firebase!");
+        toast.success("Supercar added!");
       }
       setCarForm(EMPTY_CAR);
       setCarImage(null);

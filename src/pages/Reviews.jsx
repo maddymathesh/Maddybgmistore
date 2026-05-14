@@ -94,6 +94,7 @@ export default function Reviews() {
                    </div>
                    <div>
                      <div style={{ fontWeight: 700 }}>{r.name}</div>
+                     {r.tracking_id && <div style={{ fontSize: "11px", color: "var(--gold)", fontWeight: 600 }}>Order ID: {r.tracking_id}</div>}
                      <div style={{ fontSize: "12px", color: "var(--muted)" }}>{new Date(r.created_at).toLocaleDateString()}</div>
                    </div>
                 </div>

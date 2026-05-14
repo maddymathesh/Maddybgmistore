@@ -36,6 +36,7 @@ export default function ReviewForm({ onReviewAdded }) {
   const [hoverRating, setHoverRating] = useState(0);
   const [name, setName] = useState("");
   const [comment, setComment] = useState("");
+  const [trackingId, setTrackingId] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [image, setImage] = useState(null);
@@ -90,7 +91,7 @@ export default function ReviewForm({ onReviewAdded }) {
         text: comment.trim(),
         image_url: imageUrl,
         uid: user.uid,
-        email: user.email,
+        tracking_id: trackingId.trim(),
         status,
       }]).select().single();
 
@@ -106,6 +107,7 @@ export default function ReviewForm({ onReviewAdded }) {
       setCooldown(120);
       setRating(0);
       setComment("");
+      setTrackingId("");
       removeImage();
       if (onReviewAdded) onReviewAdded(data);
     } catch (err) {
@@ -153,6 +155,7 @@ export default function ReviewForm({ onReviewAdded }) {
         </div>
 
         <input className="input" placeholder="Your Name" value={name} onChange={e => setName(e.target.value)} />
+        <input className="input" placeholder="Order ID / Tracking ID" value={trackingId} onChange={e => setTrackingId(e.target.value)} />
         <textarea className="input" placeholder="Share your experience (minimum 15 characters)..." value={comment} onChange={e => setComment(e.target.value)} rows={4} />
 
         {/* Lobby Screenshot */}

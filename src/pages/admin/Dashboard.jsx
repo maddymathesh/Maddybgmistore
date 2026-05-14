@@ -42,7 +42,7 @@ const EMPTY_REVIEW = {
   name: "", text: "", stars: 5,
   image_url: "", tracking_id: "",
 };
-const EMPTY_UC = { uc_amount: "", market_price: "", offer_price: "" };
+const EMPTY_UC = { uc_amount: "", market_price: "", offer_price: "", status: "available", method: "view_login" };
 const EMPTY_XSUIT = { name: "", price: "", image_url: "" };
 const EMPTY_CAR = { name: "", price: "", image_url: "", type: "One-Card" };
 const EMPTY_SALE = {
@@ -299,13 +299,18 @@ export default function AdminDashboard() {
     if (!ucForm.uc_amount || !ucForm.offer_price) return toast.error("Required fields missing");
     setSavingUc(true);
     try {
+      const data = {
+        ...ucForm,
+        market_price: Number(ucForm.market_price),
+        offer_price: Number(ucForm.offer_price),
+      };
       if (ucEditId) {
-        const { error } = await supabase.from('uc_prices').update(ucForm).eq('id', ucEditId);
+        const { error } = await supabase.from('uc_prices').update(data).eq('id', ucEditId);
         if (error) throw error;
         toast.success("UC Pack updated!");
         setUcEditId(null);
       } else {
-        const { error } = await supabase.from('uc_prices').insert([ucForm]);
+        const { error } = await supabase.from('uc_prices').insert([data]);
         if (error) throw error;
         toast.success("UC Pack added!");
       }
@@ -834,13 +839,29 @@ export default function AdminDashboard() {
                   <label style={sl}>UC Amount</label>
                   <input className="input" placeholder="e.g. 8,000 UC" value={ucForm.uc_amount} onChange={e => setUcForm({...ucForm, uc_amount: e.target.value})} />
                 </div>
-                <div>
-                  <label style={sl}>Market Price (₹)</label>
-                  <input className="input" placeholder="e.g. 7,500" type="number" value={ucForm.market_price} onChange={e => setUcForm({...ucForm, market_price: e.target.value})} />
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                  <div>
+                    <label style={sl}>Selling Price (₹)</label>
+                    <input className="input" placeholder="e.g. 7,500" type="number" value={ucForm.market_price} onChange={e => setUcForm({...ucForm, market_price: e.target.value})} />
+                  </div>
+                  <div>
+                    <label style={sl}>Offer Price (₹)</label>
+                    <input className="input" placeholder="e.g. 6,500" type="number" value={ucForm.offer_price} onChange={e => setUcForm({...ucForm, offer_price: e.target.value})} />
+                  </div>
                 </div>
                 <div>
-                  <label style={sl}>Our Offer Price (₹)</label>
-                  <input className="input" placeholder="e.g. 6,500" type="number" value={ucForm.offer_price} onChange={e => setUcForm({...ucForm, offer_price: e.target.value})} />
+                  <label style={sl}>Purchase Method</label>
+                  <select className="input" value={ucForm.method} onChange={e => setUcForm({...ucForm, method: e.target.value})}>
+                    <option value="view_login">🔑 View Login UC (Facebook / X)</option>
+                    <option value="character_id">🎮 Character ID UC (In-game ID)</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={sl}>Status</label>
+                  <select className="input" value={ucForm.status} onChange={e => setUcForm({...ucForm, status: e.target.value})}>
+                    <option value="available">Available</option>
+                    <option value="sold_out">Sold Out</option>
+                  </select>
                 </div>
                 <div style={{ display: "flex", gap: "8px" }}>
                   <button onClick={saveUc} disabled={savingUc} className="btn btn-gold w-full">{ucEditId ? "Update Pack" : "Save Pack"}</button>
@@ -850,18 +871,31 @@ export default function AdminDashboard() {
             </div>
             <div style={{ background: "var(--card)", borderRadius: "14px", overflow: "hidden", border: "1px solid var(--border)" }}>
               <div style={{ padding: "16px", fontWeight: 700, borderBottom: "1px solid var(--border)", background: "rgba(255,215,0,0.02)" }}>UC Price List</div>
+              {/* Market Demand Notice */}
+              <div style={{ margin: "16px", padding: "12px 16px", background: "rgba(251,191,36,0.07)", border: "1px solid rgba(251,191,36,0.3)", borderRadius: "10px", display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                <span style={{ fontSize: "16px", flexShrink: 0 }}>💡</span>
+                <p style={{ margin: 0, fontSize: "12px", color: "rgba(251,191,36,0.9)", lineHeight: 1.7 }}>
+                  <strong>Note:</strong> UC prices fluctuate based on market demand and availability. Update prices regularly to reflect the current market rate.
+                </p>
+              </div>
               {ucPrices.map(u => (
-                <div key={u.id} style={{ display: "flex", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid var(--border)" }}>
+                <div key={u.id} style={{ display: "flex", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid var(--border)", opacity: u.status === 'sold_out' ? 0.6 : 1 }}>
                   <div>
-                    <div style={{ fontWeight: 700 }}>{u.uc_amount}</div>
-                    <div style={{ fontSize: "12px", color: "var(--muted)" }}>
-                      Market: <span style={{ textDecoration: "line-through" }}>₹{u.market_price}</span>
+                    <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: "7px", flexWrap: "wrap" }}>
+                      {u.uc_amount}
+                      <span style={{ fontSize: "10px", padding: "2px 7px", borderRadius: "4px", background: u.method === 'character_id' ? "rgba(249,115,22,0.1)" : "rgba(59,130,246,0.1)", color: u.method === 'character_id' ? "#f97316" : "#60a5fa", fontWeight: 700 }}>
+                        {u.method === 'character_id' ? "🎮 Char ID" : "🔑 View Login"}
+                      </span>
+                      {u.status === 'sold_out' && <span style={{ fontSize: "10px", background: "rgba(239,68,68,0.1)", color: "#ef4444", padding: "2px 6px", borderRadius: "4px" }}>SOLD OUT</span>}
+                    </div>
+                    <div style={{ fontSize: "12px", color: "var(--muted)", marginTop: "2px" }}>
+                      Selling: <span style={{ textDecoration: "line-through" }}>₹{u.market_price}</span>
                     </div>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                     <div style={{ color: "var(--green)", fontWeight: 700 }}>₹{u.offer_price}</div>
                     <div style={{ display: "flex", gap: "6px" }}>
-                      <button onClick={() => { setUcEditId(u.id); setUcForm({ uc_amount: u.uc_amount, market_price: u.market_price, offer_price: u.offer_price }); }} 
+                      <button onClick={() => { setUcEditId(u.id); setUcForm({ uc_amount: u.uc_amount, market_price: u.market_price, offer_price: u.offer_price, status: u.status || "available", method: u.method || "view_login" }); }}
                         style={{ color: "var(--gold)", background: "none", border: "none", cursor: "pointer" }}><Pencil size={14}/></button>
                       <button onClick={() => deleteUc(u.id)} style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}><Trash2 size={16}/></button>
                     </div>

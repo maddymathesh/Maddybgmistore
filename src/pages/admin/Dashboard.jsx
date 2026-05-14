@@ -37,7 +37,7 @@ const EMPTY_UC = { uc_amount: "", market_price: "", offer_price: "" };
 const EMPTY_XSUIT = { name: "", price: "", image_url: "" };
 const EMPTY_CAR = { name: "", price: "", image_url: "", type: "One-Card" };
 const EMPTY_SALE = {
-  transaction_id: "", product_id: "", customer_id: "",
+  transaction_id: "",
   owner_price: "", sold_price: "", profit: 0,
   mode_of_deal: "Telegram",
   deal_date: new Date().toISOString().split('T')[0],
@@ -134,14 +134,10 @@ export default function AdminDashboard() {
       if (xsErr) console.error("Xsuits Fetch Error:", xsErr);
       setXsuits(xs || []);
 
-      // Firebase Firestore for Supercars
-      try {
-        const carQuery = query(collection(db, "supercar_gifts"), orderBy("type", "asc"), orderBy("price", "asc"));
-        const carSnap = await getDocs(carQuery);
-        setSupercars(carSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      } catch (carErr) {
-        console.error("Supercars Fetch Error:", carErr);
-      }
+      // Supabase for Supercars
+      const { data: c, error: cErr } = await supabase.from('supercar_gifts').select('*').order('price', { ascending: true });
+      if (cErr) console.error("Supercars Fetch Error:", cErr);
+      setSupercars(c || []);
 
       const { data: s, error: sErr } = await supabase.from('sales').select('*, products(title)').order('created_at', { ascending: false });
       if (sErr) console.error("Sales Fetch Error:", sErr);
@@ -390,13 +386,16 @@ export default function AdminDashboard() {
         image_url: url,
         updated_at: new Date().toISOString()
       };
+      // console.log(data);
 
       if (carEditId) {
-        await updateDoc(doc(db, "supercar_gifts", carEditId), data);
+        const { error } = await supabase.from('supercar_gifts').update(data).eq('id', carEditId);
+        if (error) throw error;
         toast.success("Supercar updated!");
         setCarEditId(null);
       } else {
-        await addDoc(collection(db, "supercar_gifts"), { ...data, created_at: new Date().toISOString() });
+        const { error } = await supabase.from('supercar_gifts').insert([data]);
+        if (error) throw error;
         toast.success("Supercar added!");
       }
       setCarForm(EMPTY_CAR);
@@ -409,30 +408,43 @@ export default function AdminDashboard() {
   const deleteCar = async (id) => {
     if (!confirm("Delete this Supercar gift?")) return;
     try {
-      await deleteDoc(doc(db, "supercar_gifts", id));
-      toast.success("Deleted from Firebase");
+      const { error } = await supabase.from('supercar_gifts').delete().eq('id', id);
+      if (error) throw error;
+      toast.success("Supercar deleted!");
       fetchData();
     } catch (e) { toast.error(e.message); }
   };
 
   // ── Sales CRUD ──────────────────────────────────────────────
   const saveSale = async () => {
-    if (!saleForm.sold_price) return toast.error("Sold Price is required");
+    if (!saleForm.sold_price || !saleForm.owner_price) {
+      return toast.error("Sold Price and Owner Price are required");
+    }
+    console.log(saleForm);
     setSavingSale(true);
     try {
-      const profit = Number(saleForm.sold_price) - Number(saleForm.owner_price || 0);
+      const ownerPrice = Number(saleForm.owner_price);
+      const soldPrice = Number(saleForm.sold_price);
+      const profit = soldPrice - ownerPrice;
+
       const { error } = await supabase.from('sales').insert([{ 
         ...saleForm, 
-        profit,
-        owner_price: Number(saleForm.owner_price),
-        sold_price: Number(saleForm.sold_price)
+        owner_price: ownerPrice,
+        sold_price: soldPrice,
+        profit: profit,
+        updated_at: new Date().toISOString()
       }]);
+
       if (error) throw error;
-      toast.success("Sale recorded!");
+      toast.success("Sale recorded successfully!");
+      
       setSaleForm(EMPTY_SALE);
       fetchData();
-    } catch (e) { toast.error(e.message); }
-    finally { setSavingSale(false); }
+    } catch (e) { 
+      toast.error(e.message); 
+    } finally { 
+      setSavingSale(false); 
+    }
   };
 
   // ── Render ─────────────────────────────────────────────────

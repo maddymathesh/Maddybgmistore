@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { MessageCircle, Send, Loader2, Info, CheckCircle, Car } from "lucide-react";
-import { db } from "../../firebase";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
-import { Zap, ShieldCheck } from "lucide-react"; // Keeping some icons from previous turn
+import { supabase } from "../../utils/supabase";
+import { ShieldCheck } from "lucide-react";
 
 export default function SupercarGift() {
   const [cars, setCars] = useState([]);
@@ -13,10 +12,14 @@ export default function SupercarGift() {
   useEffect(() => {
     const fetchCars = async () => {
       try {
-        const q = query(collection(db, "supercar_gifts"), orderBy("type", "asc"), orderBy("price", "asc"));
-        const querySnapshot = await getDocs(q);
-        const carData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setCars(carData);
+        const { data, error } = await supabase
+          .from('supercar_gifts')
+          .select('*')
+          .order('type', { ascending: true })
+          .order('price', { ascending: true });
+        
+        if (error) throw error;
+        setCars(data || []);
       } catch (error) {
         console.error("Error fetching supercars:", error);
       }

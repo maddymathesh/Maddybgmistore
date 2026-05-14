@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
-import { Settings, LogOut, ChevronDown } from "lucide-react";
+import { Settings, LogOut, ChevronDown, X, Menu } from "lucide-react";
 
 const navLinks = [
   { to: "/", label: "Home" },
@@ -15,7 +15,7 @@ const navLinks = [
     ],
   },
   {
-    label: "In-Game Services",
+    label: "In-Game",
     subLinks: [
       { to: "/services/uc", label: "UC Purchase" },
       { to: "/services/xsuit", label: "X-Suit Gift" },
@@ -24,7 +24,7 @@ const navLinks = [
   },
   { to: "/recovery", label: "Recovery" },
   {
-    label: "Customer Stories",
+    label: "Reviews",
     subLinks: [
       { to: "/reviews", label: "Buyer Reviews" },
       { to: "/proofs", label: "Proof & Feedback" },
@@ -45,58 +45,83 @@ const tickerItems = [
 ];
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState({});
+  const [scrolled, setScrolled] = useState(false);
   const { pathname } = useLocation();
   const { user, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
+  const navRef = useRef(null);
+
+  // Close menu on route change
+  useEffect(() => { setMobileOpen(false); setMobileExpanded({}); }, [pathname]);
+
+  // Scroll detection for shadow
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Close mobile menu on outside click
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onClick = (e) => { if (navRef.current && !navRef.current.contains(e.target)) setMobileOpen(false); };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [mobileOpen]);
+
+  // Prevent body scroll when mobile menu open
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileOpen]);
 
   const handleLogout = async () => {
+    setMobileOpen(false);
     await logout();
     toast.success("Logged out!");
     navigate("/");
   };
 
-  const doubledTicker = [...tickerItems, ...tickerItems];
-
-  const toggleMobileExpanded = (label) => {
-    setMobileExpanded((prev) => ({ ...prev, [label]: !prev[label] }));
-  };
+  const doubled = [...tickerItems, ...tickerItems];
 
   return (
-    <header style={headerStyle}>
-      <nav style={navStyle}>
-        <Link to="/" style={logoStyle}>
-          <img src="/logo.png" alt="Maddy BGMI Store" className="logo-img" />
+    <header ref={navRef} style={{
+      position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000,
+      background: scrolled ? "rgba(8,10,15,0.97)" : "rgba(8,10,15,0.80)",
+      backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
+      borderBottom: "1px solid rgba(255,215,0,0.12)",
+      boxShadow: scrolled ? "0 8px 32px rgba(0,0,0,0.4)" : "none",
+      transition: "background 0.3s, box-shadow 0.3s",
+    }}>
+
+      {/* ── Main Nav Bar ─────────────────────────────────────── */}
+      <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 clamp(16px, 5%, 60px)", height: "64px" }}>
+
+        {/* Logo */}
+        <Link to="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none", flexShrink: 0 }}>
+          <img src="/logo.png" alt="Maddy BGMI Store" className="logo-img" style={{ height: "38px", width: "auto" }} />
         </Link>
 
-        <ul className="hidden lg:flex items-center gap-1 list-none">
+        {/* Desktop Links */}
+        <ul style={{ display: "flex", alignItems: "center", gap: "2px", listStyle: "none", margin: 0, padding: 0 }} className="nav-desktop-ul">
           {navLinks.map((l) => (
-            <li key={l.label || l.to} className="nav-item-group">
+            <li key={l.label || l.to} className="nav-item-group" style={{ position: "relative" }}>
               {l.subLinks ? (
-                <div style={linkStyle} className="dropdown-trigger">
-                  {l.label} <ChevronDown size={14} style={{ marginLeft: "4px" }} />
+                <div className="dropdown-trigger" style={deskLinkStyle}>
+                  {l.label} <ChevronDown size={13} style={{ marginLeft: "3px", flexShrink: 0 }} />
                   <div className="nav-dropdown">
-                    {l.subLinks.map((sub) => (
-                      <Link
-                        key={sub.to}
-                        to={sub.to}
-                        className="dropdown-item"
-                        style={pathname === sub.to ? { color: "var(--gold)" } : {}}
-                      >
-                        {sub.label}
+                    {l.subLinks.map((s) => (
+                      <Link key={s.to} to={s.to} className="dropdown-item"
+                        style={pathname === s.to ? { color: "var(--gold)" } : {}}>
+                        {s.label}
                       </Link>
                     ))}
                   </div>
                 </div>
               ) : (
-                <Link
-                  to={l.to}
-                  style={{
-                    ...linkStyle,
-                    ...(pathname === l.to ? activeLinkStyle : {}),
-                  }}
-                >
+                <Link to={l.to} style={{ ...deskLinkStyle, ...(pathname === l.to ? activeLinkStyle : {}) }}>
                   {l.label}
                 </Link>
               )}
@@ -105,131 +130,70 @@ export default function Navbar() {
 
           {isAdmin && (
             <li>
-              <Link
-                to="/admin"
-                style={{
-                  ...linkStyle,
-                  color: "var(--gold)",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "5px",
-                }}
-              >
+              <Link to="/admin" style={{ ...deskLinkStyle, color: "var(--gold)", gap: "5px" }}>
                 <Settings size={13} /> Admin
               </Link>
             </li>
           )}
 
           {user ? (
-            <li className="user-profile-group">
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  cursor: "pointer",
-                }}
-              >
-                {user.photoURL ? (
-                  <img
-                    src={user.photoURL}
-                    alt={user.displayName}
-                    style={{
-                      width: "32px",
-                      height: "32px",
-                      borderRadius: "50%",
-                      border: "2px solid var(--gold)",
-                      objectFit: "cover",
-                    }}
-                  />
-                ) : (
-                  <div
-                    style={{
-                      width: "32px",
-                      height: "32px",
-                      borderRadius: "50%",
-                      background: "linear-gradient(135deg,var(--gold),var(--orange))",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontFamily: "var(--font-h)",
-                      fontWeight: 700,
-                      fontSize: "12px",
-                      color: "#000",
-                      border: "2px solid var(--gold)",
-                    }}
-                  >
-                    {(user.displayName || user.email || "U")[0].toUpperCase()}
-                  </div>
-                )}
-                <div style={{ display: "flex", flexDirection: "column", textAlign: "left" }}>
-                  <span
-                    style={{
-                      fontSize: "13px",
-                      fontWeight: 700,
-                      color: "#fff",
-                      fontFamily: "var(--font-h)",
-                      letterSpacing: "0.5px",
-                    }}
-                  >
-                    {user.displayName || user.email.split("@")[0]}
+            <li className="user-profile-group" style={{ position: "relative" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
+                {user.photoURL
+                  ? <img src={user.photoURL} alt="" style={{ width: "32px", height: "32px", borderRadius: "50%", border: "2px solid var(--gold)", objectFit: "cover" }} />
+                  : <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "linear-gradient(135deg,var(--gold),var(--orange))", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "13px", color: "#000", border: "2px solid var(--gold)" }}>
+                      {(user.displayName || user.email || "U")[0].toUpperCase()}
+                    </div>
+                }
+                <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.2 }}>
+                  <span style={{ fontSize: "13px", fontWeight: 700, color: "#fff", fontFamily: "var(--font-h)" }}>
+                    {(user.displayName || user.email?.split("@")[0] || "User").slice(0, 12)}
                   </span>
-                  {isAdmin && (
-                    <span
-                      style={{
-                        fontSize: "10px",
-                        color: "var(--gold)",
-                        textTransform: "uppercase",
-                        fontWeight: 700,
-                      }}
-                    >
-                      Admin
-                    </span>
-                  )}
+                  {isAdmin && <span style={{ fontSize: "10px", color: "var(--gold)", textTransform: "uppercase", fontWeight: 700 }}>Admin</span>}
                 </div>
-                <ChevronDown size={14} style={{ color: "var(--muted)", marginLeft: "-4px" }} />
+                <ChevronDown size={13} style={{ color: "var(--muted)" }} />
               </div>
-
-              {/* Dropdown UI */}
               <div className="user-dropdown">
                 <button onClick={handleLogout} className="dropdown-item logout">
-                  <LogOut size={14} /> Logout Account
+                  <LogOut size={14} /> Logout
                 </button>
               </div>
             </li>
           ) : (
             <li>
-              <Link
-                to="/login"
-                className="btn btn-outline btn-sm"
-                style={{ fontFamily: "var(--font-h)", fontSize: "11px", letterSpacing: "1px" }}
-              >
+              <Link to="/login" className="btn btn-outline btn-sm"
+                style={{ fontFamily: "var(--font-h)", fontSize: "11px", letterSpacing: "1px" }}>
                 Login
               </Link>
             </li>
           )}
         </ul>
 
+        {/* Mobile Hamburger */}
         <button
-          onClick={() => setOpen(!open)}
-          className="flex lg:hidden flex-col gap-[5px] cursor-pointer p-1 bg-transparent border-none"
-          aria-label="Menu"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          aria-expanded={mobileOpen}
+          className="nav-hamburger"
+          style={{
+            display: "none",
+            flexDirection: "column", alignItems: "center", justifyContent: "center",
+            width: "42px", height: "42px", borderRadius: "10px",
+            background: mobileOpen ? "rgba(255,215,0,0.15)" : "rgba(255,255,255,0.06)",
+            border: "1px solid rgba(255,215,0,0.2)",
+            cursor: "pointer", gap: "5px", flexShrink: 0,
+            transition: "background 0.2s",
+          }}
         >
-          <span style={barStyle} />
-          <span style={barStyle} />
-          <span style={barStyle} />
+          {mobileOpen ? <X size={20} style={{ color: "var(--gold)" }} /> : <Menu size={20} style={{ color: "var(--gold)" }} />}
         </button>
       </nav>
 
-      {/* Ticker integrated in Navbar */}
+      {/* ── Ticker ───────────────────────────────────────────── */}
       <div className="ticker-wrap">
         <div className="ticker-inner">
-          {doubledTicker.map((item, i) => (
-            <span
-              key={i}
-              className="ticker-item"
-              style={{ display: "inline-flex", alignItems: "center", gap: "12px" }}
-            >
+          {doubled.map((item, i) => (
+            <span key={i} className="ticker-item" style={{ display: "inline-flex", alignItems: "center", gap: "12px" }}>
               <img src="/logo.png" alt="" className="logo-ticker" />
               {item}
             </span>
@@ -237,216 +201,135 @@ export default function Navbar() {
         </div>
       </div>
 
-      {open && (
-        <div style={mobileMenuStyle}>
+      {/* ── Mobile Overlay Backdrop ───────────────────────────── */}
+      {mobileOpen && (
+        <div onClick={() => setMobileOpen(false)}
+          style={{ position: "fixed", inset: 0, top: "102px", background: "rgba(0,0,0,0.6)", zIndex: 997 }} />
+      )}
+
+      {/* ── Mobile Slide-Down Menu ────────────────────────────── */}
+      <div className="nav-mobile-menu" style={{
+        position: "fixed", top: "102px", left: 0, right: 0, zIndex: 998,
+        background: "rgba(8,10,15,0.99)", backdropFilter: "blur(24px)",
+        borderBottom: "1px solid rgba(255,215,0,0.18)",
+        maxHeight: mobileOpen ? "calc(100dvh - 102px)" : "0",
+        overflowY: mobileOpen ? "auto" : "hidden",
+        overflowX: "hidden",
+        transition: "max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+        WebkitOverflowScrolling: "touch",
+      }}>
+        <div style={{ padding: "12px 16px 24px" }}>
           {navLinks.map((l) => (
             <div key={l.label || l.to}>
               {l.subLinks ? (
                 <>
-                  <div
-                    onClick={() => toggleMobileExpanded(l.label)}
-                    style={{ ...mobileLinkStyle, display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}
-                  >
+                  <button onClick={() => setMobileExpanded(p => ({ ...p, [l.label]: !p[l.label] }))}
+                    style={{ width: "100%", textAlign: "left", background: "none", border: "none", ...mobileLinkStyle, display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
                     {l.label}
-                    <ChevronDown size={16} style={{ transform: mobileExpanded[l.label] ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                    <ChevronDown size={16} style={{ transform: mobileExpanded[l.label] ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.25s", color: "var(--gold)" }} />
+                  </button>
+                  <div style={{
+                    maxHeight: mobileExpanded[l.label] ? "300px" : "0",
+                    overflow: "hidden", transition: "max-height 0.3s ease",
+                    paddingLeft: "12px", background: "rgba(255,215,0,0.03)", borderRadius: "8px",
+                    marginBottom: mobileExpanded[l.label] ? "4px" : "0",
+                  }}>
+                    {l.subLinks.map((s) => (
+                      <Link key={s.to} to={s.to}
+                        style={{ ...mobileLinkStyle, fontSize: "13px", padding: "10px 16px", ...(pathname === s.to ? { color: "var(--gold)" } : {}) }}>
+                        {s.label}
+                      </Link>
+                    ))}
                   </div>
-                  {mobileExpanded[l.label] && (
-                    <div style={{ paddingLeft: "16px", background: "rgba(255,255,255,0.02)", borderRadius: "0 0 8px 8px" }}>
-                      {l.subLinks.map((sub) => (
-                        <Link
-                          key={sub.to}
-                          to={sub.to}
-                          onClick={() => setOpen(false)}
-                          style={{
-                            ...mobileLinkStyle,
-                            fontSize: "13px",
-                            padding: "10px 16px",
-                            ...(pathname === sub.to ? { color: "var(--gold)" } : {}),
-                          }}
-                        >
-                          {sub.label}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
                 </>
               ) : (
-                <Link
-                  to={l.to}
-                  onClick={() => setOpen(false)}
-                  style={{
-                    ...mobileLinkStyle,
-                    ...(pathname === l.to
-                      ? { color: "var(--gold)", background: "var(--gold-dim)" }
-                      : {}),
-                  }}
-                >
+                <Link to={l.to}
+                  style={{ ...mobileLinkStyle, ...(pathname === l.to ? { color: "var(--gold)", background: "rgba(255,215,0,0.08)" } : {}) }}>
                   {l.label}
                 </Link>
               )}
             </div>
           ))}
 
+          {/* Admin Link */}
           {isAdmin && (
-            <Link
-              to="/admin"
-              onClick={() => setOpen(false)}
-              style={{ ...mobileLinkStyle, color: "var(--gold)" }}
-            >
+            <Link to="/admin" style={{ ...mobileLinkStyle, color: "var(--gold)" }}>
               ⚙ Admin Panel
             </Link>
           )}
+
+          <div style={{ height: "1px", background: "rgba(255,255,255,0.07)", margin: "12px 0" }} />
+
+          {/* Auth Section */}
           {user ? (
             <>
-              <div
-                style={{
-                  ...mobileLinkStyle,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  color: "var(--muted)",
-                }}
-              >
-                {user.photoURL ? (
-                  <img
-                    src={user.photoURL}
-                    alt=""
-                    style={{
-                      width: "24px",
-                      height: "24px",
-                      borderRadius: "50%",
-                      border: "1px solid var(--gold)",
-                    }}
-                  />
-                ) : (
-                  <div
-                    style={{
-                      width: "24px",
-                      height: "24px",
-                      borderRadius: "50%",
-                      background: "var(--gold)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "#000",
-                      fontSize: "11px",
-                      fontWeight: 700,
-                    }}
-                  >
-                    {(user.displayName || "U")[0]}
-                  </div>
-                )}
-                <span style={{ fontSize: "13px" }}>{user.displayName || user.email}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 16px" }}>
+                {user.photoURL
+                  ? <img src={user.photoURL} alt="" style={{ width: "36px", height: "36px", borderRadius: "50%", border: "2px solid var(--gold)" }} />
+                  : <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "linear-gradient(135deg,var(--gold),var(--orange))", display: "flex", alignItems: "center", justifyContent: "center", color: "#000", fontWeight: 700, border: "2px solid var(--gold)" }}>
+                      {(user.displayName || "U")[0]}
+                    </div>
+                }
+                <div>
+                  <div style={{ fontSize: "14px", fontWeight: 700, color: "#fff" }}>{user.displayName || user.email?.split("@")[0]}</div>
+                  {isAdmin && <div style={{ fontSize: "11px", color: "var(--gold)", textTransform: "uppercase", fontWeight: 700 }}>Admin</div>}
+                </div>
               </div>
-              <button
-                onClick={handleLogout}
-                style={{
-                  ...mobileLinkStyle,
-                  textAlign: "left",
-                  cursor: "pointer",
-                  border: "none",
-                  background: "none",
-                  color: "#ef4444",
-                  fontFamily: "var(--font-body)",
-                }}
-              >
-                Logout
+              <button onClick={handleLogout}
+                style={{ ...mobileLinkStyle, color: "#ef4444", background: "rgba(239,68,68,0.08)", border: "none", cursor: "pointer", width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: "8px", fontFamily: "var(--font-body)" }}>
+                <LogOut size={15} /> Logout
               </button>
             </>
           ) : (
-            <Link
-              to="/login"
-              onClick={() => setOpen(false)}
-              style={{ ...mobileLinkStyle, color: "var(--gold)" }}
-            >
+            <Link to="/login"
+              style={{ ...mobileLinkStyle, color: "#000", background: "var(--gold)", borderRadius: "10px", textAlign: "center", fontWeight: 700 }}>
               Login / Sign Up
             </Link>
           )}
         </div>
-      )}
+      </div>
+
+      {/* ── Responsive CSS ────────────────────────────────────── */}
+      <style>{`
+        .nav-desktop-ul { display: flex !important; }
+        .nav-hamburger { display: none !important; }
+
+        @media (max-width: 1024px) {
+          .nav-desktop-ul { display: none !important; }
+          .nav-hamburger { display: flex !important; }
+        }
+      `}</style>
     </header>
   );
 }
 
-const headerStyle = {
-  position: "fixed",
-  top: 0,
-  left: 0,
-  right: 0,
-  zIndex: 999,
-  background: "rgba(8, 10, 15, 0.65)",
-  backdropFilter: "blur(20px)",
-  WebkitBackdropFilter: "blur(20px)",
-  borderBottom: "1px solid rgba(255, 215, 0, 0.12)",
-  boxShadow: "0 10px 30px rgba(0, 0, 0, 0.3)",
-};
-
-const navStyle = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  padding: "0 5%",
-  height: "64px",
-  borderBottom: "1px solid rgba(255, 255, 255, 0.03)",
-};
-const logoStyle = {
-  fontFamily: "var(--font-h)",
-  fontSize: "18px",
-  fontWeight: 700,
-  color: "var(--gold)",
-  letterSpacing: "2px",
-  textDecoration: "none",
-  display: "flex",
-  alignItems: "center",
-  gap: "6px",
-};
-const linkStyle = {
+const deskLinkStyle = {
   color: "var(--muted)",
   textDecoration: "none",
-  fontSize: "16px",
+  fontSize: "13px",
   fontWeight: 600,
-  letterSpacing: "1.2px",
+  letterSpacing: "0.8px",
   textTransform: "uppercase",
-  padding: "8px 12px",
+  padding: "8px 10px",
   borderRadius: "8px",
   transition: "all .2s",
   display: "inline-flex",
   alignItems: "center",
   cursor: "pointer",
+  whiteSpace: "nowrap",
 };
-const activeLinkStyle = { color: "var(--gold)", background: "var(--gold-dim)" };
-const barStyle = {
-  display: "block",
-  width: "24px",
-  height: "2px",
-  background: "var(--gold)",
-  borderRadius: "2px",
-};
-const mobileMenuStyle = {
-  position: "fixed",
-  top: "64px",
-  left: 0,
-  right: 0,
-  zIndex: 998,
-  background: "rgba(8,10,15,0.98)",
-  backdropFilter: "blur(20px)",
-  WebkitBackdropFilter: "blur(20px)",
-  padding: "16px",
-  borderBottom: "1px solid rgba(255,215,0,0.18)",
-  display: "flex",
-  flexDirection: "column",
-  gap: "4px",
-  maxHeight: "calc(100vh - 64px)",
-  overflowY: "auto",
-};
+
+const activeLinkStyle = { color: "var(--gold)", background: "rgba(255,215,0,0.08)" };
+
 const mobileLinkStyle = {
   color: "var(--muted)",
   textDecoration: "none",
   fontSize: "14px",
   fontWeight: 600,
-  letterSpacing: "1.2px",
+  letterSpacing: "1px",
   textTransform: "uppercase",
-  padding: "12px 16px",
-  borderRadius: "8px",
+  padding: "13px 16px",
+  borderRadius: "10px",
   display: "block",
+  transition: "background 0.15s, color 0.15s",
 };

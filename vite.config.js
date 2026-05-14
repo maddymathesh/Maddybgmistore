@@ -28,30 +28,28 @@ export default defineConfig({
         background_color: '#0a0c14',
         display: 'standalone',
         icons: [
-          {
-            src: 'logo.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: 'logo.png',
-            sizes: '512x512',
-            type: 'image/png'
-          }
-        ]
-      }
+          { src: 'logo.png', sizes: '192x192', type: 'image/png' },
+          { src: 'logo.png', sizes: '512x512', type: 'image/png' },
+        ],
+      },
     }),
   ],
+  server: {
+    headers: {
+      'X-Frame-Options': 'DENY',
+      'X-Content-Type-Options': 'nosniff',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+      'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+    },
+  },
   build: {
-    // Raise warning limit — firebase SDK is large by design
     chunkSizeWarningLimit: 1000,
-    // Disable sourcemaps in production (smaller output)
-    sourcemap: false,
-    // CSS code splitting
+    sourcemap: false,        // Never expose source maps in production
     cssCodeSplit: true,
+    // Strip console.* in production builds
+    minify: 'esbuild',
     rollupOptions: {
       output: {
-        // Manual chunk splitting: keeps vendor/firebase out of main bundle
         manualChunks: {
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           'vendor-firebase': [
@@ -61,12 +59,16 @@ export default defineConfig({
           ],
           'vendor-ui': ['lucide-react', 'react-hot-toast'],
         },
-        // Consistent asset naming
         assetFileNames: 'assets/[name]-[hash][extname]',
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
       },
     },
   },
+  esbuild: {
+    // Drop all console.log, console.warn, console.debug in production
+    drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
+  },
 })
+
 

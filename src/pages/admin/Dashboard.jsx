@@ -10,7 +10,10 @@ import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Navbar from "../../components/Navbar";
-import { LogOut, Plus, Trash2, Pencil, Star, Copy, Users, TrendingUp, DollarSign, Camera } from "lucide-react";
+import { LogOut, Plus, Trash2, Pencil, Star, Copy, Users, TrendingUp, DollarSign, Camera, Coins, Zap, Car } from "lucide-react";
+import { storage, db } from "../../firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, orderBy } from "firebase/firestore";
 
 // ── Shared label style ────────────────────────────────────────
 const ls = {
@@ -31,9 +34,9 @@ const EMPTY_REVIEW = {
   name: "", text: "", stars: 5,
   image_url: "", tracking_id: "",
 };
-const EMPTY_CUSTOMER = {
-  name: "", contact: "", social_handle: "", notes: "",
-};
+const EMPTY_UC = { uc_amount: "", market_price: "", offer_price: "" };
+const EMPTY_XSUIT = { name: "", price: "", image_url: "" };
+const EMPTY_CAR = { name: "", price: "", image_url: "", type: "One-Card" };
 const EMPTY_SALE = {
   transaction_id: "", product_id: "", customer_id: "",
   owner_price: "", sold_price: "", profit: 0,
@@ -77,16 +80,29 @@ export default function AdminDashboard() {
   const [approvingId, setApprovingId] = useState(null);
 
   const [proofs, setProofs] = useState([]);
-  const [proofForm, setProofForm] = useState({ title: "", imageUrl: "", month: new Date().toLocaleString('default', { month: 'long', year: 'numeric' }) });
+  const [proofForm, setProofForm] = useState({ title: "", month: "May 2026" });
   const [savingProof, setSavingProof] = useState(false);
   const [proofImage, setProofImage] = useState(null);
 
   const [paymentLinks, setPaymentLinks] = useState([]);
   const [generatingLink, setGeneratingLink] = useState(false);
 
-  const [customers, setCustomers] = useState([]);
-  const [customerForm, setCustomerForm] = useState(EMPTY_CUSTOMER);
-  const [savingCustomer, setSavingCustomer] = useState(false);
+  const [ucPrices, setUcPrices] = useState([]);
+  const [ucForm, setUcForm] = useState(EMPTY_UC);
+  const [ucEditId, setUcEditId] = useState(null);
+  const [savingUc, setSavingUc] = useState(false);
+
+  const [xsuits, setXsuits] = useState([]);
+  const [xsuitForm, setXsuitForm] = useState(EMPTY_XSUIT);
+  const [xsuitEditId, setXsuitEditId] = useState(null);
+  const [xsuitImage, setXsuitImage] = useState(null);
+  const [savingXsuit, setSavingXsuit] = useState(false);
+
+  const [supercars, setSupercars] = useState([]);
+  const [carForm, setCarForm] = useState(EMPTY_CAR);
+  const [carEditId, setCarEditId] = useState(null);
+  const [carImage, setCarImage] = useState(null);
+  const [savingCar, setSavingCar] = useState(false);
 
   const [sales, setSales] = useState([]);
   const [saleForm, setSaleForm] = useState(EMPTY_SALE);
@@ -106,10 +122,18 @@ export default function AdminDashboard() {
     const { data: pr } = await supabase.from('proofs').select('*').order('created_at', { ascending: false });
     setProofs(pr || []);
 
-    const { data: c } = await supabase.from('customers').select('*').order('created_at', { ascending: false });
-    setCustomers(c || []);
+    const { data: uc } = await supabase.from('uc_prices').select('*').order('price', { ascending: true });
+    setUcPrices(uc || []);
 
-    const { data: s } = await supabase.from('sales').select('*, products(title), customers(name)').order('created_at', { ascending: false });
+    const { data: xs } = await supabase.from('xsuit_gifts').select('*').order('price', { ascending: true });
+    setXsuits(xs || []);
+
+    // Firebase Firestore for Supercars
+    const carQuery = query(collection(db, "supercar_gifts"), orderBy("type", "asc"), orderBy("price", "asc"));
+    const carSnap = await getDocs(carQuery);
+    setSupercars(carSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+
+    const { data: s } = await supabase.from('sales').select('*, products(title)').order('created_at', { ascending: false });
     setSales(s || []);
   };
 
@@ -207,31 +231,35 @@ export default function AdminDashboard() {
     fetchData();
   };
 
-  // ── Proofs CRUD ────────────────────────────────────────────
+  // ── Proofs CRUD (Cloudinary) ───────────────────────────
   const saveProof = async () => {
-    if (!proofImage && !proofForm.imageUrl) return toast.error("Image is required");
+    if (!proofImage) return toast.error("Please select a proof image");
+    if (!proofForm.title.trim()) return toast.error("Please enter a title");
     setSavingProof(true);
     try {
-      let url = proofForm.imageUrl;
-      if (proofImage) {
-        const fileExt = proofImage.name.split('.').pop();
-        const fileName = `${Date.now()}.${fileExt}`;
-        const filePath = `proofs/${fileName}`;
-        const { error: uploadError } = await supabase.storage.from('reviews').upload(filePath, proofImage);
-        if (uploadError) throw uploadError;
-        const { data: { publicUrl } } = supabase.storage.from('reviews').getPublicUrl(filePath);
-        url = publicUrl;
-      }
+      const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+      const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+      const formData = new FormData();
+      formData.append("file", proofImage);
+      formData.append("upload_preset", uploadPreset);
+      formData.append("folder", `mbs_proofs/${proofForm.month.replace(" ", "_")}`);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: "POST",
+        body: formData,
+      });
+      const json = await res.json();
+      if (json.error) throw new Error(json.error.message);
+      const url = json.secure_url;
 
-      const { error } = await supabase.from('proofs').insert([{ 
-        title: proofForm.title || "Deal Proof", 
+      const { error } = await supabase.from('proofs').insert([{
+        title: proofForm.title.trim(),
         image_url: url,
-        month: proofForm.month 
+        month: proofForm.month,
       }]);
       if (error) throw error;
 
-      toast.success("Proof added!");
-      setProofForm({ title: "", imageUrl: "", month: new Date().toLocaleString('default', { month: 'long', year: 'numeric' }) });
+      toast.success(`Proof uploaded to ${proofForm.month}!`);
+      setProofForm({ title: "", month: proofForm.month });
       setProofImage(null);
       fetchData();
     } catch (e) { toast.error(e.message); }
@@ -244,17 +272,113 @@ export default function AdminDashboard() {
     fetchData();
   };
 
-  // ── CRM CRUD ───────────────────────────────────────────────
-  const saveCustomer = async () => {
-    if (!customerForm.name) return toast.error("Name required");
-    setSavingCustomer(true);
+  // ── UC Prices CRUD ─────────────────────────────────────────
+  const saveUc = async () => {
+    if (!ucForm.uc_amount || !ucForm.offer_price) return toast.error("Required fields missing");
+    setSavingUc(true);
     try {
-      await supabase.from('customers').insert([customerForm]);
-      toast.success("Customer added!");
-      setCustomerForm(EMPTY_CUSTOMER);
+      if (ucEditId) {
+        const { error } = await supabase.from('uc_prices').update(ucForm).eq('id', ucEditId);
+        if (error) throw error;
+        toast.success("UC Pack updated!");
+        setUcEditId(null);
+      } else {
+        const { error } = await supabase.from('uc_prices').insert([ucForm]);
+        if (error) throw error;
+        toast.success("UC Pack added!");
+      }
+      setUcForm(EMPTY_UC);
       fetchData();
     } catch (e) { toast.error(e.message); }
-    finally { setSavingCustomer(false); }
+    finally { setSavingUc(false); }
+  };
+
+  const deleteUc = async (id) => {
+    if (!confirm("Delete this UC pack?")) return;
+    await supabase.from('uc_prices').delete().eq('id', id);
+    fetchData();
+  };
+
+  // ── Xsuit Gifts CRUD ────────────────────────────────────────
+  const saveXsuit = async () => {
+    if (!xsuitForm.name || !xsuitForm.price) return toast.error("Required fields missing");
+    setSavingXsuit(true);
+    try {
+      let url = xsuitForm.image_url;
+      if (xsuitImage) {
+        const fileName = `${Date.now()}_${xsuitImage.name}`;
+        const storageRef = ref(storage, `xsuits/${fileName}`);
+        await uploadBytes(storageRef, xsuitImage);
+        url = await getDownloadURL(storageRef);
+      }
+
+      const data = { ...xsuitForm, image_url: url };
+      if (xsuitEditId) {
+        const { error } = await supabase.from('xsuit_gifts').update(data).eq('id', xsuitEditId);
+        if (error) throw error;
+        toast.success("Xsuit updated!");
+        setXsuitEditId(null);
+      } else {
+        const { error } = await supabase.from('xsuit_gifts').insert([data]);
+        if (error) throw error;
+        toast.success("Xsuit added!");
+      }
+      setXsuitForm(EMPTY_XSUIT);
+      setXsuitImage(null);
+      fetchData();
+    } catch (e) { toast.error(e.message); }
+    finally { setSavingXsuit(false); }
+  };
+
+  const deleteXsuit = async (id) => {
+    if (!confirm("Delete this Xsuit gift?")) return;
+    await supabase.from('xsuit_gifts').delete().eq('id', id);
+    fetchData();
+  };
+
+  // ── Supercar Gifts CRUD (Firebase) ──────────────────────────
+  const saveCar = async () => {
+    if (!carForm.name || !carForm.price) return toast.error("Required fields missing");
+    setSavingCar(true);
+    try {
+      let url = carForm.image_url;
+      if (carImage) {
+        const fileName = `${Date.now()}_${carImage.name}`;
+        const storageRef = ref(storage, `supercars/${fileName}`);
+        await uploadBytes(storageRef, carImage);
+        url = await getDownloadURL(storageRef);
+      }
+
+      const data = { 
+        name: carForm.name,
+        price: Number(carForm.price),
+        type: carForm.type,
+        image_url: url,
+        updated_at: new Date().toISOString()
+      };
+
+      if (carEditId) {
+        await updateDoc(doc(db, "supercar_gifts", carEditId), data);
+        toast.success("Supercar updated in Firebase!");
+        setCarEditId(null);
+      } else {
+        await addDoc(collection(db, "supercar_gifts"), { ...data, created_at: new Date().toISOString() });
+        toast.success("Supercar added to Firebase!");
+      }
+      setCarForm(EMPTY_CAR);
+      setCarImage(null);
+      fetchData();
+    } catch (e) { toast.error(e.message); }
+    finally { setSavingCar(false); }
+  };
+
+  const deleteCar = async (id) => {
+    if (!confirm("Delete this Supercar gift?")) return;
+    try {
+      await deleteDoc(doc(db, "supercar_gifts", id));
+      toast.success("Deleted from Firebase");
+      fetchData();
+    } catch (e) { toast.error(e.message); }
   };
 
   // ── Sales CRUD ──────────────────────────────────────────────
@@ -285,7 +409,7 @@ export default function AdminDashboard() {
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "32px" }}>
           <h1 style={{ fontFamily: "var(--font-h)", fontSize: "32px", fontWeight: 700 }}>
-            Supabase <span style={{ color: "var(--gold)" }}>Admin</span>
+            Admin <span style={{ color: "var(--gold)" }}>Panel</span>
           </h1>
           <button onClick={handleLogout} className="btn btn-outline" style={{ color: "#ef4444" }}>
             <LogOut size={15} /> Logout
@@ -294,10 +418,12 @@ export default function AdminDashboard() {
 
         <div style={{ display: "flex", gap: "4px", marginBottom: "28px", borderBottom: "1px solid rgba(255,215,0,0.15)", overflowX: "auto" }}>
           {[
-            ["products", "Products"],
+            ["products", "Accounts"],
+            ["uc", "UC Prices"],
+            ["xsuits", "Xsuit Gifts"],
+            ["supercars", "Supercar Gifts"],
             ["reviews", "Reviews"],
             ["proofs", "Proofs"],
-            ["crm", "CRM"],
             ["sales", "Sales Tracking"]
           ].map(([key, label]) => (
             <button key={key} onClick={() => setTab(key)}
@@ -424,61 +550,82 @@ export default function AdminDashboard() {
 
         {/* REVIEWS TAB */}
         {tab === "reviews" && (
-          <div style={{ display: "grid", gridTemplateColumns: "350px 1fr", gap: "24px" }}>
-            <div style={{ background: "var(--card)", padding: "24px", borderRadius: "14px", border: "1px solid var(--border-gold)" }}>
-              <h3 style={{ marginBottom: "20px" }}>Add Review</h3>
-              <div style={{ display: "grid", gap: "12px" }}>
-                <input className="input" placeholder="Buyer Name" value={reviewForm.name} onChange={e => setReviewForm({...reviewForm, name: e.target.value})} />
-                <textarea className="input" placeholder="Feedback" value={reviewForm.text} onChange={e => setReviewForm({...reviewForm, text: e.target.value})} />
-                <input className="input" type="number" placeholder="Stars (1-5)" value={reviewForm.stars} onChange={e => setReviewForm({...reviewForm, stars: e.target.value})} />
-                <button onClick={saveReview} disabled={savingReview} className="btn btn-gold">Publish Review</button>
-              </div>
+          <div style={{ display: "grid", gap: "24px" }}>
+            
+            {/* Stats Row */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "16px" }}>
+              {[
+                { label: "Total", value: reviews.length, color: "var(--gold)" },
+                { label: "Approved", value: reviews.filter(r => r.status === "approved").length, color: "#22c55e" },
+                { label: "Pending", value: reviews.filter(r => r.status === "pending").length, color: "#f59e0b" },
+                { label: "Rejected", value: reviews.filter(r => r.status === "rejected").length, color: "#ef4444" },
+              ].map(s => (
+                <div key={s.label} style={{ background: "var(--card)", borderRadius: "12px", padding: "20px", textAlign: "center", border: "1px solid var(--border)" }}>
+                  <div style={{ fontSize: "32px", fontWeight: 900, color: s.color }}>{s.value}</div>
+                  <div style={{ fontSize: "12px", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "1px" }}>{s.label}</div>
+                </div>
+              ))}
             </div>
-            <div style={{ background: "var(--card)", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.05)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-              <div style={{ padding: "20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(255,215,0,0.02)" }}>
+
+            {/* Review List */}
+            <div style={{ background: "var(--card)", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.05)", overflow: "hidden" }}>
+              <div style={{ padding: "20px", borderBottom: "1px solid var(--border)", background: "rgba(255,215,0,0.02)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <h3 style={{ fontSize: "16px", fontWeight: 700 }}>Review Management</h3>
-                <span style={{ fontSize: "12px", color: "var(--muted)" }}>{reviews.length} Total</span>
+                <span style={{ fontSize: "12px", color: "var(--muted)" }}>Reviews submitted by buyers • No manual entries</span>
               </div>
-              
               <div style={{ maxHeight: "700px", overflowY: "auto" }}>
                 {reviews.length === 0 ? (
                   <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--muted)" }}>
-                    <p>No reviews submitted yet.</p>
+                    <div style={{ fontSize: "40px", marginBottom: "12px" }}>📭</div>
+                    <p>No buyer reviews yet. Share your review link after each successful deal.</p>
                   </div>
                 ) : reviews.map(r => (
-                  <div key={r.id} style={{ padding: "20px", borderBottom: "1px solid var(--border)", display: "grid", gridTemplateColumns: "auto 1fr auto", gap: "20px", alignItems: "start" }}>
-                    {r.image_url && (
-                      <div style={{ width: "80px", height: "80px", borderRadius: "8px", overflow: "hidden", border: "1px solid var(--border)" }}>
-                        <img src={r.image_url} alt="Lobby" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                      </div>
-                    )}
+                  <div key={r.id} style={{ padding: "20px", borderBottom: "1px solid var(--border)", display: "grid", gridTemplateColumns: "80px 1fr auto", gap: "20px", alignItems: "start" }}>
+                    {/* Thumbnail */}
+                    <div style={{ width: "80px", height: "80px", borderRadius: "8px", overflow: "hidden", border: "1px solid var(--border)", background: "var(--bg2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      {r.image_url ? (
+                        <a href={r.image_url} target="_blank" rel="noreferrer">
+                          <img src={r.image_url} alt="Lobby" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        </a>
+                      ) : (
+                        <span style={{ fontSize: "10px", color: "var(--muted)" }}>No img</span>
+                      )}
+                    </div>
+
+                    {/* Content */}
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px", flexWrap: "wrap" }}>
                         <span style={{ fontWeight: 700 }}>{r.name}</span>
                         <span style={{ display: "flex", gap: "2px" }}>
-                          {[...Array(5)].map((_, i) => <Star key={i} size={10} fill={i < r.stars ? "var(--gold)" : "transparent"} color="var(--gold)" />)}
+                          {[...Array(5)].map((_, i) => <Star key={i} size={11} fill={i < r.stars ? "var(--gold)" : "transparent"} color="var(--gold)" />)}
                         </span>
-                        <span style={{ 
+                        <span style={{
                           fontSize: "10px", fontWeight: 800, padding: "2px 8px", borderRadius: "100px",
-                          background: r.status === 'approved' ? "rgba(34,197,94,0.1)" : r.status === 'rejected' ? "rgba(239,68,68,0.1)" : "rgba(251,191,36,0.1)",
-                          color: r.status === 'approved' ? "#22c55e" : r.status === 'rejected' ? "#ef4444" : "#f59e0b",
-                          border: `1px solid ${r.status === 'approved' ? "rgba(34,197,94,0.3)" : r.status === 'rejected' ? "rgba(239,68,68,0.3)" : "rgba(251,191,36,0.3)"}`,
+                          background: r.status === "approved" ? "rgba(34,197,94,0.1)" : r.status === "rejected" ? "rgba(239,68,68,0.1)" : "rgba(251,191,36,0.1)",
+                          color: r.status === "approved" ? "#22c55e" : r.status === "rejected" ? "#ef4444" : "#f59e0b",
+                          border: `1px solid ${r.status === "approved" ? "rgba(34,197,94,0.3)" : r.status === "rejected" ? "rgba(239,68,68,0.3)" : "rgba(251,191,36,0.3)"}`,
                           textTransform: "uppercase"
                         }}>
-                          {r.status}
+                          {r.status === "approved" ? "✓ Approved" : r.status === "rejected" ? "✗ Rejected" : "⏳ Pending"}
                         </span>
+                        {r.uid && <span style={{ fontSize: "10px", color: "var(--muted)" }}>Firebase UID: {r.uid.slice(0, 10)}...</span>}
                       </div>
-                      <div style={{ fontSize: "13px", color: "var(--text)", lineHeight: 1.5, marginBottom: "8px" }}>{r.text}</div>
-                      <div style={{ fontSize: "11px", color: "var(--muted)" }}>Submitted on {new Date(r.created_at).toLocaleDateString()}</div>
+                      <p style={{ fontSize: "13px", color: "var(--text)", lineHeight: 1.6, marginBottom: "6px" }}>{r.text}</p>
+                      <div style={{ fontSize: "11px", color: "var(--muted)" }}>
+                        Submitted {new Date(r.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                        {r.email && ` • ${r.email}`}
+                      </div>
                     </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                      {r.status !== 'approved' && (
-                        <button onClick={() => approveReview(r.id)} className="btn btn-gold btn-sm" style={{ padding: "6px 12px", fontSize: "11px" }}>Approve</button>
+
+                    {/* Action Buttons */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px", flexShrink: 0 }}>
+                      {r.status !== "approved" && (
+                        <button onClick={() => approveReview(r.id)} className="btn btn-gold" style={{ padding: "6px 14px", fontSize: "11px" }}>Approve</button>
                       )}
-                      {r.status !== 'rejected' && (
-                        <button onClick={() => rejectReview(r.id)} className="btn btn-outline btn-sm" style={{ padding: "6px 12px", fontSize: "11px", color: "#ef4444" }}>Reject</button>
+                      {r.status !== "rejected" && (
+                        <button onClick={() => rejectReview(r.id)} className="btn btn-outline" style={{ padding: "6px 14px", fontSize: "11px", color: "#ef4444", borderColor: "#ef4444" }}>Reject</button>
                       )}
-                      <button onClick={() => deleteReview(r.id)} style={{ background: "none", border: "none", color: "var(--muted)", cursor: "pointer", fontSize: "11px", marginTop: "4px" }}>Delete Permanently</button>
+                      <button onClick={() => deleteReview(r.id)} style={{ background: "none", border: "none", color: "var(--muted)", cursor: "pointer", fontSize: "11px" }}>Delete</button>
                     </div>
                   </div>
                 ))}
@@ -488,40 +635,187 @@ export default function AdminDashboard() {
         )}
 
         {/* PROOFS TAB */}
-        {tab === "proofs" && (
+        {tab === "proofs" && (() => {
+          const MONTHS_2026 = ["January 2026","February 2026","March 2026","April 2026","May 2026","June 2026","July 2026","August 2026","September 2026","October 2026","November 2026","December 2026"];
+          const grouped = MONTHS_2026.reduce((acc, m) => { acc[m] = proofs.filter(p => p.month === m); return acc; }, {});
+          return (
+            <div style={{ display: "grid", gap: "24px" }}>
+
+              {/* Upload Panel */}
+              <div style={{ background: "var(--card)", padding: "28px", borderRadius: "14px", border: "1px solid var(--border-gold)" }}>
+                <h3 style={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px" }}><Camera size={18}/> Upload New Proof</h3>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px", alignItems: "end" }}>
+                  <div>
+                    <label style={sl}>Title</label>
+                    <input className="input" placeholder="e.g. Payment Proof, Deal Feedback" value={proofForm.title} onChange={e => setProofForm({...proofForm, title: e.target.value})} />
+                  </div>
+                  <div>
+                    <label style={sl}>Month</label>
+                    <select className="input" value={proofForm.month} onChange={e => setProofForm({...proofForm, month: e.target.value})}>
+                      {MONTHS_2026.map(m => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={sl}>Image</label>
+                    <div style={{ border: "2px dashed var(--border-gold)", padding: "12px 16px", borderRadius: "8px", textAlign: "center", cursor: "pointer", background: "rgba(255,215,0,0.02)" }}>
+                      {proofImage ? (
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <span style={{ fontSize: "12px", color: "var(--green)" }}>✓ {proofImage.name.slice(0, 20)}...</span>
+                          <button onClick={() => setProofImage(null)} style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontSize: "18px" }}>×</button>
+                        </div>
+                      ) : (
+                        <label style={{ cursor: "pointer" }}>
+                          <div style={{ fontSize: "12px", color: "var(--muted)" }}>Click to choose file</div>
+                          <input type="file" accept="image/*" hidden onChange={e => setProofImage(e.target.files[0])} />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <button onClick={saveProof} disabled={savingProof} className="btn btn-gold w-full" style={{ padding: "12px" }}>
+                      {savingProof ? "Uploading to Cloudinary..." : "Upload Proof"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Monthly Grouped Gallery */}
+              {MONTHS_2026.filter(m => grouped[m].length > 0).length === 0 ? (
+                <div style={{ textAlign: "center", padding: "60px", color: "var(--muted)", background: "var(--card)", borderRadius: "14px" }}>
+                  <Camera size={40} style={{ opacity: 0.3, marginBottom: "16px" }} />
+                  <p>No proofs uploaded yet. Use the upload panel above to get started.</p>
+                </div>
+              ) : (
+                MONTHS_2026.map(month => {
+                  const monthProofs = grouped[month];
+                  if (monthProofs.length === 0) return null;
+                  return (
+                    <div key={month} style={{ background: "var(--card)", borderRadius: "14px", overflow: "hidden", border: "1px solid var(--border)" }}>
+                      <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", background: "rgba(255,215,0,0.03)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <h3 style={{ fontWeight: 800, color: "var(--gold)" }}>{month}</h3>
+                        <span style={{ fontSize: "12px", color: "var(--muted)" }}>{monthProofs.length} proof{monthProofs.length > 1 ? "s" : ""}</span>
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "12px", padding: "16px" }}>
+                        {monthProofs.map(p => (
+                          <div key={p.id} style={{ position: "relative", borderRadius: "8px", overflow: "hidden", border: "1px solid var(--border)", background: "var(--bg2)" }}>
+                            <div style={{ aspectRatio: "3/4" }}>
+                              <img src={p.image_url} alt={p.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                            </div>
+                            <div style={{ padding: "8px 10px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <div style={{ fontSize: "11px", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.title || "Proof"}</div>
+                              <button onClick={() => deleteProof(p.id)} style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", padding: "2px", flexShrink: 0 }}><Trash2 size={13}/></button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          );
+        })()}
+
+        {/* UC PRICES TAB */}
+        {tab === "uc" && (
           <div style={{ display: "grid", gridTemplateColumns: "350px 1fr", gap: "24px" }}>
             <div style={{ background: "var(--card)", padding: "24px", borderRadius: "14px", border: "1px solid var(--border-gold)" }}>
-              <h3 style={{ marginBottom: "20px" }}><Camera size={18}/> Add Proof</h3>
+              <h3 style={{ marginBottom: "20px" }}><Coins size={18}/> {ucEditId ? "Edit UC Pack" : "Add UC Pack"}</h3>
               <div style={{ display: "grid", gap: "12px" }}>
-                <input className="input" placeholder="Title (e.g. Payment Proof)" value={proofForm.title} onChange={e => setProofForm({...proofForm, title: e.target.value})} />
-                <input className="input" placeholder="Month (e.g. May 2026)" value={proofForm.month} onChange={e => setProofForm({...proofForm, month: e.target.value})} />
+                <div>
+                  <label style={sl}>UC Amount</label>
+                  <input className="input" placeholder="e.g. 8,000 UC" value={ucForm.uc_amount} onChange={e => setUcForm({...ucForm, uc_amount: e.target.value})} />
+                </div>
+                <div>
+                  <label style={sl}>Market Price (₹)</label>
+                  <input className="input" placeholder="e.g. 7,500" type="number" value={ucForm.market_price} onChange={e => setUcForm({...ucForm, market_price: e.target.value})} />
+                </div>
+                <div>
+                  <label style={sl}>Our Offer Price (₹)</label>
+                  <input className="input" placeholder="e.g. 6,500" type="number" value={ucForm.offer_price} onChange={e => setUcForm({...ucForm, offer_price: e.target.value})} />
+                </div>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <button onClick={saveUc} disabled={savingUc} className="btn btn-gold w-full">{ucEditId ? "Update Pack" : "Save Pack"}</button>
+                  {ucEditId && <button onClick={() => { setUcEditId(null); setUcForm(EMPTY_UC); }} className="btn btn-outline">Cancel</button>}
+                </div>
+              </div>
+            </div>
+            <div style={{ background: "var(--card)", borderRadius: "14px", overflow: "hidden", border: "1px solid var(--border)" }}>
+              <div style={{ padding: "16px", fontWeight: 700, borderBottom: "1px solid var(--border)", background: "rgba(255,215,0,0.02)" }}>UC Price List</div>
+              {ucPrices.map(u => (
+                <div key={u.id} style={{ display: "flex", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid var(--border)" }}>
+                  <div>
+                    <div style={{ fontWeight: 700 }}>{u.uc_amount}</div>
+                    <div style={{ fontSize: "12px", color: "var(--muted)" }}>
+                      Market: <span style={{ textDecoration: "line-through" }}>₹{u.market_price}</span>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <div style={{ color: "var(--green)", fontWeight: 700 }}>₹{u.offer_price}</div>
+                    <div style={{ display: "flex", gap: "6px" }}>
+                      <button onClick={() => { setUcEditId(u.id); setUcForm({ uc_amount: u.uc_amount, market_price: u.market_price, offer_price: u.offer_price }); }} 
+                        style={{ color: "var(--gold)", background: "none", border: "none", cursor: "pointer" }}><Pencil size={14}/></button>
+                      <button onClick={() => deleteUc(u.id)} style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}><Trash2 size={16}/></button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* XSUIT GIFTS TAB */}
+        {tab === "xsuits" && (
+          <div style={{ display: "grid", gridTemplateColumns: "350px 1fr", gap: "24px" }}>
+            <div style={{ background: "var(--card)", padding: "24px", borderRadius: "14px", border: "1px solid var(--border-gold)" }}>
+              <h3 style={{ marginBottom: "20px" }}><Zap size={18}/> {xsuitEditId ? "Edit Xsuit" : "Add Xsuit Gift"}</h3>
+              <div style={{ display: "grid", gap: "12px" }}>
+                <div>
+                  <label style={sl}>Xsuit Name</label>
+                  <input className="input" placeholder="e.g. Poseidon X-Suit" value={xsuitForm.name} onChange={e => setXsuitForm({...xsuitForm, name: e.target.value})} />
+                </div>
+                <div>
+                  <label style={sl}>Price (₹)</label>
+                  <input className="input" placeholder="e.g. 15000" type="number" value={xsuitForm.price} onChange={e => setXsuitForm({...xsuitForm, price: e.target.value})} />
+                </div>
                 
                 <div style={{ border: "2px dashed var(--border-gold)", padding: "20px", borderRadius: "8px", textAlign: "center" }}>
-                  {proofImage ? (
-                    <div style={{ fontSize: "12px", color: "var(--green)" }}>{proofImage.name} selected</div>
+                  {xsuitImage ? (
+                    <div style={{ fontSize: "12px", color: "var(--green)" }}>{xsuitImage.name} selected</div>
                   ) : (
                     <label style={{ cursor: "pointer" }}>
-                      <div style={{ fontSize: "12px" }}>Click to Upload Proof Image</div>
-                      <input type="file" hidden onChange={e => setProofImage(e.target.files[0])} />
+                      <div style={{ fontSize: "12px" }}>{xsuitForm.image_url ? "Change Image" : "Click to Upload Xsuit Image"}</div>
+                      <input type="file" hidden onChange={e => setXsuitImage(e.target.files[0])} />
                     </label>
                   )}
                 </div>
 
-                <button onClick={saveProof} disabled={savingProof} className="btn btn-gold w-full">
-                  {savingProof ? "Uploading..." : "Save Proof"}
-                </button>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <button onClick={saveXsuit} disabled={savingXsuit} className="btn btn-gold w-full">{xsuitEditId ? "Update Xsuit" : "Save Xsuit"}</button>
+                  {xsuitEditId && <button onClick={() => { setXsuitEditId(null); setXsuitForm(EMPTY_XSUIT); setXsuitImage(null); }} className="btn btn-outline">Cancel</button>}
+                </div>
               </div>
             </div>
-            <div style={{ background: "var(--card)", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.05)", overflow: "hidden" }}>
-              <div style={{ padding: "20px", borderBottom: "1px solid var(--border)", background: "rgba(255,215,0,0.02)" }}>
-                <h3 style={{ fontSize: "16px", fontWeight: 700 }}>Proof Gallery</h3>
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "12px", padding: "20px", maxHeight: "600px", overflowY: "auto" }}>
-                {proofs.map(p => (
-                  <div key={p.id} style={{ position: "relative", aspectRatio: "1/1", borderRadius: "8px", overflow: "hidden", border: "1px solid var(--border)" }}>
-                    <img src={p.image_url} alt="Proof" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    <button onClick={() => deleteProof(p.id)} style={{ position: "absolute", top: "5px", right: "5px", background: "rgba(239,68,68,0.8)", border: "none", color: "#fff", borderRadius: "4px", padding: "4px", cursor: "pointer" }}><Trash2 size={12}/></button>
-                    <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "rgba(0,0,0,0.6)", color: "#fff", fontSize: "10px", padding: "4px", textAlign: "center" }}>{p.month}</div>
+            <div style={{ background: "var(--card)", borderRadius: "14px", overflow: "hidden", border: "1px solid var(--border)" }}>
+              <div style={{ padding: "16px", fontWeight: 700, borderBottom: "1px solid var(--border)", background: "rgba(255,215,0,0.02)" }}>Xsuit Gift List</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "12px", padding: "12px" }}>
+                {xsuits.map(x => (
+                  <div key={x.id} style={{ border: "1px solid var(--border)", borderRadius: "8px", overflow: "hidden", background: "var(--bg2)" }}>
+                    <div style={{ aspectRatio: "1/1", background: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+                      {x.image_url ? (
+                        <img src={x.image_url} alt={x.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : (
+                        <Zap size={30} style={{ opacity: 0.2 }} />
+                      )}
+                      <div style={{ position: "absolute", top: "5px", right: "5px", display: "flex", gap: "4px" }}>
+                        <button onClick={() => { setXsuitEditId(x.id); setXsuitForm(x); }} style={{ background: "rgba(0,0,0,0.6)", border: "none", color: "var(--gold)", borderRadius: "4px", padding: "4px", cursor: "pointer" }}><Pencil size={12}/></button>
+                        <button onClick={() => deleteXsuit(x.id)} style={{ background: "rgba(239,68,68,0.8)", border: "none", color: "#fff", borderRadius: "4px", padding: "4px", cursor: "pointer" }}><Trash2 size={12}/></button>
+                      </div>
+                    </div>
+                    <div style={{ padding: "10px", textAlign: "center" }}>
+                      <div style={{ fontSize: "12px", fontWeight: 700, marginBottom: "4px" }}>{x.name}</div>
+                      <div style={{ fontSize: "14px", color: "var(--gold)", fontWeight: 800 }}>₹{x.price}</div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -529,26 +823,72 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* CRM TAB */}
-        {tab === "crm" && (
+        {/* SUPERCAR GIFTS TAB */}
+        {tab === "supercars" && (
           <div style={{ display: "grid", gridTemplateColumns: "350px 1fr", gap: "24px" }}>
             <div style={{ background: "var(--card)", padding: "24px", borderRadius: "14px", border: "1px solid var(--border-gold)" }}>
-              <h3 style={{ marginBottom: "20px" }}><Users size={18}/> Add Customer</h3>
+              <h3 style={{ marginBottom: "20px" }}><Car size={18}/> {carEditId ? "Edit Supercar" : "Add Supercar Gift"}</h3>
               <div style={{ display: "grid", gap: "12px" }}>
-                <input className="input" placeholder="Name" value={customerForm.name} onChange={e => setCustomerForm({...customerForm, name: e.target.value})} />
-                <input className="input" placeholder="Contact (WhatsApp/TG)" value={customerForm.contact} onChange={e => setCustomerForm({...customerForm, contact: e.target.value})} />
-                <input className="input" placeholder="Social Handle" value={customerForm.social_handle} onChange={e => setCustomerForm({...customerForm, social_handle: e.target.value})} />
-                <textarea className="input" placeholder="Notes" value={customerForm.notes} onChange={e => setCustomerForm({...customerForm, notes: e.target.value})} />
-                <button onClick={saveCustomer} disabled={savingCustomer} className="btn btn-gold">Save Customer</button>
+                <div>
+                  <label style={sl}>Supercar Name</label>
+                  <input className="input" placeholder="e.g. Lamborghini Aventador" value={carForm.name} onChange={e => setCarForm({...carForm, name: e.target.value})} />
+                </div>
+                <div>
+                  <label style={sl}>Price (₹)</label>
+                  <input className="input" placeholder="e.g. 15000" type="number" value={carForm.price} onChange={e => setCarForm({...carForm, price: e.target.value})} />
+                </div>
+                <div>
+                  <label style={sl}>Card Type</label>
+                  <select className="input" value={carForm.type} onChange={e => setCarForm({...carForm, type: e.target.value})}>
+                    <option value="One-Card">One-Card</option>
+                    <option value="Two-Card">Two-Card</option>
+                    <option value="Three-Card">Three-Card</option>
+                  </select>
+                </div>
+
+                <div style={{ border: "2px dashed var(--border-gold)", padding: "20px", borderRadius: "8px", textAlign: "center" }}>
+                  {carImage ? (
+                    <div style={{ fontSize: "12px", color: "var(--green)" }}>{carImage.name} selected</div>
+                  ) : (
+                    <label style={{ cursor: "pointer" }}>
+                      <div style={{ fontSize: "12px" }}>{carForm.image_url ? "Change Image" : "Click to Upload Supercar Image"}</div>
+                      <input type="file" hidden onChange={e => setCarImage(e.target.files[0])} />
+                    </label>
+                  )}
+                </div>
+
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <button onClick={saveCar} disabled={savingCar} className="btn btn-gold w-full">{carEditId ? "Update Car" : "Save Car"}</button>
+                  {carEditId && <button onClick={() => { setCarEditId(null); setCarForm(EMPTY_CAR); setCarImage(null); }} className="btn btn-outline">Cancel</button>}
+                </div>
               </div>
             </div>
-            <div style={{ background: "var(--card)", borderRadius: "14px", overflow: "hidden" }}>
-              {customers.map(c => (
-                <div key={c.id} style={{ padding: "16px", borderBottom: "1px solid var(--border)" }}>
-                  <div style={{ fontWeight: 700 }}>{c.name}</div>
-                  <div style={{ fontSize: "12px", color: "var(--muted)" }}>{c.contact} · {c.social_handle}</div>
-                </div>
-              ))}
+            <div style={{ background: "var(--card)", borderRadius: "14px", overflow: "hidden", border: "1px solid var(--border)" }}>
+              <div style={{ padding: "16px", fontWeight: 700, borderBottom: "1px solid var(--border)", background: "rgba(255,215,0,0.02)" }}>Supercar Gift List</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "12px", padding: "12px" }}>
+                {supercars.map(c => (
+                  <div key={c.id} style={{ border: "1px solid var(--border)", borderRadius: "8px", overflow: "hidden", background: "var(--bg2)" }}>
+                    <div style={{ aspectRatio: "1/1", background: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+                      {c.image_url ? (
+                        <img src={c.image_url} alt={c.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : (
+                        <Car size={30} style={{ opacity: 0.2 }} />
+                      )}
+                      <div style={{ position: "absolute", top: "5px", right: "5px", display: "flex", gap: "4px" }}>
+                        <button onClick={() => { setCarEditId(c.id); setCarForm(c); }} style={{ background: "rgba(0,0,0,0.6)", border: "none", color: "var(--gold)", borderRadius: "4px", padding: "4px", cursor: "pointer" }}><Pencil size={12}/></button>
+                        <button onClick={() => deleteCar(c.id)} style={{ background: "rgba(239,68,68,0.8)", border: "none", color: "#fff", borderRadius: "4px", padding: "4px", cursor: "pointer" }}><Trash2 size={12}/></button>
+                      </div>
+                      <div style={{ position: "absolute", bottom: "5px", left: "5px", background: "var(--gold)", color: "#000", fontSize: "9px", fontWeight: 900, padding: "2px 6px", borderRadius: "4px" }}>
+                        {c.type}
+                      </div>
+                    </div>
+                    <div style={{ padding: "10px", textAlign: "center" }}>
+                      <div style={{ fontSize: "12px", fontWeight: 700, marginBottom: "4px" }}>{c.name}</div>
+                      <div style={{ fontSize: "14px", color: "var(--gold)", fontWeight: 800 }}>₹{c.price}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}

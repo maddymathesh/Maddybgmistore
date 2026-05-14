@@ -25,12 +25,10 @@ export default function Login() {
     const provider = new GoogleAuthProvider();
     
     signInWithPopup(auth, provider)
-      .then((result) => {
-        console.log("Login Success");
+      .then(() => {
         toast.success("Logged in successfully!");
       })
       .catch((error) => {
-        console.log(error);
         toast.error(error.message);
       })
       .finally(() => {

@@ -232,233 +232,275 @@ export default function AdminPaymentManager() {
   };
 
   return (
-    <div className="grid gap-8 pb-10">
-      {/* Stats Section Modern */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        {[
-          { label: "Total Links", value: stats.total, color: "from-blue-600/20 to-transparent text-blue-400 border-blue-500/20" },
-          { label: "Active Links", value: stats.active, color: "from-emerald-600/20 to-transparent text-emerald-400 border-emerald-500/20" },
-          { label: "Potential Rev.", value: "₹" + stats.revenue.toLocaleString(), color: "from-amber-600/20 to-transparent text-amber-400 border-amber-500/20" },
-          { label: "Expired Links", value: stats.expired, color: "from-red-600/20 to-transparent text-red-400 border-red-500/20" },
-          { label: "Revoked Links", value: stats.revoked, color: "from-orange-600/20 to-transparent text-orange-400 border-orange-500/20" },
-        ].map((s, i) => (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
-            key={s.label} className={`relative overflow-hidden rounded-2xl border bg-gradient-to-br ${s.color} p-5 backdrop-blur-md`}
+  <div className="flex flex-col gap-8 pb-10">
+
+  {/* Stats Section */}
+  <div className="flex flex-wrap gap-4">
+    {[
+      {
+        label: "Total Links",
+        value: stats.total,
+        color:
+          "from-blue-600/20 to-transparent text-blue-400 border-blue-500/20",
+      },
+      {
+        label: "Active Links",
+        value: stats.active,
+        color:
+          "from-emerald-600/20 to-transparent text-emerald-400 border-emerald-500/20",
+      },
+      {
+        label: "Potential Rev.",
+        value: "₹" + stats.revenue.toLocaleString(),
+        color:
+          "from-amber-600/20 to-transparent text-amber-400 border-amber-500/20",
+      },
+      {
+        label: "Expired Links",
+        value: stats.expired,
+        color:
+          "from-red-600/20 to-transparent text-red-400 border-red-500/20",
+      },
+      {
+        label: "Revoked Links",
+        value: stats.revoked,
+        color:
+          "from-orange-600/20 to-transparent text-orange-400 border-orange-500/20",
+      },
+    ].map((s, i) => (
+      <motion.div
+        key={s.label}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: i * 0.1 }}
+        className={`relative min-w-[180px] flex-1 overflow-hidden rounded-2xl border bg-gradient-to-br ${s.color} p-5 backdrop-blur-md`}
+      >
+        <div className="relative z-10">
+          <div className="text-2xl lg:text-3xl font-black mb-1">
+            {s.value}
+          </div>
+
+          <div className="text-[10px] lg:text-xs font-bold uppercase tracking-widest opacity-70">
+            {s.label}
+          </div>
+        </div>
+
+        <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-white/5 rounded-full blur-2xl" />
+      </motion.div>
+    ))}
+  </div>
+
+  {/* Main Layout */}
+  <div className="flex flex-col lg:flex-row gap-8">
+
+    {/* Left Section */}
+    <div className="flex-1 flex flex-col gap-8">
+
+      {/* Generator Card */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative overflow-hidden rounded-[24px] border border-amber-500/30 bg-[#0c0e14] p-6 lg:p-8 shadow-[0_0_40px_rgba(245,158,11,0.1)]"
+      >
+        <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+
+        <div className="mb-8 flex items-center justify-between relative z-10">
+          <div>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-500 border border-amber-500/20 mb-3">
+              <ShieldCheck size={14} />
+              JWT Secured Links
+            </span>
+
+            <h2 className="text-2xl font-black text-white">
+              Generate Payment Link
+            </h2>
+          </div>
+        </div>
+
+        {/* FORM */}
+        <form
+          onSubmit={handleGenerate}
+          className="flex flex-col gap-6 relative z-10"
+        >
+
+          {/* Top Row */}
+          <div className="flex flex-col md:flex-row gap-6">
+
+            <div className="group relative flex-1">
+              <input
+                className="peer w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 pt-6 text-white text-sm outline-none transition-all focus:border-amber-500/50 focus:bg-amber-500/5"
+                placeholder=" "
+                value={form.customerName}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    customerName: e.target.value,
+                  })
+                }
+                required
+              />
+
+              <label className="absolute left-5 top-5 text-xs text-white/40 uppercase tracking-wider font-bold transition-all peer-focus:text-[10px] peer-focus:top-2 peer-focus:text-amber-500 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-2">
+                Customer Name
+              </label>
+            </div>
+
+            <div className="group relative flex-1">
+              <span className="absolute left-5 top-1/2 -translate-y-1/2 text-white/50 font-bold">
+                ₹
+              </span>
+
+              <input
+                className="peer w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-5 py-4 pt-6 text-white text-sm outline-none transition-all focus:border-amber-500/50 focus:bg-amber-500/5"
+                type="number"
+                min="1"
+                placeholder=" "
+                value={form.amount}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    amount: e.target.value,
+                  })
+                }
+                required
+              />
+
+              <label className="absolute left-9 top-5 text-xs text-white/40 uppercase tracking-wider font-bold transition-all peer-focus:text-[10px] peer-focus:top-2 peer-focus:text-amber-500 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-2">
+                Amount
+              </label>
+            </div>
+
+          </div>
+
+          {/* Bottom Row */}
+          <div className="flex flex-col md:flex-row gap-6">
+
+            <div className="group relative flex-1">
+              <input
+                className="peer w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 pt-6 text-white text-sm outline-none transition-all focus:border-amber-500/50 focus:bg-amber-500/5"
+                placeholder=" "
+                value={form.orderId}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    orderId: e.target.value,
+                  })
+                }
+              />
+
+              <label className="absolute left-5 top-5 text-xs text-white/40 uppercase tracking-wider font-bold transition-all peer-focus:text-[10px] peer-focus:top-2 peer-focus:text-amber-500 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-2">
+                Order ID
+              </label>
+            </div>
+
+            <div className="group relative flex-1">
+              <input
+                className="peer w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 pt-6 text-white text-sm outline-none transition-all focus:border-amber-500/50 focus:bg-amber-500/5"
+                type="number"
+                min="5"
+                max="60"
+                placeholder=" "
+                value={form.expiresInMinutes}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    expiresInMinutes: e.target.value,
+                  })
+                }
+                required
+              />
+
+              <span className="absolute right-5 top-1/2 -translate-y-1/2 text-xs text-white/30 font-bold">
+                MIN
+              </span>
+
+              <label className="absolute left-5 top-5 text-xs text-white/40 uppercase tracking-wider font-bold transition-all peer-focus:text-[10px] peer-focus:top-2 peer-focus:text-amber-500 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-2">
+                Timer
+              </label>
+            </div>
+
+            <div className="group relative flex-1">
+              <input
+                className="peer w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 pt-6 text-white text-sm font-mono tracking-widest outline-none transition-all focus:border-amber-500/50 focus:bg-amber-500/5"
+                maxLength={6}
+                placeholder=" "
+                value={form.pin}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    pin: e.target.value.replace(/\D/g, ""),
+                  })
+                }
+                required
+              />
+
+              <label className="absolute left-5 top-5 text-xs text-white/40 uppercase tracking-wider font-bold transition-all peer-focus:text-[10px] peer-focus:top-2 peer-focus:text-amber-500 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-2">
+                Access PIN
+              </label>
+            </div>
+
+          </div>
+
+          {/* Button */}
+          <button
+            type="submit"
+            disabled={generating}
+            className="mt-2 relative overflow-hidden group w-full lg:w-fit rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 p-[1px]"
           >
-            <div className="relative z-10">
-              <div className="text-2xl lg:text-3xl font-black mb-1">{s.value}</div>
-              <div className="text-[10px] lg:text-xs font-bold uppercase tracking-widest opacity-70">{s.label}</div>
-            </div>
-            <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-white/5 rounded-full blur-2xl" />
-          </motion.div>
-        ))}
-      </div>
-
-      <div className="grid lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-8 flex flex-col gap-8">
-
-          {/* Main Generator Card */}
-          <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-[24px] border border-amber-500/30 bg-[#0c0e14] p-6 lg:p-8 shadow-[0_0_40px_rgba(245,158,11,0.1)]">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-
-            <div className="mb-8 flex items-center justify-between relative z-10">
-              <div>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-500 border border-amber-500/20 mb-3">
-                  <ShieldCheck size={14} /> JWT Secured Links
-                </span>
-                <h2 className="text-2xl font-black text-white">Generate Payment Link</h2>
-              </div>
-            </div>
-
-            <form onSubmit={handleGenerate} className="grid gap-6 relative z-10">
-              <div className="grid gap-6 md:grid-cols-2">
-                <div className="group relative">
-                  <input className="peer w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 pt-6 text-white text-sm outline-none transition-all focus:border-amber-500/50 focus:bg-amber-500/5"
-                    placeholder=" " value={form.customerName} onChange={e => setForm({ ...form, customerName: e.target.value })} required />
-                  <label className="absolute left-5 top-5 text-xs text-white/40 uppercase tracking-wider font-bold transition-all peer-focus:text-[10px] peer-focus:top-2 peer-focus:text-amber-500 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-2">
-                    Customer Name
-                  </label>
-                </div>
-
-                <div className="group relative">
-                  <span className="absolute left-5 top-1/2 -translate-y-1/2 text-white/50 font-bold">₹</span>
-                  <input className="peer w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-5 py-4 pt-6 text-white text-sm outline-none transition-all focus:border-amber-500/50 focus:bg-amber-500/5"
-                    type="number" min="1" placeholder=" " value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} required />
-                  <label className="absolute left-9 top-5 text-xs text-white/40 uppercase tracking-wider font-bold transition-all peer-focus:text-[10px] peer-focus:top-2 peer-focus:text-amber-500 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-2">
-                    Amount
-                  </label>
-                </div>
-              </div>
-
-              <div className="grid gap-6 md:grid-cols-3">
-                <div className="group relative">
-                  <input className="peer w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 pt-6 text-white text-sm outline-none transition-all focus:border-amber-500/50 focus:bg-amber-500/5"
-                    placeholder=" " value={form.orderId} onChange={e => setForm({ ...form, orderId: e.target.value })} />
-                  <label className="absolute left-5 top-5 text-xs text-white/40 uppercase tracking-wider font-bold transition-all peer-focus:text-[10px] peer-focus:top-2 peer-focus:text-amber-500 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-2">
-                    Order ID (Optional)
-                  </label>
-                </div>
-
-                <div className="group relative">
-                  <input className="peer w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 pt-6 text-white text-sm outline-none transition-all focus:border-amber-500/50 focus:bg-amber-500/5"
-                    type="number" min="5" max="60" placeholder=" " value={form.expiresInMinutes} onChange={e => setForm({ ...form, expiresInMinutes: e.target.value })} required />
-                  <span className="absolute right-5 top-1/2 -translate-y-1/2 text-xs text-white/30 font-bold">MIN</span>
-                  <label className="absolute left-5 top-5 text-xs text-white/40 uppercase tracking-wider font-bold transition-all peer-focus:text-[10px] peer-focus:top-2 peer-focus:text-amber-500 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-2">
-                    Timer
-                  </label>
-                </div>
-
-                <div className="group relative">
-                  <input className="peer w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 pt-6 text-white text-sm font-mono tracking-widest outline-none transition-all focus:border-amber-500/50 focus:bg-amber-500/5"
-                    maxLength={6} placeholder=" " value={form.pin} onChange={e => setForm({ ...form, pin: e.target.value.replace(/\D/g, "") })} required />
-                  <label className="absolute left-5 top-5 text-xs text-white/40 uppercase tracking-wider font-bold transition-all peer-focus:text-[10px] peer-focus:top-2 peer-focus:text-amber-500 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-2">
-                    Access PIN
-                  </label>
-                </div>
-              </div>
-
-              <button type="submit" disabled={generating} className="mt-2 relative overflow-hidden group w-full lg:w-auto self-start rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 p-[1px]">
-                <div className="flex h-full w-full items-center justify-center gap-2 rounded-xl bg-black px-8 py-4 transition-all group-hover:bg-transparent">
-                  {generating ? <Loader2 size={18} className="animate-spin text-amber-500 group-hover:text-black" /> : <Plus size={18} className="text-amber-500 group-hover:text-black" />}
-                  <span className="font-bold text-amber-500 group-hover:text-black">Generate Secure Link</span>
-                </div>
-              </button>
-            </form>
-
-            <AnimatePresence>
-              {generatedLink && (
-                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="mt-6 overflow-hidden">
-                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                      <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-1">Link Generated • PIN: {generatedLink.pin}</div>
-                      <div className="font-mono text-sm text-white break-all">{generatedLink.url}</div>
-                    </div>
-                    <div className="flex gap-2">
-                      <button type="button" onClick={() => copyText(generatedLink.url, "Link copied!")} className="flex items-center gap-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 px-4 py-2 rounded-lg text-xs font-bold transition-colors">
-                        <Copy size={14} /> Copy
-                      </button>
-                      <a href={generatedLink.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-black px-4 py-2 rounded-lg text-xs font-bold transition-colors">
-                        Open <ExternalLink size={14} />
-                      </a>
-                    </div>
-                  </div>
-                </motion.div>
+            <div className="flex h-full w-full items-center justify-center gap-2 rounded-xl bg-black px-8 py-4 transition-all group-hover:bg-transparent">
+              {generating ? (
+                <Loader2
+                  size={18}
+                  className="animate-spin text-amber-500 group-hover:text-black"
+                />
+              ) : (
+                <Plus
+                  size={18}
+                  className="text-amber-500 group-hover:text-black"
+                />
               )}
-            </AnimatePresence>
-          </motion.section>
 
-        </div>
-
-        {/* Settings Sidebar */}
-        <div className="lg:col-span-4 flex flex-col gap-6">
-          <motion.section initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="rounded-[24px] border border-white/10 bg-[#0c0e14] p-6">
-            <div className="mb-6 flex items-center gap-2">
-              <Settings size={18} className="text-amber-500" />
-              <h3 className="text-lg font-black text-white">Payment Setup</h3>
+              <span className="font-bold text-amber-500 group-hover:text-black">
+                Generate Secure Link
+              </span>
             </div>
-            <form onSubmit={saveSettings} className="grid gap-5">
-              <div className="group relative">
-                <input className="peer w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pt-5 text-white text-sm outline-none transition-all focus:border-amber-500/50"
-                  placeholder=" " value={settingsDraft.upiId} onChange={e => setSettingsDraft({ ...settingsDraft, upiId: e.target.value })} />
-                <label className="absolute left-4 top-4 text-[11px] text-white/40 uppercase tracking-wider font-bold transition-all peer-focus:text-[9px] peer-focus:top-1.5 peer-focus:text-amber-500 peer-[:not(:placeholder-shown)]:text-[9px] peer-[:not(:placeholder-shown)]:top-1.5">
-                  UPI ID
-                </label>
-              </div>
-              <div className="group relative">
-                <input className="peer w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pt-5 text-white text-sm outline-none transition-all focus:border-amber-500/50"
-                  placeholder=" " value={settingsDraft.payeeName} onChange={e => setSettingsDraft({ ...settingsDraft, payeeName: e.target.value })} />
-                <label className="absolute left-4 top-4 text-[11px] text-white/40 uppercase tracking-wider font-bold transition-all peer-focus:text-[9px] peer-focus:top-1.5 peer-focus:text-amber-500 peer-[:not(:placeholder-shown)]:text-[9px] peer-[:not(:placeholder-shown)]:top-1.5">
-                  Payee Name
-                </label>
-              </div>
-              <button type="submit" disabled={savingSettings} className="w-full rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold py-3 text-sm transition-colors flex items-center justify-center gap-2">
-                {savingSettings ? <Loader2 size={16} className="animate-spin" /> : "Save Settings"}
-              </button>
-            </form>
-          </motion.section>
-        </div>
-      </div>
+          </button>
 
-      {/* Database Table */}
-      <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} delay={0.2} className="rounded-[24px] border border-white/10 bg-[#0c0e14] overflow-hidden">
-        <div className="flex flex-col md:flex-row items-center justify-between border-b border-white/10 bg-white/5 px-6 py-5 gap-4">
-          <h3 className="flex items-center gap-2 text-lg font-black text-white">
-            <Link2 size={18} className="text-amber-500" /> Payment Records Log
-          </h3>
-          <div className="flex gap-3 w-full md:w-auto">
-            <div className="relative flex-1 md:w-64">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
-              <input type="text" placeholder="Search customer or ID..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg pl-9 pr-4 py-2 text-sm text-white focus:border-amber-500/50 outline-none" />
-            </div>
-            <button onClick={exportRecords} className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-xs font-bold text-white transition-colors">
-              <Download size={14} /> Export
-            </button>
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="p-8 flex justify-center text-white/40"><Loader2 className="animate-spin" /></div>
-        ) : filteredLinks.length === 0 ? (
-          <div className="p-10 text-center text-sm text-white/40">No records found.</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px] text-left text-sm whitespace-nowrap">
-              <thead className="bg-white/5 text-[10px] uppercase tracking-widest text-white/40">
-                <tr>
-                  <th className="px-6 py-4">Order ID</th>
-                  <th className="px-6 py-4">Customer</th>
-                  <th className="px-6 py-4">Amount</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4">Expiry / Date</th>
-                  <th className="px-6 py-4">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/10">
-                {filteredLinks.map((link) => {
-                  const status = getStatus(link, now);
-                  const paymentUrl = getPaymentUrl(link.id);
-                  const isBusy = actionId === link.id || actionId === `del-${link.id}`;
-
-                  return (
-                    <tr key={link.id} className="hover:bg-white/5 transition-colors">
-                      <td className="px-6 py-4 font-mono text-xs text-amber-500">{link.orderId}</td>
-                      <td className="px-6 py-4 text-white font-medium">{link.customerName}</td>
-                      <td className="px-6 py-4 font-bold text-emerald-400">₹{Number(link.amount).toLocaleString('en-IN')}</td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${status === "active" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" :
-                            status === "revoked" ? "bg-orange-500/10 text-orange-400 border border-orange-500/20" :
-                              "bg-red-500/10 text-red-400 border border-red-500/20"
-                          }`}>
-                          {status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-xs text-white/50">
-                        {new Date(toDate(link.expiresAt)).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex gap-2">
-                          <button disabled={isBusy} onClick={() => copyText(paymentUrl, "Link copied!")} className="text-white/60 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-lg transition-colors" title="Copy Link">
-                            <Copy size={16} />
-                          </button>
-                          {status === "active" && (
-                            <button disabled={isBusy} onClick={() => revokeLink(link)} className="text-orange-400 hover:text-orange-300 bg-orange-500/10 hover:bg-orange-500/20 p-2 rounded-lg transition-colors" title="Revoke Link">
-                              <Ban size={16} />
-                            </button>
-                          )}
-                          <button disabled={isBusy} onClick={() => deleteLink(link)} className="text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 p-2 rounded-lg transition-colors" title="Delete record">
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+        </form>
       </motion.section>
     </div>
+
+    {/* Sidebar */}
+    <div className="w-full lg:w-[360px] flex flex-col gap-6">
+
+      <motion.section
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="rounded-[24px] border border-white/10 bg-[#0c0e14] p-6"
+      >
+        <div className="mb-6 flex items-center gap-2">
+          <Settings
+            size={18}
+            className="text-amber-500"
+          />
+
+          <h3 className="text-lg font-black text-white">
+            Payment Setup
+          </h3>
+        </div>
+
+        <form
+          onSubmit={saveSettings}
+          className="flex flex-col gap-5"
+        >
+
+          {/* Inputs */}
+
+        </form>
+      </motion.section>
+
+    </div>
+  </div>
+</div>
   );
 }

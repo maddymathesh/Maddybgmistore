@@ -5,14 +5,13 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import {
-  ShieldCheck, CheckCircle, Copy,
+  ShieldCheck, CheckCircle, Copy, MessageCircle, Send,
   AlertTriangle, CreditCard, ChevronDown, ChevronUp, Lock, XCircle
 } from "lucide-react";
 
-const FALLBACK_ENCRYPTED_UPI = "VFFWUUBIQlRAcEtXVQ==";
-const FALLBACK_ENCRYPTED_NAME = "dHFmfXxjemJ4YnN7GWI=";
-const PAYMENT_PIN = "9025";
 const BANK_PIN = "1516";
+const WHATSAPP = import.meta.env.VITE_WHATSAPP_NUMBER || "919025391516";
+const TELEGRAM = import.meta.env.VITE_TELEGRAM_USERNAME || "MBSxMADDY17";
 
 function parseDate(value) {
   if (!value) return null;
@@ -31,19 +30,6 @@ function formatTimer(secondsLeft) {
   const minutes = Math.floor(secondsLeft / 60).toString().padStart(2, "0");
   const seconds = (secondsLeft % 60).toString().padStart(2, "0");
   return `${minutes}:${seconds}`;
-}
-
-function decrypt(base64, key) {
-  try {
-    const text = atob(base64);
-    let result = "";
-    for (let i = 0; i < text.length; i++) {
-      result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-    }
-    return result;
-  } catch {
-    return "";
-  }
 }
 
 function CountdownBadge({ secondsLeft, totalSeconds }) {
@@ -111,6 +97,10 @@ export default function PaymentPage() {
   const [bankUnlocked, setBankUnlocked] = useState(false);
   const [bankPin, setBankPin] = useState("");
   const [bankError, setBankError] = useState("");
+  const [invalidReason, setInvalidReason] = useState("invalid");
+  const [unlocking, setUnlocking] = useState(false);
+  const [upiId, setUpiId] = useState("");
+  const [payeeName, setPayeeName] = useState("");
 
   const expiresAt = useMemo(() => parseDate(paymentData?.expiresAt), [paymentData]);
 
@@ -135,6 +125,7 @@ export default function PaymentPage() {
           setSecondsLeft(getSecondsLeft(parseDate(payload.link?.expiresAt)));
           setIsValidLink(true);
         } else if (!cancelled) {
+          setInvalidReason(payload?.reason || "invalid");
           setIsValidLink(false);
         }
       } catch (err) {
@@ -166,19 +157,38 @@ export default function PaymentPage() {
     return () => window.clearInterval(timer);
   }, [expiresAt, isValidLink]);
 
-  const encryptedUpi = paymentData?.encryptedUpi || FALLBACK_ENCRYPTED_UPI;
-  const encryptedName = paymentData?.encryptedName || FALLBACK_ENCRYPTED_NAME;
-  const linkPin = paymentData?.pin || PAYMENT_PIN;
   const totalSeconds = Number(paymentData?.expiresInMinutes || 10) * 60;
 
-  const handleUnlock = (e) => {
+  const handleUnlock = async (e) => {
     e.preventDefault();
-    if (pin === linkPin) {
-      setIsUnlocked(true);
-      setError("");
-    } else {
-      setError("Incorrect PIN. Please try again.");
-      setPin("");
+    if (!/^\d{4,6}$/.test(pin)) {
+      setError("Enter the 4–6 digit PIN from admin.");
+      return;
+    }
+    setUnlocking(true);
+    setError("");
+    try {
+      const functions = getFunctions();
+      const verifyPaymentPin = httpsCallable(functions, "verifyPaymentPin");
+      const result = await verifyPaymentPin({ token, pin });
+      const payload = result.data;
+      if (payload?.valid) {
+        setUpiId(payload.upiId || "");
+        setPayeeName(payload.payeeName || "");
+        setIsUnlocked(true);
+      } else if (payload?.reason === "expired") {
+        setIsValidLink(false);
+        setInvalidReason("expired");
+        toast.error("Payment link expired");
+      } else {
+        setError("Incorrect PIN. Please try again.");
+        setPin("");
+      }
+    } catch (err) {
+      console.error("PIN verification error:", err);
+      setError("Unable to verify PIN. Please try again.");
+    } finally {
+      setUnlocking(false);
     }
   };
 
@@ -193,17 +203,27 @@ export default function PaymentPage() {
     }
   };
 
-  const upiId = isUnlocked ? (import.meta.env.VITE_PAYMENT_UPI_ID || decrypt(encryptedUpi, pin)) : "";
-  const payeeName = isUnlocked ? (import.meta.env.VITE_PAYMENT_PAYEE_NAME || decrypt(encryptedName, pin)) : "";
   const amount = Number(paymentData?.amount || 0);
-  const orderId = paymentData?.orderId || token || "";
+  const orderId = paymentData?.orderId || "";
+  const customerName = paymentData?.customerName || "";
   const currency = "INR";
 
-  const paymentParams = `pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${encodeURIComponent(amount)}&cu=${currency}&tn=${encodeURIComponent(orderId)}`;
-  const baseUpiUrl = `upi://pay?${paymentParams}`;
-  const gpayLink = `gpay://upi/pay?${paymentParams}`;
-  const phonepeLink = `phonepe://pay?${paymentParams}`;
-  const paytmLink = `paytmmp://pay?${paymentParams}`;
+  const paymentParams = isUnlocked
+    ? `pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${encodeURIComponent(amount)}&cu=${currency}&tn=${encodeURIComponent(orderId)}`
+    : "";
+  const baseUpiUrl = paymentParams ? `upi://pay?${paymentParams}` : "";
+  const gpayLink = paymentParams ? `gpay://upi/pay?${paymentParams}` : "#";
+  const phonepeLink = paymentParams ? `phonepe://pay?${paymentParams}` : "#";
+  const paytmLink = paymentParams ? `paytmmp://pay?${paymentParams}` : "#";
+  const qrImageUrl = baseUpiUrl
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=12&data=${encodeURIComponent(baseUpiUrl)}`
+    : "";
+
+  const screenshotText = encodeURIComponent(
+    `Hi, I completed payment for Order ${orderId} (₹${amount.toLocaleString("en-IN")}). Customer: ${customerName}. Please verify my screenshot.`
+  );
+  const whatsappHref = `https://wa.me/${WHATSAPP}?text=${screenshotText}`;
+  const telegramHref = `https://t.me/${TELEGRAM}?text=${screenshotText}`;
 
   const handleCopyUpi = () => {
     navigator.clipboard.writeText(upiId).then(() => {
@@ -235,9 +255,13 @@ export default function PaymentPage() {
               <div style={{ display: "inline-flex", background: "rgba(239,68,68,0.1)", padding: "16px", borderRadius: "50%", marginBottom: "20px" }}>
                 <XCircle size={36} color="#ef4444" />
               </div>
-              <h1 style={{ fontFamily: "var(--font-h)", fontSize: "24px", marginBottom: "8px", color: "#fff" }}>Link Invalid or Expired</h1>
+              <h1 style={{ fontFamily: "var(--font-h)", fontSize: "24px", marginBottom: "8px", color: "#fff" }}>
+                {invalidReason === "revoked" ? "Link Revoked" : "Link Invalid or Expired"}
+              </h1>
               <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "14px", marginBottom: "24px" }}>
-                This payment link is no longer active. Please contact support for a new link.
+                {invalidReason === "revoked"
+                  ? "This payment link was revoked by admin. Contact support for a new link."
+                  : "This payment link is no longer active. Please contact support for a new link."}
               </p>
               <Link to="/connectwithus" className="btn btn-gold" style={{ display: "inline-block", padding: "12px 24px" }}>Contact Support</Link>
             </div>
@@ -331,6 +355,7 @@ export default function PaymentPage() {
 
                     <button
                       type="submit"
+                      disabled={unlocking}
                       style={{
                         background: "var(--gold)",
                         color: "#000",
@@ -338,17 +363,18 @@ export default function PaymentPage() {
                         padding: "14px 32px",
                         borderRadius: "10px",
                         border: "none",
-                        cursor: "pointer",
+                        cursor: unlocking ? "wait" : "pointer",
                         fontSize: "15px",
                         marginTop: "8px",
                         width: "200px",
+                        opacity: unlocking ? 0.7 : 1,
                         boxShadow: "0 4px 14px rgba(255,215,0,0.3)",
                         transition: "transform 0.2s"
                       }}
                       onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-2px)"}
                       onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
                     >
-                      Unlock
+                      {unlocking ? "Verifying..." : "Unlock"}
                     </button>
                   </form>
                 </div>
@@ -381,8 +407,8 @@ export default function PaymentPage() {
                     marginBottom: "20px"
                   }}>
                     <img
-                      src="/payqr.png"
-                      alt="Payment QR Code"
+                      src={qrImageUrl}
+                      alt="UPI payment QR code"
                       style={{ width: "220px", height: "220px", objectFit: "contain", display: "block" }}
                       onError={(e) => {
                         e.target.onerror = null;
@@ -610,9 +636,13 @@ export default function PaymentPage() {
                         <p style={{ margin: "0 0 10px 0", fontSize: "13px", color: "rgba(255,255,255,0.8)", lineHeight: "1.5" }}>
                           After payment, take a screenshot and share it with us to complete your order.
                         </p>
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: "#fff", fontWeight: "600" }}>
-                          <CheckCircle size={14} color="#22c55e" />
-                          <span>Share screenshot for verification</span>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                          <a href={whatsappHref} target="_blank" rel="noreferrer" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "12px", borderRadius: "10px", background: "#25D366", color: "#fff", fontWeight: 700, fontSize: "13px", textDecoration: "none" }}>
+                            <MessageCircle size={16} /> WhatsApp
+                          </a>
+                          <a href={telegramHref} target="_blank" rel="noreferrer" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "12px", borderRadius: "10px", background: "#0088cc", color: "#fff", fontWeight: 700, fontSize: "13px", textDecoration: "none" }}>
+                            <Send size={16} /> Telegram
+                          </a>
                         </div>
                       </div>
                     </div>

@@ -199,7 +199,7 @@ export default function App() {
           <Route
             path="/pay/:token"
             element={
-              <Suspense fallback={ <PageLoader />}>
+              <Suspense fallback={<PageLoader />}>
                 <PaymentPage />
               </Suspense>
             }

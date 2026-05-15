@@ -418,7 +418,7 @@ export default function AdminDashboard() {
             ["supercars", "Supercar Gifts"],
             ["reviews", "Reviews"],
             ["proofs", "Proofs"],
-            ["payment_links", "🔗 Payment Links"]
+            ["payment_links", "Payment Links"],
           ].map(([key, label]) => (
             <button key={key} onClick={() => setTab(key)}
               style={{
@@ -923,7 +923,6 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* PAYMENT LINKS TAB */}
         {tab === "payment_links" && <AdminPaymentManager />}
 
       </div>

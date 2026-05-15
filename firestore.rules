@@ -52,6 +52,10 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+    match /payment_settings/{docId} {
+      allow read, write: if isAdmin();
+    }
+
     // ── Deny all other collections by default ──────────────────
     match /{document=**} {
       allow read, write: if false;

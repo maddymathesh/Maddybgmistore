@@ -1,5 +1,5 @@
 /**
- * Admin Dashboard — Manage Products + Reviews + Payment Links (Supabase/Firebase)
+ * Admin Dashboard — Manage Products + Reviews + CRM + Sales (Supabase)
  *
  * Access control:
  *   - isAdmin checked via AuthContext (UID match from .env)
@@ -10,8 +10,9 @@ import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Navbar from "../../components/Navbar";
-import { LogOut, Plus, Trash2, Pencil, Star, Camera, Coins, Zap, Car } from "lucide-react";
-import AdminPaymentManager from "../../components/admin/AdminPaymentManager";
+import { LogOut, Plus, Trash2, Pencil, Star, Copy, Users, TrendingUp, DollarSign, Camera, Coins, Zap, Car } from "lucide-react";
+import { db } from "../../firebase";
+import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, orderBy } from "firebase/firestore";
 
 // ── Shared label style ────────────────────────────────────────
 const ls = {
@@ -25,25 +26,46 @@ const GUARANTEE_OPTIONS = [
   "37 days unlink Garuntee for Secondary Login",
   "22 Days Unlink Garuntee for Secondary Login",
   "75 Days Unlink Garuntee For Both logins",
-  "Single & Safe Login",
+  "Single & Safe Login"
 ];
 
 // ── Empty form defaults ───────────────────────────────────────
 const EMPTY_PRODUCT = {
   title: "", description: "", price: "",
   category: "Budget", status: "available",
-  youtubeUrl: "",
+  youtubeUrl: "", 
   primaryLogin: "X",
   secondaryLogin: "null",
-  unlinkGuarantee: "Single & Safe Login",
+  unlinkGuarantee: "Single & Safe Login"
 };
 const EMPTY_REVIEW = {
   name: "", text: "", stars: 5,
   image_url: "", tracking_id: "",
 };
-const EMPTY_UC = { uc_amount: "", market_price: "", offer_price: "", status: "available", method: "view_login" };
+const EMPTY_UC = { uc_amount: "", bonus_uc: "", market_price: "", offer_price: "", status: "available", method: "view_login" };
 const EMPTY_XSUIT = { name: "", price: "", image_url: "" };
 const EMPTY_CAR = { name: "", price: "", image_url: "", type: "One-Card" };
+const EMPTY_SALE = {
+  transaction_id: "", product_id: "", customer_id: "",
+  owner_price: "", sold_price: "", profit: 0,
+  mode_of_deal: "Telegram",
+  deal_date: new Date().toISOString().split('T')[0],
+  link: "",
+  logins: "",
+  unlinking_1: "",
+  unlink_range_1: "",
+  unlink_guarantee_1: "",
+  unlinking_2: "",
+  unlink_range_2: "",
+  unlink_guarantee_2: "",
+  credentials: "",
+  owner_phone: "",
+  seller_phone: "",
+  reseller_phone: "",
+  buyer_phone: "",
+  account_owner: ""
+};
+
 function getInitials(name) {
   return (name || "").split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "?";
 }
@@ -70,6 +92,10 @@ export default function AdminDashboard() {
   const [savingProof, setSavingProof] = useState(false);
   const [proofImage, setProofImage] = useState(null);
 
+  const [paymentLinks, setPaymentLinks] = useState([]);
+  const [generatingLink, setGeneratingLink] = useState(false);
+  const [paymentForm, setPaymentForm] = useState({ customer_name: "", amount: "", note: "", expires_in: "24" });
+
   const [ucPrices, setUcPrices] = useState([]);
   const [ucForm, setUcForm] = useState(EMPTY_UC);
   const [ucEditId, setUcEditId] = useState(null);
@@ -87,6 +113,10 @@ export default function AdminDashboard() {
   const [carImage, setCarImage] = useState(null);
   const [savingCar, setSavingCar] = useState(false);
 
+  const [sales, setSales] = useState([]);
+  const [saleForm, setSaleForm] = useState(EMPTY_SALE);
+  const [savingSale, setSavingSale] = useState(false);
+
   // ── Real-time listeners (Simulated with fetch on tab change or updates) ──
   const fetchData = async () => {
     try {
@@ -97,6 +127,10 @@ export default function AdminDashboard() {
       const { data: r, error: rErr } = await supabase.from('reviews').select('*').order('created_at', { ascending: false });
       if (rErr) console.error("Reviews Fetch Error:", rErr);
       setReviews(r || []);
+
+      const { data: pl, error: plErr } = await supabase.from('payment_links').select('*').order('created_at', { ascending: false });
+      if (plErr) console.error("Payment Links Fetch Error:", plErr);
+      setPaymentLinks(pl || []);
 
       const { data: pr, error: prErr } = await supabase.from('proofs').select('*').order('created_at', { ascending: false });
       if (prErr) console.error("Proofs Fetch Error:", prErr);
@@ -110,11 +144,18 @@ export default function AdminDashboard() {
       if (xsErr) console.error("Xsuits Fetch Error:", xsErr);
       setXsuits(xs || []);
 
-      // Supabase for Supercars
-      const { data: c, error: cErr } = await supabase.from('supercar_gifts').select('*').order('price', { ascending: true });
-      if (cErr) console.error("Supercars Fetch Error:", cErr);
-      setSupercars(c || []);
+      // Firebase Firestore for Supercars
+      try {
+        const carQuery = query(collection(db, "supercar_gifts"), orderBy("type", "asc"), orderBy("price", "asc"));
+        const carSnap = await getDocs(carQuery);
+        setSupercars(carSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      } catch (carErr) {
+        console.error("Supercars Fetch Error:", carErr);
+      }
 
+      const { data: s, error: sErr } = await supabase.from('sales').select('*, products(title)').order('created_at', { ascending: false });
+      if (sErr) console.error("Sales Fetch Error:", sErr);
+      setSales(s || []);
     } catch (globalErr) {
       console.error("Global Data Fetch Error:", globalErr);
     }
@@ -266,6 +307,7 @@ export default function AdminDashboard() {
         ...ucForm,
         market_price: Number(ucForm.market_price),
         offer_price: Number(ucForm.offer_price),
+        bonus_uc: Number(ucForm.bonus_uc || 0)
       };
       if (ucEditId) {
         const { error } = await supabase.from('uc_prices').update(data).eq('id', ucEditId);
@@ -366,16 +408,13 @@ export default function AdminDashboard() {
         image_url: url,
         updated_at: new Date().toISOString()
       };
-      // console.log(data);
 
       if (carEditId) {
-        const { error } = await supabase.from('supercar_gifts').update(data).eq('id', carEditId);
-        if (error) throw error;
+        await updateDoc(doc(db, "supercar_gifts", carEditId), data);
         toast.success("Supercar updated!");
         setCarEditId(null);
       } else {
-        const { error } = await supabase.from('supercar_gifts').insert([data]);
-        if (error) throw error;
+        await addDoc(collection(db, "supercar_gifts"), { ...data, created_at: new Date().toISOString() });
         toast.success("Supercar added!");
       }
       setCarForm(EMPTY_CAR);
@@ -388,11 +427,73 @@ export default function AdminDashboard() {
   const deleteCar = async (id) => {
     if (!confirm("Delete this Supercar gift?")) return;
     try {
-      const { error } = await supabase.from('supercar_gifts').delete().eq('id', id);
-      if (error) throw error;
-      toast.success("Supercar deleted!");
+      await deleteDoc(doc(db, "supercar_gifts", id));
+      toast.success("Deleted from Firebase");
       fetchData();
     } catch (e) { toast.error(e.message); }
+  };
+
+  // ── Payment Links ───────────────────────────────────────────
+  const generatePaymentLink = async () => {
+    if (!paymentForm.amount) return toast.error("Amount is required");
+    setGeneratingLink(true);
+    try {
+      const linkId = `PAY-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2,6).toUpperCase()}`;
+      const expiresAt = new Date(Date.now() + Number(paymentForm.expires_in) * 3600 * 1000).toISOString();
+      const { error } = await supabase.from('payment_links').insert([{
+        id: linkId,
+        customer_name: paymentForm.customer_name || "Customer",
+        amount: Number(paymentForm.amount),
+        note: paymentForm.note,
+        status: "active",
+        expires_at: expiresAt,
+      }]);
+      if (error) throw error;
+      toast.success(`Payment link generated! ID: ${linkId}`);
+      setPaymentForm({ customer_name: "", amount: "", note: "", expires_in: "24" });
+      fetchData();
+    } catch (e) { toast.error(e.message); }
+    finally { setGeneratingLink(false); }
+  };
+
+  const revokePaymentLink = async (id) => {
+    if (!confirm("Revoke this payment link? The customer won't be able to use it.")) return;
+    try {
+      const { error } = await supabase.from('payment_links').update({ status: "revoked" }).eq('id', id);
+      if (error) throw error;
+      toast.success("Link revoked");
+      fetchData();
+    } catch (e) { toast.error(e.message); }
+  };
+
+  const deletePaymentLink = async (id) => {
+    if (!confirm("Delete this payment link permanently?")) return;
+    try {
+      const { error } = await supabase.from('payment_links').delete().eq('id', id);
+      if (error) throw error;
+      toast.success("Link deleted");
+      fetchData();
+    } catch (e) { toast.error(e.message); }
+  };
+
+  // ── Sales CRUD ──────────────────────────────────────────────
+  const saveSale = async () => {
+    if (!saleForm.sold_price) return toast.error("Sold Price is required");
+    setSavingSale(true);
+    try {
+      const profit = Number(saleForm.sold_price) - Number(saleForm.owner_price || 0);
+      const { error } = await supabase.from('sales').insert([{ 
+        ...saleForm, 
+        profit,
+        owner_price: Number(saleForm.owner_price),
+        sold_price: Number(saleForm.sold_price)
+      }]);
+      if (error) throw error;
+      toast.success("Sale recorded!");
+      setSaleForm(EMPTY_SALE);
+      fetchData();
+    } catch (e) { toast.error(e.message); }
+    finally { setSavingSale(false); }
   };
 
   // ── Render ─────────────────────────────────────────────────
@@ -418,7 +519,7 @@ export default function AdminDashboard() {
             ["supercars", "Supercar Gifts"],
             ["reviews", "Reviews"],
             ["proofs", "Proofs"],
-            ["payment_links", "Payment Links"],
+            ["payment_links", "🔗 Payment Links"]
           ].map(([key, label]) => (
             <button key={key} onClick={() => setTab(key)}
               style={{
@@ -452,7 +553,7 @@ export default function AdminDashboard() {
                   </select>
                 </div>
 
-                <div style={{ display: "grid", gap: "10px", padding: "14px", background: "rgba(255,215,0,0.05)", borderRadius: "10px", border: "1px solid rgba(255,215,0,0.12)" }}>
+                <div style={{ display: "grid", gap: "12px", padding: "12px", background: "rgba(255,215,0,0.05)", borderRadius: "10px", border: "1px solid rgba(255,215,0,0.12)" }}>
                   <div>
                     <label style={ls}>Primary Login</label>
                     <select className="input" value={productForm.primaryLogin} onChange={e => setProductForm({...productForm, primaryLogin: e.target.value})}>
@@ -468,14 +569,9 @@ export default function AdminDashboard() {
                   </div>
                   <div>
                     <label style={ls}>Unlink Guarantee</label>
-                    <div style={{ display: "grid", gap: "8px", marginTop: "4px" }}>
-                      {GUARANTEE_OPTIONS.map(opt => (
-                        <label key={opt} style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "12px", cursor: "pointer", padding: "8px 10px", borderRadius: "8px", background: productForm.unlinkGuarantee === opt ? "rgba(255,215,0,0.12)" : "transparent", border: productForm.unlinkGuarantee === opt ? "1px solid rgba(255,215,0,0.3)" : "1px solid transparent", transition: "all 0.2s" }}>
-                          <input type="radio" name="unlinkGuarantee" value={opt} checked={productForm.unlinkGuarantee === opt} onChange={() => setProductForm({...productForm, unlinkGuarantee: opt})} style={{ accentColor: "var(--gold)" }} />
-                          <span style={{ color: productForm.unlinkGuarantee === opt ? "var(--gold)" : "var(--text)" }}>{opt}</span>
-                        </label>
-                      ))}
-                    </div>
+                    <select className="input" value={productForm.unlinkGuarantee} onChange={e => setProductForm({...productForm, unlinkGuarantee: e.target.value})}>
+                      {GUARANTEE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                    </select>
                   </div>
                 </div>
 
@@ -727,21 +823,25 @@ export default function AdminDashboard() {
                   <label style={sl}>UC Amount</label>
                   <input className="input" placeholder="e.g. 8,000 UC" value={ucForm.uc_amount} onChange={e => setUcForm({...ucForm, uc_amount: e.target.value})} />
                 </div>
+                <div>
+                  <label style={sl}>Bonus UC</label>
+                  <input className="input" placeholder="e.g. 60" type="number" value={ucForm.bonus_uc} onChange={e => setUcForm({...ucForm, bonus_uc: e.target.value})} />
+                </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
                   <div>
-                    <label style={sl}>Selling Price (₹)</label>
+                    <label style={sl}>Market Price (₹)</label>
                     <input className="input" placeholder="e.g. 7,500" type="number" value={ucForm.market_price} onChange={e => setUcForm({...ucForm, market_price: e.target.value})} />
                   </div>
                   <div>
-                    <label style={sl}>Offer Price (₹)</label>
+                    <label style={sl}>Our Offer Price (₹)</label>
                     <input className="input" placeholder="e.g. 6,500" type="number" value={ucForm.offer_price} onChange={e => setUcForm({...ucForm, offer_price: e.target.value})} />
                   </div>
                 </div>
                 <div>
                   <label style={sl}>Purchase Method</label>
                   <select className="input" value={ucForm.method} onChange={e => setUcForm({...ucForm, method: e.target.value})}>
-                    <option value="view_login">🔑 View Login UC (Facebook / X)</option>
-                    <option value="character_id">🎮 Character ID UC (In-game ID)</option>
+                    <option value="view_login">View Login UC (Facebook / X)</option>
+                    <option value="character_id">Character ID UC (In-game ID)</option>
                   </select>
                 </div>
                 <div>
@@ -760,30 +860,41 @@ export default function AdminDashboard() {
             <div style={{ background: "var(--card)", borderRadius: "14px", overflow: "hidden", border: "1px solid var(--border)" }}>
               <div style={{ padding: "16px", fontWeight: 700, borderBottom: "1px solid var(--border)", background: "rgba(255,215,0,0.02)" }}>UC Price List</div>
               {/* Market Demand Notice */}
-              <div style={{ margin: "16px", padding: "12px 16px", background: "rgba(251,191,36,0.07)", border: "1px solid rgba(251,191,36,0.3)", borderRadius: "10px", display: "flex", alignItems: "flex-start", gap: "10px" }}>
+              <div style={{ margin: "16px", padding: "12px 16px", background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.25)", borderRadius: "10px", display: "flex", alignItems: "flex-start", gap: "10px" }}>
                 <span style={{ fontSize: "16px", flexShrink: 0 }}>💡</span>
-                <p style={{ margin: 0, fontSize: "12px", color: "rgba(251,191,36,0.9)", lineHeight: 1.7 }}>
+                <p style={{ margin: 0, fontSize: "12px", color: "rgba(251,191,36,0.85)", lineHeight: 1.7 }}>
                   <strong>Note:</strong> UC prices fluctuate based on market demand and availability. Update prices regularly to reflect the current market rate.
                 </p>
               </div>
               {ucPrices.map(u => (
                 <div key={u.id} style={{ display: "flex", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid var(--border)", opacity: u.status === 'sold_out' ? 0.6 : 1 }}>
                   <div>
-                    <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: "7px", flexWrap: "wrap" }}>
+                    <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
                       {u.uc_amount}
-                      <span style={{ fontSize: "10px", padding: "2px 7px", borderRadius: "4px", background: u.method === 'character_id' ? "rgba(249,115,22,0.1)" : "rgba(59,130,246,0.1)", color: u.method === 'character_id' ? "#f97316" : "#60a5fa", fontWeight: 700 }}>
+                      {u.bonus_uc > 0 && <span style={{ fontSize: "10px", background: "var(--gold-dim)", color: "var(--gold)", padding: "2px 6px", borderRadius: "4px" }}>+{u.bonus_uc} Bonus</span>}
+                      <span style={{ fontSize: "10px", padding: "2px 8px", borderRadius: "4px", background: u.method === 'character_id' ? "rgba(249,115,22,0.1)" : "rgba(59,130,246,0.1)", color: u.method === 'character_id' ? "#f97316" : "#60a5fa", fontWeight: 700 }}>
                         {u.method === 'character_id' ? "🎮 Char ID" : "🔑 View Login"}
                       </span>
                       {u.status === 'sold_out' && <span style={{ fontSize: "10px", background: "rgba(239,68,68,0.1)", color: "#ef4444", padding: "2px 6px", borderRadius: "4px" }}>SOLD OUT</span>}
                     </div>
-                    <div style={{ fontSize: "12px", color: "var(--muted)", marginTop: "2px" }}>
-                      Selling: <span style={{ textDecoration: "line-through" }}>₹{u.market_price}</span>
+                    <div style={{ fontSize: "12px", color: "var(--muted)" }}>
+                      Market: <span style={{ textDecoration: "line-through" }}>₹{u.market_price}</span>
                     </div>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                     <div style={{ color: "var(--green)", fontWeight: 700 }}>₹{u.offer_price}</div>
                     <div style={{ display: "flex", gap: "6px" }}>
-                      <button onClick={() => { setUcEditId(u.id); setUcForm({ uc_amount: u.uc_amount, market_price: u.market_price, offer_price: u.offer_price, status: u.status || "available", method: u.method || "view_login" }); }}
+                      <button onClick={() => { 
+                        setUcEditId(u.id); 
+                        setUcForm({ 
+                          uc_amount: u.uc_amount, 
+                          bonus_uc: u.bonus_uc || "",
+                          market_price: u.market_price, 
+                          offer_price: u.offer_price,
+                          status: u.status || "available",
+                          method: u.method || "view_login"
+                        }); 
+                      }} 
                         style={{ color: "var(--gold)", background: "none", border: "none", cursor: "pointer" }}><Pencil size={14}/></button>
                       <button onClick={() => deleteUc(u.id)} style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}><Trash2 size={16}/></button>
                     </div>
@@ -923,11 +1034,182 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {tab === "payment_links" && <AdminPaymentManager />}
+
+        {/* PAYMENT LINKS TAB */}
+        {tab === "payment_links" && (() => {
+          const activeLinks = paymentLinks.filter(l => l.status === "active");
+          const revokedLinks = paymentLinks.filter(l => l.status !== "active");
+          const siteBase = window.location.origin;
+          return (
+            <div style={{ display: "grid", gap: "24px" }}>
+
+              {/* Generator Form */}
+              <div style={{ background: "var(--card)", padding: "28px", borderRadius: "14px", border: "1px solid var(--border-gold)" }}>
+                <h3 style={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px", fontSize: "16px" }}>
+                  <span style={{ fontSize: "20px" }}>🔗</span> Generate Payment Link
+                </h3>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "14px" }}>
+                  <div>
+                    <label style={sl}>Customer Name</label>
+                    <input className="input" placeholder="e.g. Ravi Kumar" value={paymentForm.customer_name} onChange={e => setPaymentForm({...paymentForm, customer_name: e.target.value})} />
+                  </div>
+                  <div>
+                    <label style={sl}>Amount (₹) *</label>
+                    <input className="input" type="number" placeholder="e.g. 4999" value={paymentForm.amount} onChange={e => setPaymentForm({...paymentForm, amount: e.target.value})} />
+                  </div>
+                  <div>
+                    <label style={sl}>Expires In</label>
+                    <select className="input" value={paymentForm.expires_in} onChange={e => setPaymentForm({...paymentForm, expires_in: e.target.value})}>
+                      <option value="6">6 Hours</option>
+                      <option value="12">12 Hours</option>
+                      <option value="24">24 Hours</option>
+                      <option value="48">48 Hours</option>
+                      <option value="72">72 Hours</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={sl}>Note (Optional)</label>
+                    <input className="input" placeholder="e.g. BGMI Account #XYZ" value={paymentForm.note} onChange={e => setPaymentForm({...paymentForm, note: e.target.value})} />
+                  </div>
+                </div>
+                <button
+                  onClick={generatePaymentLink}
+                  disabled={generatingLink}
+                  className="btn btn-gold"
+                  style={{ marginTop: "18px", padding: "12px 32px" }}
+                >
+                  {generatingLink ? "Generating..." : "⚡ Generate Payment Link"}
+                </button>
+              </div>
+
+              {/* Stats */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "14px" }}>
+                {[
+                  { label: "Total", value: paymentLinks.length, color: "var(--gold)" },
+                  { label: "Active", value: activeLinks.length, color: "#22c55e" },
+                  { label: "Revoked", value: revokedLinks.length, color: "#ef4444" },
+                ].map(s => (
+                  <div key={s.label} style={{ background: "var(--card)", borderRadius: "12px", padding: "18px", textAlign: "center", border: "1px solid var(--border)" }}>
+                    <div style={{ fontSize: "28px", fontWeight: 900, color: s.color }}>{s.value}</div>
+                    <div style={{ fontSize: "11px", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "1px" }}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Active Links Table */}
+              <div style={{ background: "var(--card)", borderRadius: "14px", overflow: "hidden", border: "1px solid rgba(34,197,94,0.2)" }}>
+                <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", background: "rgba(34,197,94,0.04)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <h3 style={{ fontSize: "14px", fontWeight: 800 }}>✅ Active Links</h3>
+                  <span style={{ fontSize: "11px", color: "var(--muted)" }}>{activeLinks.length} link{activeLinks.length !== 1 ? "s" : ""}</span>
+                </div>
+                {activeLinks.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "40px", color: "var(--muted)", fontSize: "14px" }}>No active links. Generate one above.</div>
+                ) : (
+                  <div style={{ overflowX: "auto" }}>
+                    <table style={{ width: "100%", fontSize: "13px", borderCollapse: "collapse", textAlign: "left" }}>
+                      <thead style={{ background: "rgba(255,215,0,0.04)", textTransform: "uppercase", fontSize: "10px", letterSpacing: "1px", color: "var(--muted)" }}>
+                        <tr>
+                          <th style={{ padding: "12px 16px" }}>Link ID</th>
+                          <th>Customer</th>
+                          <th>Amount</th>
+                          <th>Note</th>
+                          <th>Expires</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {activeLinks.map(link => {
+                          const fullUrl = `${siteBase}/pay/${link.id}`;
+                          const isExpired = link.expires_at && new Date(link.expires_at) < new Date();
+                          return (
+                            <tr key={link.id} style={{ borderBottom: "1px solid var(--border)", opacity: isExpired ? 0.6 : 1 }}>
+                              <td style={{ padding: "13px 16px", fontWeight: 700, fontFamily: "monospace", fontSize: "12px", color: "var(--gold)" }}>{link.id}</td>
+                              <td>{link.customer_name || "—"}</td>
+                              <td><strong style={{ color: "var(--green)" }}>₹{Number(link.amount).toLocaleString("en-IN")}</strong></td>
+                              <td style={{ color: "var(--muted)", fontSize: "12px" }}>{link.note || "—"}</td>
+                              <td style={{ fontSize: "11px", color: isExpired ? "#ef4444" : "var(--muted)" }}>
+                                {link.expires_at ? new Date(link.expires_at).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "No expiry"}
+                                {isExpired && <span style={{ marginLeft: "4px", fontWeight: 800 }}>(EXPIRED)</span>}
+                              </td>
+                              <td>
+                                <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                                  <button
+                                    onClick={() => { navigator.clipboard.writeText(fullUrl); toast.success("Link copied!"); }}
+                                    style={{ display: "flex", alignItems: "center", gap: "5px", padding: "6px 12px", borderRadius: "7px", background: "rgba(255,215,0,0.1)", color: "var(--gold)", border: "1px solid rgba(255,215,0,0.2)", cursor: "pointer", fontSize: "12px", fontWeight: 600 }}
+                                  >
+                                    <Copy size={12} /> Copy
+                                  </button>
+                                  <a
+                                    href={fullUrl} target="_blank" rel="noreferrer"
+                                    style={{ display: "flex", alignItems: "center", gap: "5px", padding: "6px 12px", borderRadius: "7px", background: "rgba(59,130,246,0.1)", color: "#60a5fa", border: "1px solid rgba(59,130,246,0.2)", fontSize: "12px", fontWeight: 600, textDecoration: "none" }}
+                                  >
+                                    Open
+                                  </a>
+                                  <button
+                                    onClick={() => revokePaymentLink(link.id)}
+                                    style={{ display: "flex", alignItems: "center", gap: "5px", padding: "6px 12px", borderRadius: "7px", background: "rgba(239,68,68,0.08)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", cursor: "pointer", fontSize: "12px", fontWeight: 600 }}
+                                  >
+                                    Revoke
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* Revoked / Old Links */}
+              {revokedLinks.length > 0 && (
+                <div style={{ background: "var(--card)", borderRadius: "14px", overflow: "hidden", border: "1px solid var(--border)" }}>
+                  <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", background: "rgba(239,68,68,0.03)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <h3 style={{ fontSize: "14px", fontWeight: 800, color: "#ef4444" }}>🚫 Revoked / Expired Links</h3>
+                    <span style={{ fontSize: "11px", color: "var(--muted)" }}>{revokedLinks.length} records</span>
+                  </div>
+                  <div style={{ overflowX: "auto" }}>
+                    <table style={{ width: "100%", fontSize: "13px", borderCollapse: "collapse", textAlign: "left", opacity: 0.7 }}>
+                      <thead style={{ background: "rgba(239,68,68,0.04)", textTransform: "uppercase", fontSize: "10px", letterSpacing: "1px", color: "var(--muted)" }}>
+                        <tr>
+                          <th style={{ padding: "12px 16px" }}>Link ID</th>
+                          <th>Customer</th>
+                          <th>Amount</th>
+                          <th>Status</th>
+                          <th>Delete</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {revokedLinks.map(link => (
+                          <tr key={link.id} style={{ borderBottom: "1px solid var(--border)" }}>
+                            <td style={{ padding: "12px 16px", fontFamily: "monospace", fontSize: "12px" }}>{link.id}</td>
+                            <td>{link.customer_name || "—"}</td>
+                            <td>₹{Number(link.amount).toLocaleString("en-IN")}</td>
+                            <td><span style={{ fontSize: "10px", background: "rgba(239,68,68,0.1)", color: "#ef4444", padding: "2px 8px", borderRadius: "4px", fontWeight: 800, textTransform: "uppercase" }}>{link.status}</span></td>
+                            <td>
+                              <button onClick={() => deletePaymentLink(link.id)} style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer" }}>
+                                <Trash2 size={14} />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+            </div>
+          );
+        })()}
 
       </div>
     </div>
   );
 }
 
+// ── New Section Styles ──────────────────────────────────────
+const sh = { fontSize: "14px", fontWeight: 800, color: "var(--gold)", marginBottom: "16px", textTransform: "uppercase", letterSpacing: "1px", borderLeft: "3px solid var(--gold)", paddingLeft: "10px" };
+const sg = { display: "grid", gap: "16px" };
 const sl = { display: "block", fontSize: "11px", fontWeight: 700, color: "var(--muted)", marginBottom: "6px", textTransform: "uppercase" };

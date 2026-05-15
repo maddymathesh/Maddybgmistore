@@ -1,172 +1,87 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-import toast from "react-hot-toast";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase";
-import { verifyPaymentJWT } from "../utils/jwt";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../context/AuthContext";
+import { supabase } from "../utils/supabase";
 import {
-  ShieldCheck, CheckCircle, Copy, MessageCircle, Send,
-  AlertTriangle, CreditCard, ChevronDown, ChevronUp, Lock, XCircle,
-  Loader2, BadgeIndianRupee, QrCode
+  ShieldCheck, CheckCircle, Copy,
+  AlertTriangle, CreditCard, ChevronDown, ChevronUp, Lock, XCircle
 } from "lucide-react";
 
-const BANK_PIN = "1516";
-const WHATSAPP = import.meta.env.VITE_WHATSAPP_NUMBER || "919025391516";
-const TELEGRAM = import.meta.env.VITE_TELEGRAM_USERNAME || "MBSxMADDY17";
-
-function parseDate(value) {
-  if (!value) return null;
-  if (typeof value.toDate === "function") return value.toDate();
-  if (typeof value === "number") return new Date(value);
-  if (value.seconds) return new Date(value.seconds * 1000);
-  return new Date(value);
-}
-
-function getSecondsLeft(expiresAt) {
-  if (!expiresAt) return 0;
-  return Math.max(0, Math.ceil((expiresAt.getTime() - Date.now()) / 1000));
-}
-
-function formatTimer(secondsLeft) {
-  const minutes = Math.floor(secondsLeft / 60).toString().padStart(2, "0");
-  const seconds = (secondsLeft % 60).toString().padStart(2, "0");
-  return `${minutes}:${seconds}`;
-}
-
 export default function PaymentPage() {
-  const { token } = useParams(); // this is the linkId
+  const { user } = useAuth();
+  const { paymentId } = useParams();
 
-  const [linkDoc, setLinkDoc] = useState(null);
   const [isValidLink, setIsValidLink] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [secondsLeft, setSecondsLeft] = useState(0);
+  const [paymentData, setPaymentData] = useState(null);
 
   const [showBank, setShowBank] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // PIN Protection State for Page
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
 
+  // PIN Protection State for Bank Details
   const [bankUnlocked, setBankUnlocked] = useState(false);
   const [bankPin, setBankPin] = useState("");
   const [bankError, setBankError] = useState("");
-  const [invalidReason, setInvalidReason] = useState("invalid");
-  const [unlocking, setUnlocking] = useState(false);
-
-  const [jwtPayload, setJwtPayload] = useState(null);
-
-  const expiresAt = useMemo(() => parseDate(linkDoc?.expiresAt), [linkDoc]);
 
   useEffect(() => {
-    let cancelled = false;
-
     const checkLink = async () => {
-      if (!token) {
+      if (!paymentId) {
         setIsValidLink(false);
         setLoading(false);
         return;
       }
-
       try {
-        const docSnap = await getDoc(doc(db, "payment_links", token));
-        if (!docSnap.exists()) {
+        const { data, error: fetchError } = await supabase
+          .from('payment_links')
+          .select('*')
+          .eq('id', paymentId)
+          .single();
+
+        if (fetchError) throw fetchError;
+
+        if (data && data.status === "active") {
+          // Check for expiration
+          const isExpired = data.expires_at && new Date(data.expires_at) < new Date();
+          if (isExpired) {
+            setIsValidLink(false);
+          } else {
+            setPaymentData(data);
+            setIsValidLink(true);
+          }
+        } else {
           setIsValidLink(false);
-          setInvalidReason("invalid");
-          setLoading(false);
-          return;
-        }
-
-        const data = docSnap.data();
-
-        if (data.status === "revoked") {
-          setIsValidLink(false);
-          setInvalidReason("revoked");
-          setLoading(false);
-          return;
-        }
-
-        const exp = parseDate(data.expiresAt);
-        if (!exp || exp.getTime() <= Date.now()) {
-          setIsValidLink(false);
-          setInvalidReason("expired");
-          setLoading(false);
-          return;
-        }
-
-        if (!cancelled) {
-          setLinkDoc(data);
-          setSecondsLeft(getSecondsLeft(exp));
-          setIsValidLink(true);
         }
       } catch (err) {
-        console.error("Error verifying link:", err);
-        if (!cancelled) setIsValidLink(false);
+        console.error("Error fetching payment link:", err);
+        setIsValidLink(false);
       } finally {
-        if (!cancelled) setLoading(false);
+        setLoading(false);
       }
     };
-
     checkLink();
-    return () => { cancelled = true; };
-  }, [token]);
+  }, [paymentId]);
 
-  useEffect(() => {
-    if (!isValidLink || !expiresAt) return;
-
-    const timer = window.setInterval(() => {
-      const next = getSecondsLeft(expiresAt);
-      setSecondsLeft(next);
-      if (next <= 0) {
-        setIsValidLink(false);
-        setInvalidReason("expired");
-        toast.error("Payment link expired");
-      }
-    }, 1000);
-
-    return () => window.clearInterval(timer);
-  }, [expiresAt, isValidLink]);
-
-  const totalSeconds = Number(linkDoc?.expiresInMinutes || 10) * 60;
-  const isCritical = secondsLeft <= 60;
-  const progress = Math.max(0, Math.min(1, secondsLeft / Math.max(totalSeconds || 600, 1)));
-
-  const handleUnlock = async (e) => {
+  const handleUnlock = (e) => {
     e.preventDefault();
-    if (!/^\d{4,6}$/.test(pin)) {
-      setError("Enter the 4–6 digit PIN from admin.");
-      return;
+    if (pin === "9025") {
+      setIsUnlocked(true);
+      setError("");
+    } else {
+      setError("Incorrect PIN. Please try again.");
+      setPin("");
     }
-    setUnlocking(true);
-    setError("");
-
-    setTimeout(async () => {
-      try {
-        const jwtString = linkDoc.token;
-        const result = await verifyPaymentJWT(jwtString, pin);
-
-        if (result.valid) {
-          setJwtPayload(result.payload);
-          setIsUnlocked(true);
-          toast.success("Payment details unlocked");
-        } else {
-          setError(result.error === 'expired' ? "Payment link expired" : "Incorrect PIN. Please try again.");
-          setPin("");
-        }
-      } catch (err) {
-        setError("Unable to verify PIN.");
-      } finally {
-        setUnlocking(false);
-      }
-    }, 800); // Artificial delay for animation
   };
 
   const handleBankUnlock = (e) => {
     e.preventDefault();
-    if (bankPin === BANK_PIN) {
+    if (bankPin === "1516") {
       setBankUnlocked(true);
       setBankError("");
     } else {
@@ -175,45 +90,52 @@ export default function PaymentPage() {
     }
   };
 
-  const amount = Number(jwtPayload?.amount || linkDoc?.amount || 0);
-  const orderId = jwtPayload?.orderId || linkDoc?.orderId || "";
-  const customerName = jwtPayload?.customerName || linkDoc?.customerName || "";
-  const upiId = jwtPayload?.upiId || "";
-  const payeeName = jwtPayload?.payeeName || "";
-  const currency = "INR";
-
-  const paymentParams = isUnlocked
-    ? `pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${encodeURIComponent(amount)}&cu=${currency}&tn=${encodeURIComponent(orderId)}`
-    : "";
-  const baseUpiUrl = paymentParams ? `upi://pay?${paymentParams}` : "";
-  const gpayLink = paymentParams ? `gpay://upi/pay?${paymentParams}` : "#";
-  const phonepeLink = paymentParams ? `phonepe://pay?${paymentParams}` : "#";
-  const paytmLink = paymentParams ? `paytmmp://pay?${paymentParams}` : "#";
-
-  const qrImageUrl = baseUpiUrl
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=8&color=000&bgcolor=fff&data=${encodeURIComponent(baseUpiUrl)}`
-    : "";
-
-  const screenshotText = encodeURIComponent(
-    `Hi, I completed payment for Order ${orderId} (₹${amount.toLocaleString("en-IN")}). Customer: ${customerName}. Please verify my screenshot.`
-  );
-  const whatsappHref = `https://wa.me/${WHATSAPP}?text=${screenshotText}`;
-  const telegramHref = `https://t.me/${TELEGRAM}?text=${screenshotText}`;
-
   const handleCopyUpi = () => {
     navigator.clipboard.writeText(upiId).then(() => {
       setCopied(true);
-      toast.success("UPI ID copied");
       setTimeout(() => setCopied(false), 2000);
     });
   };
 
+  // Secure dynamic loading via client-side obfuscation
+  const encryptedUpi = paymentData?.encryptedUpi || "VFFWUUBIQlRAcEtXVQ==";
+  const encryptedName = paymentData?.encryptedName || "dHFmfXxjemJ4YnN7GWI=";
+
+  const decrypt = (base64, key) => {
+    try {
+      const text = atob(base64);
+      let result = "";
+      for (let i = 0; i < text.length; i++) {
+        result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+      }
+      return result;
+    } catch {
+      return "";
+    }
+  };
+
+  // User Specific Details (Dynamically Decrypted)
+  const upiId = isUnlocked ? decrypt(encryptedUpi, pin) : "";
+  const payeeName = isUnlocked ? decrypt(encryptedName, pin) : "";
+  const currency = "INR";
+
+  // Base UPI Link
+  const baseUpiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&cu=${currency}`;
+
+  // Specific App Links
+  const gpayLink = `gpay://upi/pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&cu=${currency}`;
+  const phonepeLink = `phonepe://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&cu=${currency}`;
+  const paytmLink = `paytmmp://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&cu=${currency}`;
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#080a0f] flex flex-col items-center justify-center text-white">
-        <Loader2 className="w-10 h-10 animate-spin text-amber-500 mb-4" />
-        <div className="text-amber-500/80 font-mono tracking-widest text-sm uppercase">Securing Connection...</div>
-      </div>
+      <>
+        <Navbar />
+        <div style={{ paddingTop: "84px", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#080a0f", color: "#fff" }}>
+          Loading secure payment gateway...
+        </div>
+        <Footer />
+      </>
     );
   }
 
@@ -221,25 +143,19 @@ export default function PaymentPage() {
     return (
       <>
         <Navbar />
-        <div className="pt-24 min-h-screen bg-[#080a0f] flex flex-col items-center justify-center p-6 relative overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.05)_0%,rgba(8,10,15,1)_60%)] pointer-events-none" />
-
-          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative z-10 bg-white/[0.02] border border-red-500/20 rounded-3xl p-8 max-w-md w-full text-center shadow-2xl backdrop-blur-xl">
-            <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-              <XCircle className="w-10 h-10 text-red-500" />
+        <div style={{ paddingTop: "84px", minHeight: "100vh", display: "flex", flexDirection: "column", background: "#080a0f" }}>
+          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px" }}>
+            <div style={{ background: "var(--card)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: "16px", padding: "40px 30px", maxWidth: "500px", width: "100%", textAlign: "center" }}>
+              <div style={{ display: "inline-flex", background: "rgba(239,68,68,0.1)", padding: "16px", borderRadius: "50%", marginBottom: "20px" }}>
+                <XCircle size={36} color="#ef4444" />
+              </div>
+              <h1 style={{ fontFamily: "var(--font-h)", fontSize: "24px", marginBottom: "8px", color: "#fff" }}>Link Invalid or Expired</h1>
+              <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "14px", marginBottom: "24px" }}>
+                This payment link is no longer active. Please contact support for a new link.
+              </p>
+              <Link to="/connectwithus" className="btn btn-gold" style={{ display: "inline-block", padding: "12px 24px" }}>Contact Support</Link>
             </div>
-            <h1 className="text-2xl font-black text-white mb-2">
-              {invalidReason === "revoked" ? "Link Revoked" : "Link Expired"}
-            </h1>
-            <p className="text-white/50 text-sm mb-8 leading-relaxed">
-              {invalidReason === "revoked"
-                ? "This secure payment session was terminated by the administrator."
-                : "This secure payment session has timed out. Security protocols require a fresh link."}
-            </p>
-            <Link to="/connectwithus" className="inline-flex items-center justify-center gap-2 w-full py-4 px-6 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold transition-all border border-white/5">
-              Contact Support
-            </Link>
-          </motion.div>
+          </div>
         </div>
         <Footer />
       </>
@@ -249,182 +165,384 @@ export default function PaymentPage() {
   return (
     <>
       <Navbar />
-      <div className="pt-24 min-h-screen bg-[#080a0f] flex flex-col p-4 relative overflow-hidden">
+      <div style={{ paddingTop: "84px", minHeight: "100vh", display: "flex", flexDirection: "column", background: "#080a0f" }}>
+        <div style={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "40px 20px"
+        }}>
+          <div style={{
+            background: "var(--card)",
+            border: "1px solid rgba(255,215,0,0.2)",
+            borderRadius: "16px",
+            padding: "40px 30px",
+            maxWidth: "500px",
+            width: "100%",
+            boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
+            textAlign: "center",
+            position: "relative",
+            overflow: "hidden"
+          }}>
+            {/* Top Glow */}
+            <div style={{
+              position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)",
+              width: "150px", height: "150px", background: "rgba(255,215,0,0.1)",
+              filter: "blur(50px)", zIndex: 0
+            }} />
 
-        {/* Dynamic Background */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-amber-500/10 rounded-full blur-[120px] opacity-30 mix-blend-screen" />
-        </div>
-
-        <div className="flex-1 max-w-lg w-full mx-auto relative z-10 flex flex-col justify-center my-10">
-          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-[#0c0e14]/80 backdrop-blur-3xl border border-amber-500/20 rounded-3xl p-6 md:p-10 shadow-[0_20px_60px_rgba(0,0,0,0.5),_0_0_40px_rgba(245,158,11,0.05)]">
-
-            {/* Timer Header */}
-            <div className="flex items-center justify-between mb-8 pb-6 border-b border-white/10">
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-full ${isCritical ? 'bg-red-500/10 text-red-500 box-shadow-pulse-red' : 'bg-amber-500/10 text-amber-500 box-shadow-pulse-amber'}`}>
-                  <ShieldCheck size={24} />
-                </div>
-                <div>
-                  <div className="text-[10px] font-bold tracking-widest uppercase text-white/40">Secure Session</div>
-                  <div className={`font-mono font-bold text-lg ${isCritical ? 'text-red-400' : 'text-amber-400'}`}>
-                    {formatTimer(secondsLeft)} Left
-                  </div>
-                </div>
-              </div>
-
-              <svg width="40" height="40" viewBox="0 0 50 50" className="-rotate-90">
-                <circle cx="25" cy="25" r="20" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="3" />
-                <circle cx="25" cy="25" r="20" fill="none" stroke={isCritical ? "#ef4444" : "var(--gold)"} strokeWidth="3" strokeLinecap="round" strokeDasharray={126} strokeDashoffset={126 * (1 - progress)} className="transition-all duration-1000 ease-linear" />
-              </svg>
-            </div>
-
-            <AnimatePresence mode="wait">
+            <div style={{ position: "relative", zIndex: 1 }}>
               {!isUnlocked ? (
-                <motion.div key="lock" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}>
-                  <div className="text-center mb-8">
-                    <h1 className="text-3xl font-black text-white mb-2">Access Payment</h1>
-                    <p className="text-white/50 text-sm">Session encrypted. Enter the access PIN provided by the administrator to reveal details.</p>
+                // --- PIN ENTRY SCREEN ---
+                <div style={{ padding: "20px 0" }}>
+                  <div style={{ display: "inline-flex", background: "rgba(255,215,0,0.1)", padding: "16px", borderRadius: "50%", marginBottom: "20px" }}>
+                    <Lock size={36} color="var(--gold)" />
                   </div>
+                  <h1 style={{ fontFamily: "var(--font-h)", fontSize: "24px", marginBottom: "8px", color: "#fff" }}>Secured Payment page</h1>
+                  <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "14px", marginBottom: "24px" }}>
+                    Please enter the PIN provided by admin to access the payment details.
+                  </p>
 
-                  <form onSubmit={handleUnlock} className="flex flex-col items-center">
-                    <div className="relative group mb-6">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-amber-500 transition-colors" />
-                      <input type="password" maxLength={6} required value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, ""))}
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-6 py-4 text-center text-2xl font-mono tracking-[0.5em] text-amber-400 focus:border-amber-500/50 focus:bg-amber-500/5 outline-none transition-all placeholder:text-white/20" placeholder="••••••" />
-                    </div>
+                  <form onSubmit={handleUnlock} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
+                    <input
+                      type="password"
+                      maxLength={6}
+                      placeholder="Enter PIN"
+                      value={pin}
+                      onChange={(e) => setPin(e.target.value)}
+                      style={{
+                        background: "rgba(255,255,255,0.05)",
+                        border: "1px solid rgba(255,215,0,0.3)",
+                        padding: "14px 20px",
+                        borderRadius: "10px",
+                        color: "#fff",
+                        fontSize: "20px",
+                        textAlign: "center",
+                        letterSpacing: "4px",
+                        width: "200px",
+                        outline: "none",
+                        transition: "border-color 0.2s"
+                      }}
+                      autoFocus
+                    />
+                    {error && <div style={{ color: "#ef4444", fontSize: "13px", fontWeight: "600" }}>{error}</div>}
 
-                    {error && <div className="text-red-400 text-sm font-bold mb-4">{error}</div>}
-
-                    <button type="submit" disabled={unlocking} className="w-full relative overflow-hidden group rounded-2xl bg-gradient-to-r from-amber-400 to-amber-600 p-[1px]">
-                      <div className="flex h-full w-full items-center justify-center gap-2 rounded-2xl bg-black px-8 py-4 transition-all group-hover:bg-transparent">
-                        {unlocking ? <Loader2 className="animate-spin text-amber-500 group-hover:text-black" /> : <Lock size={18} className="text-amber-500 group-hover:text-black" />}
-                        <span className="font-bold text-amber-500 group-hover:text-black">{unlocking ? 'Authenticating...' : 'Unlock Secure Gateway'}</span>
-                      </div>
+                    <button
+                      type="submit"
+                      style={{
+                        background: "var(--gold)",
+                        color: "#000",
+                        fontWeight: "700",
+                        padding: "14px 32px",
+                        borderRadius: "10px",
+                        border: "none",
+                        cursor: "pointer",
+                        fontSize: "15px",
+                        marginTop: "8px",
+                        width: "200px",
+                        boxShadow: "0 4px 14px rgba(255,215,0,0.3)",
+                        transition: "transform 0.2s"
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-2px)"}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
+                    >
+                      Unlock
                     </button>
                   </form>
-                </motion.div>
+                </div>
               ) : (
-                <motion.div key="gateway" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-
-                  {/* Order Details Mini Card */}
-                  <div className="grid grid-cols-2 gap-3 mb-6">
-                    <div className="bg-white/5 border border-white/5 rounded-xl p-4">
-                      <div className="text-[10px] text-white/40 uppercase tracking-widest font-bold mb-1">Order ID</div>
-                      <div className="text-sm font-mono text-white truncate">{orderId}</div>
-                    </div>
-                    <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4 text-right">
-                      <div className="text-[10px] text-emerald-500/60 uppercase tracking-widest font-bold mb-1">Amount to pay</div>
-                      <div className="text-xl font-black text-emerald-400 leading-none flex items-center justify-end gap-1">
-                        <BadgeIndianRupee size={16} />{amount.toLocaleString('en-IN')}
-                      </div>
-                    </div>
+                // --- PAYMENT DETAILS SCREEN ---
+                <>
+                  <div style={{ display: "inline-flex", background: "rgba(34,197,94,0.1)", padding: "12px", borderRadius: "50%", marginBottom: "16px" }}>
+                    <ShieldCheck size={32} color="#22c55e" />
                   </div>
+                  <h1 style={{ fontFamily: "var(--font-h)", fontSize: "28px", marginBottom: "8px", color: "#fff" }}>Secure Checkout</h1>
+                  
+                  {paymentData?.amount && (
+                    <div style={{ marginBottom: "20px" }}>
+                      <div style={{ fontSize: "12px", color: "var(--gold)", textTransform: "uppercase", letterSpacing: "2px", fontWeight: "800", marginBottom: "4px" }}>Amount to Pay</div>
+                      <div style={{ fontSize: "36px", fontWeight: "900", color: "#fff" }}>₹{Number(paymentData.amount).toLocaleString("en-IN")}</div>
+                      {paymentData.note && (
+                        <div style={{ fontSize: "14px", color: "rgba(255,255,255,0.5)", marginTop: "4px" }}>
+                          Ref: {paymentData.note}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "14px", marginBottom: "30px" }}>
+                    Scan the QR code or click a button below to complete your payment securely.
+                  </p>
 
                   {/* QR Code Section */}
-                  <div className="bg-white p-6 rounded-2xl flex flex-col items-center justify-center mb-6 relative overflow-hidden shadow-[0_10px_30px_rgba(255,255,255,0.05)]">
-                    <div className="absolute inset-0 bg-[url('/bg-pattern.svg')] opacity-5" />
-                    <img src={qrImageUrl} alt="UPI QR" className="w-48 h-48 object-contain rounded-xl shadow-sm relative z-10" />
-                    <div className="mt-4 flex items-center gap-2 text-black/40 font-bold text-xs uppercase tracking-widest z-10">
-                      <QrCode size={14} /> Scan with any UPI app
-                    </div>
+                  <div style={{
+                    background: "#fff",
+                    padding: "16px",
+                    borderRadius: "12px",
+                    display: "inline-block",
+                    marginBottom: "20px"
+                  }}>
+                    <img
+                      src="/payqr.png"
+                      alt="Payment QR Code"
+                      style={{ width: "220px", height: "220px", objectFit: "contain", display: "block" }}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "https://placehold.co/220x220/EEE/31343C?text=Scan+to+Pay";
+                      }}
+                    />
                   </div>
 
-                  {/* UPI Copy Section */}
-                  <div className="bg-white/5 border border-white/10 border-dashed rounded-xl p-4 flex flex-col mb-6">
-                    <div className="text-[10px] font-bold tracking-widest uppercase text-white/50 mb-1">Payee: <span className="text-white">{payeeName}</span></div>
-                    <button onClick={handleCopyUpi} className={`flex items-center justify-between p-3 rounded-lg border transition-all ${copied ? 'bg-emerald-500/10 border-emerald-500/40' : 'bg-black/50 border-white/10 hover:border-amber-500/30'}`}>
-                      <div className={`font-mono text-sm tracking-wide ${copied ? 'text-emerald-400' : 'text-amber-400'} truncate mr-3`}>{upiId}</div>
-                      <div className={`flex items-center gap-1.5 text-xs font-bold px-2 py-1 rounded bg-white/10 ${copied ? 'text-emerald-400' : 'text-white/60'}`}>
-                        {copied ? <CheckCircle size={14} /> : <Copy size={14} />} {copied ? 'Copied' : 'Copy'}
-                      </div>
+                  <div style={{
+                    background: "rgba(255,255,255,0.05)",
+                    padding: "12px 20px",
+                    borderRadius: "8px",
+                    marginBottom: "24px",
+                    border: "1px dashed rgba(255,255,255,0.2)"
+                  }}>
+                    <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "1px" }}>Payee Name</span>
+                    <div style={{ fontSize: "18px", fontWeight: "700", color: "#fff", marginBottom: "12px" }}>{payeeName}</div>
+                    <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "1px" }}>UPI ID</span>
+                    {/* Clickable Copy UPI ID */}
+                    <button
+                      onClick={handleCopyUpi}
+                      title="Click to copy UPI ID"
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                        width: "100%", marginTop: "8px", padding: "10px 14px",
+                        background: copied ? "rgba(34,197,94,0.12)" : "rgba(255,215,0,0.07)",
+                        border: copied ? "1px solid rgba(34,197,94,0.4)" : "1px solid rgba(255,215,0,0.25)",
+                        borderRadius: "8px", cursor: "pointer",
+                        transition: "all 0.2s",
+                      }}
+                    >
+                      <span style={{ fontSize: "16px", fontWeight: "700", color: copied ? "#22c55e" : "var(--gold)", letterSpacing: "0.5px" }}>
+                        {upiId}
+                      </span>
+                      <span style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "12px", color: copied ? "#22c55e" : "rgba(255,255,255,0.45)", flexShrink: 0, marginLeft: "10px" }}>
+                        {copied ? <CheckCircle size={14} /> : <Copy size={14} />}
+                        {copied ? "Copied!" : "Copy"}
+                      </span>
                     </button>
                   </div>
 
-                  {/* Quick UPI Apps */}
-                  <div className="mb-8">
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="h-px bg-white/10 flex-1" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-white/30">Or Tap to Pay</span>
-                      <div className="h-px bg-white/10 flex-1" />
+                  {/* Payment Buttons */}
+                  <div style={{ marginBottom: "24px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
+                      <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.1)" }} />
+                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "1.5px", whiteSpace: "nowrap" }}>Pay Via</span>
+                      <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.1)" }} />
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      {[
-                        { name: "GPay", href: gpayLink, img: "/gpay-logo.svg", bg: "bg-white", text: "text-black" },
-                        { name: "PhonePe", href: phonepeLink, img: "/phonepe-logo.svg", bg: "bg-[#5f259f]", text: "text-white" },
-                        { name: "Paytm", href: paytmLink, img: "/paytm-logo.svg", bg: "bg-[#002970]", text: "text-white" },
-                        { name: "Other UPI", href: baseUpiUrl, img: "/upi-logo.svg", bg: "bg-white/10 border border-white/20", text: "text-white" }
-                      ].map(app => (
-                        <a key={app.name} href={app.href} className={`flex items-center gap-3 p-3 rounded-xl ${app.bg} ${app.text} transition-transform hover:-translate-y-1 shadow-lg`}>
-                          <div className="bg-white p-1 rounded-md shadow-sm"><img src={app.img} alt={app.name} className="w-6 h-6 object-contain" /></div>
-                          <span className="font-bold text-sm">{app.name}</span>
-                        </a>
-                      ))}
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                      {/* Google Pay */}
+                      <a href={gpayLink} style={{
+                        display: "flex", alignItems: "center", gap: "14px",
+                        background: "#fff", color: "#3c4043",
+                        padding: "13px 20px", borderRadius: "12px",
+                        fontWeight: 700, textDecoration: "none", fontSize: "15px",
+                        transition: "transform 0.2s, box-shadow 0.2s",
+                        boxShadow: "0 2px 12px rgba(0,0,0,0.25)",
+                        position: "relative", overflow: "hidden"
+                      }}
+                        onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(66,133,244,0.35)"; }}
+                        onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.25)"; }}>
+                        {/* Google Pay Logo */}
+                        <img src="/gpay-logo.svg" alt="Google Pay" style={{ width: "38px", height: "38px", objectFit: "contain", background: "#fff", borderRadius: "8px", padding: "4px" }} />
+                        <div style={{ textAlign: "left" }}>
+                          <div style={{ fontSize: "13px", color: "#888", fontWeight: 500, lineHeight: 1 }}>Pay with</div>
+                          <div style={{ fontSize: "16px", fontWeight: 700, color: "#3c4043", lineHeight: 1.4 }}>Google Pay</div>
+                        </div>
+                        <svg style={{ marginLeft: "auto" }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3c4043" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                      </a>
+
+                      {/* PhonePe */}
+                      <a href={phonepeLink} style={{
+                        display: "flex", alignItems: "center", gap: "14px",
+                        background: "linear-gradient(135deg, #5f259f, #7c3aed)",
+                        color: "#fff", padding: "13px 20px", borderRadius: "12px",
+                        fontWeight: 700, textDecoration: "none", fontSize: "15px",
+                        transition: "transform 0.2s, box-shadow 0.2s",
+                        boxShadow: "0 2px 12px rgba(95,37,159,0.35)"
+                      }}
+                        onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(95,37,159,0.55)"; }}
+                        onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 12px rgba(95,37,159,0.35)"; }}>
+                        {/* PhonePe Logo Icon */}
+                        <img src="/phonepe-logo.svg" alt="PhonePe" style={{ width: "38px", height: "38px", objectFit: "contain", background: "#fff", borderRadius: "8px" }} />
+                        <div style={{ textAlign: "left" }}>
+                          <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.7)", fontWeight: 500, lineHeight: 1 }}>Pay with</div>
+                          <div style={{ fontSize: "16px", fontWeight: 700, lineHeight: 1.4 }}>PhonePe</div>
+                        </div>
+                        <svg style={{ marginLeft: "auto" }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                      </a>
+
+                      {/* Paytm */}
+                      <a href={paytmLink} style={{
+                        display: "flex", alignItems: "center", gap: "14px",
+                        background: "linear-gradient(135deg, #002970, #00b9f1)",
+                        color: "#fff", padding: "13px 20px", borderRadius: "12px",
+                        fontWeight: 700, textDecoration: "none", fontSize: "15px",
+                        transition: "transform 0.2s, box-shadow 0.2s",
+                        boxShadow: "0 2px 12px rgba(0,185,241,0.25)"
+                      }}
+                        onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,185,241,0.5)"; }}
+                        onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,185,241,0.25)"; }}>
+                        {/* Paytm Logo */}
+                        <img src="/paytm-logo.svg" alt="Paytm" style={{ width: "38px", height: "38px", objectFit: "contain", background: "#fff", borderRadius: "8px", padding: "4px" }} />
+                        <div style={{ textAlign: "left" }}>
+                          <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.7)", fontWeight: 500, lineHeight: 1 }}>Pay with</div>
+                          <div style={{ fontSize: "16px", fontWeight: 700, lineHeight: 1.4 }}>Paytm</div>
+                        </div>
+                        <svg style={{ marginLeft: "auto" }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                      </a>
+
+                      {/* Any UPI App */}
+                      <a href={baseUpiUrl} style={{
+                        display: "flex", alignItems: "center", gap: "14px",
+                        background: "linear-gradient(135deg, #1a1a2e, #16213e)",
+                        color: "#fff", padding: "13px 20px", borderRadius: "12px",
+                        fontWeight: 700, textDecoration: "none", fontSize: "15px",
+                        border: "1px solid rgba(255,215,0,0.25)",
+                        transition: "transform 0.2s, box-shadow 0.2s",
+                        boxShadow: "0 2px 12px rgba(0,0,0,0.3)"
+                      }}
+                        onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(255,215,0,0.15)"; }}
+                        onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.3)"; }}>
+                        {/* UPI Logo */}
+                        <img src="/upi-logo.svg" alt="UPI" style={{ width: "38px", height: "38px", objectFit: "contain", background: "#fff", borderRadius: "8px", padding: "4px" }} />
+                        <div style={{ textAlign: "left" }}>
+                          <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.5)", fontWeight: 500, lineHeight: 1 }}>Open any</div>
+                          <div style={{ fontSize: "16px", fontWeight: 700, lineHeight: 1.4, color: "var(--gold)" }}>Other UPI App</div>
+                        </div>
+                        <svg style={{ marginLeft: "auto" }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,215,0,0.6)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                      </a>
                     </div>
                   </div>
 
-                  {/* Manual Bank Dropdown */}
-                  <div className="mb-6">
-                    <button onClick={() => setShowBank(!showBank)} className="w-full flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm font-bold transition-colors hover:bg-white/10">
-                      <div className="flex items-center gap-2"><CreditCard size={18} className="text-amber-500" /> Bank Transfer Details</div>
+                  {/* Bank Transfer Toggle */}
+                  <div style={{ marginBottom: "24px" }}>
+                    <button
+                      onClick={() => setShowBank(!showBank)}
+                      style={{
+                        width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                        padding: "12px 16px", borderRadius: "10px", background: "rgba(255,255,255,0.05)",
+                        border: "1px solid rgba(255,215,0,0.1)", color: "#fff", cursor: "pointer",
+                        fontSize: "14px", fontWeight: "600", transition: "all 0.2s"
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <CreditCard size={18} color="var(--gold)" />
+                        Bank Transfer Details
+                      </div>
                       {showBank ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                     </button>
 
-                    <AnimatePresence>
-                      {showBank && (
-                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                          <div className="mt-2 bg-[#0a0c10] border border-amber-500/20 rounded-xl p-5">
-                            {!bankUnlocked ? (
-                              <form onSubmit={handleBankUnlock} className="flex flex-col items-center py-4">
-                                <Lock size={20} className="text-white/20 mb-3" />
-                                <p className="text-xs text-center text-white/50 mb-4">Enter secondary bank PIN to reveal details</p>
-                                <input type="password" maxLength={4} required value={bankPin} onChange={e => setBankPin(e.target.value)} className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-center font-mono tracking-widest text-white outline-none mb-3" placeholder="••••" />
-                                {bankError && <p className="text-xs text-red-500 font-bold mb-3">{bankError}</p>}
-                                <button type="submit" className="px-6 py-2 bg-amber-500 text-black text-xs font-bold rounded-lg hover:bg-amber-400">Unlock Bank</button>
-                              </form>
-                            ) : (
-                              <div className="grid gap-3 text-sm">
-                                {[
-                                  { label: "Bank", value: "FEDERAL BANK" },
-                                  { label: "Account Type", value: "SAVINGS" },
-                                  { label: "Name", value: "MATHESHWARAN R", highlight: true },
-                                  { label: "A/C Number", value: "23550100026910", mono: true },
-                                  { label: "IFSC", value: "FDRL0002355", highlight: true, mono: true }
-                                ].map(row => (
-                                  <div key={row.label} className="flex justify-between items-center border-b border-white/5 pb-2 last:border-0">
-                                    <span className="text-white/40 text-xs font-bold uppercase">{row.label}</span>
-                                    <span className={`${row.highlight ? 'text-amber-400' : 'text-white'} ${row.mono ? 'font-mono' : 'font-bold'}`}>{row.value}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+                    {showBank && (
+                      <div style={{
+                        marginTop: "12px", padding: "20px", borderRadius: "10px",
+                        background: "rgba(10,12,20,0.6)", border: "1px solid rgba(255,215,0,0.15)",
+                        textAlign: "left", animation: "slideDown 0.3s ease-out"
+                      }}>
+                        {!bankUnlocked ? (
+                          <form onSubmit={handleBankUnlock} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", padding: "10px 0" }}>
+                            <Lock size={24} color="rgba(255,255,255,0.3)" style={{ marginBottom: "4px" }} />
+                            <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.6)", marginBottom: "8px", textAlign: "center" }}>
+                              Enter the secondary PIN to unlock bank details.
+                            </p>
+                            <input
+                              type="password"
+                              maxLength={4}
+                              placeholder="Bank PIN"
+                              value={bankPin}
+                              onChange={(e) => setBankPin(e.target.value)}
+                              style={{
+                                background: "rgba(255,255,255,0.05)",
+                                border: "1px solid rgba(255,215,0,0.3)",
+                                padding: "10px 16px",
+                                borderRadius: "8px",
+                                color: "#fff",
+                                fontSize: "16px",
+                                textAlign: "center",
+                                letterSpacing: "4px",
+                                width: "160px",
+                                outline: "none"
+                              }}
+                              autoFocus
+                            />
+                            {bankError && <div style={{ color: "#ef4444", fontSize: "12px", fontWeight: "600" }}>{bankError}</div>}
+                            <button type="submit" className="btn btn-gold" style={{ padding: "8px 24px", fontSize: "13px" }}>
+                              Unlock Bank Details
+                            </button>
+                          </form>
+                        ) : (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                            <div>
+                              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", textTransform: "uppercase" }}>Bank Name</div>
+                              <div style={{ fontSize: "14px", fontWeight: "600", color: "#fff" }}>FEDERAL BANK</div>
+                            </div>
+                            <div>
+                              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", textTransform: "uppercase" }}>Account Type</div>
+                              <div style={{ fontSize: "14px", fontWeight: "600", color: "#fff" }}>SAVINGS ACCOUNT</div>
+                            </div>
+                            <div>
+                              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", textTransform: "uppercase" }}>Account Holder</div>
+                              <div style={{ fontSize: "14px", fontWeight: "600", color: "var(--gold)" }}>MATHESHWARAN R</div>
+                            </div>
+                            <div>
+                              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", textTransform: "uppercase" }}>Account Number</div>
+                              <div style={{ fontSize: "16px", fontWeight: "700", color: "#fff", letterSpacing: "1px" }}>23550100026910</div>
+                            </div>
+                            <div>
+                              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", textTransform: "uppercase" }}>IFSC Code</div>
+                              <div style={{ fontSize: "16px", fontWeight: "700", color: "var(--gold)" }}>FDRL0002355</div>
+                            </div>
+                            <div>
+                              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", textTransform: "uppercase" }}>Branch</div>
+                              <div style={{ fontSize: "14px", fontWeight: "600", color: "#fff" }}>Alagusenai</div>
+                            </div>
                           </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                        )}
+                      </div>
+                    )}
                   </div>
 
-                  {/* Verification Banner */}
-                  <div className="bg-orange-500/10 border-l-4 border-orange-500 rounded-r-xl p-4 mb-4">
-                    <div className="flex gap-3">
-                      <AlertTriangle className="text-orange-500 shrink-0 mt-0.5" size={20} />
+                  {/* Verification Note */}
+                  <div style={{
+                    padding: "20px",
+                    background: "rgba(249, 115, 22, 0.1)",
+                    borderLeft: "4px solid #f97316",
+                    borderRadius: "4px 8px 8px 4px",
+                    textAlign: "left"
+                  }}>
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                      <AlertTriangle size={20} color="#f97316" style={{ flexShrink: 0, marginTop: "2px" }} />
                       <div>
-                        <h4 className="text-orange-500 font-bold text-sm mb-1">Verify Output & Share Proof</h4>
-                        <p className="text-white/70 text-xs leading-relaxed mb-3">Ensure payee name shows <strong className="text-white">{payeeName}</strong>. Once paid, share screenshot proof instantly to process your order.</p>
-                        <div className="grid grid-cols-2 gap-2">
-                          <a href={whatsappHref} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-[#25D366] text-black font-bold text-xs"><MessageCircle size={14} /> WhatsApp</a>
-                          <a href={telegramHref} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-[#0088cc] text-white font-bold text-xs"><Send size={14} /> Telegram</a>
+                        <h4 style={{ margin: "0 0 6px 0", color: "#f97316", fontSize: "15px" }}>Verification Required</h4>
+                        <p style={{ margin: "0 0 10px 0", fontSize: "13px", color: "rgba(255,255,255,0.8)", lineHeight: "1.5" }}>
+                          Please verify that the name matches <strong>{payeeName}</strong> before confirming the payment.
+                        </p>
+                        <p style={{ margin: "0 0 10px 0", fontSize: "13px", color: "rgba(255,255,255,0.8)", lineHeight: "1.5" }}>
+                          After payment, take a screenshot and share it with us to complete your order.
+                        </p>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: "#fff", fontWeight: "600" }}>
+                          <CheckCircle size={14} color="#22c55e" />
+                          <span>Share screenshot for verification</span>
                         </div>
                       </div>
                     </div>
                   </div>
-
-                </motion.div>
+                </>
               )}
-            </AnimatePresence>
-
-          </motion.div>
+            </div>
+          </div>
         </div>
+        <style>{`
+          @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+        `}</style>
       </div>
       <Footer />
     </>

@@ -1,65 +1,179 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import toast from "react-hot-toast";
+import { getFunctions, httpsCallable } from "firebase/functions";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { useAuth } from "../context/AuthContext";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase";
 import {
   ShieldCheck, CheckCircle, Copy,
   AlertTriangle, CreditCard, ChevronDown, ChevronUp, Lock, XCircle
 } from "lucide-react";
 
+const FALLBACK_ENCRYPTED_UPI = "VFFWUUBIQlRAcEtXVQ==";
+const FALLBACK_ENCRYPTED_NAME = "dHFmfXxjemJ4YnN7GWI=";
+const PAYMENT_PIN = "9025";
+const BANK_PIN = "1516";
+
+function parseDate(value) {
+  if (!value) return null;
+  if (typeof value.toDate === "function") return value.toDate();
+  if (typeof value === "number") return new Date(value);
+  if (value.seconds) return new Date(value.seconds * 1000);
+  return new Date(value);
+}
+
+function getSecondsLeft(expiresAt) {
+  if (!expiresAt) return 0;
+  return Math.max(0, Math.ceil((expiresAt.getTime() - Date.now()) / 1000));
+}
+
+function formatTimer(secondsLeft) {
+  const minutes = Math.floor(secondsLeft / 60).toString().padStart(2, "0");
+  const seconds = (secondsLeft % 60).toString().padStart(2, "0");
+  return `${minutes}:${seconds}`;
+}
+
+function decrypt(base64, key) {
+  try {
+    const text = atob(base64);
+    let result = "";
+    for (let i = 0; i < text.length; i++) {
+      result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+    }
+    return result;
+  } catch {
+    return "";
+  }
+}
+
+function CountdownBadge({ secondsLeft, totalSeconds }) {
+  const isCritical = secondsLeft <= 60;
+  const progress = Math.max(0, Math.min(1, secondsLeft / Math.max(totalSeconds || 600, 1)));
+  const strokeDasharray = 126;
+  const strokeDashoffset = strokeDasharray * (1 - progress);
+
+  return (
+    <div style={{
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "10px",
+      padding: "8px 12px",
+      borderRadius: "999px",
+      background: isCritical ? "rgba(239,68,68,0.1)" : "rgba(255,215,0,0.08)",
+      border: isCritical ? "1px solid rgba(239,68,68,0.3)" : "1px solid rgba(255,215,0,0.2)",
+      marginBottom: "20px",
+    }}>
+      <svg width="34" height="34" viewBox="0 0 50 50" style={{ transform: "rotate(-90deg)" }}>
+        <circle cx="25" cy="25" r="20" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4" />
+        <circle
+          cx="25"
+          cy="25"
+          r="20"
+          fill="none"
+          stroke={isCritical ? "#ef4444" : "var(--gold)"}
+          strokeWidth="4"
+          strokeLinecap="round"
+          strokeDasharray={strokeDasharray}
+          strokeDashoffset={strokeDashoffset}
+          style={{
+            transition: "stroke-dashoffset 0.7s ease, stroke 0.2s ease",
+            filter: isCritical ? "drop-shadow(0 0 6px rgba(239,68,68,0.8))" : "drop-shadow(0 0 6px rgba(255,215,0,0.65))",
+          }}
+        />
+      </svg>
+      <div style={{ textAlign: "left", lineHeight: 1.1 }}>
+        <div style={{ color: isCritical ? "#ef4444" : "var(--gold)", fontFamily: "monospace", fontWeight: 900, fontSize: "17px" }}>
+          {formatTimer(secondsLeft)}
+        </div>
+        <div style={{ color: "rgba(255,255,255,0.45)", fontSize: "10px", textTransform: "uppercase", letterSpacing: "1px", fontWeight: 800 }}>
+          Link timer
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function PaymentPage() {
-  const { user } = useAuth();
-  const { paymentId } = useParams();
+  const { token } = useParams();
 
   const [isValidLink, setIsValidLink] = useState(null);
   const [loading, setLoading] = useState(true);
   const [paymentData, setPaymentData] = useState(null);
+  const [secondsLeft, setSecondsLeft] = useState(0);
 
   const [showBank, setShowBank] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // PIN Protection State for Page
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
 
-  // PIN Protection State for Bank Details
   const [bankUnlocked, setBankUnlocked] = useState(false);
   const [bankPin, setBankPin] = useState("");
   const [bankError, setBankError] = useState("");
 
+  const expiresAt = useMemo(() => parseDate(paymentData?.expiresAt), [paymentData]);
+
   useEffect(() => {
+    let cancelled = false;
+
     const checkLink = async () => {
-      if (!paymentId) {
+      if (!token) {
         setIsValidLink(false);
         setLoading(false);
         return;
       }
+
       try {
-        const docRef = doc(db, "payment_links", paymentId);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists() && docSnap.data().status === "active") {
-          setPaymentData(docSnap.data());
+        const functions = getFunctions();
+        const verifyPaymentLink = httpsCallable(functions, "verifyPaymentLink");
+        const result = await verifyPaymentLink({ token });
+        const payload = result.data;
+
+        if (!cancelled && payload?.valid) {
+          setPaymentData(payload.link);
+          setSecondsLeft(getSecondsLeft(parseDate(payload.link?.expiresAt)));
           setIsValidLink(true);
-        } else {
+        } else if (!cancelled) {
           setIsValidLink(false);
         }
       } catch (err) {
-        console.error("Error fetching payment link:", err);
-        setIsValidLink(false);
+        console.error("Error verifying payment link:", err);
+        if (!cancelled) setIsValidLink(false);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
+
     checkLink();
-  }, [paymentId]);
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
+  useEffect(() => {
+    if (!isValidLink || !expiresAt) return undefined;
+
+    const timer = window.setInterval(() => {
+      const next = getSecondsLeft(expiresAt);
+      setSecondsLeft(next);
+      if (next <= 0) {
+        setIsValidLink(false);
+        toast.error("Payment link expired");
+      }
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [expiresAt, isValidLink]);
+
+  const encryptedUpi = paymentData?.encryptedUpi || FALLBACK_ENCRYPTED_UPI;
+  const encryptedName = paymentData?.encryptedName || FALLBACK_ENCRYPTED_NAME;
+  const linkPin = paymentData?.pin || PAYMENT_PIN;
+  const totalSeconds = Number(paymentData?.expiresInMinutes || 10) * 60;
 
   const handleUnlock = (e) => {
     e.preventDefault();
-    if (pin === "9025") {
+    if (pin === linkPin) {
       setIsUnlocked(true);
       setError("");
     } else {
@@ -70,7 +184,7 @@ export default function PaymentPage() {
 
   const handleBankUnlock = (e) => {
     e.preventDefault();
-    if (bankPin === "1516") {
+    if (bankPin === BANK_PIN) {
       setBankUnlocked(true);
       setBankError("");
     } else {
@@ -79,42 +193,25 @@ export default function PaymentPage() {
     }
   };
 
+  const upiId = isUnlocked ? (import.meta.env.VITE_PAYMENT_UPI_ID || decrypt(encryptedUpi, pin)) : "";
+  const payeeName = isUnlocked ? (import.meta.env.VITE_PAYMENT_PAYEE_NAME || decrypt(encryptedName, pin)) : "";
+  const amount = Number(paymentData?.amount || 0);
+  const orderId = paymentData?.orderId || token || "";
+  const currency = "INR";
+
+  const paymentParams = `pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${encodeURIComponent(amount)}&cu=${currency}&tn=${encodeURIComponent(orderId)}`;
+  const baseUpiUrl = `upi://pay?${paymentParams}`;
+  const gpayLink = `gpay://upi/pay?${paymentParams}`;
+  const phonepeLink = `phonepe://pay?${paymentParams}`;
+  const paytmLink = `paytmmp://pay?${paymentParams}`;
+
   const handleCopyUpi = () => {
     navigator.clipboard.writeText(upiId).then(() => {
       setCopied(true);
+      toast.success("UPI ID copied");
       setTimeout(() => setCopied(false), 2000);
     });
   };
-
-  // Secure dynamic loading via client-side obfuscation
-  const encryptedUpi = paymentData?.encryptedUpi || "VFFWUUBIQlRAcEtXVQ==";
-  const encryptedName = paymentData?.encryptedName || "dHFmfXxjemJ4YnN7GWI=";
-
-  const decrypt = (base64, key) => {
-    try {
-      const text = atob(base64);
-      let result = "";
-      for (let i = 0; i < text.length; i++) {
-        result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-      }
-      return result;
-    } catch {
-      return "";
-    }
-  };
-
-  // User Specific Details (Dynamically Decrypted)
-  const upiId = isUnlocked ? decrypt(encryptedUpi, pin) : "";
-  const payeeName = isUnlocked ? decrypt(encryptedName, pin) : "";
-  const currency = "INR";
-
-  // Base UPI Link
-  const baseUpiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&cu=${currency}`;
-
-  // Specific App Links
-  const gpayLink = `gpay://upi/pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&cu=${currency}`;
-  const phonepeLink = `phonepe://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&cu=${currency}`;
-  const paytmLink = `paytmmp://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&cu=${currency}`;
 
   if (loading) {
     return (
@@ -174,7 +271,6 @@ export default function PaymentPage() {
             position: "relative",
             overflow: "hidden"
           }}>
-            {/* Top Glow */}
             <div style={{
               position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)",
               width: "150px", height: "150px", background: "rgba(255,215,0,0.1)",
@@ -182,9 +278,25 @@ export default function PaymentPage() {
             }} />
 
             <div style={{ position: "relative", zIndex: 1 }}>
+              <CountdownBadge secondsLeft={secondsLeft} totalSeconds={totalSeconds} />
+
+              {secondsLeft <= 60 && (
+                <div style={{
+                  background: "rgba(239,68,68,0.08)",
+                  border: "1px solid rgba(239,68,68,0.22)",
+                  color: "#fca5a5",
+                  padding: "10px 12px",
+                  borderRadius: "8px",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  marginBottom: "18px"
+                }}>
+                  This link expires in less than 1 minute.
+                </div>
+              )}
+
               {!isUnlocked ? (
-                // --- PIN ENTRY SCREEN ---
-                <div style={{ padding: "20px 0" }}>
+                <div style={{ padding: "8px 0 20px" }}>
                   <div style={{ display: "inline-flex", background: "rgba(255,215,0,0.1)", padding: "16px", borderRadius: "50%", marginBottom: "20px" }}>
                     <Lock size={36} color="var(--gold)" />
                   </div>
@@ -241,17 +353,26 @@ export default function PaymentPage() {
                   </form>
                 </div>
               ) : (
-                // --- PAYMENT DETAILS SCREEN ---
                 <>
                   <div style={{ display: "inline-flex", background: "rgba(34,197,94,0.1)", padding: "12px", borderRadius: "50%", marginBottom: "16px" }}>
                     <ShieldCheck size={32} color="#22c55e" />
                   </div>
                   <h1 style={{ fontFamily: "var(--font-h)", fontSize: "28px", marginBottom: "8px", color: "#fff" }}>Secure Checkout</h1>
-                  <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "14px", marginBottom: "30px" }}>
+                  <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "14px", marginBottom: "18px" }}>
                     Scan the QR code or click a button below to complete your payment securely.
                   </p>
 
-                  {/* QR Code Section */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "20px" }}>
+                    <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "9px", padding: "10px" }}>
+                      <div style={{ color: "rgba(255,255,255,0.45)", fontSize: "10px", textTransform: "uppercase", letterSpacing: "1px", fontWeight: 800 }}>Order ID</div>
+                      <div style={{ color: "var(--gold)", fontSize: "13px", fontWeight: 900, overflowWrap: "anywhere" }}>{orderId}</div>
+                    </div>
+                    <div style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.18)", borderRadius: "9px", padding: "10px" }}>
+                      <div style={{ color: "rgba(255,255,255,0.45)", fontSize: "10px", textTransform: "uppercase", letterSpacing: "1px", fontWeight: 800 }}>Amount</div>
+                      <div style={{ color: "#22c55e", fontSize: "18px", fontWeight: 900 }}>₹{amount.toLocaleString("en-IN")}</div>
+                    </div>
+                  </div>
+
                   <div style={{
                     background: "#fff",
                     padding: "16px",
@@ -280,7 +401,6 @@ export default function PaymentPage() {
                     <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "1px" }}>Payee Name</span>
                     <div style={{ fontSize: "18px", fontWeight: "700", color: "#fff", marginBottom: "12px" }}>{payeeName}</div>
                     <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "1px" }}>UPI ID</span>
-                    {/* Clickable Copy UPI ID */}
                     <button
                       onClick={handleCopyUpi}
                       title="Click to copy UPI ID"
@@ -293,7 +413,7 @@ export default function PaymentPage() {
                         transition: "all 0.2s",
                       }}
                     >
-                      <span style={{ fontSize: "16px", fontWeight: "700", color: copied ? "#22c55e" : "var(--gold)", letterSpacing: "0.5px" }}>
+                      <span style={{ fontSize: "16px", fontWeight: "700", color: copied ? "#22c55e" : "var(--gold)", letterSpacing: "0.5px", overflowWrap: "anywhere" }}>
                         {upiId}
                       </span>
                       <span style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "12px", color: copied ? "#22c55e" : "rgba(255,255,255,0.45)", flexShrink: 0, marginLeft: "10px" }}>
@@ -303,7 +423,6 @@ export default function PaymentPage() {
                     </button>
                   </div>
 
-                  {/* Payment Buttons */}
                   <div style={{ marginBottom: "24px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
                       <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.1)" }} />
@@ -312,7 +431,6 @@ export default function PaymentPage() {
                     </div>
 
                     <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                      {/* Google Pay */}
                       <a href={gpayLink} style={{
                         display: "flex", alignItems: "center", gap: "14px",
                         background: "#fff", color: "#3c4043",
@@ -324,7 +442,6 @@ export default function PaymentPage() {
                       }}
                         onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(66,133,244,0.35)"; }}
                         onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.25)"; }}>
-                        {/* Google Pay Logo */}
                         <img src="/gpay-logo.svg" alt="Google Pay" style={{ width: "38px", height: "38px", objectFit: "contain", background: "#fff", borderRadius: "8px", padding: "4px" }} />
                         <div style={{ textAlign: "left" }}>
                           <div style={{ fontSize: "13px", color: "#888", fontWeight: 500, lineHeight: 1 }}>Pay with</div>
@@ -333,7 +450,6 @@ export default function PaymentPage() {
                         <svg style={{ marginLeft: "auto" }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3c4043" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
                       </a>
 
-                      {/* PhonePe */}
                       <a href={phonepeLink} style={{
                         display: "flex", alignItems: "center", gap: "14px",
                         background: "linear-gradient(135deg, #5f259f, #7c3aed)",
@@ -344,7 +460,6 @@ export default function PaymentPage() {
                       }}
                         onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(95,37,159,0.55)"; }}
                         onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 12px rgba(95,37,159,0.35)"; }}>
-                        {/* PhonePe Logo Icon */}
                         <img src="/phonepe-logo.svg" alt="PhonePe" style={{ width: "38px", height: "38px", objectFit: "contain", background: "#fff", borderRadius: "8px" }} />
                         <div style={{ textAlign: "left" }}>
                           <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.7)", fontWeight: 500, lineHeight: 1 }}>Pay with</div>
@@ -353,7 +468,6 @@ export default function PaymentPage() {
                         <svg style={{ marginLeft: "auto" }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
                       </a>
 
-                      {/* Paytm */}
                       <a href={paytmLink} style={{
                         display: "flex", alignItems: "center", gap: "14px",
                         background: "linear-gradient(135deg, #002970, #00b9f1)",
@@ -364,7 +478,6 @@ export default function PaymentPage() {
                       }}
                         onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,185,241,0.5)"; }}
                         onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,185,241,0.25)"; }}>
-                        {/* Paytm Logo */}
                         <img src="/paytm-logo.svg" alt="Paytm" style={{ width: "38px", height: "38px", objectFit: "contain", background: "#fff", borderRadius: "8px", padding: "4px" }} />
                         <div style={{ textAlign: "left" }}>
                           <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.7)", fontWeight: 500, lineHeight: 1 }}>Pay with</div>
@@ -373,7 +486,6 @@ export default function PaymentPage() {
                         <svg style={{ marginLeft: "auto" }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
                       </a>
 
-                      {/* Any UPI App */}
                       <a href={baseUpiUrl} style={{
                         display: "flex", alignItems: "center", gap: "14px",
                         background: "linear-gradient(135deg, #1a1a2e, #16213e)",
@@ -385,7 +497,6 @@ export default function PaymentPage() {
                       }}
                         onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(255,215,0,0.15)"; }}
                         onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.3)"; }}>
-                        {/* UPI Logo */}
                         <img src="/upi-logo.svg" alt="UPI" style={{ width: "38px", height: "38px", objectFit: "contain", background: "#fff", borderRadius: "8px", padding: "4px" }} />
                         <div style={{ textAlign: "left" }}>
                           <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.5)", fontWeight: 500, lineHeight: 1 }}>Open any</div>
@@ -396,7 +507,6 @@ export default function PaymentPage() {
                     </div>
                   </div>
 
-                  {/* Bank Transfer Toggle */}
                   <div style={{ marginBottom: "24px" }}>
                     <button
                       onClick={() => setShowBank(!showBank)}
@@ -483,7 +593,6 @@ export default function PaymentPage() {
                     )}
                   </div>
 
-                  {/* Verification Note */}
                   <div style={{
                     padding: "20px",
                     background: "rgba(249, 115, 22, 0.1)",

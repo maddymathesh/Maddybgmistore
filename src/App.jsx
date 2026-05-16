@@ -22,6 +22,7 @@ const ReadyStocks = lazy(() => import("./pages/ReadyStocks"));
 const Login = lazy(() => import("./pages/Login"));
 const PaymentPage = lazy(() => import("./pages/PaymentPage"));
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
+const Transactions = lazy(() => import("./pages/Transactions"));
 const PageNotFound = lazy(() => import("./pages/PageNotFound"));
 
 // Scroll to top on route change
@@ -223,6 +224,14 @@ export default function App() {
           element={
             <Suspense fallback={<PageLoader />}>
               <Login />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/transactions"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <Transactions />
             </Suspense>
           }
         />

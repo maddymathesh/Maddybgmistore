@@ -7,7 +7,7 @@ import {
   flexRender,
 } from '@tanstack/react-table';
 import { motion } from 'framer-motion';
-import { Search, Filter, Eye, FileText, Download, Trash2, ChevronLeft, ChevronRight, FileOutput, Receipt } from 'lucide-react';
+import { Search, Filter, Eye, FileText, Download, Trash2, ChevronLeft, ChevronRight, FileOutput, Receipt, RefreshCw } from 'lucide-react';
 import { fetchAllTransactions, deleteTransaction } from '../../services/transactionService';
 
 import toast from 'react-hot-toast';
@@ -24,11 +24,12 @@ export default function TransactionsList({ onAddNew }) {
     loadData();
   }, []);
 
-  const loadData = async () => {
+  const loadData = async (forceRefresh = false) => {
     setIsLoading(true);
     try {
-      const txs = await fetchAllTransactions();
+      const txs = await fetchAllTransactions(forceRefresh);
       setData(txs || []);
+      if (forceRefresh) toast.success('Transactions refreshed');
     } catch (error) {
       toast.error('Failed to load transactions');
     } finally {
@@ -38,12 +39,20 @@ export default function TransactionsList({ onAddNew }) {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this transaction?')) return;
+    
+    // Optimistic UI update
+    const previousData = [...data];
+    setData(prev => prev.filter(tx => tx.id !== id));
+    
     try {
       await deleteTransaction(id);
       toast.success('Transaction deleted');
-      loadData();
+      // No need to reload data if it's optimistic, unless we want to ensure cache is cleared.
+      // The backend will clear its cache automatically on delete.
     } catch (error) {
       toast.error('Failed to delete transaction');
+      // Revert optimistic update
+      setData(previousData);
     }
   };
 
@@ -124,11 +133,20 @@ export default function TransactionsList({ onAddNew }) {
     return data.filter(item => item.transaction_type === typeFilter);
   }, [data, typeFilter]);
 
+  // Debounce global filter
+  const [debouncedFilter, setDebouncedFilter] = useState(globalFilter);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedFilter(globalFilter);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [globalFilter]);
+
   const table = useReactTable({
     data: filteredData,
     columns,
     state: {
-      globalFilter,
+      globalFilter: debouncedFilter,
     },
     onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
@@ -173,13 +191,23 @@ export default function TransactionsList({ onAddNew }) {
           </div>
         </div>
 
-        <button
-          onClick={handleExport}
-          className="btn btn-green"
-          style={{ padding: '10px 16px', fontSize: '12px' }}
-        >
-          <Download size={16} /> Export Excel
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            onClick={() => loadData(true)}
+            className="btn btn-outline"
+            style={{ padding: '10px 16px', fontSize: '12px' }}
+            disabled={isLoading}
+          >
+            <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} /> Refresh
+          </button>
+          <button
+            onClick={handleExport}
+            className="btn btn-green"
+            style={{ padding: '10px 16px', fontSize: '12px' }}
+          >
+            <Download size={16} /> Export Excel
+          </button>
+        </div>
       </div>
 
       {/* Table */}
@@ -203,12 +231,16 @@ export default function TransactionsList({ onAddNew }) {
               ))}
             </thead>
             <tbody>
-              {isLoading ? (
-                <tr>
-                  <td colSpan={columns.length} style={{ textAlign: 'center', padding: '60px 0', color: 'var(--muted)' }}>
-                    Loading transactions...
-                  </td>
-                </tr>
+              {isLoading && data.length === 0 ? (
+                Array.from({ length: 5 }).map((_, idx) => (
+                  <tr key={`skeleton-${idx}`}>
+                    {columns.map((col, cIdx) => (
+                      <td key={`skeleton-col-${cIdx}`}>
+                        <div style={{ height: '24px', background: 'var(--border)', borderRadius: '4px', animation: 'pulse 1.5s infinite opacity' }} />
+                      </td>
+                    ))}
+                  </tr>
+                ))
               ) : table.getRowModel().rows.length === 0 ? (
                 <tr>
                   <td colSpan={columns.length} style={{ textAlign: 'center', padding: '60px 0', color: 'var(--muted)' }}>

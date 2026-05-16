@@ -10,13 +10,17 @@ export default function XsuitGift() {
 
   useEffect(() => {
     const fetchSuits = async () => {
-      const { data, error } = await supabase
-        .from('xsuit_gifts')
-        .select('*')
-        .order('price', { ascending: true });
-      
-      if (!error) setSuits(data);
-      setLoading(false);
+      try {
+        const { data } = await supabase
+          .from('xsuit_gifts')
+          .select('*')
+          .order('created_at', { ascending: false });
+        setSuits(data || []);
+      } catch (err) {
+        console.error('Error fetching suits:', err);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchSuits();
   }, []);

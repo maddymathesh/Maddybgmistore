@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, DollarSign, Clock, ShieldAlert, ArrowUpRight } from 'lucide-react';
-import { fetchAllTransactions } from '../../services/transactionService';
+import { TrendingUp, DollarSign, Clock, ShieldAlert, ArrowUpRight, RefreshCw, Activity } from 'lucide-react';
+import { fetchAllTransactions, fetchDashboardStats } from '../../services/transactionService';
+import toast from 'react-hot-toast';
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
     totalSales: 0,
     totalProfit: 0,
     pendingPayments: 0,
-    activeGuarantees: 0
+    totalTransactions: 0
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -16,39 +17,22 @@ export default function Dashboard() {
     loadStats();
   }, []);
 
-  const loadStats = async () => {
+  const loadStats = async (forceRefresh = false) => {
     setIsLoading(true);
     try {
-      const data = await fetchAllTransactions();
-      
-      let sales = 0;
-      let profit = 0;
-      let pending = 0;
-      let guarantees = 0;
-
-      data.forEach(tx => {
-        sales += Number(tx.sold_price) || 0;
-        profit += Number(tx.profit) || 0;
-        if (tx.payment_status === 'Pending') pending++;
-        
-        // Simple logic for active guarantees on accounts
-        if (tx.transaction_type === 'Account' && tx.account_transactions?.[0]) {
-          const acc = tx.account_transactions[0];
-          if (acc.guarantee_void_date) {
-            const voidDate = new Date(acc.guarantee_void_date);
-            if (voidDate > new Date()) guarantees++;
-          }
-        }
-      });
-
-      setStats({
-        totalSales: sales,
-        totalProfit: profit,
-        pendingPayments: pending,
-        activeGuarantees: guarantees
-      });
+      const data = await fetchDashboardStats(forceRefresh);
+      if (data) {
+        setStats({
+          totalSales: data.totalRevenue || 0,
+          totalProfit: data.totalProfit || 0,
+          pendingPayments: data.pendingPayments || 0,
+          totalTransactions: data.totalTransactions || 0
+        });
+        if (forceRefresh) toast.success('Dashboard analytics refreshed');
+      }
     } catch (error) {
       console.error("Error loading stats:", error);
+      toast.error('Failed to load dashboard stats');
     } finally {
       setIsLoading(false);
     }
@@ -80,9 +64,9 @@ export default function Dashboard() {
       text: 'text-amber-500'
     },
     {
-      title: 'Active Guarantees',
-      value: stats.activeGuarantees.toString(),
-      icon: ShieldAlert,
+      title: 'Total Transactions',
+      value: stats.totalTransactions.toString(),
+      icon: Activity,
       color: 'from-purple-600 to-purple-400',
       bgLight: 'bg-purple-500/10',
       text: 'text-purple-500'
@@ -101,6 +85,18 @@ export default function Dashboard() {
 
   return (
     <div style={{ display: 'grid', gap: '32px' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-16px' }}>
+        <button
+          onClick={() => loadStats(true)}
+          className="btn btn-outline"
+          style={{ padding: '8px 16px', fontSize: '12px' }}
+          disabled={isLoading}
+        >
+          <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} style={{ marginRight: '6px' }} /> 
+          Refresh Analytics
+        </button>
+      </div>
+
       {/* Stats Grid */}
       <div className="admin-stat-grid">
         {statCards.map((stat, i) => {

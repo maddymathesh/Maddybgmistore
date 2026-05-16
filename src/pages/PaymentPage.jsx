@@ -38,13 +38,11 @@ export default function PaymentPage() {
         return;
       }
       try {
-        const { data, error: fetchError } = await supabase
+        const { data, error } = await supabase
           .from('payment_links')
           .select('*')
           .eq('id', paymentId)
           .single();
-
-        if (fetchError) throw fetchError;
 
         if (data && data.status === "active") {
           // Check for expiration

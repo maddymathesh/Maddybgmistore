@@ -5,6 +5,7 @@ import { ArrowLeft, Save, CheckCircle2, ChevronRight, ChevronLeft, Hash, Calenda
 import { createUcTransaction, generateNextUcId } from '../../services/transactionService';
 import { generateCustomerPDF, generateInternalPDF } from '../../lib/pdfGenerator';
 import { exportToExcel } from '../../lib/excelExport';
+import * as api from '../../services/api';
 import { supabase } from '../../utils/supabase';
 import toast from 'react-hot-toast';
 
@@ -61,6 +62,8 @@ function SearchDropdown({ options, value, onChange, placeholder, renderOption, g
   );
 }
 
+const Label = ({ children }) => <label className="slabel" style={{ display: 'block', marginBottom: '6px' }}>{children}</label>;
+
 export default function CreateUcTransaction({ onBack }) {
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -71,6 +74,16 @@ export default function CreateUcTransaction({ onBack }) {
   const [selectedMethod, setSelectedMethod] = useState('');
   const [selectedPack, setSelectedPack] = useState(null);
   const [numPacks, setNumPacks] = useState(1);
+  const [canSubmit, setCanSubmit] = useState(false);
+
+  useEffect(() => {
+    if (step === STEPS.length - 1) {
+      setCanSubmit(false);
+      const t = setTimeout(() => setCanSubmit(true), 600);
+      return () => clearTimeout(t);
+    }
+  }, [step]);
+
 
   const { register, handleSubmit, watch, setValue } = useForm({
     defaultValues: {
@@ -142,7 +155,6 @@ export default function CreateUcTransaction({ onBack }) {
     }
   };
 
-  const Label = ({ children }) => <label className="slabel" style={{ display: 'block', marginBottom: '6px' }}>{children}</label>;
   const grid = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' };
 
   // ── Success ─────────────────────────────────────────────────────────────
@@ -333,7 +345,7 @@ export default function CreateUcTransaction({ onBack }) {
         })}
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }}>
         <AnimatePresence mode="wait">
           <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.18 }} className="card" style={{ padding: '32px' }}>
             <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '22px', paddingBottom: '14px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -352,7 +364,7 @@ export default function CreateUcTransaction({ onBack }) {
               Next Step <ChevronRight size={16} />
             </button>
           ) : (
-            <button type="submit" disabled={isSubmitting} className="btn btn-gold" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button type="submit" disabled={isSubmitting || !canSubmit} className="btn btn-gold" style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: (!canSubmit && !isSubmitting) ? 0.5 : 1 }}>
               {isSubmitting ? <><span style={{ width: '15px', height: '15px', border: '2px solid rgba(0,0,0,0.3)', borderTopColor: '#000', borderRadius: '50%', display: 'inline-block', animation: 'spin .7s linear infinite' }} /> Saving...</> : <><Save size={16} /> Save Transaction</>}
             </button>
           )}

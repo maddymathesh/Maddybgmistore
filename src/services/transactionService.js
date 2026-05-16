@@ -82,3 +82,123 @@ export const deleteTransaction = async (id) => {
 
   if (error) throw error;
 };
+
+/**
+ * Generates the next sequential MBSXS XSuit transaction ID.
+ */
+export const generateNextXsuitId = async () => {
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('transaction_id')
+    .like('transaction_id', 'MBSXS%')
+    .order('created_at', { ascending: false })
+    .limit(1);
+
+  if (error) throw error;
+
+  if (!data || data.length === 0) return 'MBSXS001';
+
+  const num = parseInt(data[0].transaction_id.replace('MBSXS', ''), 10);
+  return `MBSXS${String(num + 1).padStart(3, '0')}`;
+};
+
+/**
+ * Create a new XSuit Gift transaction.
+ */
+export const createXsuitTransaction = async (mainData, detailData) => {
+  const { data: transaction, error: mainError } = await supabase
+    .from('transactions')
+    .insert([mainData])
+    .select()
+    .single();
+
+  if (mainError) throw mainError;
+
+  const { error: detailError } = await supabase
+    .from('xsuit_transactions')
+    .insert([{ ...detailData, transaction_ref: transaction.transaction_id }]);
+
+  if (detailError) throw detailError;
+
+  return transaction;
+};
+
+/**
+ * Generates the next sequential MBSSC Supercar transaction ID.
+ */
+export const generateNextSupercarId = async () => {
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('transaction_id')
+    .like('transaction_id', 'MBSSC%')
+    .order('created_at', { ascending: false })
+    .limit(1);
+
+  if (error) throw error;
+
+  if (!data || data.length === 0) return 'MBSSC001';
+
+  const num = parseInt(data[0].transaction_id.replace('MBSSC', ''), 10);
+  return `MBSSC${String(num + 1).padStart(3, '0')}`;
+};
+
+/**
+ * Create a new Supercar Gift transaction.
+ */
+export const createSupercarTransaction = async (mainData, detailData) => {
+  const { data: transaction, error: mainError } = await supabase
+    .from('transactions')
+    .insert([mainData])
+    .select()
+    .single();
+
+  if (mainError) throw mainError;
+
+  const { error: detailError } = await supabase
+    .from('supercar_transactions')
+    .insert([{ ...detailData, transaction_ref: transaction.transaction_id }]);
+
+  if (detailError) throw detailError;
+
+  return transaction;
+};
+
+/**
+ * Generates the next sequential MBSUC transaction ID.
+ */
+export const generateNextUcId = async () => {
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('transaction_id')
+    .like('transaction_id', 'MBSUC%')
+    .order('created_at', { ascending: false })
+    .limit(1);
+
+  if (error) throw error;
+
+  if (!data || data.length === 0) return 'MBSUC001';
+
+  const num = parseInt(data[0].transaction_id.replace('MBSUC', ''), 10);
+  return `MBSUC${String(num + 1).padStart(3, '0')}`;
+};
+
+/**
+ * Create a new UC Order transaction.
+ */
+export const createUcTransaction = async (mainData, detailData) => {
+  const { data: transaction, error: mainError } = await supabase
+    .from('transactions')
+    .insert([mainData])
+    .select()
+    .single();
+
+  if (mainError) throw mainError;
+
+  const { error: detailError } = await supabase
+    .from('uc_transactions')
+    .insert([{ ...detailData, transaction_ref: transaction.transaction_id }]);
+
+  if (detailError) throw detailError;
+
+  return transaction;
+};

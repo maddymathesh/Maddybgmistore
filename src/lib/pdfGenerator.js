@@ -103,11 +103,50 @@ const buildPDF = async (tx, isInternal = false) => {
 
   // ── PRODUCT DETAILS ─────────────────────────────────────────────────────
   y = section('Product Details', y);
-  draw('Product Type', 48, y, 9, bold);         draw('BGMI Account', 180, y, 9, font);
-  if (acc.product_link) {
-    draw('Product Reference', 330, y, 9, bold); draw(acc.product_link.substring(0, 40), 460, y, 8, font);
+  draw('Product Type', 48, y, 9, bold);
+  draw(tx.transaction_type === 'XSuit' ? 'XSuit Gift' : 'BGMI Account', 180, y, 9, font);
+  y -= 18;
+
+  if (tx.transaction_type === 'XSuit' && tx.xsuit_transactions?.[0]) {
+    const xs = tx.xsuit_transactions[0];
+    draw('XSuit Name', 48, y, 9, bold);          draw(xs.xsuit_name || 'N/A', 180, y, 9, font);
+    draw('Gift Status', 330, y, 9, bold);
+    draw(xs.gift_status || 'N/A', 460, y, 9, bold, xs.gift_status === 'Delivered' ? GREEN : rgb(0.9,0.6,0.1));
+    y -= 18;
+    draw('Delivery Date', 48, y, 9, bold);       draw(formatDate(xs.delivery_date), 180, y, 9, font);
+    draw('Delivery Time', 330, y, 9, bold);      draw(xs.delivery_time || 'N/A', 460, y, 9, font);
+    y -= 18;
+    draw('Gifter IG Name', 48, y, 9, bold);      draw(xs.gifter_ig_name || 'N/A', 180, y, 9, font);
+    draw('Gifter IG ID', 330, y, 9, bold);       draw(String(xs.gifter_ig_id || 'N/A'), 460, y, 9, font);
+    y -= 18;
+    if (!isInternal) {
+      // Customer copy: show buyer details
+      draw('Buyer IG Name', 48, y, 9, bold);     draw(xs.buyer_ig_name || 'N/A', 180, y, 9, font);
+      draw('Buyer IG ID', 330, y, 9, bold);      draw(String(xs.buyer_ig_id || 'N/A'), 460, y, 9, font);
+      y -= 18;
+    }
+  } else if (tx.transaction_type === 'Supercar' && tx.supercar_transactions?.[0]) {
+    const sc = tx.supercar_transactions[0];
+    draw('Supercar Name', 48, y, 9, bold);       draw(sc.supercar_name || 'N/A', 180, y, 9, font);
+    draw('Card Tier', 330, y, 9, bold);          draw(sc.supercar_card_tier || 'N/A', 460, y, 9, font);
+    y -= 18;
+    draw('Gift Status', 48, y, 9, bold);
+    draw(sc.gift_status || 'N/A', 180, y, 9, bold, sc.gift_status === 'Delivered' ? GREEN : rgb(0.9,0.6,0.1));
+    draw('Delivery Date', 330, y, 9, bold);      draw(formatDate(sc.delivery_date), 460, y, 9, font);
+    y -= 18;
+    draw('Gifter IG Name', 48, y, 9, bold);      draw(sc.gifter_ig_name || 'N/A', 180, y, 9, font);
+    draw('Gifter IG ID', 330, y, 9, bold);       draw(String(sc.gifter_ig_id || 'N/A'), 460, y, 9, font);
+    y -= 18;
+    if (!isInternal) {
+      draw('Buyer IG Name', 48, y, 9, bold);     draw(sc.buyer_ig_name || 'N/A', 180, y, 9, font);
+      draw('Buyer IG ID', 330, y, 9, bold);      draw(String(sc.buyer_ig_id || 'N/A'), 460, y, 9, font);
+      y -= 18;
+    }
+  } else if (acc.product_link) {
+    draw('Product Reference', 330, y, 9, bold);  draw(acc.product_link.substring(0, 40), 460, y, 8, font);
   }
-  y -= 24;
+
+  y -= 10;
   line(y);
   y -= 18;
 

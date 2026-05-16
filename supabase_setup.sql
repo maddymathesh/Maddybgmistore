@@ -54,3 +54,44 @@ CREATE TABLE public.account_transactions (
 -- 3. Disable RLS for admin panel access
 ALTER TABLE public.transactions DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.account_transactions DISABLE ROW LEVEL SECURITY;
+
+-- =====================================================================
+-- XSUIT TRANSACTIONS TABLE
+-- Run this block to add XSuit Gift support
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS public.xsuit_transactions (
+  id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  transaction_ref   TEXT REFERENCES public.transactions(transaction_id) ON DELETE CASCADE,
+  xsuit_name        TEXT,
+  gifter_ig_name    TEXT,
+  gifter_ig_id      TEXT,
+  buyer_ig_name     TEXT,
+  buyer_ig_id       TEXT,
+  delivery_date     DATE,
+  delivery_time     TEXT,
+  gift_status       TEXT DEFAULT 'Pending',
+  created_at        TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.xsuit_transactions DISABLE ROW LEVEL SECURITY;
+
+-- =====================================================================
+-- SUPERCAR TRANSACTIONS TABLE
+-- Run this block to add Supercar Gift support
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS public.supercar_transactions (
+  id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  transaction_ref     TEXT REFERENCES public.transactions(transaction_id) ON DELETE CASCADE,
+  supercar_name       TEXT,
+  supercar_card_tier  TEXT,
+  gifter_ig_name      TEXT,
+  gifter_ig_id        TEXT,
+  buyer_ig_name       TEXT,
+  buyer_ig_id         TEXT,
+  delivery_date       DATE,
+  delivery_time       TEXT,
+  gift_status         TEXT DEFAULT 'Pending',
+  created_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.supercar_transactions DISABLE ROW LEVEL SECURITY;

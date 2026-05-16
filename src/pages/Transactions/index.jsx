@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTransactionStore } from '../../store/useTransactionStore';
 import PinLogin from './PinLogin';
 import Dashboard from './Dashboard';
 import TransactionsList from './TransactionsList';
 import CreateTransaction from './CreateTransaction';
+import CreateXsuitTransaction from './CreateXsuitTransaction';
+import CreateSupercarTransaction from './CreateSupercarTransaction';
+import CreateUcTransaction from './CreateUcTransaction';
 import {
   LayoutDashboard,
   Receipt,
@@ -46,13 +49,19 @@ export default function TransactionsLayout() {
       case 'dashboard':
         return <Dashboard />;
       case 'transactions':
-        return <TransactionsList onAddNew={() => setActiveTab('create_transaction')} />;
-      case 'create_transaction':
+        return <TransactionsList onAddNew={() => setActiveTab('create_account')} />;
+      case 'create_account':
         return <CreateTransaction onBack={() => setActiveTab('transactions')} />;
+      case 'create_xsuit':
+        return <CreateXsuitTransaction onBack={() => setActiveTab('transactions')} />;
+      case 'create_supercar':
+        return <CreateSupercarTransaction onBack={() => setActiveTab('transactions')} />;
+      case 'create_uc':
+        return <CreateUcTransaction onBack={() => setActiveTab('transactions')} />;
       default:
         return (
-          <div className="flex flex-col items-center justify-center h-full text-white/50">
-            <h2 className="text-2xl font-bold mb-2">Coming Soon</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '40vh', color: 'var(--muted)' }}>
+            <h2 style={{ fontFamily: 'var(--font-h)', fontSize: '24px', fontWeight: 700, marginBottom: '8px' }}>Coming Soon</h2>
             <p>This module is currently under development.</p>
           </div>
         );
@@ -109,15 +118,23 @@ export default function TransactionsLayout() {
             </p>
           </div>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-             {activeTab !== 'create_transaction' && activeTab !== 'dashboard' && (
-               <button 
-                onClick={() => setActiveTab('create_transaction')}
-                className="btn btn-gold"
-              >
-                <Plus size={16} /> New Transaction
-              </button>
-             )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {(activeTab === 'transactions') && (
+              <>
+                <button onClick={() => setActiveTab('create_account')} className="btn btn-gold" style={{ fontSize: '12px', padding: '10px 16px' }}>
+                  <Plus size={15} /> Account
+                </button>
+                <button onClick={() => setActiveTab('create_xsuit')} className="btn btn-outline" style={{ fontSize: '12px', padding: '10px 16px', borderColor: 'var(--border-gold)', color: 'var(--gold)' }}>
+                  <Plus size={15} /> XSuit Gift
+                </button>
+                <button onClick={() => setActiveTab('create_supercar')} className="btn btn-outline" style={{ fontSize: '12px', padding: '10px 16px', borderColor: 'rgba(239,68,68,0.4)', color: 'var(--red)' }}>
+                  <Plus size={15} /> Supercar Gift
+                </button>
+                <button onClick={() => setActiveTab('create_uc')} className="btn btn-outline" style={{ fontSize: '12px', padding: '10px 16px', borderColor: 'rgba(59,130,246,0.4)', color: '#3b82f6' }}>
+                  <Plus size={15} /> UC Order
+                </button>
+              </>
+            )}
             <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--gold), var(--orange))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000' }}>
               <ShieldCheck size={22} />
             </div>

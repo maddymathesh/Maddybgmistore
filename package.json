@@ -36,7 +36,7 @@
     "postcss": "^8.5.13",
     "postcss-preset-env": "^11.2.1",
     "tailwindcss": "^4.2.4",
-    "vite": "^8.0.13",
+    "vite": "^5.2.0",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-image-optimizer": "^2.0.3",
     "vite-plugin-pwa": "^1.2.0"

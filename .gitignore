@@ -3,7 +3,6 @@ node_modules/
 .pnp
 .pnp.js
 
-
 # ── Build Output ───────────────────────────────────────────────
 dist/
 dist-ssr/

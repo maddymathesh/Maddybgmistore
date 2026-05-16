@@ -92,82 +92,91 @@ export default function Buy() {
         </section>
 
         {/* ── OPTIONS GRID ─────────────────────────────────── */}
-        <section className="section" style={{ background: "radial-gradient(circle at bottom, rgba(255,215,0,0.02), transparent)" }}>
-          <div className="options-grid">
+        <section className="section">
+          <div style={{ 
+            display: "grid", 
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 420px), 1fr))", 
+            gap: "40px",
+            maxWidth: "1200px",
+            margin: "0 auto",
+            alignItems: "stretch" 
+          }}>
             {/* OPTION 1: READY SECURED ACCOUNTS */}
-            <div className="option-card-wrap">
-              <div className="option-header">
-                <span className="badge badge-blue">
+            <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px", flexWrap: "wrap" }}>
+                <span className="badge" style={{ background: "linear-gradient(135deg,#3b82f6,#6366f1)", border: "none" }}>
                   <Star size={11} fill="#fff" /> OPTION 1
                 </span>
-                <h2 className="stitle" style={{ margin: 0 }}>Ready to Play</h2>
+                <h2 className="stitle" style={{ margin: 0, fontSize: "clamp(24px,4vw,32px)" }}>Ready to Play</h2>
               </div>
-              <p className="ssub" style={{ marginBottom: "24px" }}>
+              <p className="ssub" style={{ marginBottom: "24px", minHeight: "44px" }}>
                 Browse our verified, ready-to-play accounts. New listings posted regularly. Buy instantly via WhatsApp or Telegram.
               </p>
 
-              <div className="glass-card option-card">
-                <ul className="steps-list-premium">
+              <div style={{ background: "var(--card)", border: "1px solid rgba(255,215,0,0.15)", borderRadius: "18px", padding: "32px", marginBottom: "24px", flex: 1, display: "flex", flexDirection: "column" }}>
+                <ol className="steps-list" style={{ flex: 1 }}>
                   {[
-                    [<Gamepad2 size={18} />, "Watch Preview", "Check Gun Labs, cars, and outfits."],
-                    [<Lock size={18} />, "Check Logins", "Verified and secured credentials."],
-                    [<ShoppingCart size={18} />, "Select & Buy", "Direct access to our official links."],
-                    [<MessageCircle size={18} />, "Book with 10%", "Secure your account instantly."],
-                    [<Banknote size={18} />, "Final Payment", "UPI, Bank, USDT, or Wise."],
-                    [<Shield size={18} />, "Instant Delivery", "Secure transfer to your details."],
+                    [<Gamepad2 size={16} />, "Watch the account Inventory video", "Check Gun Labs, cars, and outfits."],
+                    [<Lock size={16} />, "Check login & price details", "Verified and secured account credentials."],
+                    [<ShoppingCart size={16} />, "Click Buy Now button", "Direct access to WhatsApp or Telegram."],
+                    [<MessageCircle size={16} />, "Book with 10% Advance", "Secure your account instantly (Non-refundable)."],
+                    [<Banknote size={16} />, "Complete the Payment", "UPI, Bank Transfer, USDT, or Wise."],
+                    [<Shield size={16} />, "Fast Account Handover", "Secure transfer to your phone and email."],
                   ].map(([icon, title, desc], i) => (
-                    <li key={i} className="step-item">
-                      <div className="step-icon-wrap">{icon}</div>
-                      <div className="step-content">
-                        <strong>{title}</strong>
-                        <span>{desc}</span>
+                    <li key={i}>
+                      <div className="step-text">
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--gold)", marginBottom: "2px" }}>
+                          {icon} <strong style={{ fontSize: "15px" }}>{title}</strong>
+                        </div>
+                        <small style={{ display: "block", color: "var(--muted)", fontSize: "12px" }}>{desc}</small>
                       </div>
                     </li>
                   ))}
-                </ul>
-                <Link to="/readystocks" className="btn btn-gold" style={{ marginTop: "30px", width: "100%", height: "55px" }}>
-                  <Gamepad2 size={20} /> View Ready Stocks
+                </ol>
+                <Link to="/readystocks" className="btn btn-gold" style={{ marginTop: "24px", width: "100%", justifyContent: "center" }}>
+                  <Gamepad2 size={18} /> View Ready Stocks →
                 </Link>
               </div>
             </div>
 
             {/* OPTION 2: CUSTOM REQUIREMENT */}
-            <div className="option-card-wrap">
-              <div className="option-header">
-                <span className="badge badge-red">
+            <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px", flexWrap: "wrap" }}>
+                <span className="badge" style={{ background: "linear-gradient(135deg,#f97316,#ef4444)", border: "none" }}>
                   <Flame size={11} fill="#fff" /> OPTION 2
                 </span>
-                <h2 className="stitle" style={{ margin: 0 }}>Custom Order</h2>
+                <h2 className="stitle" style={{ margin: 0, fontSize: "clamp(24px,4vw,32px)" }}>Customized Account</h2>
               </div>
-              <p className="ssub" style={{ marginBottom: "24px" }}>
+              <p className="ssub" style={{ marginBottom: "24px", minHeight: "44px" }}>
                 Get a personalized BGMI account based on your exact budget and preferences.
               </p>
 
-              <div className="glass-card option-card">
-                <ul className="steps-list-premium">
+              <div style={{ background: "var(--card)", border: "1px solid rgba(255,215,0,0.15)", borderRadius: "18px", padding: "32px", marginBottom: "24px", flex: 1, display: "flex", flexDirection: "column" }}>
+                <ol className="steps-list" style={{ flex: 1 }}>
                   {[
-                    [<Target size={18} />, "Requirements", "Tell us exactly what you need."],
-                    [<Banknote size={18} />, "Search Fee", "Small advance for search results."],
-                    [<Gamepad2 size={18} />, "Review Options", "We find the best specification accounts."],
-                    [<MessageCircle size={18} />, "Finalize Deal", "Lock your choice with a deposit."],
-                    [<Banknote size={18} />, "Pay Balance", "Secure payment via trusted methods."],
-                    [<Shield size={18} />, "Full Handover", "Complete access transfer to you."],
+                    [<Target size={16} />, "Share Requirements & Budget", "Tell us exactly what you need."],
+                    [<Banknote size={16} />, "Pay Advance (₹500 - ₹1000)", "Wait 24-48 hours for our search results."],
+                    [<Gamepad2 size={16} />, "Review the Options", "We find the best accounts matching your specs."],
+                    [<MessageCircle size={16} />, "Finalize & Book", "Talk with us to lock your choice with 10%."],
+                    [<Banknote size={16} />, "Pay the Remaining Balance", "Secure payment via any trusted method."],
+                    [<Shield size={16} />, "Secure Account Delivery", "Full access transferred to your own details."],
                   ].map(([icon, title, desc], i) => (
-                    <li key={i} className="step-item">
-                      <div className="step-icon-wrap" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "#ef4444" }}>{icon}</div>
-                      <div className="step-content">
-                        <strong>{title}</strong>
-                        <span>{desc}</span>
+                    <li key={i}>
+                      <div className="step-text">
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--gold)", marginBottom: "2px" }}>
+                          {icon} <strong style={{ fontSize: "15px" }}>{title}</strong>
+                        </div>
+                        <small style={{ display: "block", color: "var(--muted)", fontSize: "12px" }}>{desc}</small>
                       </div>
                     </li>
                   ))}
-                </ul>
-                <div style={{ display: "flex", gap: "12px", marginTop: "30px", flexDirection: "column" }}>
-                  <a href="https://wa.me/+919025391516?text=Hi!%20I%20have%20a%20custom%20BGMI%20account%20requirement." target="_blank" rel="noreferrer" className="btn btn-green" style={{ width: "100%", height: "55px" }}>
-                    <MessageCircle size={20} /> Request on WhatsApp
+                </ol>
+                <div style={{ display: "flex", gap: "12px", marginTop: "24px", flexDirection: "column" }}>
+                  <a href="https://wa.me/+919025391516?text=Hi!%20I%20have%20a%20custom%20BGMI%20account%20requirement." target="_blank" rel="noreferrer" className="btn btn-green" style={{ width: "100%", justifyContent: "center" }}>
+                    <MessageCircle size={18} /> request On Whats app
                   </a>
-                  <a href="https://t.me/MBSxMADDY17" target="_blank" rel="noreferrer" className="btn btn-tg" style={{ width: "100%", height: "55px" }}>
-                    <Send size={20} /> Request on Telegram
+                  <a href="https://t.me/MBSxMADDY17" target="_blank" rel="noreferrer" className="btn" style={{ width: "100%", justifyContent: "center", display: "inline-flex", alignItems: "center", gap: "7px", background: "#229ED9", color: "#fff", border: "1px solid #229ED9", borderRadius: "12px", padding: "14px 24px", fontSize: "14px", fontWeight: 700 }}>
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" /></svg> request On Telegram
                   </a>
                 </div>
               </div>
@@ -175,81 +184,32 @@ export default function Buy() {
           </div>
         </section>
 
+
         {/* WHY TRUST US */}
-        <section className="section-alt" style={{ textAlign: "center" }}>
-          <h2 className="stitle" style={{ display:"inline-flex", alignItems:"center", gap:"15px", marginBottom: "40px" }}>
-            <Shield size={32} className="g-svg" /> Why Trust <span className="g">Maddy Store?</span>
+       <section className="section-alt">
+          <h2 className="stitle" style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+            <Shield size={28} style={{ color:"var(--gold)" }} /> Why Trust Maddy Store?
           </h2>
-          <div className="trust-grid">
-            {[
-              { t: "100% Trusted Deals", d: "Over 5000+ satisfied customers globally." },
-              { t: "Safe Transfers", d: "Proprietary security protocol for handovers." },
-              { t: "24/7 Support", d: "Dedicated team for after-sales assistance." },
-              { t: "Verified Listings", d: "Every account is manually checked by Maddy." }
-            ].map(w => (
-              <div key={w.t} className="trust-item card">
-                <CheckCircle size={24} color="var(--green)" />
-                <h4>{w.t}</h4>
-                <p>{w.d}</p>
+          <div className="why-grid" style={{ maxWidth: "800px" }}>
+            {["100% Trusted Deals", "Safe & Secure Transfers", "Verified Support Team", "Fast Delivery After Payment"].map(w => (
+              <div key={w} className="why-item">
+                <div className="why-check"><CheckCircle size={16} /></div>
+                <span>{w}</span>
               </div>
             ))}
           </div>
+          <div style={{ marginTop: "32px", display: "flex", gap: "14px", justifyContent: "center", flexWrap: "wrap" }}>
+            <a href="https://wa.me/+919025391516?text=Hi!%20I%20need%20help%20with%20buying%20a%20BGMI%20account." target="_blank" rel="noreferrer" className="btn btn-green"
+              style={{ display:"inline-flex", alignItems:"center", gap:"8px" }}>
+              <MessageCircle size={15} /> Contact Us on WhatsApp
+            </a>
+            <a href="https://t.me/MBSxMADDY17" target="_blank" rel="noreferrer" className="btn"
+              style={{ display:"inline-flex", alignItems:"center", gap:"8px", background: "#229ED9", color: "#fff", border: "1px solid #229ED9", borderRadius: "12px", padding: "14px 24px", fontSize: "14px", fontWeight: 700 }}>
+              <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" /></svg> Contact Us on Telegram
+            </a>
+          </div>
         </section>
 
-        <style>{`
-          .options-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 40px;
-            max-width: 1200px;
-            margin: 0 auto;
-          }
-          .option-card-wrap { display: flex; flex-direction: column; }
-          .option-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
-          .badge-blue { background: linear-gradient(135deg,#3b82f6,#6366f1) !important; border: none !important; }
-          .badge-red { background: linear-gradient(135deg,#f97316,#ef4444) !important; border: none !important; }
-          
-          .glass-card {
-            background: rgba(17, 21, 32, 0.6);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border-gold);
-            border-radius: 24px;
-            padding: 30px;
-            flex: 1;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-          }
-          
-          .steps-list-premium { list-style: none; padding: 0; }
-          .step-item { display: flex; gap: 18px; margin-bottom: 20px; align-items: center; }
-          .step-icon-wrap {
-            width: 44px; height: 44px; border-radius: 14px;
-            background: var(--gold-dim); border: 1px solid var(--gold-border);
-            color: var(--gold); display: flex; alignItems: center; justifyContent: center;
-            flex-shrink: 0;
-          }
-          .step-content { display: flex; flex-direction: column; }
-          .step-content strong { color: #fff; font-size: 15px; font-family: var(--font-h); letter-spacing: 0.5px; }
-          .step-content span { color: var(--muted); font-size: 12px; }
-
-          .trust-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px;
-            max-width: 1100px;
-            margin: 0 auto;
-          }
-          .trust-item { padding: 30px !important; text-align: center; }
-          .trust-item h4 { margin: 15px 0 8px; font-family: var(--font-h); font-size: 18px; color: #fff; }
-          .trust-item p { color: var(--muted); font-size: 13px; line-height: 1.5; }
-          
-          .g-svg { color: var(--gold); filter: drop-shadow(0 0 10px rgba(255,215,0,0.3)); }
-
-          @media (max-width: 600px) {
-            .options-grid { gap: 30px; }
-            .glass-card { padding: 25px 20px; }
-            .step-item { gap: 14px; }
-          }
-        `}</style>
       </div>
       <Footer />
     </>

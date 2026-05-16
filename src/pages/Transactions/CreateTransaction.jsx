@@ -1,254 +1,496 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft, UserSquare2, Gift, Car, Coins, Save, CheckCircle2 } from 'lucide-react';
-import { createTransaction } from '../../services/transactionService';
+import {
+  ArrowLeft, Save, CheckCircle2, ChevronRight, ChevronLeft,
+  Hash, Calendar, CreditCard, Link2, Key, Shield, DollarSign,
+  Phone, User, FileText, Download, FileOutput, Table
+} from 'lucide-react';
+import { createAccountTransaction, generateNextTransactionId } from '../../services/transactionService';
+import { generateCustomerPDF, generateInternalPDF } from '../../lib/pdfGenerator';
+import { exportToExcel } from '../../lib/excelExport';
 import toast from 'react-hot-toast';
 
-const TYPES = [
-  { id: 'Account', label: 'BGMI Account', icon: UserSquare2 },
-  { id: 'XSuit', label: 'XSuit Gift', icon: Gift },
-  { id: 'Supercar', label: 'Supercar Gift', icon: Car },
-  { id: 'UC', label: 'UC Transfer', icon: Coins }
+const STEPS = [
+  { id: 0, label: 'Deal Info', icon: Hash },
+  { id: 1, label: 'Login Details', icon: Key },
+  { id: 2, label: 'Guarantee', icon: Shield },
+  { id: 3, label: 'Financials', icon: DollarSign },
+  { id: 4, label: 'Contacts', icon: Phone },
 ];
 
-export default function CreateTransaction({ onBack }) {
-  const [selectedType, setSelectedType] = useState('Account');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+const inp = 'input';
+const sel = 'input'; // reuse same class for selects via select.input in CSS
 
-  const { register, handleSubmit, watch, reset, formState: { errors } } = useForm({
+export default function CreateTransaction({ onBack }) {
+  const [step, setStep] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [savedTransaction, setSavedTransaction] = useState(null);
+  const [nextId, setNextId] = useState('Loading...');
+
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
     defaultValues: {
-      transaction_id: `TXN-${Date.now().toString(36).toUpperCase()}`,
+      transaction_id: '',
       transaction_date: new Date().toISOString().split('T')[0],
-      payment_status: 'Pending',
-      mode_of_deal: 'Telegram',
+      mode_of_deal: 'WhatsApp',
+      mode_of_payment: 'Full Payment via UPI / Bank Transfer',
+      payment_status: 'Fully Paid',
+      secondary_login_provider: 'Null',
+      guarantee_plan: 'Not Applicable',
+      primary_mothermail_status: 'Given To Customer',
+      secondary_mothermail_status: 'Given To Customer',
+      primary_guarantee_void: 'date',
+      secondary_guarantee_void: 'date',
+      owner_phone: '+91',
+      seller_phone: '+91',
+      reseller_phone: '+91',
+      buyer_phone: '+91',
     }
   });
 
-  const ownerPrice = watch('owner_price') || 0;
-  const soldPrice = watch('sold_price') || 0;
-  const profit = Number(soldPrice) - Number(ownerPrice);
+  useEffect(() => {
+    generateNextTransactionId()
+      .then(id => { setNextId(id); setValue('transaction_id', id); })
+      .catch(() => { setNextId('MBSA403'); setValue('transaction_id', 'MBSA403'); });
+
+  }, []);
+
+  const costPrice = parseFloat(watch('owner_price')) || 0;
+  const soldPrice = parseFloat(watch('sold_price')) || 0;
+  const profit = soldPrice - costPrice;
+  const primaryVoid = watch('primary_guarantee_void');
+  const secondaryVoid = watch('secondary_guarantee_void');
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
-      // Split data into main table and detail table
       const mainData = {
         transaction_id: data.transaction_id,
-        transaction_type: selectedType,
-        mode_of_deal: data.mode_of_deal,
+        transaction_type: 'Account',
         transaction_date: data.transaction_date,
-        owner_price: Number(data.owner_price),
-        sold_price: Number(data.sold_price),
+        mode_of_deal: data.mode_of_deal,
+        mode_of_payment: data.mode_of_payment,
+        payment_status: data.payment_status,
+        owner_price: costPrice,
+        sold_price: soldPrice,
         profit: profit,
         buyer_phone: data.buyer_phone,
-        payment_status: data.payment_status,
+        owner_phone: data.owner_phone,
+        seller_phone: data.seller_phone,
+        reseller_phone: data.reseller_phone,
       };
-
-      const detailData = { ...data };
-      // Remove main table fields from detail data to avoid duplication/errors
-      Object.keys(mainData).forEach(key => delete detailData[key]);
-
-      await createTransaction(selectedType, mainData, detailData);
-      toast.success(`${selectedType} Transaction created successfully!`);
-      onBack();
-    } catch (error) {
-      console.error(error);
-      toast.error(error.message || 'Failed to create transaction');
+      const detailData = {
+        product_link: data.product_link,
+        primary_login_provider: data.primary_login_provider,
+        primary_credentials: data.primary_credentials,
+        secondary_login_provider: data.secondary_login_provider,
+        secondary_credentials: data.secondary_credentials,
+        primary_mothermail_status: data.primary_mothermail_status,
+        secondary_mothermail_status: data.secondary_mothermail_status,
+        guarantee_plan: data.guarantee_plan,
+        primary_unlink_date: data.primary_unlink_date || null,
+        secondary_unlink_date: data.secondary_unlink_date || null,
+        primary_guarantee_void: data.primary_guarantee_void,
+        primary_guarantee_void_date: data.primary_guarantee_void === 'date' ? (data.primary_guarantee_void_date || null) : null,
+        secondary_guarantee_void: data.secondary_guarantee_void,
+        secondary_guarantee_void_date: data.secondary_guarantee_void === 'date' ? (data.secondary_guarantee_void_date || null) : null,
+        owner_proof_link: data.owner_proof_link,
+      };
+      const saved = await createAccountTransaction(mainData, detailData);
+      setSavedTransaction({ ...saved, ...mainData, account_transactions: [detailData] });
+      toast.success(`Transaction ${data.transaction_id} saved successfully!`);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to save transaction. Check console for details.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const inputClass = "input";
-  const labelClass = "slabel";
+  const Label = ({ children }) => (
+    <label className="slabel" style={{ display: 'block', marginBottom: '6px' }}>{children}</label>
+  );
+
+  const Field = ({ children, span }) => (
+    <div style={{ gridColumn: span ? '1 / -1' : undefined }}>{children}</div>
+  );
+
+  const grid = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px' };
+
+  // ── SUCCESS SCREEN ────────────────────────────────────────────────────────
+  if (savedTransaction) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.97 }}
+        animate={{ opacity: 1, scale: 1 }}
+        style={{ maxWidth: '700px', margin: '0 auto', textAlign: 'center' }}
+      >
+        <div className="card" style={{ padding: '48px 40px' }}>
+          <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--gold), var(--orange))', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', color: '#000' }}>
+            <CheckCircle2 size={36} />
+          </div>
+          <h2 style={{ fontFamily: 'var(--font-h)', fontSize: '28px', fontWeight: 700, marginBottom: '8px' }}>
+            Transaction Saved!
+          </h2>
+          <div style={{ display: 'inline-block', background: 'var(--gold-dim)', border: '1px solid var(--border-gold)', borderRadius: '8px', padding: '8px 20px', marginBottom: '32px' }}>
+            <span style={{ fontFamily: 'monospace', fontSize: '18px', fontWeight: 700, color: 'var(--gold)' }}>
+              #{savedTransaction.transaction_id}
+            </span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '32px' }}>
+            {[
+              { label: 'Sold Price', val: `₹${Number(savedTransaction.sold_price).toLocaleString('en-IN')}`, color: 'var(--green)' },
+              { label: 'Cost Price', val: `₹${Number(savedTransaction.owner_price).toLocaleString('en-IN')}`, color: 'var(--muted)' },
+              { label: 'Profit', val: `₹${Number(savedTransaction.profit).toLocaleString('en-IN')}`, color: profit >= 0 ? 'var(--green)' : 'var(--red)' },
+            ].map(s => (
+              <div key={s.label} style={{ background: 'var(--bg2)', borderRadius: '12px', padding: '16px', border: '1px solid var(--border)' }}>
+                <div style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>{s.label}</div>
+                <div style={{ fontSize: '20px', fontWeight: 700, color: s.color }}>{s.val}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '32px' }}>
+            <button className="btn btn-outline" onClick={() => generateCustomerPDF(savedTransaction)} style={{ flexDirection: 'column', gap: '6px', padding: '16px 12px' }}>
+              <FileText size={22} style={{ color: 'var(--gold)' }} />
+              <span style={{ fontSize: '12px' }}>Customer PDF</span>
+            </button>
+            <button className="btn btn-outline" onClick={() => generateInternalPDF(savedTransaction)} style={{ flexDirection: 'column', gap: '6px', padding: '16px 12px' }}>
+              <FileOutput size={22} style={{ color: 'var(--orange)' }} />
+              <span style={{ fontSize: '12px' }}>Internal PDF</span>
+            </button>
+            <button className="btn btn-outline" onClick={() => exportToExcel([savedTransaction], savedTransaction.transaction_id)} style={{ flexDirection: 'column', gap: '6px', padding: '16px 12px' }}>
+              <Table size={22} style={{ color: 'var(--green)' }} />
+              <span style={{ fontSize: '12px' }}>Export Excel</span>
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+            <button className="btn btn-outline" onClick={() => { setSavedTransaction(null); setStep(0); generateNextTransactionId().then(id => setValue('transaction_id', id)); }}>
+              + New Transaction
+            </button>
+            <button className="btn btn-gold" onClick={onBack}>
+              Back to Transactions
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // ── STEP CONTENT ─────────────────────────────────────────────────────────
+  const renderStep = () => {
+    switch (step) {
+      // ── STEP 0: Deal Info ─────────────────────────────────────────────────
+      case 0:
+        return (
+          <div style={grid}>
+            <Field>
+              <Label>Transaction ID</Label>
+              <div className={inp} style={{ background: 'var(--bg2)', color: 'var(--gold)', fontFamily: 'monospace', fontWeight: 700, fontSize: '16px' }}>
+                #{nextId}
+                <input type="hidden" {...register('transaction_id')} />
+              </div>
+            </Field>
+            <Field>
+              <Label>Transaction Date</Label>
+              <input type="date" className={inp} {...register('transaction_date', { required: true })} />
+            </Field>
+            <Field>
+              <Label>Mode of Deal</Label>
+              <select className={inp} {...register('mode_of_deal')}>
+                {['WhatsApp', 'Telegram', 'Instagram', 'Face to Face'].map(o => <option key={o}>{o}</option>)}
+              </select>
+            </Field>
+            <Field>
+              <Label>Mode of Payment</Label>
+              <select className={inp} {...register('mode_of_payment')}>
+                {[
+                  'Full Payment via UPI / Bank Transfer',
+                  'Full Payment in Cash',
+                  'Half Payment in UPI / Bank Transfer & Half in Cash',
+                  'Easy Monthly Instalment (EMI)',
+                ].map(o => <option key={o}>{o}</option>)}
+              </select>
+            </Field>
+            <Field>
+              <Label>Payment Status</Label>
+              <select className={inp} {...register('payment_status')}>
+                {['Fully Paid', 'Pending', 'Pending EMI'].map(o => <option key={o}>{o}</option>)}
+              </select>
+            </Field>
+            <Field>
+              <Label>Product / Listing Link</Label>
+              <input className={inp} placeholder="PlayerAuctions / Drive / Image link..." {...register('product_link')} />
+            </Field>
+          </div>
+        );
+
+      // ── STEP 1: Login Details ─────────────────────────────────────────────
+      case 1:
+        return (
+          <div style={{ display: 'grid', gap: '28px' }}>
+            {/* Primary */}
+            <div style={{ background: 'var(--bg2)', border: '1px solid var(--border-gold)', borderRadius: 'var(--radius)', padding: '24px' }}>
+              <p className="slabel" style={{ marginBottom: '16px' }}>🔑 Primary Login</p>
+              <div style={grid}>
+                <Field>
+                  <Label>Primary Login Provider</Label>
+                  <select className={inp} {...register('primary_login_provider')}>
+                    {['Facebook', 'X (Twitter)', 'Google PlayGames', 'Apple ID', 'Game Center', 'WhatsApp'].map(o => <option key={o}>{o}</option>)}
+                  </select>
+                </Field>
+                <Field>
+                  <Label>Primary Mothermail Status</Label>
+                  <select className={inp} {...register('primary_mothermail_status')}>
+                    {['Given To Customer', 'Not Given To Customer'].map(o => <option key={o}>{o}</option>)}
+                  </select>
+                </Field>
+                <Field span>
+                  <Label>Primary Login Credentials</Label>
+                  <textarea className={inp} rows={4} placeholder={"Email / Username\nPassword\nRecovery Details"} {...register('primary_credentials')} style={{ resize: 'vertical', minHeight: '90px' }} />
+                </Field>
+              </div>
+            </div>
+
+            {/* Secondary */}
+            <div style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '24px' }}>
+              <p className="slabel" style={{ marginBottom: '16px' }}>🔗 Secondary Login</p>
+              <div style={grid}>
+                <Field>
+                  <Label>Secondary Login Provider</Label>
+                  <select className={inp} {...register('secondary_login_provider')}>
+                    {['Null (Single Login Only)', 'Facebook', 'X (Twitter)', 'Google PlayGames', 'Apple ID', 'Game Center', 'WhatsApp'].map(o => <option key={o}>{o}</option>)}
+                  </select>
+                </Field>
+                <Field>
+                  <Label>Secondary Mothermail Status</Label>
+                  <select className={inp} {...register('secondary_mothermail_status')}>
+                    {['Given To Customer', 'Not Given To Customer'].map(o => <option key={o}>{o}</option>)}
+                  </select>
+                </Field>
+                <Field span>
+                  <Label>Secondary Login Credentials</Label>
+                  <textarea className={inp} rows={4} placeholder={"Email / Username\nPassword\nRecovery Details"} {...register('secondary_credentials')} style={{ resize: 'vertical', minHeight: '90px' }} />
+                </Field>
+              </div>
+            </div>
+          </div>
+        );
+
+      // ── STEP 2: Guarantee ─────────────────────────────────────────────────
+      case 2:
+        return (
+          <div style={{ display: 'grid', gap: '28px' }}>
+            <Field span>
+              <Label>Guarantee Plan</Label>
+              <select className={inp} {...register('guarantee_plan')}>
+                {[
+                  'Not Applicable',
+                  '37 Days For Primary Login',
+                  '22 Days For Primary Login',
+                  '37 Days For Secondary Login',
+                  '22 Days For Secondary Login',
+                  '75 Days For Primary & Secondary Logins',
+                ].map(o => <option key={o}>{o}</option>)}
+              </select>
+            </Field>
+
+            {/* Primary Dates */}
+            <div style={{ background: 'var(--bg2)', border: '1px solid var(--border-gold)', borderRadius: 'var(--radius)', padding: '24px' }}>
+              <p className="slabel" style={{ marginBottom: '16px' }}>Primary Login — Dates</p>
+              <div style={grid}>
+                <Field>
+                  <Label>Primary Unlink Eligible Date</Label>
+                  <input type="date" className={inp} {...register('primary_unlink_date')} />
+                </Field>
+                <Field>
+                  <Label>Primary Guarantee Void Date</Label>
+                  <div style={{ display: 'grid', gap: '8px' }}>
+                    <select className={inp} {...register('primary_guarantee_void')}>
+                      <option value="date">Set a Date</option>
+                      <option value="no_guarantee">No Guarantee</option>
+                    </select>
+                    {primaryVoid === 'date' && <input type="date" className={inp} {...register('primary_guarantee_void_date')} />}
+                  </div>
+                </Field>
+              </div>
+            </div>
+
+            {/* Secondary Dates */}
+            <div style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '24px' }}>
+              <p className="slabel" style={{ marginBottom: '16px' }}>Secondary Login — Dates</p>
+              <div style={grid}>
+                <Field>
+                  <Label>Secondary Unlink Eligible Date</Label>
+                  <input type="date" className={inp} {...register('secondary_unlink_date')} />
+                </Field>
+                <Field>
+                  <Label>Secondary Guarantee Void Date</Label>
+                  <div style={{ display: 'grid', gap: '8px' }}>
+                    <select className={inp} {...register('secondary_guarantee_void')}>
+                      <option value="date">Set a Date</option>
+                      <option value="no_guarantee">No Guarantee</option>
+                    </select>
+                    {secondaryVoid === 'date' && <input type="date" className={inp} {...register('secondary_guarantee_void_date')} />}
+                  </div>
+                </Field>
+              </div>
+            </div>
+          </div>
+        );
+
+      // ── STEP 3: Financials ────────────────────────────────────────────────
+      case 3:
+        return (
+          <div style={grid}>
+            <Field>
+              <Label>Cost Price (₹)</Label>
+              <input type="number" className={inp} placeholder="0.00" {...register('owner_price')} />
+            </Field>
+            <Field>
+              <Label>Sold Price (₹)</Label>
+              <input type="number" className={inp} placeholder="0.00" {...register('sold_price')} />
+            </Field>
+            <Field span>
+              <Label>Net Profit (Auto-Calculated)</Label>
+              <div className={inp} style={{ background: profit >= 0 ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)', borderColor: profit >= 0 ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)', color: profit >= 0 ? 'var(--green)' : 'var(--red)', fontWeight: 700, fontSize: '22px' }}>
+                ₹ {profit.toLocaleString('en-IN')}
+              </div>
+            </Field>
+            <Field span>
+              <Label>Account Owner Proof Link (Drive / Screenshot)</Label>
+              <input className={inp} placeholder="https://drive.google.com/..." {...register('owner_proof_link')} />
+            </Field>
+          </div>
+        );
+
+      // ── STEP 4: Contacts ──────────────────────────────────────────────────
+      case 4:
+        return (
+          <div style={grid}>
+            {[
+              { label: 'Account Owner Phone', key: 'owner_phone' },
+              { label: 'Seller Phone Number', key: 'seller_phone' },
+              { label: 'Reseller Phone Number', key: 'reseller_phone' },
+              { label: 'Buyer Phone Number', key: 'buyer_phone' },
+            ].map(({ label, key }) => (
+              <Field key={key}>
+                <Label>{label}</Label>
+                <input className={inp} placeholder="+91 00000 00000 or Void" {...register(key)} />
+              </Field>
+            ))}
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'grid', gap: '24px' }}>
-      <button 
-        onClick={onBack}
-        className="btn-outline"
-        style={{ padding: '8px 16px', fontSize: '12px', width: 'fit-content' }}
-      >
-        <ArrowLeft size={16} /> Back to Transactions
+    <div style={{ maxWidth: '900px', margin: '0 auto', display: 'grid', gap: '28px' }}>
+      {/* Back */}
+      <button onClick={onBack} className="btn btn-outline" style={{ width: 'fit-content', padding: '8px 16px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <ArrowLeft size={15} /> Back to Transactions
       </button>
 
-      {/* Type Selector */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
-        {TYPES.map(type => {
-          const Icon = type.icon;
-          const isActive = selectedType === type.id;
+      {/* Header card */}
+      <div className="card" style={{ padding: '24px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div>
+          <h2 style={{ fontFamily: 'var(--font-h)', fontSize: '22px', fontWeight: 700, marginBottom: '2px' }}>
+            New Account Transaction
+          </h2>
+          <p style={{ color: 'var(--muted)', fontSize: '13px' }}>BGMI Account Sale — Step {step + 1} of {STEPS.length}</p>
+        </div>
+        <div style={{ fontFamily: 'monospace', fontSize: '20px', fontWeight: 700, color: 'var(--gold)', background: 'var(--gold-dim)', padding: '8px 18px', borderRadius: '8px', border: '1px solid var(--border-gold)' }}>
+          #{nextId}
+        </div>
+      </div>
+
+      {/* Step Navigator */}
+      <div style={{ display: 'flex', gap: '0', background: 'var(--card)', borderRadius: 'var(--radius)', border: '1px solid var(--border-gold)', overflow: 'hidden' }}>
+        {STEPS.map((s, i) => {
+          const Icon = s.icon;
+          const isActive = step === i;
+          const isDone = step > i;
           return (
             <button
-              key={type.id}
-              onClick={() => { setSelectedType(type.id); reset({ transaction_id: `TXN-${Date.now().toString(36).toUpperCase()}`, transaction_date: new Date().toISOString().split('T')[0], payment_status: 'Pending', mode_of_deal: 'Telegram' }); }}
-              className="card"
-              style={{ 
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-                borderColor: isActive ? 'var(--gold)' : 'var(--border-gold)',
-                background: isActive ? 'var(--gold-dim)' : 'var(--card)',
-                padding: '24px',
+              key={s.id}
+              onClick={() => setStep(i)}
+              style={{
+                flex: 1, padding: '14px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
+                background: isActive ? 'var(--gold-dim)' : 'transparent',
+                borderRight: i < STEPS.length - 1 ? '1px solid var(--border-gold)' : 'none',
+                cursor: 'pointer', transition: 'all .2s',
+                borderBottom: isActive ? '2px solid var(--gold)' : '2px solid transparent',
               }}
             >
-              {isActive && <CheckCircle2 size={16} style={{ position: 'absolute', top: '12px', right: '12px', color: 'var(--gold)' }} />}
-              <div style={{ width: '48px', height: '48px', borderRadius: '50%', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: isActive ? 'var(--gold)' : 'var(--bg2)', color: isActive ? '#000' : 'var(--muted)' }}>
-                <Icon size={24} />
-              </div>
-              <span style={{ fontSize: '14px', fontWeight: 700, color: isActive ? 'var(--gold)' : 'var(--muted)' }}>{type.label}</span>
+              <Icon size={16} style={{ color: isDone ? 'var(--green)' : isActive ? 'var(--gold)' : 'var(--muted)' }} />
+              <span style={{ fontSize: '11px', fontWeight: 600, color: isDone ? 'var(--green)' : isActive ? 'var(--gold)' : 'var(--muted)', letterSpacing: '0.5px' }}>
+                {isDone ? '✓ ' : ''}{s.label}
+              </span>
             </button>
           );
         })}
       </div>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit(onSubmit)} className="card" style={{ padding: '32px' }}>
-        <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '24px', borderBottom: '1px solid var(--border)', paddingBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span>{selectedType} Details</span>
-          <span style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--muted)' }}>{watch('transaction_id')}</span>
-        </h3>
+      {/* Form card */}
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={step}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.18 }}
+            className="card"
+            style={{ padding: '32px' }}
+          >
+            <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '24px', paddingBottom: '14px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {React.createElement(STEPS[step].icon, { size: 18, style: { color: 'var(--gold)' } })}
+              {STEPS[step].label}
+            </h3>
+            {renderStep()}
+          </motion.div>
+        </AnimatePresence>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
-          {/* Common Fields */}
-          <div>
-            <label className={labelClass}>Transaction Date</label>
-            <input type="date" {...register('transaction_date', { required: true })} className={inputClass} />
-          </div>
-          <div>
-            <label className={labelClass}>Mode of Deal</label>
-            <select {...register('mode_of_deal')} className={inputClass}>
-              <option value="Telegram">Telegram</option>
-              <option value="WhatsApp">WhatsApp</option>
-              <option value="Instagram">Instagram</option>
-              <option value="Direct">Direct</option>
-            </select>
-          </div>
-          <div>
-            <label className={labelClass}>Payment Status</label>
-            <select {...register('payment_status')} className={inputClass}>
-              <option value="Pending">Pending</option>
-              <option value="Paid">Paid</option>
-            </select>
-          </div>
-
-          <div style={{ gridColumn: '1 / -1', height: '1px', background: 'var(--border)', margin: '8px 0' }} />
-
-          {/* Dynamic Fields based on Type */}
-          {selectedType === 'Account' && (
-            <>
-              <div>
-                <label className={labelClass}>Product Link</label>
-                <input type="url" {...register('product_link')} placeholder="https://" className={inputClass} />
-              </div>
-              <div>
-                <label className={labelClass}>Primary Login</label>
-                <select {...register('primary_login_provider')} className={inputClass}>
-                  <option value="Facebook">Facebook</option>
-                  <option value="Google PlayGames">Google PlayGames</option>
-                  <option value="Apple ID">Apple ID</option>
-                  <option value="Game Center">Game Center</option>
-                  <option value="WhatsApp">WhatsApp</option>
-                </select>
-              </div>
-              <div>
-                <label className={labelClass}>Secondary Login</label>
-                <select {...register('secondary_login_provider')} className={inputClass}>
-                  <option value="Null">Null (Single Login)</option>
-                  <option value="Facebook">Facebook</option>
-                  <option value="Google PlayGames">Google PlayGames</option>
-                  <option value="Apple ID">Apple ID</option>
-                  <option value="Game Center">Game Center</option>
-                  <option value="WhatsApp">WhatsApp</option>
-                </select>
-              </div>
-              <div>
-                <label className={labelClass}>Mothermail Status</label>
-                <select {...register('mothermail_status')} className={inputClass}>
-                  <option value="Given">Given</option>
-                  <option value="Not Given">Not Given</option>
-                </select>
-              </div>
-              <div>
-                <label className={labelClass}>Guarantee Plan</label>
-                <select {...register('guarantee_plan')} className={inputClass}>
-                  <option value="Single & Safe Login">Single & Safe Login</option>
-                  <option value="37 Days Secondary">37 Days Secondary</option>
-                  <option value="22 Days Secondary">22 Days Secondary</option>
-                  <option value="75 Days Both">75 Days Both</option>
-                </select>
-              </div>
-              <div>
-                <label className={labelClass}>Unlink Eligible Date</label>
-                <input type="date" {...register('unlink_eligible_date')} className={inputClass} />
-              </div>
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label className={labelClass}>Credentials (Email:Password:Recovery)</label>
-                <textarea {...register('credentials')} rows={3} className={inputClass} placeholder="user@gmail.com:pass123:recov@gmail.com" />
-              </div>
-            </>
-          )}
-
-          {selectedType === 'XSuit' && (
-            <>
-              <div><label className={labelClass}>Owner IG ID</label><input {...register('owner_ig_id')} className={inputClass} /></div>
-              <div><label className={labelClass}>Owner IG Name</label><input {...register('owner_ig_name')} className={inputClass} /></div>
-              <div><label className={labelClass}>Delivery Date</label><input type="date" {...register('delivery_date')} className={inputClass} /></div>
-              <div><label className={labelClass}>Buyer IG ID</label><input {...register('buyer_ig_id')} className={inputClass} /></div>
-              <div><label className={labelClass}>Buyer IG Name</label><input {...register('buyer_ig_name')} className={inputClass} /></div>
-            </>
-          )}
-
-          {selectedType === 'Supercar' && (
-            <>
-              <div><label className={labelClass}>Owner IG ID</label><input {...register('owner_ig_id')} className={inputClass} /></div>
-              <div><label className={labelClass}>Owner IG Name</label><input {...register('owner_ig_name')} className={inputClass} /></div>
-              <div><label className={labelClass}>Delivery Date</label><input type="date" {...register('delivery_date')} className={inputClass} /></div>
-              <div><label className={labelClass}>Buyer IG ID</label><input {...register('buyer_ig_id')} className={inputClass} /></div>
-              <div><label className={labelClass}>Buyer IG Name</label><input {...register('buyer_ig_name')} className={inputClass} /></div>
-            </>
-          )}
-
-          {selectedType === 'UC' && (
-            <>
-              <div><label className={labelClass}>UC Quantity</label><input type="number" {...register('uc_quantity')} className={inputClass} /></div>
-              <div><label className={labelClass}>BGMI ID</label><input {...register('bgmi_id')} className={inputClass} /></div>
-              <div><label className={labelClass}>Delivery Date</label><input type="date" {...register('delivery_date')} className={inputClass} /></div>
-            </>
-          )}
-
-          <div style={{ gridColumn: '1 / -1', height: '1px', background: 'var(--border)', margin: '8px 0' }} />
-
-          {/* Financials & Contacts */}
-          <div>
-            <label className={labelClass}>Owner Price (₹)</label>
-            <input type="number" {...register('owner_price', { required: true })} className={inputClass} />
-          </div>
-          <div>
-            <label className={labelClass}>Sold Price (₹)</label>
-            <input type="number" {...register('sold_price', { required: true })} className={inputClass} />
-          </div>
-          <div>
-            <label className={labelClass}>Profit (₹)</label>
-            <div className="input" style={{ background: 'var(--gold-dim)', borderColor: 'var(--gold)', color: 'var(--gold)', fontWeight: 700 }}>
-              ₹{profit.toLocaleString()}
-            </div>
-          </div>
-          
-          <div><label className={labelClass}>Buyer Phone</label><input {...register('buyer_phone', { required: true })} className={inputClass} placeholder="+91..." /></div>
-          {selectedType === 'Account' && (
-            <>
-              <div><label className={labelClass}>Owner Phone</label><input {...register('owner_phone')} className={inputClass} /></div>
-              <div><label className={labelClass}>Reseller Phone</label><input {...register('reseller_phone')} className={inputClass} /></div>
-            </>
-          )}
-        </div>
-
-        <div style={{ marginTop: '32px', paddingTop: '24px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: '16px' }}>
-          <button type="button" onClick={onBack} className="btn btn-outline">
-            Cancel
+        {/* Navigation */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px' }}>
+          <button
+            type="button"
+            onClick={() => setStep(s => Math.max(0, s - 1))}
+            disabled={step === 0}
+            className="btn btn-outline"
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: step === 0 ? 0.4 : 1 }}
+          >
+            <ChevronLeft size={16} /> Previous
           </button>
-          <button type="submit" disabled={isSubmitting} className="btn btn-gold">
-            {isSubmitting ? 'Saving...' : <><Save size={18} /> Complete Transaction</>}
-          </button>
+
+          {step < STEPS.length - 1 ? (
+            <button
+              type="button"
+              onClick={() => setStep(s => Math.min(STEPS.length - 1, s + 1))}
+              className="btn btn-gold"
+              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              Next Step <ChevronRight size={16} />
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="btn btn-gold"
+              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              {isSubmitting ? (
+                <><span style={{ width: '16px', height: '16px', border: '2px solid rgba(0,0,0,0.3)', borderTopColor: '#000', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite' }} /> Saving...</>
+              ) : (
+                <><Save size={16} /> Save Transaction</>
+              )}
+            </button>
+          )}
         </div>
       </form>
     </div>

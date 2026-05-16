@@ -12,7 +12,8 @@ import { useTransactionStore } from "../../store/useTransactionStore";
 import { useRef } from "react";
 import toast from "react-hot-toast";
 import Navbar from "../../components/Navbar";
-import { LogOut, Plus, Trash2, Pencil, Star, Copy, Users, TrendingUp, DollarSign, Camera, Coins, Zap, Car } from "lucide-react";
+import { LogOut, Plus, Trash2, Pencil, Star, Copy, Users, TrendingUp, DollarSign, Camera, Coins, Zap, Car, Clock, ShieldCheck, User as UserIcon, Tag, Hash } from "lucide-react";
+import { generateNextTransactionId, generateNextXsuitId, generateNextSupercarId, generateNextUcId } from "../../services/transactionService";
 import { db } from "../../firebase";
 import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, orderBy } from "firebase/firestore";
 
@@ -25,28 +26,36 @@ const ls = {
 
 const LOGIN_OPTIONS = ["X", "Facebook", "Google Playgames", "Apple ID", "Game Center", "Whats App"];
 const GUARANTEE_OPTIONS = [
-  "37 days unlink Garuntee for Secondary Login",
-  "22 Days Unlink Garuntee for Secondary Login",
-  "75 Days Unlink Garuntee For Both logins",
-  "Single & Safe Login"
+  "Not Applicable",
+  "37 Days For Primary Login",
+  "22 Days For Primary Login",
+  "37 Days For Secondary Login",
+  "22 Days For Secondary Login",
+  "75 Days For Primary and Secondary Logins"
 ];
+
+const PROMO_TAGS = ["None", "Best Value", "Deal Of The Day", "Limited Time Deal"];
+
+const YEARS = Array.from({ length: 16 }, (_, i) => (2020 + i).toString());
+const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 // ── Empty form defaults ───────────────────────────────────────
 const EMPTY_PRODUCT = {
   title: "", description: "", price: "",
   category: "Budget", status: "available",
-  youtubeUrl: "", 
+  youtubeUrl: "",
   primaryLogin: "X",
   secondaryLogin: "null",
-  unlinkGuarantee: "Single & Safe Login"
+  unlinkGuarantee: "Not Applicable",
+  tag: "None"
 };
 const EMPTY_REVIEW = {
   name: "", text: "", stars: 5,
   image_url: "", tracking_id: "",
 };
-const EMPTY_UC = { uc_amount: "", bonus_uc: "", market_price: "", offer_price: "", status: "available", method: "view_login" };
-const EMPTY_XSUIT = { name: "", price: "", image_url: "" };
-const EMPTY_CAR = { name: "", price: "", image_url: "", type: "One-Card" };
+const EMPTY_UC = { uc_amount: "", bonus_uc: "", market_price: "", offer_price: "", status: "available", method: "view_login", tag: "None" };
+const EMPTY_XSUIT = { name: "", price: "", image_url: "", tag: "None" };
+const EMPTY_CAR = { name: "", price: "", image_url: "", type: "One-Card", tag: "None" };
 const EMPTY_SALE = {
   transaction_id: "", product_id: "", customer_id: "",
   owner_price: "", sold_price: "", profit: 0,
@@ -90,13 +99,29 @@ export default function AdminDashboard() {
   const [approvingId, setApprovingId] = useState(null);
 
   const [proofs, setProofs] = useState([]);
-  const [proofForm, setProofForm] = useState({ title: "", month: "May 2026" });
+  const [proofForm, setProofForm] = useState({ 
+    title: "", 
+    month: new Date().toLocaleString('en-US', { month: 'long' }), 
+    year: new Date().getFullYear().toString() 
+  });
   const [savingProof, setSavingProof] = useState(false);
   const [proofImage, setProofImage] = useState(null);
 
   const [paymentLinks, setPaymentLinks] = useState([]);
   const [generatingLink, setGeneratingLink] = useState(false);
-  const [paymentForm, setPaymentForm] = useState({ customer_name: "", amount: "", note: "", expires_in: "24", pin: "9025" });
+  const [paymentForm, setPaymentForm] = useState({ transaction_id: "", type: "Account", customer_name: "", amount: "", note: "", expires_in: "0.166", pin: "" });
+  const [suggestingId, setSuggestingId] = useState(false);
+  const [paymentSettings, setPaymentSettings] = useState({
+    payee_name: "",
+    payee_upi_id: "",
+    bank_name: "",
+    account_type: "SAVINGS ACCOUNT",
+    account_holder: "",
+    account_number: "",
+    ifsc_code: "",
+    branch: ""
+  });
+  const [savingSettings, setSavingSettings] = useState(false);
 
   const [ucPrices, setUcPrices] = useState([]);
   const [ucForm, setUcForm] = useState(EMPTY_UC);
@@ -147,13 +172,13 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     try {
       const [
-        { data: p }, 
-        { data: r }, 
-        { data: pl }, 
-        { data: pr }, 
-        { data: uc }, 
-        { data: xs }, 
-        { data: sc }, 
+        { data: p },
+        { data: r },
+        { data: pl },
+        { data: pr },
+        { data: uc },
+        { data: xs },
+        { data: sc },
         { data: s }
       ] = await Promise.all([
         supabase.from('products').select('*').order('created_at', { ascending: false }),
@@ -163,7 +188,8 @@ export default function AdminDashboard() {
         supabase.from('uc_prices').select('*').order('offer_price', { ascending: true }),
         supabase.from('xsuit_gifts').select('*').order('created_at', { ascending: false }),
         supabase.from('supercar_gifts').select('*').order('created_at', { ascending: false }),
-        supabase.from('sales').select('*, products(*)').order('deal_date', { ascending: false })
+        supabase.from('sales').select('*, products(*)').order('deal_date', { ascending: false }),
+        supabase.from('admin_payment_settings').select('*').eq('id', 1).single()
       ]);
 
       setProducts(p || []);
@@ -171,9 +197,11 @@ export default function AdminDashboard() {
       setPaymentLinks(pl || []);
       setProofs(pr || []);
       setUcPrices(uc || []);
+      setUcPacks(uc || []);
       setXsuits(xs || []);
       setSupercars(sc || []);
       setSales(s || []);
+      if (settings?.data) setPaymentSettings(settings.data);
     } catch (globalErr) {
       console.error("Global Data Fetch Error:", globalErr);
     }
@@ -183,16 +211,42 @@ export default function AdminDashboard() {
     fetchData();
   }, []);
 
+  // Auto-suggest ID based on type
+  useEffect(() => {
+    const fetchSuggestedId = async () => {
+      setSuggestingId(true);
+      try {
+        let id = "";
+        switch (paymentForm.type) {
+          case "Account": id = await generateNextTransactionId(); break;
+          case "Xsuit": id = await generateNextXsuitId(); break;
+          case "Supercar": id = await generateNextSupercarId(); break;
+          case "UC": id = await generateNextUcId(); break;
+          default: id = "";
+        }
+        // If the ID is the same prefix (failed to fetch), just set empty or prefix
+        setPaymentForm(prev => ({ ...prev, transaction_id: id }));
+      } catch (e) {
+        console.error("ID Suggestion Error:", e);
+      } finally {
+        setSuggestingId(false);
+      }
+    };
+    if (!paymentForm.transaction_id || paymentForm.transaction_id.startsWith("MBS")) {
+      fetchSuggestedId();
+    }
+  }, [paymentForm.type]);
+
   // Guard: redirect non-admins
   useEffect(() => {
     if (user !== undefined && !isAdmin) navigate("/");
   }, [user, isAdmin, navigate]);
 
   const logoutTx = useTransactionStore(state => state.logout);
-  const handleLogout = async () => { 
+  const handleLogout = async () => {
     logoutTx();
-    await logout(); 
-    navigate("/"); 
+    await logout();
+    navigate("/");
   };
 
   // ── Product CRUD ───────────────────────────────────────────
@@ -210,6 +264,7 @@ export default function AdminDashboard() {
         primary_login: productForm.primaryLogin,
         secondary_login: productForm.secondaryLogin === "null" ? null : productForm.secondaryLogin,
         unlink_guarantee: productForm.unlinkGuarantee,
+        tag: productForm.tag,
         available: productForm.status === "available",
       };
       if (editId) {
@@ -306,15 +361,16 @@ export default function AdminDashboard() {
       if (json.error) throw new Error(json.error.message);
       const url = json.secure_url;
 
+      const fullMonth = `${proofForm.month} ${proofForm.year}`;
       const { error } = await supabase.from('proofs').insert([{
         title: proofForm.title.trim(),
         image_url: url,
-        month: proofForm.month,
+        month: fullMonth,
       }]);
       if (error) throw error;
 
-      toast.success(`Proof uploaded to ${proofForm.month}!`);
-      setProofForm({ title: "", month: proofForm.month });
+      toast.success(`Proof uploaded to ${fullMonth}!`);
+      setProofForm({ ...proofForm, title: "" });
       setProofImage(null);
       fetchData();
     } catch (e) { toast.error(e.message); }
@@ -339,7 +395,8 @@ export default function AdminDashboard() {
         ...ucForm,
         market_price: Number(ucForm.market_price),
         offer_price: Number(ucForm.offer_price),
-        bonus_uc: Number(ucForm.bonus_uc || 0)
+        bonus_uc: Number(ucForm.bonus_uc || 0),
+        tag: ucForm.tag
       };
       if (ucEditId) {
         const { error } = await supabase.from('uc_prices').update(data).eq('id', ucEditId);
@@ -379,7 +436,7 @@ export default function AdminDashboard() {
         formData.append("file", xsuitImage);
         formData.append("upload_preset", uploadPreset);
         formData.append("folder", "mbs_xsuits");
-        
+
         const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
           method: "POST",
           body: formData,
@@ -389,7 +446,7 @@ export default function AdminDashboard() {
         url = json.secure_url;
       }
 
-      const data = { ...xsuitForm, image_url: url };
+      const data = { ...xsuitForm, image_url: url, tag: xsuitForm.tag };
       if (xsuitEditId) {
         const { error } = await supabase.from('xsuit_gifts').update(data).eq('id', xsuitEditId);
         if (error) throw error;
@@ -429,7 +486,7 @@ export default function AdminDashboard() {
         formData.append("file", carImage);
         formData.append("upload_preset", uploadPreset);
         formData.append("folder", "mbs_supercars");
-        
+
         const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
           method: "POST",
           body: formData,
@@ -439,11 +496,12 @@ export default function AdminDashboard() {
         url = json.secure_url;
       }
 
-      const data = { 
+      const data = {
         name: carForm.name,
         price: Number(carForm.price),
         type: carForm.type,
         image_url: url,
+        tag: carForm.tag,
         updated_at: new Date().toISOString()
       };
 
@@ -474,12 +532,23 @@ export default function AdminDashboard() {
     } catch (e) { toast.error(e.message); }
   };
 
-  // ── Payment Links ───────────────────────────────────────────
+  // ── Payment Manager ─────────────────────────────────────────
+  const savePaymentSettings = async () => {
+    setSavingSettings(true);
+    try {
+      const { error } = await supabase.from('admin_payment_settings').upsert({ id: 1, ...paymentSettings });
+      if (error) throw error;
+      toast.success("Payment tools updated!");
+      fetchData();
+    } catch (e) { toast.error(e.message); }
+    finally { setSavingSettings(false); }
+  };
+
   const generatePaymentLink = async () => {
     if (!paymentForm.amount) return toast.error("Amount is required");
     setGeneratingLink(true);
     try {
-      const linkId = `PAY-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2,6).toUpperCase()}`;
+      const linkId = paymentForm.transaction_id.trim() || `PAY-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
       const expiresAt = new Date(Date.now() + Number(paymentForm.expires_in) * 3600 * 1000).toISOString();
       const { error } = await supabase.from('payment_links').insert([{
         id: linkId,
@@ -488,11 +557,21 @@ export default function AdminDashboard() {
         note: paymentForm.note,
         status: "active",
         expires_at: expiresAt,
-        pin: paymentForm.pin || "9025",
+        pin: paymentForm.pin || null,
+        payee_name: paymentSettings.payee_name,
+        payee_upi: paymentSettings.payee_upi_id,
+        bank_details: {
+          bank_name: paymentSettings.bank_name,
+          account_type: paymentSettings.account_type,
+          account_holder: paymentSettings.account_holder,
+          account_number: paymentSettings.account_number,
+          ifsc_code: paymentSettings.ifsc_code,
+          branch: paymentSettings.branch
+        }
       }]);
       if (error) throw error;
       toast.success(`Payment link generated! ID: ${linkId}`);
-      setPaymentForm({ customer_name: "", amount: "", note: "", expires_in: "24" });
+      setPaymentForm({ transaction_id: "", customer_name: "", amount: "", note: "", expires_in: "0.5", pin: "" });
       fetchData();
     } catch (e) { toast.error(e.message); }
     finally { setGeneratingLink(false); }
@@ -524,8 +603,8 @@ export default function AdminDashboard() {
     setSavingSale(true);
     try {
       const profit = Number(saleForm.sold_price) - Number(saleForm.owner_price || 0);
-      const { error } = await supabase.from('sales').insert([{ 
-        ...saleForm, 
+      const { error } = await supabase.from('sales').insert([{
+        ...saleForm,
         profit,
         owner_price: Number(saleForm.owner_price),
         sold_price: Number(saleForm.sold_price),
@@ -550,11 +629,11 @@ export default function AdminDashboard() {
             Admin <span style={{ color: "var(--gold)" }}>Panel</span>
           </h1>
           <div style={{ display: "flex", gap: "10px" }}>
-            <button 
+            <button
               onClick={() => {
                 logoutTx();
                 setShowTxAuth(true);
-              }} 
+              }}
               className="btn btn-gold"
             >
               <DollarSign size={15} /> Transaction Panel
@@ -567,13 +646,13 @@ export default function AdminDashboard() {
 
         <div style={{ display: "flex", gap: "4px", marginBottom: "28px", borderBottom: "1px solid rgba(255,215,0,0.15)", overflowX: "auto" }}>
           {[
-            ["products", "Accounts"],
-            ["uc", "UC Prices"],
+            ["products", "Accounts "],
+            ["uc", "UC Packs"],
             ["xsuits", "Xsuit Gifts"],
             ["supercars", "Supercar Gifts"],
             ["reviews", "Reviews"],
             ["proofs", "Proofs"],
-            ["payment_links", "🔗 Payment Links"]
+            ["payment_links", "Payment Manager"]
           ].map(([key, label]) => (
             <button key={key} onClick={() => setTab(key)}
               style={{
@@ -591,15 +670,15 @@ export default function AdminDashboard() {
         {tab === "products" && (
           <div style={{ display: "grid", gridTemplateColumns: "350px 1fr", gap: "24px" }}>
             <div style={{ background: "var(--card)", padding: "24px", borderRadius: "14px", border: "1px solid var(--border-gold)" }}>
-              <h3 style={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px" }}><Plus size={18}/> {editId ? "Edit" : "Add"} Product</h3>
+              <h3 style={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px" }}><Plus size={18} /> {editId ? "Edit" : "Add"} Product</h3>
               <div style={{ display: "grid", gap: "12px" }}>
-                <input className="input" placeholder="YouTube Video URL" value={productForm.youtubeUrl} onChange={e => setProductForm({...productForm, youtubeUrl: e.target.value})} />
-                <input className="input" placeholder="Account Title (e.g. M416 Maxed 60K UC)" value={productForm.title} onChange={e => setProductForm({...productForm, title: e.target.value})} />
-                <textarea className="input" placeholder="Account Description (items, skins, levels...)" rows={5} value={productForm.description} onChange={e => setProductForm({...productForm, description: e.target.value})} />
-                
+                <input className="input" placeholder="YouTube Video URL" value={productForm.youtubeUrl} onChange={e => setProductForm({ ...productForm, youtubeUrl: e.target.value })} />
+                <input className="input" placeholder="Account Title (e.g. M416 Maxed 60K UC)" value={productForm.title} onChange={e => setProductForm({ ...productForm, title: e.target.value })} />
+                <textarea className="input" placeholder="Account Description (items, skins, levels...)" rows={5} value={productForm.description} onChange={e => setProductForm({ ...productForm, description: e.target.value })} />
+
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                  <input className="input" type="number" placeholder="Price (₹)" value={productForm.price} onChange={e => setProductForm({...productForm, price: e.target.value})} />
-                  <select className="input" value={productForm.category} onChange={e => setProductForm({...productForm, category: e.target.value})}>
+                  <input className="input" type="number" placeholder="Price (₹)" value={productForm.price} onChange={e => setProductForm({ ...productForm, price: e.target.value })} />
+                  <select className="input" value={productForm.category} onChange={e => setProductForm({ ...productForm, category: e.target.value })}>
                     <option value="Budget">Budget</option>
                     <option value="Mid Range">Mid Range</option>
                     <option value="Premium">Premium</option>
@@ -610,31 +689,31 @@ export default function AdminDashboard() {
                 <div style={{ display: "grid", gap: "12px", padding: "12px", background: "rgba(255,215,0,0.05)", borderRadius: "10px", border: "1px solid rgba(255,215,0,0.12)" }}>
                   <div>
                     <label style={ls}>Primary Login</label>
-                    <select className="input" value={productForm.primaryLogin} onChange={e => setProductForm({...productForm, primaryLogin: e.target.value})}>
+                    <select className="input" value={productForm.primaryLogin} onChange={e => setProductForm({ ...productForm, primaryLogin: e.target.value })}>
                       {LOGIN_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                     </select>
                   </div>
                   <div>
                     <label style={ls}>Secondary Login</label>
-                    <select className="input" value={productForm.secondaryLogin} onChange={e => setProductForm({...productForm, secondaryLogin: e.target.value})}>
+                    <select className="input" value={productForm.secondaryLogin} onChange={e => setProductForm({ ...productForm, secondaryLogin: e.target.value })}>
                       <option value="null">None (Single Login)</option>
                       {LOGIN_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label style={ls}>Unlink Guarantee</label>
-                    <select className="input" value={productForm.unlinkGuarantee} onChange={e => setProductForm({...productForm, unlinkGuarantee: e.target.value})}>
-                      {GUARANTEE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                    <label style={ls}>Promo Tag</label>
+                    <select className="input" value={productForm.tag} onChange={e => setProductForm({...productForm, tag: e.target.value})}>
+                      {PROMO_TAGS.map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
                   </div>
                 </div>
 
-                <select className="input" value={productForm.status} onChange={e => setProductForm({...productForm, status: e.target.value})}>
+                <select className="input" value={productForm.status} onChange={e => setProductForm({ ...productForm, status: e.target.value })}>
                   <option value="available">Available</option>
                   <option value="sold">Sold</option>
                   <option value="coming_soon">Coming Soon</option>
                 </select>
-                
+
                 <div style={{ display: "flex", gap: "8px" }}>
                   <button onClick={saveProduct} disabled={savingProduct} className="btn btn-gold" style={{ flex: 1 }}>
                     {savingProduct ? "Saving..." : editId ? "Update Product" : "Save Product"}
@@ -650,7 +729,7 @@ export default function AdminDashboard() {
                 <h3 style={{ fontSize: "16px", fontWeight: 700 }}>Account Inventory</h3>
                 <span style={{ fontSize: "12px", color: "var(--muted)" }}>{products.length} Items</span>
               </div>
-              
+
               <div style={{ maxHeight: "700px", overflowY: "auto" }}>
                 {products.length === 0 ? (
                   <div style={{ textAlign: "center", padding: "100px 20px", color: "var(--muted)" }}>
@@ -664,33 +743,40 @@ export default function AdminDashboard() {
                       <div style={{ fontWeight: 700, fontSize: "14px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", color: "var(--text)" }}>{p.title}</div>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "4px" }}>
                         <span style={{ fontSize: "13px", fontWeight: 800, color: "var(--gold)" }}>₹{Number(p.price).toLocaleString("en-IN")}</span>
-                        <span style={{ width: "3px", height: "3px", borderRadius: "50%", background: "var(--muted)" }}></span>
-                        <span style={{ 
-                          fontSize: "10px", 
-                          fontWeight: 900, 
+                        {p.tag && p.tag !== "None" && (
+                          <span style={{ 
+                            fontSize: "9px", fontWeight: 900, background: "var(--gold)", color: "#000", 
+                            padding: "2px 6px", borderRadius: "4px", textTransform: "uppercase" 
+                          }}>
+                            {p.tag}
+                          </span>
+                        )}
+                        <span style={{
+                          fontSize: "10px",
+                          fontWeight: 900,
                           color: p.status === 'available' ? "var(--green)" : p.status === 'coming_soon' ? "var(--gold)" : "#ef4444",
-                          textTransform: "uppercase" 
+                          textTransform: "uppercase"
                         }}>
                           {p.status.replace('_', ' ')}
                         </span>
                       </div>
                     </div>
                     <div style={{ display: "flex", gap: "6px" }}>
-                      <button onClick={() => { 
-                        setEditId(p.id); 
-                        setProductForm({ 
-                          title: p.title || "", 
-                          description: p.description || "", 
-                          price: p.price || "", 
-                          category: p.category || "Budget", 
-                          status: p.status || "available", 
-                          youtubeUrl: p.youtube_url || "", 
+                      <button onClick={() => {
+                        setEditId(p.id);
+                        setProductForm({
+                          title: p.title || "",
+                          description: p.description || "",
+                          price: p.price || "",
+                          category: p.category || "Budget",
+                          status: p.status || "available",
+                          youtubeUrl: p.youtube_url || "",
                           primaryLogin: p.primary_login || "X",
                           secondaryLogin: p.secondary_login || "null",
                           unlinkGuarantee: p.unlink_guarantee || "Single & Safe Login"
-                        }); 
-                      }} style={{ padding: "8px", borderRadius: "8px", background: "rgba(255,215,0,0.1)", color: "var(--gold)", border: "1px solid rgba(255,215,0,0.2)", cursor: "pointer", transition: "all .2s" }} title="Edit"><Pencil size={16}/></button>
-                      <button onClick={() => deleteProduct(p.id)} style={{ padding: "8px", borderRadius: "8px", background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", cursor: "pointer", transition: "all .2s" }} title="Delete"><Trash2 size={16}/></button>
+                        });
+                      }} style={{ padding: "8px", borderRadius: "8px", background: "rgba(255,215,0,0.1)", color: "var(--gold)", border: "1px solid rgba(255,215,0,0.2)", cursor: "pointer", transition: "all .2s" }} title="Edit"><Pencil size={16} /></button>
+                      <button onClick={() => deleteProduct(p.id)} style={{ padding: "8px", borderRadius: "8px", background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", cursor: "pointer", transition: "all .2s" }} title="Delete"><Trash2 size={16} /></button>
                     </div>
                   </div>
                 ))}
@@ -702,7 +788,7 @@ export default function AdminDashboard() {
         {/* REVIEWS TAB */}
         {tab === "reviews" && (
           <div style={{ display: "grid", gap: "24px" }}>
-            
+
             {/* Stats Row */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "16px" }}>
               {[
@@ -787,23 +873,42 @@ export default function AdminDashboard() {
 
         {/* PROOFS TAB */}
         {tab === "proofs" && (() => {
-          const MONTHS_2026 = ["January 2026","February 2026","March 2026","April 2026","May 2026","June 2026","July 2026","August 2026","September 2026","October 2026","November 2026","December 2026"];
-          const grouped = MONTHS_2026.reduce((acc, m) => { acc[m] = proofs.filter(p => p.month === m); return acc; }, {});
+          // Group by month string (which includes year)
+          // Sort groups by year descending, then month descending
+          const grouped = proofs.reduce((acc, p) => {
+            if (!acc[p.month]) acc[p.month] = [];
+            acc[p.month].push(p);
+            return acc;
+          }, {});
+
+          const sortedMonths = Object.keys(grouped).sort((a, b) => {
+            const [mA, yA] = a.split(" ");
+            const [mB, yB] = b.split(" ");
+            if (yA !== yB) return Number(yB) - Number(yA);
+            return MONTH_NAMES.indexOf(mB) - MONTH_NAMES.indexOf(mA);
+          });
+
           return (
             <div style={{ display: "grid", gap: "24px" }}>
 
               {/* Upload Panel */}
               <div style={{ background: "var(--card)", padding: "28px", borderRadius: "14px", border: "1px solid var(--border-gold)" }}>
-                <h3 style={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px" }}><Camera size={18}/> Upload New Proof</h3>
+                <h3 style={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px" }}><Camera size={18} /> Upload New Proof</h3>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px", alignItems: "end" }}>
                   <div>
                     <label style={sl}>Title</label>
-                    <input className="input" placeholder="e.g. Payment Proof, Deal Feedback" value={proofForm.title} onChange={e => setProofForm({...proofForm, title: e.target.value})} />
+                    <input className="input" placeholder="e.g. Payment Proof, Deal Feedback" value={proofForm.title} onChange={e => setProofForm({ ...proofForm, title: e.target.value })} />
                   </div>
                   <div>
                     <label style={sl}>Month</label>
-                    <select className="input" value={proofForm.month} onChange={e => setProofForm({...proofForm, month: e.target.value})}>
-                      {MONTHS_2026.map(m => <option key={m} value={m}>{m}</option>)}
+                    <select className="input" value={proofForm.month} onChange={e => setProofForm({ ...proofForm, month: e.target.value })}>
+                      {MONTH_NAMES.map(m => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={sl}>Year</label>
+                    <select className="input" value={proofForm.year} onChange={e => setProofForm({ ...proofForm, year: e.target.value })}>
+                      {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
                     </select>
                   </div>
                   <div>
@@ -831,15 +936,14 @@ export default function AdminDashboard() {
               </div>
 
               {/* Monthly Grouped Gallery */}
-              {MONTHS_2026.filter(m => grouped[m].length > 0).length === 0 ? (
+              {sortedMonths.length === 0 ? (
                 <div style={{ textAlign: "center", padding: "60px", color: "var(--muted)", background: "var(--card)", borderRadius: "14px" }}>
                   <Camera size={40} style={{ opacity: 0.3, marginBottom: "16px" }} />
                   <p>No proofs uploaded yet. Use the upload panel above to get started.</p>
                 </div>
               ) : (
-                MONTHS_2026.map(month => {
+                sortedMonths.map(month => {
                   const monthProofs = grouped[month];
-                  if (monthProofs.length === 0) return null;
                   return (
                     <div key={month} style={{ background: "var(--card)", borderRadius: "14px", overflow: "hidden", border: "1px solid var(--border)" }}>
                       <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", background: "rgba(255,215,0,0.03)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -854,7 +958,7 @@ export default function AdminDashboard() {
                             </div>
                             <div style={{ padding: "8px 10px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                               <div style={{ fontSize: "11px", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.title || "Proof"}</div>
-                              <button onClick={() => deleteProof(p.id)} style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", padding: "2px", flexShrink: 0 }}><Trash2 size={13}/></button>
+                              <button onClick={() => deleteProof(p.id)} style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", padding: "2px", flexShrink: 0 }}><Trash2 size={13} /></button>
                             </div>
                           </div>
                         ))}
@@ -871,39 +975,47 @@ export default function AdminDashboard() {
         {tab === "uc" && (
           <div style={{ display: "grid", gridTemplateColumns: "350px 1fr", gap: "24px" }}>
             <div style={{ background: "var(--card)", padding: "24px", borderRadius: "14px", border: "1px solid var(--border-gold)" }}>
-              <h3 style={{ marginBottom: "20px" }}><Coins size={18}/> {ucEditId ? "Edit UC Pack" : "Add UC Pack"}</h3>
+              <h3 style={{ marginBottom: "20px" }}><Coins size={18} /> {ucEditId ? "Edit UC Pack" : "Add UC Pack"}</h3>
               <div style={{ display: "grid", gap: "12px" }}>
                 <div>
                   <label style={sl}>UC Amount</label>
-                  <input className="input" placeholder="e.g. 8,000 UC" value={ucForm.uc_amount} onChange={e => setUcForm({...ucForm, uc_amount: e.target.value})} />
+                  <input className="input" placeholder="e.g. 8,000 UC" value={ucForm.uc_amount} onChange={e => setUcForm({ ...ucForm, uc_amount: e.target.value })} />
                 </div>
                 <div>
                   <label style={sl}>Bonus UC</label>
-                  <input className="input" placeholder="e.g. 60" type="number" value={ucForm.bonus_uc} onChange={e => setUcForm({...ucForm, bonus_uc: e.target.value})} />
+                  <input className="input" placeholder="e.g. 60" type="number" value={ucForm.bonus_uc} onChange={e => setUcForm({ ...ucForm, bonus_uc: e.target.value })} />
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
                   <div>
-                    <label style={sl}>Market Price (₹)</label>
-                    <input className="input" placeholder="e.g. 7,500" type="number" value={ucForm.market_price} onChange={e => setUcForm({...ucForm, market_price: e.target.value})} />
+                    <label style={sl}>Selling Price (₹)</label>
+                    <input className="input" placeholder="e.g. 7,500" type="number" value={ucForm.market_price} onChange={e => setUcForm({ ...ucForm, market_price: e.target.value })} />
                   </div>
                   <div>
                     <label style={sl}>Our Offer Price (₹)</label>
-                    <input className="input" placeholder="e.g. 6,500" type="number" value={ucForm.offer_price} onChange={e => setUcForm({...ucForm, offer_price: e.target.value})} />
+                    <input className="input" placeholder="e.g. 6,500" type="number" value={ucForm.offer_price} onChange={e => setUcForm({ ...ucForm, offer_price: e.target.value })} />
                   </div>
                 </div>
                 <div>
                   <label style={sl}>Purchase Method</label>
-                  <select className="input" value={ucForm.method} onChange={e => setUcForm({...ucForm, method: e.target.value})}>
+                  <select className="input" value={ucForm.method} onChange={e => setUcForm({ ...ucForm, method: e.target.value })}>
                     <option value="view_login">View Login UC (Facebook / X)</option>
                     <option value="character_id">Character ID UC (In-game ID)</option>
                   </select>
                 </div>
-                <div>
-                  <label style={sl}>Status</label>
-                  <select className="input" value={ucForm.status} onChange={e => setUcForm({...ucForm, status: e.target.value})}>
-                    <option value="available">Available</option>
-                    <option value="sold_out">Sold Out</option>
-                  </select>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                  <div>
+                    <label style={sl}>Status</label>
+                    <select className="input" value={ucForm.status} onChange={e => setUcForm({ ...ucForm, status: e.target.value })}>
+                      <option value="available">Available</option>
+                      <option value="sold_out">Sold Out</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={sl}>Promo Tag</label>
+                    <select className="input" value={ucForm.tag} onChange={e => setUcForm({...ucForm, tag: e.target.value})}>
+                      {PROMO_TAGS.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  </div>
                 </div>
                 <div style={{ display: "flex", gap: "8px" }}>
                   <button onClick={saveUc} disabled={savingUc} className="btn btn-gold w-full">{ucEditId ? "Update Pack" : "Save Pack"}</button>
@@ -926,6 +1038,9 @@ export default function AdminDashboard() {
                     <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
                       {u.uc_amount}
                       {u.bonus_uc > 0 && <span style={{ fontSize: "10px", background: "var(--gold-dim)", color: "var(--gold)", padding: "2px 6px", borderRadius: "4px" }}>+{u.bonus_uc} Bonus</span>}
+                      {u.tag && u.tag !== "None" && (
+                        <span style={{ fontSize: "9px", background: "var(--gold)", color: "#000", padding: "2px 6px", borderRadius: "4px", fontWeight: 900 }}>{u.tag.toUpperCase()}</span>
+                      )}
                       <span style={{ fontSize: "10px", padding: "2px 8px", borderRadius: "4px", background: u.method === 'character_id' ? "rgba(249,115,22,0.1)" : "rgba(59,130,246,0.1)", color: u.method === 'character_id' ? "#f97316" : "#60a5fa", fontWeight: 700 }}>
                         {u.method === 'character_id' ? "🎮 Char ID" : "🔑 View Login"}
                       </span>
@@ -938,19 +1053,19 @@ export default function AdminDashboard() {
                   <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                     <div style={{ color: "var(--green)", fontWeight: 700 }}>₹{u.offer_price}</div>
                     <div style={{ display: "flex", gap: "6px" }}>
-                      <button onClick={() => { 
-                        setUcEditId(u.id); 
-                        setUcForm({ 
-                          uc_amount: u.uc_amount, 
+                      <button onClick={() => {
+                        setUcEditId(u.id);
+                        setUcForm({
+                          uc_amount: u.uc_amount,
                           bonus_uc: u.bonus_uc || "",
-                          market_price: u.market_price, 
+                          market_price: u.market_price,
                           offer_price: u.offer_price,
                           status: u.status || "available",
                           method: u.method || "view_login"
-                        }); 
-                      }} 
-                        style={{ color: "var(--gold)", background: "none", border: "none", cursor: "pointer" }}><Pencil size={14}/></button>
-                      <button onClick={() => deleteUc(u.id)} style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}><Trash2 size={16}/></button>
+                        });
+                      }}
+                        style={{ color: "var(--gold)", background: "none", border: "none", cursor: "pointer" }}><Pencil size={14} /></button>
+                      <button onClick={() => deleteUc(u.id)} style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}><Trash2 size={16} /></button>
                     </div>
                   </div>
                 </div>
@@ -963,17 +1078,23 @@ export default function AdminDashboard() {
         {tab === "xsuits" && (
           <div style={{ display: "grid", gridTemplateColumns: "350px 1fr", gap: "24px" }}>
             <div style={{ background: "var(--card)", padding: "24px", borderRadius: "14px", border: "1px solid var(--border-gold)" }}>
-              <h3 style={{ marginBottom: "20px" }}><Zap size={18}/> {xsuitEditId ? "Edit Xsuit" : "Add Xsuit Gift"}</h3>
+              <h3 style={{ marginBottom: "20px" }}><Zap size={18} /> {xsuitEditId ? "Edit Xsuit" : "Add Xsuit Gift"}</h3>
               <div style={{ display: "grid", gap: "12px" }}>
                 <div>
                   <label style={sl}>Xsuit Name</label>
-                  <input className="input" placeholder="e.g. Poseidon X-Suit" value={xsuitForm.name} onChange={e => setXsuitForm({...xsuitForm, name: e.target.value})} />
+                  <input className="input" placeholder="e.g. Poseidon X-Suit" value={xsuitForm.name} onChange={e => setXsuitForm({ ...xsuitForm, name: e.target.value })} />
                 </div>
                 <div>
-                  <label style={sl}>Price (₹)</label>
-                  <input className="input" placeholder="e.g. 15000" type="number" value={xsuitForm.price} onChange={e => setXsuitForm({...xsuitForm, price: e.target.value})} />
+                  <label style={sl}>Offer Price (₹)</label>
+                  <input className="input" placeholder="e.g. 15000" type="number" value={xsuitForm.price} onChange={e => setXsuitForm({ ...xsuitForm, price: e.target.value })} />
                 </div>
-                
+                <div>
+                  <label style={sl}>Promo Tag</label>
+                  <select className="input" value={xsuitForm.tag} onChange={e => setXsuitForm({...xsuitForm, tag: e.target.value})}>
+                    {PROMO_TAGS.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+
                 <div style={{ border: "2px dashed var(--border-gold)", padding: "20px", borderRadius: "8px", textAlign: "center" }}>
                   {xsuitImage ? (
                     <div style={{ fontSize: "12px", color: "var(--green)" }}>{xsuitImage.name} selected</div>
@@ -1003,8 +1124,8 @@ export default function AdminDashboard() {
                         <Zap size={30} style={{ opacity: 0.2 }} />
                       )}
                       <div style={{ position: "absolute", top: "5px", right: "5px", display: "flex", gap: "4px" }}>
-                        <button onClick={() => { setXsuitEditId(x.id); setXsuitForm(x); }} style={{ background: "rgba(0,0,0,0.6)", border: "none", color: "var(--gold)", borderRadius: "4px", padding: "4px", cursor: "pointer" }}><Pencil size={12}/></button>
-                        <button onClick={() => deleteXsuit(x.id)} style={{ background: "rgba(239,68,68,0.8)", border: "none", color: "#fff", borderRadius: "4px", padding: "4px", cursor: "pointer" }}><Trash2 size={12}/></button>
+                        <button onClick={() => { setXsuitEditId(x.id); setXsuitForm(x); }} style={{ background: "rgba(0,0,0,0.6)", border: "none", color: "var(--gold)", borderRadius: "4px", padding: "4px", cursor: "pointer" }}><Pencil size={12} /></button>
+                        <button onClick={() => deleteXsuit(x.id)} style={{ background: "rgba(239,68,68,0.8)", border: "none", color: "#fff", borderRadius: "4px", padding: "4px", cursor: "pointer" }}><Trash2 size={12} /></button>
                       </div>
                     </div>
                     <div style={{ padding: "10px", textAlign: "center" }}>
@@ -1022,19 +1143,25 @@ export default function AdminDashboard() {
         {tab === "supercars" && (
           <div style={{ display: "grid", gridTemplateColumns: "350px 1fr", gap: "24px" }}>
             <div style={{ background: "var(--card)", padding: "24px", borderRadius: "14px", border: "1px solid var(--border-gold)" }}>
-              <h3 style={{ marginBottom: "20px" }}><Car size={18}/> {carEditId ? "Edit Supercar" : "Add Supercar Gift"}</h3>
+              <h3 style={{ marginBottom: "20px" }}><Car size={18} /> {carEditId ? "Edit Supercar" : "Add Supercar Gift"}</h3>
               <div style={{ display: "grid", gap: "12px" }}>
                 <div>
                   <label style={sl}>Supercar Name</label>
-                  <input className="input" placeholder="e.g. Lamborghini Aventador" value={carForm.name} onChange={e => setCarForm({...carForm, name: e.target.value})} />
+                  <input className="input" placeholder="e.g. Lamborghini Aventador" value={carForm.name} onChange={e => setCarForm({ ...carForm, name: e.target.value })} />
                 </div>
                 <div>
-                  <label style={sl}>Price (₹)</label>
-                  <input className="input" placeholder="e.g. 15000" type="number" value={carForm.price} onChange={e => setCarForm({...carForm, price: e.target.value})} />
+                  <label style={sl}>Offer Price (₹)</label>
+                  <input className="input" placeholder="e.g. 15000" type="number" value={carForm.price} onChange={e => setCarForm({ ...carForm, price: e.target.value })} />
+                </div>
+                <div>
+                  <label style={sl}>Promo Tag</label>
+                  <select className="input" value={carForm.tag} onChange={e => setCarForm({...carForm, tag: e.target.value})}>
+                    {PROMO_TAGS.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
                 </div>
                 <div>
                   <label style={sl}>Card Type</label>
-                  <select className="input" value={carForm.type} onChange={e => setCarForm({...carForm, type: e.target.value})}>
+                  <select className="input" value={carForm.type} onChange={e => setCarForm({ ...carForm, type: e.target.value })}>
                     <option value="One-Card">One-Card</option>
                     <option value="Two-Card">Two-Card</option>
                     <option value="Three-Card">Three-Card</option>
@@ -1070,8 +1197,8 @@ export default function AdminDashboard() {
                         <Car size={30} style={{ opacity: 0.2 }} />
                       )}
                       <div style={{ position: "absolute", top: "5px", right: "5px", display: "flex", gap: "4px" }}>
-                        <button onClick={() => { setCarEditId(c.id); setCarForm(c); }} style={{ background: "rgba(0,0,0,0.6)", border: "none", color: "var(--gold)", borderRadius: "4px", padding: "4px", cursor: "pointer" }}><Pencil size={12}/></button>
-                        <button onClick={() => deleteCar(c.id)} style={{ background: "rgba(239,68,68,0.8)", border: "none", color: "#fff", borderRadius: "4px", padding: "4px", cursor: "pointer" }}><Trash2 size={12}/></button>
+                        <button onClick={() => { setCarEditId(c.id); setCarForm(c); }} style={{ background: "rgba(0,0,0,0.6)", border: "none", color: "var(--gold)", borderRadius: "4px", padding: "4px", cursor: "pointer" }}><Pencil size={12} /></button>
+                        <button onClick={() => deleteCar(c.id)} style={{ background: "rgba(239,68,68,0.8)", border: "none", color: "#fff", borderRadius: "4px", padding: "4px", cursor: "pointer" }}><Trash2 size={12} /></button>
                       </div>
                       <div style={{ position: "absolute", bottom: "5px", left: "5px", background: "var(--gold)", color: "#000", fontSize: "9px", fontWeight: 900, padding: "2px 6px", borderRadius: "4px" }}>
                         {c.type}
@@ -1089,7 +1216,7 @@ export default function AdminDashboard() {
         )}
 
 
-        {/* PAYMENT LINKS TAB */}
+        {/* PAYMENT MANAGER TAB */}
         {tab === "payment_links" && (() => {
           const activeLinks = paymentLinks.filter(l => l.status === "active");
           const revokedLinks = paymentLinks.filter(l => l.status !== "active");
@@ -1097,46 +1224,181 @@ export default function AdminDashboard() {
           return (
             <div style={{ display: "grid", gap: "24px" }}>
 
-              {/* Generator Form */}
+              {/* DEFAULT PAYMENT TOOLS SECTION */}
               <div style={{ background: "var(--card)", padding: "28px", borderRadius: "14px", border: "1px solid var(--border-gold)" }}>
                 <h3 style={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px", fontSize: "16px" }}>
-                  <span style={{ fontSize: "20px" }}>🔗</span> Generate Payment Link
+                  <Zap size={18} color="var(--gold)" /> DEFAULT PAYMENT TOOLS
                 </h3>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "14px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "20px", marginBottom: "20px" }}>
                   <div>
-                    <label style={sl}>Customer Name</label>
-                    <input className="input" placeholder="e.g. Ravi Kumar" value={paymentForm.customer_name} onChange={e => setPaymentForm({...paymentForm, customer_name: e.target.value})} />
+                    <label style={sl}>Payee Name (Edit)</label>
+                    <input className="input" placeholder="e.g. Maddy BGMI Store" value={paymentSettings.payee_name} onChange={e => setPaymentSettings({ ...paymentSettings, payee_name: e.target.value })} />
                   </div>
                   <div>
-                    <label style={sl}>Amount (₹) *</label>
-                    <input className="input" type="number" placeholder="e.g. 4999" value={paymentForm.amount} onChange={e => setPaymentForm({...paymentForm, amount: e.target.value})} />
-                  </div>
-                  <div>
-                    <label style={sl}>Expires In</label>
-                    <select className="input" value={paymentForm.expires_in} onChange={e => setPaymentForm({...paymentForm, expires_in: e.target.value})}>
-                      <option value="6">6 Hours</option>
-                      <option value="12">12 Hours</option>
-                      <option value="24">24 Hours</option>
-                      <option value="48">48 Hours</option>
-                      <option value="72">72 Hours</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label style={sl}>Note (Optional)</label>
-                    <input className="input" placeholder="e.g. BGMI Account #XYZ" value={paymentForm.note} onChange={e => setPaymentForm({...paymentForm, note: e.target.value})} />
-                  </div>
-                  <div>
-                    <label style={sl}>Access PIN / Password</label>
-                    <input className="input" placeholder="9025" value={paymentForm.pin} onChange={e => setPaymentForm({...paymentForm, pin: e.target.value})} />
+                    <label style={sl}>Payee UPI ID (Edit)</label>
+                    <input className="input" placeholder="e.g. example@upi" value={paymentSettings.payee_upi_id} onChange={e => setPaymentSettings({ ...paymentSettings, payee_upi_id: e.target.value })} />
                   </div>
                 </div>
+
+                <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "20px", marginTop: "20px" }}>
+                  <label style={{ ...sl, marginBottom: "15px" }}>Bank Details (Edit)</label>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "14px" }}>
+                    <input className="input" placeholder="Bank Name" value={paymentSettings.bank_name} onChange={e => setPaymentSettings({ ...paymentSettings, bank_name: e.target.value })} />
+                    <input className="input" placeholder="Account Holder" value={paymentSettings.account_holder} onChange={e => setPaymentSettings({ ...paymentSettings, account_holder: e.target.value })} />
+                    <input className="input" placeholder="Account Number" value={paymentSettings.account_number} onChange={e => setPaymentSettings({ ...paymentSettings, account_number: e.target.value })} />
+                    <input className="input" placeholder="IFSC Code" value={paymentSettings.ifsc_code} onChange={e => setPaymentSettings({ ...paymentSettings, ifsc_code: e.target.value })} />
+                    <input className="input" placeholder="Branch" value={paymentSettings.branch} onChange={e => setPaymentSettings({ ...paymentSettings, branch: e.target.value })} />
+                  </div>
+                </div>
+
+                <button onClick={savePaymentSettings} disabled={savingSettings} className="btn btn-gold" style={{ marginTop: "20px", padding: "10px 24px" }}>
+                  {savingSettings ? "Updating..." : "Save Payment Tools"}
+                </button>
+              </div>
+
+              {/* Generator Form */}
+              <div style={{ background: "var(--card)", padding: "32px", borderRadius: "18px", border: "1px solid rgba(255,215,0,0.2)", boxShadow: "0 8px 32px rgba(0,0,0,0.2)" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px", borderBottom: "1px solid rgba(255,255,255,0.05)", pb: "16px" }}>
+                  <h3 style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "18px", fontWeight: 800, color: "#fff" }}>
+                    <Zap size={22} color="var(--gold)" /> Payment Manager Generator
+                  </h3>
+                  <div style={{ fontSize: "11px", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "1px" }}>Secure Checkout Generation</div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "20px" }}>
+                  <div>
+                    <label style={sl}>Transaction Type</label>
+                    <div style={{ position: "relative" }}>
+                      <Tag size={14} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--gold)" }} />
+                      <select
+                        className="input"
+                        style={{ paddingLeft: "36px" }}
+                        value={paymentForm.type}
+                        onChange={e => setPaymentForm({ ...paymentForm, type: e.target.value })}
+                      >
+                        <option value="Account">Account (MBSA)</option>
+                        <option value="Xsuit">Xsuit (MBSXS)</option>
+                        <option value="Supercar">Supercar (MBSSC)</option>
+                        <option value="UC">UC (MBSUC)</option>
+                        <option value="Other">Other (Custom)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={sl}>Transaction ID</label>
+                    <div style={{ position: "relative" }}>
+                      <Hash size={14} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--gold)" }} />
+                      <input
+                        className="input"
+                        style={{ paddingLeft: "36px", fontFamily: "monospace", fontWeight: 700 }}
+                        placeholder={suggestingId ? "Generating..." : "e.g. MBSA4003"}
+                        value={paymentForm.transaction_id}
+                        onChange={e => setPaymentForm({ ...paymentForm, transaction_id: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={sl}>Customer Name</label>
+                    <div style={{ position: "relative" }}>
+                      <UserIcon size={14} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--gold)" }} />
+                      <input
+                        className="input"
+                        style={{ paddingLeft: "36px" }}
+                        placeholder="e.g. Surya"
+                        value={paymentForm.customer_name}
+                        onChange={e => setPaymentForm({ ...paymentForm, customer_name: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={sl}>Amount (₹)</label>
+                    <div style={{ position: "relative" }}>
+                      <DollarSign size={14} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--gold)" }} />
+                      <input
+                        className="input"
+                        type="number"
+                        style={{ paddingLeft: "36px", fontSize: "16px", fontWeight: 700 }}
+                        placeholder="0.00"
+                        value={paymentForm.amount}
+                        onChange={e => setPaymentForm({ ...paymentForm, amount: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={sl}>Expiry Time</label>
+                    <div style={{ position: "relative" }}>
+                      <Clock size={14} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--gold)" }} />
+                      <select
+                        className="input"
+                        style={{ paddingLeft: "36px" }}
+                        value={paymentForm.expires_in}
+                        onChange={e => setPaymentForm({ ...paymentForm, expires_in: e.target.value })}
+                      >
+                        <option value="0.166">10 Minutes</option>
+                        <option value="0.25">15 Minutes</option>
+                        <option value="0.333">20 Minutes</option>
+                        <option value="0.416">25 Minutes</option>
+                        <option value="0.5">30 Minutes</option>
+                        <option value="1">60 Minutes</option>
+                        <option value="2">120 Minutes (2 Hours)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={sl}>Access PIN (Optional)</label>
+                    <div style={{ position: "relative" }}>
+                      <ShieldCheck size={14} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--gold)" }} />
+                      <input
+                        className="input"
+                        type="password"
+                        maxLength={6}
+                        style={{ paddingLeft: "36px", letterSpacing: "2px" }}
+                        placeholder="None"
+                        value={paymentForm.pin}
+                        onChange={e => setPaymentForm({ ...paymentForm, pin: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: "24px" }}>
+                  <label style={sl}>Payment Note / Reference</label>
+                  <input
+                    className="input"
+                    placeholder="e.g. Account Purchase - Level 75..."
+                    value={paymentForm.note}
+                    onChange={e => setPaymentForm({ ...paymentForm, note: e.target.value })}
+                  />
+                </div>
+
                 <button
                   onClick={generatePaymentLink}
                   disabled={generatingLink}
                   className="btn btn-gold"
-                  style={{ marginTop: "18px", padding: "12px 32px" }}
+                  style={{
+                    marginTop: "24px",
+                    padding: "16px 32px",
+                    width: "100%",
+                    fontWeight: 900,
+                    fontSize: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "12px",
+                    borderRadius: "12px",
+                    boxShadow: "0 4px 15px rgba(255,215,0,0.2)"
+                  }}
                 >
-                  {generatingLink ? "Generating..." : "⚡ Generate Payment Link"}
+                  {generatingLink ? (
+                    <><span className="spinner" /> Generating...</>
+                  ) : (
+                    <><Zap size={18} fill="currentColor" /> Generate Secure Payment Link</>
+                  )}
                 </button>
               </div>
 
@@ -1276,7 +1538,7 @@ export default function AdminDashboard() {
               </div>
               <h2 style={{ fontFamily: "var(--font-h)", fontSize: "24px", fontWeight: 700, marginBottom: "8px" }}>Secure Access</h2>
               <p style={{ color: "var(--muted)", fontSize: "14px", marginBottom: "24px" }}>Enter the management PIN to access the Transaction Panel.</p>
-              
+
               <form onSubmit={(e) => {
                 e.preventDefault();
                 const fullPin = txPin.join("");

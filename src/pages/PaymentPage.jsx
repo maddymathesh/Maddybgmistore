@@ -52,6 +52,7 @@ export default function PaymentPage() {
           } else {
             setPaymentData(data);
             setIsValidLink(true);
+            if (!data.pin) setIsUnlocked(true);
           }
         } else {
           setIsValidLink(false);
@@ -68,7 +69,7 @@ export default function PaymentPage() {
 
   const handleUnlock = (e) => {
     e.preventDefault();
-    if (pin === "9025") {
+    if (!paymentData?.pin || pin === paymentData.pin) {
       setIsUnlocked(true);
       setError("");
     } else {
@@ -79,6 +80,8 @@ export default function PaymentPage() {
 
   const handleBankUnlock = (e) => {
     e.preventDefault();
+    // Default bank pin for extra security or just use page pin? 
+    // Let's use 1516 as requested or just unlock if page is unlocked.
     if (bankPin === "1516") {
       setBankUnlocked(true);
       setBankError("");
@@ -95,26 +98,9 @@ export default function PaymentPage() {
     });
   };
 
-  // Secure dynamic loading via client-side obfuscation
-  const encryptedUpi = paymentData?.encryptedUpi || "VFFWUUBIQlRAcEtXVQ==";
-  const encryptedName = paymentData?.encryptedName || "dHFmfXxjemJ4YnN7GWI=";
-
-  const decrypt = (base64, key) => {
-    try {
-      const text = atob(base64);
-      let result = "";
-      for (let i = 0; i < text.length; i++) {
-        result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-      }
-      return result;
-    } catch {
-      return "";
-    }
-  };
-
-  // User Specific Details (Dynamically Decrypted)
-  const upiId = isUnlocked ? decrypt(encryptedUpi, pin) : "";
-  const payeeName = isUnlocked ? decrypt(encryptedName, pin) : "";
+  // User Specific Details (Dynamically from DB)
+  const upiId = paymentData?.payee_upi || "";
+  const payeeName = paymentData?.payee_name || "";
   const currency = "INR";
 
   // Base UPI Link
@@ -197,9 +183,9 @@ export default function PaymentPage() {
                   <div style={{ display: "inline-flex", background: "rgba(255,215,0,0.1)", padding: "16px", borderRadius: "50%", marginBottom: "20px" }}>
                     <Lock size={36} color="var(--gold)" />
                   </div>
-                  <h1 style={{ fontFamily: "var(--font-h)", fontSize: "24px", marginBottom: "8px", color: "#fff" }}>Secured Payment page</h1>
+                  <h1 style={{ fontFamily: "var(--font-h)", fontSize: "24px", marginBottom: "8px", color: "#fff" }}>Secured Payment Page</h1>
                   <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "14px", marginBottom: "24px" }}>
-                    Please enter the PIN provided by admin to access the payment details.
+                    Please enter the PIN provided by the administrator to access the payment details.
                   </p>
 
                   <form onSubmit={handleUnlock} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
@@ -477,27 +463,27 @@ export default function PaymentPage() {
                           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                             <div>
                               <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", textTransform: "uppercase" }}>Bank Name</div>
-                              <div style={{ fontSize: "14px", fontWeight: "600", color: "#fff" }}>FEDERAL BANK</div>
+                              <div style={{ fontSize: "14px", fontWeight: "600", color: "#fff" }}>{paymentData?.bank_details?.bank_name || "FEDERAL BANK"}</div>
                             </div>
                             <div>
                               <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", textTransform: "uppercase" }}>Account Type</div>
-                              <div style={{ fontSize: "14px", fontWeight: "600", color: "#fff" }}>SAVINGS ACCOUNT</div>
+                              <div style={{ fontSize: "14px", fontWeight: "600", color: "#fff" }}>{paymentData?.bank_details?.account_type || "SAVINGS ACCOUNT"}</div>
                             </div>
                             <div>
                               <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", textTransform: "uppercase" }}>Account Holder</div>
-                              <div style={{ fontSize: "14px", fontWeight: "600", color: "var(--gold)" }}>MATHESHWARAN R</div>
+                              <div style={{ fontSize: "14px", fontWeight: "600", color: "var(--gold)" }}>{paymentData?.bank_details?.account_holder || "MATHESHWARAN R"}</div>
                             </div>
                             <div>
                               <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", textTransform: "uppercase" }}>Account Number</div>
-                              <div style={{ fontSize: "16px", fontWeight: "700", color: "#fff", letterSpacing: "1px" }}>23550100026910</div>
+                              <div style={{ fontSize: "16px", fontWeight: "700", color: "#fff", letterSpacing: "1px" }}>{paymentData?.bank_details?.account_number || "23550100026910"}</div>
                             </div>
                             <div>
                               <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", textTransform: "uppercase" }}>IFSC Code</div>
-                              <div style={{ fontSize: "16px", fontWeight: "700", color: "var(--gold)" }}>FDRL0002355</div>
+                              <div style={{ fontSize: "16px", fontWeight: "700", color: "var(--gold)" }}>{paymentData?.bank_details?.ifsc_code || "FDRL0002355"}</div>
                             </div>
                             <div>
                               <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", textTransform: "uppercase" }}>Branch</div>
-                              <div style={{ fontSize: "14px", fontWeight: "600", color: "#fff" }}>Alagusenai</div>
+                              <div style={{ fontSize: "14px", fontWeight: "600", color: "#fff" }}>{paymentData?.bank_details?.branch || "Alagusenai"}</div>
                             </div>
                           </div>
                         )}

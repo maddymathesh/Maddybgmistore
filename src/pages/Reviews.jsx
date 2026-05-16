@@ -55,7 +55,7 @@ export default function Reviews() {
   const handleReviewAdded = (newReview) => {
     // If review is pending, we don't show it yet
     if (newReview.status === 'approved') {
-       setReviews(prev => [newReview, ...prev]);
+      setReviews(prev => [newReview, ...prev]);
     }
   };
 
@@ -63,25 +63,25 @@ export default function Reviews() {
     <>
       <Navbar />
       <div style={{ paddingTop: "102px" }}>
-        
+
         <section style={{ position: "relative", width: "100%", minHeight: "80vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <img src="/reviews-banner.webp" alt="Banner" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.5)" }} />
           <div style={{ position: "relative", zIndex: 2, textAlign: "center" }}>
-             <h1 style={{ fontFamily: "var(--font-h)", fontSize: "clamp(30px,5.5vw,66px)", fontWeight: 900 }}>What Our<br /><span style={{ color: "var(--gold)" }}>Buyers Say</span></h1>
+            <h1 style={{ fontFamily: "var(--font-h)", fontSize: "clamp(30px,5.5vw,66px)", fontWeight: 900 }}>What Our<br /><span style={{ color: "var(--gold)" }}>Buyers Say</span></h1>
           </div>
         </section>
 
         <section className="section">
-           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "40px", maxWidth: "1200px", margin: "0 auto" }}>
-              <div style={{ textAlign: "center", padding: "30px", background: "var(--card)", borderRadius: "20px", border: "1px solid var(--border-gold)" }}>
-                <div style={{ fontSize: "64px", fontFamily: "var(--font-h)", fontWeight: 800, color: "var(--gold)" }}>{stats.averageRating.toFixed(1)}</div>
-                <div style={{ display: "flex", justifyContent: "center", gap: "4px", margin: "12px 0" }}>
-                   {[1,2,3,4,5].map(i => <Star key={i} size={20} fill="var(--gold)" color="var(--gold)" />)}
-                </div>
-                <div style={{ color: "var(--muted)" }}>Based on {stats.totalReviews} reviews</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "40px", maxWidth: "1200px", margin: "0 auto" }}>
+            <div style={{ textAlign: "center", padding: "30px", background: "var(--card)", borderRadius: "20px", border: "1px solid var(--border-gold)" }}>
+              <div style={{ fontSize: "64px", fontFamily: "var(--font-h)", fontWeight: 800, color: "var(--gold)" }}>{stats.averageRating.toFixed(1)}</div>
+              <div style={{ display: "flex", justifyContent: "center", gap: "4px", margin: "12px 0" }}>
+                {[1, 2, 3, 4, 5].map(i => <Star key={i} size={20} fill="var(--gold)" color="var(--gold)" />)}
               </div>
-              <ReviewForm onReviewAdded={handleReviewAdded} />
-           </div>
+              <div style={{ color: "var(--muted)" }}>Based on {stats.totalReviews} reviews</div>
+            </div>
+            <ReviewForm onReviewAdded={handleReviewAdded} />
+          </div>
         </section>
 
         <section className="section-alt">
@@ -89,17 +89,17 @@ export default function Reviews() {
             {reviews.map(r => (
               <div key={r.id} className="card" style={{ padding: "24px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-                   <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--gold)", color: "#000", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700 }}>
-                     {(r.name || "?")[0]}
-                   </div>
-                   <div>
-                     <div style={{ fontWeight: 700 }}>{r.name}</div>
-                     {r.tracking_id && <div style={{ fontSize: "11px", color: "var(--gold)", fontWeight: 600 }}>Order ID: {r.tracking_id}</div>}
-                     <div style={{ fontSize: "12px", color: "var(--muted)" }}>{new Date(r.created_at).toLocaleDateString()}</div>
-                   </div>
+                  <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--gold)", color: "#000", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700 }}>
+                    {(r.name || "?")[0]}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700 }}>{r.name}</div>
+                    {r.tracking_id && <div style={{ fontSize: "11px", color: "var(--gold)", fontWeight: 600 }}>Transaction ID: {r.tracking_id}</div>}
+                    <div style={{ fontSize: "12px", color: "var(--muted)" }}>{new Date(r.created_at).toLocaleDateString()}</div>
+                  </div>
                 </div>
                 <div style={{ display: "flex", gap: "2px", marginBottom: "12px" }}>
-                   {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={14} fill={i < (r.stars || 5) ? "var(--gold)" : "transparent"} color="var(--gold)" />)}
+                  {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={14} fill={i < (r.stars || 5) ? "var(--gold)" : "transparent"} color="var(--gold)" />)}
                 </div>
                 <p style={{ fontSize: "14px", lineHeight: 1.6 }}>{r.text}</p>
                 {r.image_url && <img src={r.image_url} alt="Proof" style={{ width: "100%", borderRadius: "8px", marginTop: "12px" }} />}

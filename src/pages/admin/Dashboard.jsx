@@ -12,7 +12,7 @@ import { useTransactionStore } from "../../store/useTransactionStore";
 import { useRef } from "react";
 import toast from "react-hot-toast";
 import Navbar from "../../components/Navbar";
-import { LogOut, Plus, Trash2, Pencil, Star, Copy, Users, TrendingUp, DollarSign, Camera, Coins, Zap, Car, Clock, ShieldCheck, User as UserIcon, Tag, Hash } from "lucide-react";
+import { LogOut, Plus, Trash2, Pencil, Star, Copy, Users, TrendingUp, DollarSign, Camera, Coins, Zap, Car, Clock, ShieldCheck, User as UserIcon, Tag, Hash, ArrowRightLeft } from "lucide-react";
 import { generateNextTransactionId, generateNextXsuitId, generateNextSupercarId, generateNextUcId } from "../../services/transactionService";
 import { db } from "../../firebase";
 import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, orderBy } from "firebase/firestore";
@@ -119,7 +119,8 @@ export default function AdminDashboard() {
     account_holder: "",
     account_number: "",
     ifsc_code: "",
-    branch: ""
+    branch: "",
+    payment_pin: ""
   });
   const [savingSettings, setSavingSettings] = useState(false);
 
@@ -139,35 +140,8 @@ export default function AdminDashboard() {
   const [carEditId, setCarEditId] = useState(null);
   const [carImage, setCarImage] = useState(null);
   const [savingCar, setSavingCar] = useState(false);
-  const [sales, setSales] = useState([]);
-  const [saleForm, setSaleForm] = useState(EMPTY_SALE);
-  const [savingSale, setSavingSale] = useState(false);
 
-  // Transaction Panel Auth
-  const isTxAuthenticated = useTransactionStore(state => state.isAuthenticated);
-  const loginTx = useTransactionStore(state => state.login);
-  const [showTxAuth, setShowTxAuth] = useState(false);
-  const [txPin, setTxPin] = useState(["", "", "", ""]);
-  const txInputRefs = [useRef(), useRef(), useRef(), useRef()];
 
-  const handleTxPinChange = (e, index) => {
-    const val = e.target.value;
-    if (!/^[0-9]*$/.test(val)) return;
-
-    const newPin = [...txPin];
-    newPin[index] = val.slice(-1);
-    setTxPin(newPin);
-
-    if (val && index < 3) {
-      txInputRefs[index + 1].current.focus();
-    }
-  };
-
-  const handleTxPinKeyDown = (e, index) => {
-    if (e.key === 'Backspace' && !txPin[index] && index > 0) {
-      txInputRefs[index - 1].current.focus();
-    }
-  };
 
   const fetchData = async () => {
     try {
@@ -179,7 +153,7 @@ export default function AdminDashboard() {
         { data: uc },
         { data: xs },
         { data: sc },
-        { data: s }
+        settingsResult
       ] = await Promise.all([
         supabase.from('products').select('*').order('created_at', { ascending: false }),
         supabase.from('reviews').select('*').order('created_at', { ascending: false }),
@@ -188,7 +162,6 @@ export default function AdminDashboard() {
         supabase.from('uc_prices').select('*').order('offer_price', { ascending: true }),
         supabase.from('xsuit_gifts').select('*').order('created_at', { ascending: false }),
         supabase.from('supercar_gifts').select('*').order('created_at', { ascending: false }),
-        supabase.from('sales').select('*, products(*)').order('deal_date', { ascending: false }),
         supabase.from('admin_payment_settings').select('*').eq('id', 1).single()
       ]);
 
@@ -197,11 +170,9 @@ export default function AdminDashboard() {
       setPaymentLinks(pl || []);
       setProofs(pr || []);
       setUcPrices(uc || []);
-      setUcPacks(uc || []);
       setXsuits(xs || []);
       setSupercars(sc || []);
-      setSales(s || []);
-      if (settings?.data) setPaymentSettings(settings.data);
+      if (settingsResult?.data) setPaymentSettings(settingsResult.data);
     } catch (globalErr) {
       console.error("Global Data Fetch Error:", globalErr);
     }
@@ -577,6 +548,16 @@ export default function AdminDashboard() {
     finally { setGeneratingLink(false); }
   };
 
+  const deletePaymentLink = async (id) => {
+    if (!confirm("Are you sure? This will PERMANENTLY delete this payment link.")) return;
+    try {
+      const { error } = await supabase.from('payment_links').delete().eq('id', id);
+      if (error) throw error;
+      toast.success("Link deleted forever!");
+      fetchData();
+    } catch (e) { toast.error(e.message); }
+  };
+
   const revokePaymentLink = async (id) => {
     if (!confirm("Revoke this payment link? The customer won't be able to use it.")) return;
     try {
@@ -587,90 +568,51 @@ export default function AdminDashboard() {
     } catch (e) { toast.error(e.message); }
   };
 
-  const deletePaymentLink = async (id) => {
-    if (!confirm("Delete this payment link permanently?")) return;
-    try {
-      const { error } = await supabase.from('payment_links').delete().eq('id', id);
-      if (error) throw error;
-      toast.success("Link deleted");
-      fetchData();
-    } catch (e) { toast.error(e.message); }
-  };
-
-  // ── Sales CRUD ──────────────────────────────────────────────
-  const saveSale = async () => {
-    if (!saleForm.sold_price) return toast.error("Sold Price is required");
-    setSavingSale(true);
-    try {
-      const profit = Number(saleForm.sold_price) - Number(saleForm.owner_price || 0);
-      const { error } = await supabase.from('sales').insert([{
-        ...saleForm,
-        profit,
-        owner_price: Number(saleForm.owner_price),
-        sold_price: Number(saleForm.sold_price),
-        created_at: new Date().toISOString()
-      }]);
-      if (error) throw error;
-      toast.success("Sale recorded!");
-      setSaleForm(EMPTY_SALE);
-      fetchData();
-    } catch (e) { toast.error(e.message); }
-    finally { setSavingSale(false); }
-  };
 
   // ── Render ─────────────────────────────────────────────────
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
       <Navbar />
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "100px 5% 60px" }}>
-
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "32px" }}>
-          <h1 style={{ fontFamily: "var(--font-h)", fontSize: "32px", fontWeight: 700 }}>
-            Admin <span style={{ color: "var(--gold)" }}>Panel</span>
+      <div className="admin-container" style={{ padding: "100px 5% 60px", maxWidth: "1600px", margin: "0 auto" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px", gap: "15px", flexWrap: "wrap" }}>
+          <h1 className="stitle" style={{ fontSize: "clamp(24px, 4vw, 32px)", margin: 0 }}>
+            Admin <span className="g">Panel</span>
           </h1>
-          <div style={{ display: "flex", gap: "10px" }}>
-            <button
-              onClick={() => {
-                logoutTx();
-                setShowTxAuth(true);
-              }}
-              className="btn btn-gold"
-            >
-              <DollarSign size={15} /> Transaction Panel
+          <div style={{ display: "flex", gap: "12px" }}>
+            <button onClick={() => navigate("/transactions")} className="btn btn-gold btn-sm" style={{ padding: "0 18px" }}>
+              <ArrowRightLeft size={14} /> <span className="hide-mobile">Transaction Panel</span>
             </button>
-            <button onClick={handleLogout} className="btn btn-outline" style={{ color: "#ef4444" }}>
-              <LogOut size={15} /> Logout
+            <button onClick={handleLogout} className="btn btn-outline btn-sm" style={{ borderColor: "var(--red)", color: "var(--red)" }}>
+              <LogOut size={14} /> Logout
             </button>
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: "4px", marginBottom: "28px", borderBottom: "1px solid rgba(255,215,0,0.15)", overflowX: "auto" }}>
-          {[
-            ["products", "Accounts "],
-            ["uc", "UC Packs"],
-            ["xsuits", "Xsuit Gifts"],
-            ["supercars", "Supercar Gifts"],
-            ["reviews", "Reviews"],
-            ["proofs", "Proofs"],
-            ["payment_links", "Payment Manager"]
-          ].map(([key, label]) => (
-            <button key={key} onClick={() => setTab(key)}
-              style={{
-                padding: "10px 24px", fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "12px",
-                background: tab === key ? "var(--gold)" : "transparent",
-                color: tab === key ? "#000" : "var(--muted)",
-                border: "none", borderRadius: "8px 8px 0 0", cursor: "pointer"
-              }}>
-              {label}
-            </button>
-          ))}
+        {/* Tab Navigation - Responsive Scroll */}
+        <div className="admin-tabs-scroll">
+          <div className="admin-tabs-inner">
+            {[
+              ["products", "Accounts"],
+              ["uc", "UC Packs"],
+              ["xsuits", "Xsuit Gifts"],
+              ["supercars", "Cars"],
+              ["reviews", "Reviews"],
+              ["proofs", "Proofs"],
+              ["payment_links", "Payments"]
+            ].map(([key, label]) => (
+              <button key={key} onClick={() => setTab(key)}
+                className={`admin-tab-btn ${tab === key ? 'active' : ''}`}>
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* PRODUCTS TAB */}
         {tab === "products" && (
-          <div style={{ display: "grid", gridTemplateColumns: "350px 1fr", gap: "24px" }}>
-            <div style={{ background: "var(--card)", padding: "24px", borderRadius: "14px", border: "1px solid var(--border-gold)" }}>
-              <h3 style={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px" }}><Plus size={18} /> {editId ? "Edit" : "Add"} Product</h3>
+          <div className="admin-grid">
+            <div className="admin-form-side">
+              <h3 className="form-title"><Plus size={18} /> {editId ? "Edit" : "Add"} Product</h3>
               <div style={{ display: "grid", gap: "12px" }}>
                 <input className="input" placeholder="YouTube Video URL" value={productForm.youtubeUrl} onChange={e => setProductForm({ ...productForm, youtubeUrl: e.target.value })} />
                 <input className="input" placeholder="Account Title (e.g. M416 Maxed 60K UC)" value={productForm.title} onChange={e => setProductForm({ ...productForm, title: e.target.value })} />
@@ -1238,6 +1180,10 @@ export default function AdminDashboard() {
                     <label style={sl}>Payee UPI ID (Edit)</label>
                     <input className="input" placeholder="e.g. example@upi" value={paymentSettings.payee_upi_id} onChange={e => setPaymentSettings({ ...paymentSettings, payee_upi_id: e.target.value })} />
                   </div>
+                  <div>
+                    <label style={sl}>Bank Details Access PIN (Optional)</label>
+                    <input className="input" type="text" maxLength={6} placeholder="e.g. 1516" value={paymentSettings.payment_pin} onChange={e => setPaymentSettings({ ...paymentSettings, payment_pin: e.target.value })} />
+                  </div>
                 </div>
 
                 <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "20px", marginTop: "20px" }}>
@@ -1416,60 +1362,64 @@ export default function AdminDashboard() {
                 ))}
               </div>
 
-              {/* Active Links Table */}
-              <div style={{ background: "var(--card)", borderRadius: "14px", overflow: "hidden", border: "1px solid rgba(34,197,94,0.2)" }}>
-                <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", background: "rgba(34,197,94,0.04)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <h3 style={{ fontSize: "14px", fontWeight: 800 }}>✅ Active Links</h3>
-                  <span style={{ fontSize: "11px", color: "var(--muted)" }}>{activeLinks.length} link{activeLinks.length !== 1 ? "s" : ""}</span>
+              {/* List of Links Table */}
+              <div style={{ background: "var(--card)", borderRadius: "14px", overflow: "hidden", border: "1px solid var(--border)" }}>
+                <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", background: "rgba(255,215,0,0.02)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <h3 style={{ fontSize: "14px", fontWeight: 800 }}>📋 Master Payment Registry</h3>
+                  <span style={{ fontSize: "11px", color: "var(--muted)" }}>{paymentLinks.length} total link{paymentLinks.length !== 1 ? "s" : ""}</span>
                 </div>
-                {activeLinks.length === 0 ? (
-                  <div style={{ textAlign: "center", padding: "40px", color: "var(--muted)", fontSize: "14px" }}>No active links. Generate one above.</div>
+                {paymentLinks.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "40px", color: "var(--muted)", fontSize: "14px" }}>No links found. Generate one above.</div>
                 ) : (
                   <div style={{ overflowX: "auto" }}>
                     <table style={{ width: "100%", fontSize: "13px", borderCollapse: "collapse", textAlign: "left" }}>
                       <thead style={{ background: "rgba(255,215,0,0.04)", textTransform: "uppercase", fontSize: "10px", letterSpacing: "1px", color: "var(--muted)" }}>
                         <tr>
                           <th style={{ padding: "12px 16px" }}>Link ID</th>
+                          <th>Status</th>
                           <th>Customer</th>
                           <th>Amount</th>
-                          <th>Note</th>
                           <th>Expires</th>
                           <th>Actions</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {activeLinks.map(link => {
+                        {paymentLinks.map(link => {
                           const fullUrl = `${siteBase}/pay/${link.id}`;
                           const isExpired = link.expires_at && new Date(link.expires_at) < new Date();
                           return (
                             <tr key={link.id} style={{ borderBottom: "1px solid var(--border)", opacity: isExpired ? 0.6 : 1 }}>
                               <td style={{ padding: "13px 16px", fontWeight: 700, fontFamily: "monospace", fontSize: "12px", color: "var(--gold)" }}>{link.id}</td>
+                              <td>
+                                <span style={{ 
+                                  padding: "2px 8px", borderRadius: "10px", fontSize: "10px", fontWeight: 800,
+                                  background: link.status === "active" ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)",
+                                  color: link.status === "active" ? "#22c55e" : "#ef4444"
+                                }}>
+                                  {link.status.toUpperCase()}
+                                </span>
+                              </td>
                               <td>{link.customer_name || "—"}</td>
                               <td><strong style={{ color: "var(--green)" }}>₹{Number(link.amount).toLocaleString("en-IN")}</strong></td>
-                              <td style={{ color: "var(--muted)", fontSize: "12px" }}>{link.note || "—"}</td>
                               <td style={{ fontSize: "11px", color: isExpired ? "#ef4444" : "var(--muted)" }}>
                                 {link.expires_at ? new Date(link.expires_at).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "No expiry"}
                                 {isExpired && <span style={{ marginLeft: "4px", fontWeight: 800 }}>(EXPIRED)</span>}
                               </td>
                               <td>
-                                <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                                <div style={{ display: "flex", gap: "6px" }}>
                                   <button
                                     onClick={() => { navigator.clipboard.writeText(fullUrl); toast.success("Link copied!"); }}
-                                    style={{ display: "flex", alignItems: "center", gap: "5px", padding: "6px 12px", borderRadius: "7px", background: "rgba(255,215,0,0.1)", color: "var(--gold)", border: "1px solid rgba(255,215,0,0.2)", cursor: "pointer", fontSize: "12px", fontWeight: 600 }}
+                                    className="btn btn-outline"
+                                    style={{ padding: "6px 10px", fontSize: "11px", borderColor: "var(--gold)", color: "var(--gold)" }}
                                   >
                                     <Copy size={12} /> Copy
                                   </button>
-                                  <a
-                                    href={fullUrl} target="_blank" rel="noreferrer"
-                                    style={{ display: "flex", alignItems: "center", gap: "5px", padding: "6px 12px", borderRadius: "7px", background: "rgba(59,130,246,0.1)", color: "#60a5fa", border: "1px solid rgba(59,130,246,0.2)", fontSize: "12px", fontWeight: 600, textDecoration: "none" }}
-                                  >
-                                    Open
-                                  </a>
                                   <button
-                                    onClick={() => revokePaymentLink(link.id)}
-                                    style={{ display: "flex", alignItems: "center", gap: "5px", padding: "6px 12px", borderRadius: "7px", background: "rgba(239,68,68,0.08)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", cursor: "pointer", fontSize: "12px", fontWeight: 600 }}
+                                    onClick={() => deletePaymentLink(link.id)}
+                                    className="btn btn-outline"
+                                    style={{ padding: "6px 10px", fontSize: "11px", borderColor: "#ef4444", color: "#ef4444" }}
                                   >
-                                    Revoke
+                                    <Trash2 size={12} /> Delete
                                   </button>
                                 </div>
                               </td>
@@ -1482,104 +1432,81 @@ export default function AdminDashboard() {
                 )}
               </div>
 
-              {/* Revoked / Old Links */}
-              {revokedLinks.length > 0 && (
-                <div style={{ background: "var(--card)", borderRadius: "14px", overflow: "hidden", border: "1px solid var(--border)" }}>
-                  <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", background: "rgba(239,68,68,0.03)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <h3 style={{ fontSize: "14px", fontWeight: 800, color: "#ef4444" }}>🚫 Revoked / Expired Links</h3>
-                    <span style={{ fontSize: "11px", color: "var(--muted)" }}>{revokedLinks.length} records</span>
-                  </div>
-                  <div style={{ overflowX: "auto" }}>
-                    <table style={{ width: "100%", fontSize: "13px", borderCollapse: "collapse", textAlign: "left", opacity: 0.7 }}>
-                      <thead style={{ background: "rgba(239,68,68,0.04)", textTransform: "uppercase", fontSize: "10px", letterSpacing: "1px", color: "var(--muted)" }}>
-                        <tr>
-                          <th style={{ padding: "12px 16px" }}>Link ID</th>
-                          <th>Customer</th>
-                          <th>Amount</th>
-                          <th>Status</th>
-                          <th>Delete</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {revokedLinks.map(link => (
-                          <tr key={link.id} style={{ borderBottom: "1px solid var(--border)" }}>
-                            <td style={{ padding: "12px 16px", fontFamily: "monospace", fontSize: "12px" }}>{link.id}</td>
-                            <td>{link.customer_name || "—"}</td>
-                            <td>₹{Number(link.amount).toLocaleString("en-IN")}</td>
-                            <td><span style={{ fontSize: "10px", background: "rgba(239,68,68,0.1)", color: "#ef4444", padding: "2px 8px", borderRadius: "4px", fontWeight: 800, textTransform: "uppercase" }}>{link.status}</span></td>
-                            <td>
-                              <button onClick={() => deletePaymentLink(link.id)} style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer" }}>
-                                <Trash2 size={14} />
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
 
             </div>
           );
         })()}
 
-        {/* Transaction Panel Auth Modal */}
-        {showTxAuth && (
-          <div style={{
-            position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
-            background: "rgba(0,0,0,0.85)", backdropFilter: "blur(10px)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            zIndex: 10000, padding: "20px"
-          }}>
-            <div className="card" style={{ maxWidth: "400px", width: "100%", padding: "40px 30px", textAlign: "center", border: "1px solid var(--border-gold)" }}>
-              <div style={{ width: "60px", height: "60px", borderRadius: "50%", background: "var(--gold-dim)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", color: "var(--gold)" }}>
-                <DollarSign size={30} />
-              </div>
-              <h2 style={{ fontFamily: "var(--font-h)", fontSize: "24px", fontWeight: 700, marginBottom: "8px" }}>Secure Access</h2>
-              <p style={{ color: "var(--muted)", fontSize: "14px", marginBottom: "24px" }}>Enter the management PIN to access the Transaction Panel.</p>
 
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                const fullPin = txPin.join("");
-                if (loginTx(fullPin)) {
-                  setShowTxAuth(false);
-                  setTxPin(["", "", "", ""]);
-                  navigate("/transactions");
-                } else {
-                  toast.error("Invalid PIN. Access Denied.");
-                  setTxPin(["", "", "", ""]);
-                  txInputRefs[0].current.focus();
-                }
-              }}>
-                <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginBottom: "24px" }}>
-                  {txPin.map((digit, i) => (
-                    <input
-                      key={i}
-                      ref={txInputRefs[i]}
-                      type="password"
-                      inputMode="numeric"
-                      maxLength={1}
-                      value={digit}
-                      onChange={e => handleTxPinChange(e, i)}
-                      onKeyDown={e => handleTxPinKeyDown(e, i)}
-                      className="input"
-                      style={{
-                        width: "50px", height: "60px", textAlign: "center", fontSize: "24px", fontWeight: 700,
-                        background: "rgba(255,215,0,0.05)", borderColor: digit ? "var(--gold)" : "var(--border-gold)"
-                      }}
-                      autoFocus={i === 0}
-                    />
-                  ))}
-                </div>
-                <div style={{ display: "flex", gap: "10px" }}>
-                  <button type="button" onClick={() => setShowTxAuth(false)} className="btn btn-outline" style={{ flex: 1 }}>Cancel</button>
-                  <button type="submit" disabled={txPin.join("").length !== 4} className="btn btn-gold" style={{ flex: 1 }}>Unlock</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+        {/* Styles for Responsiveness */}
+        <style>{`
+          .admin-container { color: var(--text); }
+          .admin-grid {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 24px;
+            align-items: start;
+          }
+          .admin-form-side {
+            background: var(--card);
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border-gold);
+            position: sticky;
+            top: 100px;
+          }
+          .form-title {
+            font-family: var(--font-h);
+            font-size: 18px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--gold);
+          }
+          .admin-tabs-scroll {
+            margin-bottom: 32px;
+            border-bottom: 1px solid var(--border-gold);
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+          }
+          .admin-tabs-scroll::-webkit-scrollbar { display: none; }
+          .admin-tabs-inner { display: flex; gap: 8px; min-width: max-content; }
+          .admin-tab-btn {
+            padding: 12px 24px;
+            font-family: var(--font-h);
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted);
+            border: none;
+            background: transparent;
+            border-radius: 10px 10px 0 0;
+            transition: all 0.2s;
+            cursor: pointer;
+          }
+          .admin-tab-btn.active { background: var(--gold); color: #000; }
+          
+          .admin-table-wrap {
+            background: var(--card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+          }
+          .table-responsive { overflow-x: auto; }
+
+          @media (max-width: 1024px) {
+            .admin-grid { grid-template-columns: 1fr; }
+            .admin-form-side { position: static; }
+          }
+          @media (max-width: 600px) {
+            .admin-container { padding: 80px 15px 40px; }
+            .admin-tab-btn { padding: 10px 15px; font-size: 11px; }
+            .hide-mobile { display: none; }
+          }
+        `}</style>
       </div>
     </div>
   );

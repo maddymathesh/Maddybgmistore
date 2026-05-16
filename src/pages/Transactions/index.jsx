@@ -21,14 +21,9 @@ import {
   Plus
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
 const SIDEBAR_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'transactions', label: 'Transactions', icon: Receipt },
-  { id: 'accounts', label: 'Accounts', icon: UserSquare2 },
-  { id: 'xsuit', label: 'XSuit', icon: Gift },
-  { id: 'supercars', label: 'Supercars', icon: Car },
-  { id: 'uc', label: 'UC', icon: Coins },
   { id: 'customers', label: 'Customers', icon: Users },
   { id: 'guarantees', label: 'Guarantees', icon: ShieldCheck },
   { id: 'proofs', label: 'Payment Proofs', icon: FileCheck },
@@ -65,23 +60,14 @@ export default function TransactionsLayout() {
   };
 
   return (
-    <div className="flex h-screen bg-[#050505] text-white overflow-hidden font-sans selection:bg-blue-500/30">
+    <div className="admin-layout" style={{ background: 'var(--bg)', color: 'var(--text)', fontFamily: 'var(--font-b)' }}>
       {/* Sidebar */}
-      <motion.aside 
-        initial={{ x: -300 }}
-        animate={{ x: 0 }}
-        className="w-64 bg-[#0a0a0a] border-r border-white/5 flex flex-col flex-shrink-0"
-      >
-        <div className="p-6 border-b border-white/5 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">
-              MBSx Panel
-            </h1>
-            <p className="text-xs text-white/40 mt-1">Transaction Management</p>
-          </div>
+      <aside className="admin-sidebar">
+        <div className="admin-sidebar-logo" style={{ lineHeight: 1.2 }}>
+          MBSx <br/><span style={{ fontSize: '14px' }}>Transaction Panel</span>
         </div>
 
-        <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1 custom-scrollbar">
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0 12px' }}>
           {SIDEBAR_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -89,69 +75,64 @@ export default function TransactionsLayout() {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-medium ${
-                  isActive
-                    ? 'bg-blue-600/10 text-blue-400'
-                    : 'text-white/60 hover:bg-white/5 hover:text-white'
-                }`}
+                className={`admin-nav-item ${isActive ? 'active' : ''}`}
+                style={{ width: '100%', border: 'none', background: isActive ? 'var(--gold-dim)' : 'transparent', borderRadius: '8px', marginBottom: '4px', justifyContent: 'flex-start' }}
               >
-                <Icon size={18} className={isActive ? 'text-blue-500' : 'text-white/40'} />
+                <Icon size={18} className="nav-icon" />
                 {item.label}
               </button>
             );
           })}
         </div>
 
-        <div className="p-4 border-t border-white/5">
+        <div style={{ padding: '24px', borderTop: '1px solid var(--border-gold)', marginTop: 'auto' }}>
           <button
             onClick={() => { logout(); navigate('/'); }}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-colors text-sm font-medium"
+            className="btn btn-outline"
+            style={{ width: '100%', color: 'var(--red)', borderColor: 'rgba(239, 68, 68, 0.3)', justifyContent: 'center' }}
           >
-            <LogOut size={18} />
-            Secure Logout
+            <LogOut size={16} />
+            Logout
           </button>
         </div>
-      </motion.aside>
+      </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 relative">
-        {/* Top Header */}
-        <header className="h-20 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-8 z-10">
+      <main className="admin-main">
+        <div className="admin-header">
           <div>
-            <h2 className="text-xl font-semibold text-white capitalize">
-              {activeTab.replace('_', ' ')}
-            </h2>
-            <p className="text-xs text-white/40 mt-1">
+            <h1 className="admin-title">
+              {activeTab.replace('_', ' ')} <span style={{ color: 'var(--gold)' }}>Panel</span>
+            </h1>
+            <p style={{ fontSize: '13px', color: 'var(--muted)', marginTop: '4px' }}>
               {new Date().toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
             </p>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
              {activeTab !== 'create_transaction' && activeTab !== 'dashboard' && (
                <button 
                 onClick={() => setActiveTab('create_transaction')}
-                className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl font-medium text-sm flex items-center gap-2 transition-colors shadow-lg shadow-blue-600/20"
+                className="btn btn-gold"
               >
                 <Plus size={16} /> New Transaction
               </button>
              )}
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center border-2 border-[#0a0a0a] shadow-lg">
-              <ShieldCheck size={20} className="text-white" />
+            <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--gold), var(--orange))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000' }}>
+              <ShieldCheck size={22} />
             </div>
           </div>
-        </header>
+        </div>
 
         {/* Content Render */}
-        <div className="flex-1 overflow-y-auto p-8 relative">
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-[150px] pointer-events-none" />
+        <div style={{ position: 'relative' }}>
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="h-full"
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.2 }}
             >
               {renderContent()}
             </motion.div>

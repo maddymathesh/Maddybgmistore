@@ -67,74 +67,65 @@ export default function PinLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4 relative overflow-hidden font-sans">
-      {/* Background Effects */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
-
+    <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', color: 'var(--text)', padding: '24px' }}>
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-        className="relative z-10 w-full max-w-md bg-[#0a0a0a]/80 backdrop-blur-2xl border border-white/10 rounded-[32px] p-10 shadow-2xl shadow-blue-900/20"
+        animate={isShaking ? { x: [-10, 10, -10, 10, 0] } : { opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4 }}
+        className="card"
+        style={{ width: '100%', maxWidth: '440px', padding: '40px 32px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
       >
-        <div className="flex flex-col items-center mb-10">
-          <motion.div
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="w-16 h-16 bg-gradient-to-tr from-blue-600 to-cyan-400 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30"
-          >
-            <ShieldCheck size={32} className="text-white" />
-          </motion.div>
-          <motion.h1
-            initial={{ y: -10, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-3xl font-bold text-white mb-2 tracking-tight"
-          >
-            System Access
-          </motion.h1>
-          <motion.p
-            initial={{ y: -10, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="text-white/50 text-sm flex items-center gap-2"
-          >
-            <Gamepad2 size={16} /> Enter your 4-digit security PIN
-          </motion.p>
+        <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--gold), var(--orange))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', marginBottom: '24px' }}>
+          <Lock size={32} />
         </div>
 
-        <motion.div
-          animate={isShaking ? { x: [-10, 10, -10, 10, 0] } : {}}
-          transition={{ duration: 0.4 }}
-          className="flex justify-center gap-4 mb-10"
-        >
-          {pin.map((digit, index) => (
-            <input
-              key={index}
-              ref={inputRefs[index]}
-              type="password"
-              inputMode="numeric"
-              maxLength={1}
-              value={digit}
-              onChange={(e) => handleChange(e, index)}
-              onKeyDown={(e) => handleKeyDown(e, index)}
-              className="w-16 h-20 bg-[#111] border-2 border-white/10 focus:border-blue-500 rounded-2xl text-center text-3xl font-bold text-white shadow-inner focus:outline-none focus:ring-4 focus:ring-blue-500/20 transition-all duration-200"
-            />
-          ))}
-        </motion.div>
+        <h1 style={{ fontFamily: 'var(--font-h)', fontSize: '28px', fontWeight: 700, marginBottom: '8px', textAlign: 'center' }}>
+          Admin Authentication
+        </h1>
+        <p style={{ color: 'var(--muted)', textAlign: 'center', marginBottom: '32px' }}>
+          Enter the management PIN to securely access the MBSx panel.
+        </p>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="flex justify-center"
-        >
-          <div className="flex items-center gap-2 text-xs text-white/40 bg-white/5 px-4 py-2 rounded-full border border-white/5">
-            <Lock size={12} /> Protected by 256-bit AES encryption
+        <form onSubmit={(e) => { e.preventDefault(); handleLogin(pin.join('')); }} style={{ width: '100%' }}>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginBottom: '32px' }}>
+            {pin.map((digit, i) => (
+              <motion.input
+                key={i}
+                ref={inputRefs[i]}
+                type="password"
+                inputMode="numeric"
+                maxLength={1}
+                value={digit}
+                onChange={e => handleChange(e, i)}
+                onKeyDown={e => handleKeyDown(e, i)}
+                className="input"
+                style={{
+                  width: '56px', height: '64px', textAlign: 'center', fontSize: '24px', fontWeight: 700,
+                  background: 'var(--bg2)', borderColor: digit ? 'var(--gold)' : 'var(--border-gold)',
+                  boxShadow: digit ? '0 0 15px rgba(255, 215, 0, 0.1)' : 'none'
+                }}
+              />
+            ))}
           </div>
-        </motion.div>
+
+          <button
+            type="submit"
+            disabled={pin.join('').length !== 4}
+            className="btn btn-gold"
+            style={{ width: '100%', justifyContent: 'center', padding: '16px' }}
+          >
+            Authenticate Securely
+          </button>
+        </form>
+
+        <div style={{ marginTop: '32px', display: 'flex', alignItems: 'center', gap: '24px', color: 'var(--muted)', fontSize: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <ShieldCheck size={14} style={{ color: 'var(--green)' }} /> 256-bit Secure
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Gamepad2 size={14} style={{ color: 'var(--gold)' }} /> System V2.0
+          </div>
+        </div>
       </motion.div>
     </div>
   );

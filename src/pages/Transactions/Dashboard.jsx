@@ -91,44 +91,38 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="admin-stat-grid">
         {[1, 2, 3, 4].map(i => (
-          <div key={i} className="h-40 bg-white/5 rounded-2xl animate-pulse border border-white/10" />
+          <div key={i} style={{ height: '120px', background: 'var(--card)', borderRadius: 'var(--radius)', border: '1px solid var(--border-gold)', opacity: 0.5 }} className="animate-pulse" />
         ))}
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
+    <div style={{ display: 'grid', gap: '32px' }}>
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="admin-stat-grid">
         {statCards.map((stat, i) => {
           const Icon = stat.icon;
           return (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="relative overflow-hidden bg-[#111] border border-white/5 rounded-2xl p-6 group hover:border-white/10 transition-colors"
+              className="admin-stat-card"
+              style={{ position: 'relative', overflow: 'hidden' }}
             >
-              <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${stat.color} rounded-full blur-[80px] opacity-20 group-hover:opacity-40 transition-opacity`} />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <div style={{ width: '42px', height: '42px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg2)', border: '1px solid var(--border-gold)', color: 'var(--gold)' }}>
+                  <Icon size={20} />
+                </div>
+              </div>
               
-              <div className="relative z-10 flex flex-col h-full justify-between">
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${stat.bgLight}`}>
-                    <Icon size={24} className={stat.text} />
-                  </div>
-                  <div className="flex items-center gap-1 text-xs text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-full">
-                    <ArrowUpRight size={14} /> +2.4%
-                  </div>
-                </div>
-                
-                <div>
-                  <h3 className="text-white/50 text-sm font-medium mb-1">{stat.title}</h3>
-                  <div className="text-3xl font-bold text-white tracking-tight">{stat.value}</div>
-                </div>
+              <div>
+                <div className="label">{stat.title}</div>
+                <div className="value">{stat.value}</div>
               </div>
             </motion.div>
           );
@@ -136,25 +130,25 @@ export default function Dashboard() {
       </div>
 
       {/* Placeholder for Charts / Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="col-span-2 bg-[#111] border border-white/5 rounded-2xl p-6 min-h-[400px]">
-          <h3 className="text-lg font-semibold text-white mb-6">Revenue Analytics</h3>
-          <div className="flex items-center justify-center h-[300px] text-white/30 border-2 border-dashed border-white/5 rounded-xl">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+        <div className="card" style={{ minHeight: '400px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '24px' }}>Revenue Analytics</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '260px', color: 'var(--muted)', border: '2px dashed var(--border)', borderRadius: 'var(--radius)' }}>
             Chart Integration Pending
           </div>
         </div>
-        <div className="bg-[#111] border border-white/5 rounded-2xl p-6 min-h-[400px]">
-          <h3 className="text-lg font-semibold text-white mb-6">Recent Activity</h3>
-          <div className="space-y-4">
+        <div className="card" style={{ minHeight: '400px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '24px' }}>Recent Activity</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
              {/* Mock Activity */}
              {[1,2,3,4,5].map(i => (
-                <div key={i} className="flex items-center gap-4 border-b border-white/5 pb-4 last:border-0">
-                  <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/50">
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px', borderBottom: '1px solid var(--border)', paddingBottom: '16px' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--bg2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gold)' }}>
                     {i}
                   </div>
                   <div>
-                    <p className="text-sm text-white">New Sale recorded</p>
-                    <p className="text-xs text-white/40">2 hours ago</p>
+                    <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text)' }}>New Sale recorded</p>
+                    <p style={{ fontSize: '12px', color: 'var(--muted)' }}>2 hours ago</p>
                   </div>
                 </div>
              ))}

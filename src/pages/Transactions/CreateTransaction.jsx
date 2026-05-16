@@ -6,10 +6,10 @@ import { createTransaction } from '../../services/transactionService';
 import toast from 'react-hot-toast';
 
 const TYPES = [
-  { id: 'Account', label: 'BGMI Account', icon: UserSquare2, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-  { id: 'XSuit', label: 'XSuit Gift', icon: Gift, color: 'text-purple-500', bg: 'bg-purple-500/10' },
-  { id: 'Supercar', label: 'Supercar Gift', icon: Car, color: 'text-rose-500', bg: 'bg-rose-500/10' },
-  { id: 'UC', label: 'UC Transfer', icon: Coins, color: 'text-amber-500', bg: 'bg-amber-500/10' }
+  { id: 'Account', label: 'BGMI Account', icon: UserSquare2 },
+  { id: 'XSuit', label: 'XSuit Gift', icon: Gift },
+  { id: 'Supercar', label: 'Supercar Gift', icon: Car },
+  { id: 'UC', label: 'UC Transfer', icon: Coins }
 ];
 
 export default function CreateTransaction({ onBack }) {
@@ -60,20 +60,21 @@ export default function CreateTransaction({ onBack }) {
     }
   };
 
-  const inputClass = "w-full bg-[#0a0a0a] border border-white/10 rounded-xl py-3 px-4 text-sm text-white placeholder-white/30 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all";
-  const labelClass = "block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider";
+  const inputClass = "input";
+  const labelClass = "slabel";
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'grid', gap: '24px' }}>
       <button 
         onClick={onBack}
-        className="flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm font-medium"
+        className="btn-outline"
+        style={{ padding: '8px 16px', fontSize: '12px', width: 'fit-content' }}
       >
         <ArrowLeft size={16} /> Back to Transactions
       </button>
 
       {/* Type Selector */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
         {TYPES.map(type => {
           const Icon = type.icon;
           const isActive = selectedType === type.id;
@@ -81,33 +82,32 @@ export default function CreateTransaction({ onBack }) {
             <button
               key={type.id}
               onClick={() => { setSelectedType(type.id); reset({ transaction_id: `TXN-${Date.now().toString(36).toUpperCase()}`, transaction_date: new Date().toISOString().split('T')[0], payment_status: 'Pending', mode_of_deal: 'Telegram' }); }}
-              className={`relative overflow-hidden flex flex-col items-center justify-center p-6 rounded-2xl border transition-all duration-300 ${
-                isActive 
-                  ? 'bg-[#111] border-white/20 shadow-xl' 
-                  : 'bg-[#0a0a0a] border-white/5 hover:border-white/10 opacity-60 hover:opacity-100'
-              }`}
+              className="card"
+              style={{ 
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+                borderColor: isActive ? 'var(--gold)' : 'var(--border-gold)',
+                background: isActive ? 'var(--gold-dim)' : 'var(--card)',
+                padding: '24px',
+              }}
             >
-              {isActive && (
-                <div className={`absolute top-0 right-0 w-24 h-24 rounded-full blur-[50px] opacity-20 ${type.bg}`} />
-              )}
-              {isActive && <CheckCircle2 size={16} className={`absolute top-3 right-3 ${type.color}`} />}
-              <div className={`w-12 h-12 rounded-full mb-3 flex items-center justify-center ${isActive ? type.bg : 'bg-white/5'}`}>
-                <Icon size={24} className={isActive ? type.color : 'text-white/40'} />
+              {isActive && <CheckCircle2 size={16} style={{ position: 'absolute', top: '12px', right: '12px', color: 'var(--gold)' }} />}
+              <div style={{ width: '48px', height: '48px', borderRadius: '50%', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: isActive ? 'var(--gold)' : 'var(--bg2)', color: isActive ? '#000' : 'var(--muted)' }}>
+                <Icon size={24} />
               </div>
-              <span className={`text-sm font-medium ${isActive ? 'text-white' : 'text-white/60'}`}>{type.label}</span>
+              <span style={{ fontSize: '14px', fontWeight: 700, color: isActive ? 'var(--gold)' : 'var(--muted)' }}>{type.label}</span>
             </button>
           );
         })}
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit(onSubmit)} className="bg-[#111] border border-white/5 rounded-2xl p-8 relative overflow-hidden">
-        <h3 className="text-xl font-semibold text-white mb-6 border-b border-white/5 pb-4 flex items-center justify-between">
+      <form onSubmit={handleSubmit(onSubmit)} className="card" style={{ padding: '32px' }}>
+        <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '24px', borderBottom: '1px solid var(--border)', paddingBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span>{selectedType} Details</span>
-          <span className="text-sm font-mono text-white/40">{watch('transaction_id')}</span>
+          <span style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--muted)' }}>{watch('transaction_id')}</span>
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
           {/* Common Fields */}
           <div>
             <label className={labelClass}>Transaction Date</label>
@@ -130,7 +130,7 @@ export default function CreateTransaction({ onBack }) {
             </select>
           </div>
 
-          <div className="col-span-1 md:col-span-3 border-t border-white/5 my-2" />
+          <div style={{ gridColumn: '1 / -1', height: '1px', background: 'var(--border)', margin: '8px 0' }} />
 
           {/* Dynamic Fields based on Type */}
           {selectedType === 'Account' && (
@@ -180,7 +180,7 @@ export default function CreateTransaction({ onBack }) {
                 <label className={labelClass}>Unlink Eligible Date</label>
                 <input type="date" {...register('unlink_eligible_date')} className={inputClass} />
               </div>
-              <div className="col-span-1 md:col-span-3">
+              <div style={{ gridColumn: '1 / -1' }}>
                 <label className={labelClass}>Credentials (Email:Password:Recovery)</label>
                 <textarea {...register('credentials')} rows={3} className={inputClass} placeholder="user@gmail.com:pass123:recov@gmail.com" />
               </div>
@@ -215,7 +215,7 @@ export default function CreateTransaction({ onBack }) {
             </>
           )}
 
-          <div className="col-span-1 md:col-span-3 border-t border-white/5 my-2" />
+          <div style={{ gridColumn: '1 / -1', height: '1px', background: 'var(--border)', margin: '8px 0' }} />
 
           {/* Financials & Contacts */}
           <div>
@@ -228,7 +228,7 @@ export default function CreateTransaction({ onBack }) {
           </div>
           <div>
             <label className={labelClass}>Profit (₹)</label>
-            <div className="w-full bg-blue-500/10 border border-blue-500/20 rounded-xl py-3 px-4 text-sm font-bold text-blue-400">
+            <div className="input" style={{ background: 'var(--gold-dim)', borderColor: 'var(--gold)', color: 'var(--gold)', fontWeight: 700 }}>
               ₹{profit.toLocaleString()}
             </div>
           </div>
@@ -242,11 +242,11 @@ export default function CreateTransaction({ onBack }) {
           )}
         </div>
 
-        <div className="mt-8 pt-6 border-t border-white/5 flex justify-end gap-4">
-          <button type="button" onClick={onBack} className="px-6 py-2.5 rounded-xl border border-white/10 text-white/70 hover:text-white hover:bg-white/5 transition-colors text-sm font-medium">
+        <div style={{ marginTop: '32px', paddingTop: '24px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: '16px' }}>
+          <button type="button" onClick={onBack} className="btn btn-outline">
             Cancel
           </button>
-          <button type="submit" disabled={isSubmitting} className="px-8 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-colors text-sm font-medium flex items-center gap-2 shadow-lg shadow-blue-600/20 disabled:opacity-50">
+          <button type="submit" disabled={isSubmitting} className="btn btn-gold">
             {isSubmitting ? 'Saving...' : <><Save size={18} /> Complete Transaction</>}
           </button>
         </div>

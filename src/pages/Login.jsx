@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, getRedirectResult } from "firebase/auth";
 import { auth } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
@@ -18,22 +18,39 @@ export default function Login() {
   // If already logged in, redirect appropriately
   useEffect(() => {
     if (user) navigate(isAdmin ? "/admin" : from, { replace: true });
+    
+    // Handle redirect result
+    getRedirectResult(auth).then((result) => {
+      if (result) toast.success("Logged in with Google!");
+    }).catch((error) => {
+      if (error.code !== 'auth/redirect-cancelled') {
+        toast.error(error.message);
+      }
+    });
   }, [user, isAdmin, navigate, from]);
 
-  const googleLogin = () => {
+
+  const googleLogin = async () => {
     setLoading(true);
     const provider = new GoogleAuthProvider();
+    // Add custom parameters to provider if needed
+    provider.setCustomParameters({ prompt: 'select_account' });
     
-    signInWithPopup(auth, provider)
-      .then(() => {
-        toast.success("Logged in successfully!");
-      })
-      .catch((error) => {
-        toast.error(error.message);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    try {
+      await signInWithPopup(auth, provider);
+      toast.success("Logged in successfully!");
+    } catch (error) {
+      console.error("Google Login Error:", error);
+      if (error.code === 'auth/popup-blocked') {
+        toast.error("Popup blocked! Please allow popups for this site or try again.");
+      } else if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/popup-closed-by-user') {
+        // Silently handle user cancellation
+      } else {
+        toast.error(error.message || "Failed to login with Google");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

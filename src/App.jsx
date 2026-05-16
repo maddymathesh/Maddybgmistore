@@ -231,7 +231,9 @@ export default function App() {
           path="/transactions"
           element={
             <Suspense fallback={<PageLoader />}>
-              <Transactions />
+              <ProtectedRoute>
+                <Transactions />
+              </ProtectedRoute>
             </Suspense>
           }
         />

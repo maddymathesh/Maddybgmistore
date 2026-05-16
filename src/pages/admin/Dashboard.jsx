@@ -8,6 +8,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../utils/supabase";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useTransactionStore } from "../../store/useTransactionStore";
+import { useRef } from "react";
 import toast from "react-hot-toast";
 import Navbar from "../../components/Navbar";
 import { LogOut, Plus, Trash2, Pencil, Star, Copy, Users, TrendingUp, DollarSign, Camera, Coins, Zap, Car } from "lucide-react";
@@ -94,7 +96,7 @@ export default function AdminDashboard() {
 
   const [paymentLinks, setPaymentLinks] = useState([]);
   const [generatingLink, setGeneratingLink] = useState(false);
-  const [paymentForm, setPaymentForm] = useState({ customer_name: "", amount: "", note: "", expires_in: "24" });
+  const [paymentForm, setPaymentForm] = useState({ customer_name: "", amount: "", note: "", expires_in: "24", pin: "9025" });
 
   const [ucPrices, setUcPrices] = useState([]);
   const [ucForm, setUcForm] = useState(EMPTY_UC);
@@ -116,6 +118,32 @@ export default function AdminDashboard() {
   const [sales, setSales] = useState([]);
   const [saleForm, setSaleForm] = useState(EMPTY_SALE);
   const [savingSale, setSavingSale] = useState(false);
+
+  // Transaction Panel Auth
+  const isTxAuthenticated = useTransactionStore(state => state.isAuthenticated);
+  const loginTx = useTransactionStore(state => state.login);
+  const [showTxAuth, setShowTxAuth] = useState(false);
+  const [txPin, setTxPin] = useState(["", "", "", ""]);
+  const txInputRefs = [useRef(), useRef(), useRef(), useRef()];
+
+  const handleTxPinChange = (e, index) => {
+    const val = e.target.value;
+    if (!/^[0-9]*$/.test(val)) return;
+
+    const newPin = [...txPin];
+    newPin[index] = val.slice(-1);
+    setTxPin(newPin);
+
+    if (val && index < 3) {
+      txInputRefs[index + 1].current.focus();
+    }
+  };
+
+  const handleTxPinKeyDown = (e, index) => {
+    if (e.key === 'Backspace' && !txPin[index] && index > 0) {
+      txInputRefs[index - 1].current.focus();
+    }
+  };
 
   // ── Real-time listeners (Simulated with fetch on tab change or updates) ──
   const fetchData = async () => {
@@ -170,7 +198,12 @@ export default function AdminDashboard() {
     if (user !== undefined && !isAdmin) navigate("/");
   }, [user, isAdmin, navigate]);
 
-  const handleLogout = async () => { await logout(); navigate("/"); };
+  const logoutTx = useTransactionStore(state => state.logout);
+  const handleLogout = async () => { 
+    logoutTx();
+    await logout(); 
+    navigate("/"); 
+  };
 
   // ── Product CRUD ───────────────────────────────────────────
   const saveProduct = async () => {
@@ -447,6 +480,7 @@ export default function AdminDashboard() {
         note: paymentForm.note,
         status: "active",
         expires_at: expiresAt,
+        pin: paymentForm.pin || "9025",
       }]);
       if (error) throw error;
       toast.success(`Payment link generated! ID: ${linkId}`);
@@ -506,9 +540,20 @@ export default function AdminDashboard() {
           <h1 style={{ fontFamily: "var(--font-h)", fontSize: "32px", fontWeight: 700 }}>
             Admin <span style={{ color: "var(--gold)" }}>Panel</span>
           </h1>
-          <button onClick={handleLogout} className="btn btn-outline" style={{ color: "#ef4444" }}>
-            <LogOut size={15} /> Logout
-          </button>
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button 
+              onClick={() => {
+                logoutTx();
+                setShowTxAuth(true);
+              }} 
+              className="btn btn-gold"
+            >
+              <DollarSign size={15} /> Transaction Panel
+            </button>
+            <button onClick={handleLogout} className="btn btn-outline" style={{ color: "#ef4444" }}>
+              <LogOut size={15} /> Logout
+            </button>
+          </div>
         </div>
 
         <div style={{ display: "flex", gap: "4px", marginBottom: "28px", borderBottom: "1px solid rgba(255,215,0,0.15)", overflowX: "auto" }}>
@@ -1071,6 +1116,10 @@ export default function AdminDashboard() {
                     <label style={sl}>Note (Optional)</label>
                     <input className="input" placeholder="e.g. BGMI Account #XYZ" value={paymentForm.note} onChange={e => setPaymentForm({...paymentForm, note: e.target.value})} />
                   </div>
+                  <div>
+                    <label style={sl}>Access PIN / Password</label>
+                    <input className="input" placeholder="9025" value={paymentForm.pin} onChange={e => setPaymentForm({...paymentForm, pin: e.target.value})} />
+                  </div>
                 </div>
                 <button
                   onClick={generatePaymentLink}
@@ -1204,6 +1253,62 @@ export default function AdminDashboard() {
           );
         })()}
 
+        {/* Transaction Panel Auth Modal */}
+        {showTxAuth && (
+          <div style={{
+            position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+            background: "rgba(0,0,0,0.85)", backdropFilter: "blur(10px)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            zIndex: 10000, padding: "20px"
+          }}>
+            <div className="card" style={{ maxWidth: "400px", width: "100%", padding: "40px 30px", textAlign: "center", border: "1px solid var(--border-gold)" }}>
+              <div style={{ width: "60px", height: "60px", borderRadius: "50%", background: "var(--gold-dim)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", color: "var(--gold)" }}>
+                <DollarSign size={30} />
+              </div>
+              <h2 style={{ fontFamily: "var(--font-h)", fontSize: "24px", fontWeight: 700, marginBottom: "8px" }}>Secure Access</h2>
+              <p style={{ color: "var(--muted)", fontSize: "14px", marginBottom: "24px" }}>Enter the management PIN to access the Transaction Panel.</p>
+              
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                const fullPin = txPin.join("");
+                if (loginTx(fullPin)) {
+                  setShowTxAuth(false);
+                  setTxPin(["", "", "", ""]);
+                  navigate("/transactions");
+                } else {
+                  toast.error("Invalid PIN. Access Denied.");
+                  setTxPin(["", "", "", ""]);
+                  txInputRefs[0].current.focus();
+                }
+              }}>
+                <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginBottom: "24px" }}>
+                  {txPin.map((digit, i) => (
+                    <input
+                      key={i}
+                      ref={txInputRefs[i]}
+                      type="password"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={digit}
+                      onChange={e => handleTxPinChange(e, i)}
+                      onKeyDown={e => handleTxPinKeyDown(e, i)}
+                      className="input"
+                      style={{
+                        width: "50px", height: "60px", textAlign: "center", fontSize: "24px", fontWeight: 700,
+                        background: "rgba(255,215,0,0.05)", borderColor: digit ? "var(--gold)" : "var(--border-gold)"
+                      }}
+                      autoFocus={i === 0}
+                    />
+                  ))}
+                </div>
+                <div style={{ display: "flex", gap: "10px" }}>
+                  <button type="button" onClick={() => setShowTxAuth(false)} className="btn btn-outline" style={{ flex: 1 }}>Cancel</button>
+                  <button type="submit" disabled={txPin.join("").length !== 4} className="btn btn-gold" style={{ flex: 1 }}>Unlock</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

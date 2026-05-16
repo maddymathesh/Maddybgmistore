@@ -21,7 +21,8 @@ export function AuthProvider({ children }) {
 
   const logout = () => signOut(auth);
 
-  const isAdmin = user && (user.uid === ADMIN_UID_1 || user.uid === ADMIN_UID_2);
+  const isAdmin = user && (user.uid === ADMIN_UID_1 
+                           || user.uid === ADMIN_UID_2);
 
   return (
     <AuthContext.Provider value={{ user, loading, logout, isAdmin }}>

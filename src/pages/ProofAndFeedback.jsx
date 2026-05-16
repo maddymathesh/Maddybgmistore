@@ -16,12 +16,17 @@ export default function ProofAndFeedback() {
 
   useEffect(() => {
     const fetchProofs = async () => {
-      const { data, error } = await supabase
-        .from('proofs')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (!error) setProofs(data);
-      setLoading(false);
+      try {
+        const { data } = await supabase
+          .from('proofs')
+          .select('*')
+          .order('created_at', { ascending: false });
+        setProofs(data || []);
+      } catch (err) {
+        console.error('Error fetching proofs:', err);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchProofs();
   }, []);

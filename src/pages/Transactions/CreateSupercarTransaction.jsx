@@ -86,12 +86,24 @@ function SupercarSelect({ value, onChange }) {
 }
 
 // ── Main Component ────────────────────────────────────────────────────────────
+const Label = ({ children }) => <label className="slabel" style={{ display: 'block', marginBottom: '6px' }}>{children}</label>;
+
 export default function CreateSupercarTransaction({ onBack }) {
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [savedTransaction, setSavedTransaction] = useState(null);
   const [nextId, setNextId] = useState('Loading...');
   const [supercarName, setSupercarName] = useState('');
+  const [canSubmit, setCanSubmit] = useState(false);
+
+  useEffect(() => {
+    if (step === STEPS.length - 1) {
+      setCanSubmit(false);
+      const t = setTimeout(() => setCanSubmit(true), 600);
+      return () => clearTimeout(t);
+    }
+  }, [step]);
+
 
   const { register, handleSubmit, watch, setValue } = useForm({
     defaultValues: {
@@ -159,9 +171,7 @@ export default function CreateSupercarTransaction({ onBack }) {
     }
   };
 
-  const Label = ({ children }) => (
-    <label className="slabel" style={{ display: 'block', marginBottom: '6px' }}>{children}</label>
-  );
+
   const grid = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' };
 
   // ── SUCCESS SCREEN ──────────────────────────────────────────────────────────
@@ -410,7 +420,7 @@ export default function CreateSupercarTransaction({ onBack }) {
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }}>
         <AnimatePresence mode="wait">
           <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.18 }} className="card" style={{ padding: '32px' }}>
@@ -434,7 +444,7 @@ export default function CreateSupercarTransaction({ onBack }) {
               Next Step <ChevronRight size={16} />
             </button>
           ) : (
-            <button type="submit" disabled={isSubmitting} className="btn btn-gold" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button type="submit" disabled={isSubmitting || !canSubmit} className="btn btn-gold" style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: (!canSubmit && !isSubmitting) ? 0.5 : 1 }}>
               {isSubmitting
                 ? <><span style={{ width: '15px', height: '15px', border: '2px solid rgba(0,0,0,0.3)', borderTopColor: '#000', borderRadius: '50%', display: 'inline-block', animation: 'spin .7s linear infinite' }} /> Saving...</>
                 : <><Save size={16} /> Save Transaction</>}

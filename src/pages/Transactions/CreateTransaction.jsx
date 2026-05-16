@@ -22,11 +22,29 @@ const STEPS = [
 const inp = 'input';
 const sel = 'input'; // reuse same class for selects via select.input in CSS
 
+const Label = ({ children }) => (
+  <label className="slabel" style={{ display: 'block', marginBottom: '6px' }}>{children}</label>
+);
+
+const Field = ({ children, span }) => (
+  <div style={{ gridColumn: span ? '1 / -1' : undefined }}>{children}</div>
+);
+
 export default function CreateTransaction({ onBack }) {
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [savedTransaction, setSavedTransaction] = useState(null);
   const [nextId, setNextId] = useState('Loading...');
+  const [canSubmit, setCanSubmit] = useState(false);
+
+  useEffect(() => {
+    if (step === STEPS.length - 1) {
+      setCanSubmit(false);
+      const t = setTimeout(() => setCanSubmit(true), 600);
+      return () => clearTimeout(t);
+    }
+  }, [step]);
+
 
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
     defaultValues: {
@@ -107,13 +125,6 @@ export default function CreateTransaction({ onBack }) {
     }
   };
 
-  const Label = ({ children }) => (
-    <label className="slabel" style={{ display: 'block', marginBottom: '6px' }}>{children}</label>
-  );
-
-  const Field = ({ children, span }) => (
-    <div style={{ gridColumn: span ? '1 / -1' : undefined }}>{children}</div>
-  );
 
   const grid = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px' };
 
@@ -437,7 +448,7 @@ export default function CreateTransaction({ onBack }) {
       </div>
 
       {/* Form card */}
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }}>
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
@@ -480,9 +491,9 @@ export default function CreateTransaction({ onBack }) {
           ) : (
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !canSubmit}
               className="btn btn-gold"
-              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: (!canSubmit && !isSubmitting) ? 0.5 : 1 }}
             >
               {isSubmitting ? (
                 <><span style={{ width: '16px', height: '16px', border: '2px solid rgba(0,0,0,0.3)', borderTopColor: '#000', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite' }} /> Saving...</>

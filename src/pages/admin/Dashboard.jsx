@@ -114,7 +114,6 @@ export default function AdminDashboard() {
   const [carEditId, setCarEditId] = useState(null);
   const [carImage, setCarImage] = useState(null);
   const [savingCar, setSavingCar] = useState(false);
-
   const [sales, setSales] = useState([]);
   const [saleForm, setSaleForm] = useState(EMPTY_SALE);
   const [savingSale, setSavingSale] = useState(false);
@@ -145,44 +144,35 @@ export default function AdminDashboard() {
     }
   };
 
-  // ── Real-time listeners (Simulated with fetch on tab change or updates) ──
   const fetchData = async () => {
     try {
-      const { data: p, error: pErr } = await supabase.from('products').select('*').order('created_at', { ascending: false });
-      if (pErr) console.error("Products Fetch Error:", pErr);
+      const [
+        { data: p }, 
+        { data: r }, 
+        { data: pl }, 
+        { data: pr }, 
+        { data: uc }, 
+        { data: xs }, 
+        { data: sc }, 
+        { data: s }
+      ] = await Promise.all([
+        supabase.from('products').select('*').order('created_at', { ascending: false }),
+        supabase.from('reviews').select('*').order('created_at', { ascending: false }),
+        supabase.from('payment_links').select('*').order('created_at', { ascending: false }),
+        supabase.from('proofs').select('*').order('created_at', { ascending: false }),
+        supabase.from('uc_prices').select('*').order('offer_price', { ascending: true }),
+        supabase.from('xsuit_gifts').select('*').order('created_at', { ascending: false }),
+        supabase.from('supercar_gifts').select('*').order('created_at', { ascending: false }),
+        supabase.from('sales').select('*, products(*)').order('deal_date', { ascending: false })
+      ]);
+
       setProducts(p || []);
-
-      const { data: r, error: rErr } = await supabase.from('reviews').select('*').order('created_at', { ascending: false });
-      if (rErr) console.error("Reviews Fetch Error:", rErr);
       setReviews(r || []);
-
-      const { data: pl, error: plErr } = await supabase.from('payment_links').select('*').order('created_at', { ascending: false });
-      if (plErr) console.error("Payment Links Fetch Error:", plErr);
       setPaymentLinks(pl || []);
-
-      const { data: pr, error: prErr } = await supabase.from('proofs').select('*').order('created_at', { ascending: false });
-      if (prErr) console.error("Proofs Fetch Error:", prErr);
       setProofs(pr || []);
-
-      const { data: uc, error: ucErr } = await supabase.from('uc_prices').select('*').order('offer_price', { ascending: true });
-      if (ucErr) console.error("UC Prices Fetch Error:", ucErr);
       setUcPrices(uc || []);
-
-      const { data: xs, error: xsErr } = await supabase.from('xsuit_gifts').select('*').order('price', { ascending: true });
-      if (xsErr) console.error("Xsuits Fetch Error:", xsErr);
       setXsuits(xs || []);
-
-      // Firebase Firestore for Supercars
-      try {
-        const carQuery = query(collection(db, "supercar_gifts"), orderBy("type", "asc"), orderBy("price", "asc"));
-        const carSnap = await getDocs(carQuery);
-        setSupercars(carSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      } catch (carErr) {
-        console.error("Supercars Fetch Error:", carErr);
-      }
-
-      const { data: s, error: sErr } = await supabase.from('sales').select('*, products(title)').order('created_at', { ascending: false });
-      if (sErr) console.error("Sales Fetch Error:", sErr);
+      setSupercars(sc || []);
       setSales(s || []);
     } catch (globalErr) {
       console.error("Global Data Fetch Error:", globalErr);
@@ -240,12 +230,12 @@ export default function AdminDashboard() {
 
   const deleteProduct = async (id) => {
     if (!confirm("Delete product?")) return;
-    const { error } = await supabase.from('products').delete().eq('id', id);
-    if (error) toast.error(error.message);
-    else {
+    try {
+      const { error } = await supabase.from('products').delete().eq('id', id);
+      if (error) throw error;
       toast.success("Product deleted");
       fetchData();
-    }
+    } catch (e) { toast.error(e.message); }
   };
 
   // ── Review CRUD ────────────────────────────────────────────
@@ -253,7 +243,7 @@ export default function AdminDashboard() {
     if (!reviewForm.name || !reviewForm.text) return toast.error("Required fields missing");
     setSavingReview(true);
     try {
-      await supabase.from('reviews').insert([{
+      const { error } = await supabase.from('reviews').insert([{
         name: reviewForm.name,
         text: reviewForm.text,
         stars: Number(reviewForm.stars),
@@ -261,6 +251,7 @@ export default function AdminDashboard() {
         tracking_id: reviewForm.tracking_id,
         status: 'approved',
       }]);
+      if (error) throw error;
       toast.success("Review published!");
       setReviewForm(EMPTY_REVIEW);
       fetchData();
@@ -270,7 +261,8 @@ export default function AdminDashboard() {
 
   const approveReview = async (id) => {
     try {
-      await supabase.from('reviews').update({ status: 'approved' }).eq('id', id);
+      const { error } = await supabase.from('reviews').update({ status: 'approved' }).eq('id', id);
+      if (error) throw error;
       toast.success("Review approved!");
       fetchData();
     } catch (e) { toast.error(e.message); }
@@ -278,7 +270,8 @@ export default function AdminDashboard() {
 
   const rejectReview = async (id) => {
     try {
-      await supabase.from('reviews').update({ status: 'rejected' }).eq('id', id);
+      const { error } = await supabase.from('reviews').update({ status: 'rejected' }).eq('id', id);
+      if (error) throw error;
       toast.success("Review rejected!");
       fetchData();
     } catch (e) { toast.error(e.message); }
@@ -286,8 +279,11 @@ export default function AdminDashboard() {
 
   const deleteReview = async (id) => {
     if (!confirm("Delete review?")) return;
-    await supabase.from('reviews').delete().eq('id', id);
-    fetchData();
+    try {
+      const { error } = await supabase.from('reviews').delete().eq('id', id);
+      if (error) throw error;
+      fetchData();
+    } catch (e) { toast.error(e.message); }
   };
 
   // ── Proofs CRUD (Cloudinary) ───────────────────────────
@@ -327,8 +323,11 @@ export default function AdminDashboard() {
 
   const deleteProof = async (id) => {
     if (!confirm("Delete proof?")) return;
-    await supabase.from('proofs').delete().eq('id', id);
-    fetchData();
+    try {
+      const { error } = await supabase.from('proofs').delete().eq('id', id);
+      if (error) throw error;
+      fetchData();
+    } catch (e) { toast.error(e.message); }
   };
 
   // ── UC Prices CRUD ─────────────────────────────────────────
@@ -360,8 +359,11 @@ export default function AdminDashboard() {
 
   const deleteUc = async (id) => {
     if (!confirm("Delete this UC pack?")) return;
-    await supabase.from('uc_prices').delete().eq('id', id);
-    fetchData();
+    try {
+      const { error } = await supabase.from('uc_prices').delete().eq('id', id);
+      if (error) throw error;
+      fetchData();
+    } catch (e) { toast.error(e.message); }
   };
 
   // ── Xsuit Gifts CRUD ────────────────────────────────────────
@@ -407,8 +409,11 @@ export default function AdminDashboard() {
 
   const deleteXsuit = async (id) => {
     if (!confirm("Delete this Xsuit gift?")) return;
-    await supabase.from('xsuit_gifts').delete().eq('id', id);
-    fetchData();
+    try {
+      const { error } = await supabase.from('xsuit_gifts').delete().eq('id', id);
+      if (error) throw error;
+      fetchData();
+    } catch (e) { toast.error(e.message); }
   };
 
   // ── Supercar Gifts CRUD (Firebase) ──────────────────────────
@@ -443,11 +448,13 @@ export default function AdminDashboard() {
       };
 
       if (carEditId) {
-        await updateDoc(doc(db, "supercar_gifts", carEditId), data);
+        const { error } = await supabase.from('supercar_gifts').update(data).eq('id', carEditId);
+        if (error) throw error;
         toast.success("Supercar updated!");
         setCarEditId(null);
       } else {
-        await addDoc(collection(db, "supercar_gifts"), { ...data, created_at: new Date().toISOString() });
+        const { error } = await supabase.from('supercar_gifts').insert([{ ...data, created_at: new Date().toISOString() }]);
+        if (error) throw error;
         toast.success("Supercar added!");
       }
       setCarForm(EMPTY_CAR);
@@ -460,8 +467,9 @@ export default function AdminDashboard() {
   const deleteCar = async (id) => {
     if (!confirm("Delete this Supercar gift?")) return;
     try {
-      await deleteDoc(doc(db, "supercar_gifts", id));
-      toast.success("Deleted from Firebase");
+      const { error } = await supabase.from('supercar_gifts').delete().eq('id', id);
+      if (error) throw error;
+      toast.success("Deleted from Supabase");
       fetchData();
     } catch (e) { toast.error(e.message); }
   };
@@ -520,7 +528,8 @@ export default function AdminDashboard() {
         ...saleForm, 
         profit,
         owner_price: Number(saleForm.owner_price),
-        sold_price: Number(saleForm.sold_price)
+        sold_price: Number(saleForm.sold_price),
+        created_at: new Date().toISOString()
       }]);
       if (error) throw error;
       toast.success("Sale recorded!");

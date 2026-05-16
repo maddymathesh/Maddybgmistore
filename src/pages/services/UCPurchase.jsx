@@ -112,12 +112,17 @@ export default function UCPurchase() {
 
   useEffect(() => {
     const fetchPacks = async () => {
-      const { data, error } = await supabase
-        .from("uc_prices")
-        .select("*")
-        .order("offer_price", { ascending: true });
-      if (!error) setPacks(data || []);
-      setLoading(false);
+      try {
+        const { data } = await supabase
+          .from('uc_prices')
+          .select('*')
+          .order('offer_price', { ascending: true });
+        setPacks(data || []);
+      } catch (err) {
+        console.error('Error fetching UC packs:', err);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchPacks();
   }, []);

@@ -16,14 +16,14 @@ export default function ManageReviews() {
 
   const fetchReviews = async () => {
     setFetching(true);
-    const { data, error } = await supabase
-      .from('reviews')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
-    if (error) toast.error(error.message);
-    else setReviews(data);
-    setFetching(false);
+    try {
+      const data = await api.get('reviews');
+      setReviews(data);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setFetching(false);
+    }
   };
 
   useEffect(() => {
@@ -34,13 +34,12 @@ export default function ManageReviews() {
     if (!form.name || !form.text) { toast.error("Name and review text required"); return; }
     setLoading(true);
     try {
-      const { error } = await supabase.from("reviews").insert([{ 
+      await api.create("reviews", { 
         ...form, 
         stars: Number(form.stars),
-        uid: "ADMIN_MANUAL" 
-      }]);
-      
-      if (error) throw error;
+        uid: "ADMIN_MANUAL",
+        created_at: new Date().toISOString()
+      });
       
       toast.success("Review added!");
       setShowModal(false);
@@ -56,8 +55,7 @@ export default function ManageReviews() {
   const handleDelete = async (id) => {
     if (!confirm("Delete this review?")) return;
     try {
-      const { error } = await supabase.from('reviews').delete().eq('id', id);
-      if (error) throw error;
+      await api.delete('reviews', id);
       toast.success("Review deleted");
       setReviews(prev => prev.filter(r => r.id !== id));
     } catch (e) {
@@ -68,8 +66,7 @@ export default function ManageReviews() {
   const toggleStatus = async (id, currentStatus) => {
     const newStatus = currentStatus === 'approved' ? 'pending' : 'approved';
     try {
-      const { error } = await supabase.from('reviews').update({ status: newStatus }).eq('id', id);
-      if (error) throw error;
+      await api.update('reviews', id, { status: newStatus });
       toast.success(`Review ${newStatus}`);
       setReviews(prev => prev.map(r => r.id === id ? { ...r, status: newStatus } : r));
     } catch (e) {

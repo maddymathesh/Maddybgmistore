@@ -1,204 +1,129 @@
-import { supabase } from '../utils/supabase';
+import * as api from './api';
 
 /**
- * Generates the next sequential MBSAID transaction ID.
- * Queries the DB for the highest existing ID and increments by 1.
- * Format: MBSAID001, MBSAID002, ..., MBSAID999, MBSAID1000
+ * Generates the next sequential ID by fetching all transactions and finding the max.
  */
-export const generateNextTransactionId = async () => {
-  const { data, error } = await supabase
-    .from('transactions')
-    .select('transaction_id')
-    .like('transaction_id', 'MBSA%')
-    .order('created_at', { ascending: false })
-    .limit(1);
+const getNextSequentialId = async (prefix, sheet = 'transactions') => {
+  try {
+    const transactions = await api.getTransactions(sheet);
+    const filtered = transactions
+      .filter(tx => tx.transaction_id && tx.transaction_id.startsWith(prefix))
+      .map(tx => parseInt(tx.transaction_id.replace(prefix, ''), 10))
+      .filter(num => !isNaN(num));
 
-  if (error) throw error;
+    if (filtered.length === 0) {
+      if (prefix === 'MBSA') return 'MBSA403';
+      return `${prefix}001`;
+    }
 
-  if (!data || data.length === 0) {
-    // No records yet — continue from the last known ID in the old system
-    return 'MBSA403';
+    const next = Math.max(...filtered) + 1;
+    return `${prefix}${String(next).padStart(3, '0')}`;
+  } catch (error) {
+    console.error(`Error generating next ${prefix} ID:`, error);
+    if (prefix === 'MBSA') return 'MBSA403';
+    return `${prefix}001`;
   }
-
-  const lastId = data[0].transaction_id; // e.g. "MBSA402"
-  const num = parseInt(lastId.replace('MBSA', ''), 10);
-  const next = num + 1;
-  // Pad to 3 digits minimum, e.g. MBSA403, MBSA1000
-  return `MBSA${String(next).padStart(3, '0')}`;
 };
 
-/**
- * Fetch all transactions with their account details joined.
- */
-export const fetchAllTransactions = async () => {
-  const { data, error } = await supabase
-    .from('transactions')
-    .select(`
-      *,
-      account_transactions (*)
-    `)
-    .order('created_at', { ascending: false });
+export const generateNextTransactionId = () => getNextSequentialId('MBSA');
+export const generateNextXsuitId = () => getNextSequentialId('MBSXS');
+export const generateNextSupercarId = () => getNextSequentialId('MBSSC');
+export const generateNextUcId = () => getNextSequentialId('MBSUC');
 
-  if (error) {
-    console.error('Error fetching transactions:', error);
+/**
+ * Fetch all transactions with their details manually joined.
+ */
+export const fetchAllTransactions = async (forceRefresh = false) => {
+  try {
+    const params = forceRefresh ? { noCache: 'true' } : {};
+    const [transactions, accounts, xsuits, supercars, ucs] = await Promise.all([
+      api.getTransactions('transactions', params),
+      api.getTransactions('account_transactions', params),
+      api.getTransactions('xsuit_transactions', params),
+      api.getTransactions('supercar_transactions', params),
+      api.getTransactions('uc_transactions', params),
+    ]);
+
+    return transactions.map(tx => ({
+      ...tx,
+      account_transactions: accounts.filter(a => a.transaction_ref === tx.transaction_id),
+      xsuit_transactions: xsuits.filter(x => x.transaction_ref === tx.transaction_id),
+      supercar_transactions: supercars.filter(s => s.transaction_ref === tx.transaction_id),
+      uc_transactions: ucs.filter(u => u.transaction_ref === tx.transaction_id),
+    })).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  } catch (error) {
+    console.error('Error fetching all transactions:', error);
     throw error;
   }
-  return data;
 };
 
 /**
- * Create a new Account transaction.
- * @param {object} mainData  - Fields for the `transactions` table.
- * @param {object} detailData - Fields for the `account_transactions` table.
+ * Fetch optimized cached dashboard analytics
  */
-export const createAccountTransaction = async (mainData, detailData) => {
-  // 1. Insert main transaction record
-  const { data: transaction, error: mainError } = await supabase
-    .from('transactions')
-    .insert([mainData])
-    .select()
-    .single();
-
-  if (mainError) throw mainError;
-
-  // 2. Insert account-specific details
-  const { error: detailError } = await supabase
-    .from('account_transactions')
-    .insert([{ ...detailData, transaction_ref: transaction.transaction_id }]);
-
-  if (detailError) throw detailError;
-
-  return transaction;
+export const fetchDashboardStats = async (forceRefresh = false) => {
+  try {
+    const params = { action: 'analytics' };
+    if (forceRefresh) params.noCache = 'true';
+    const stats = await api.getTransactions('dashboard', params);
+    return stats;
+  } catch (error) {
+    console.error('Error fetching dashboard stats:', error);
+    throw error;
+  }
 };
 
 /**
- * Delete a transaction by its UUID.
+ * Generic create function to handle main + detail inserts.
+ */
+const createFullTransaction = async (mainData, detailData, detailSheet) => {
+  try {
+    // 1. Insert main transaction
+    const transaction = await api.createTransaction('transactions', {
+      ...mainData,
+      id: crypto.randomUUID(),
+      created_at: new Date().toISOString()
+    });
+
+    // 2. Insert detail record
+    if (detailData && detailSheet) {
+      await api.createTransaction(detailSheet, {
+        ...detailData,
+        id: crypto.randomUUID(),
+        transaction_ref: mainData.transaction_id,
+        created_at: new Date().toISOString()
+      });
+    }
+
+    return transaction;
+  } catch (error) {
+    console.error(`Error creating transaction in ${detailSheet}:`, error);
+    throw error;
+  }
+};
+
+export const createAccountTransaction = (mainData, detailData) => 
+  createFullTransaction(mainData, detailData, 'account_transactions');
+
+export const createXsuitTransaction = (mainData, detailData) => 
+  createFullTransaction(mainData, detailData, 'xsuit_transactions');
+
+export const createSupercarTransaction = (mainData, detailData) => 
+  createFullTransaction(mainData, detailData, 'supercar_transactions');
+
+export const createUcTransaction = (mainData, detailData) => 
+  createFullTransaction(mainData, detailData, 'uc_transactions');
+
+/**
+ * Delete a transaction by its ID.
  */
 export const deleteTransaction = async (id) => {
-  const { error } = await supabase
-    .from('transactions')
-    .delete()
-    .eq('id', id);
-
-  if (error) throw error;
-};
-
-/**
- * Generates the next sequential MBSXS XSuit transaction ID.
- */
-export const generateNextXsuitId = async () => {
-  const { data, error } = await supabase
-    .from('transactions')
-    .select('transaction_id')
-    .like('transaction_id', 'MBSXS%')
-    .order('created_at', { ascending: false })
-    .limit(1);
-
-  if (error) throw error;
-
-  if (!data || data.length === 0) return 'MBSXS001';
-
-  const num = parseInt(data[0].transaction_id.replace('MBSXS', ''), 10);
-  return `MBSXS${String(num + 1).padStart(3, '0')}`;
-};
-
-/**
- * Create a new XSuit Gift transaction.
- */
-export const createXsuitTransaction = async (mainData, detailData) => {
-  const { data: transaction, error: mainError } = await supabase
-    .from('transactions')
-    .insert([mainData])
-    .select()
-    .single();
-
-  if (mainError) throw mainError;
-
-  const { error: detailError } = await supabase
-    .from('xsuit_transactions')
-    .insert([{ ...detailData, transaction_ref: transaction.transaction_id }]);
-
-  if (detailError) throw detailError;
-
-  return transaction;
-};
-
-/**
- * Generates the next sequential MBSSC Supercar transaction ID.
- */
-export const generateNextSupercarId = async () => {
-  const { data, error } = await supabase
-    .from('transactions')
-    .select('transaction_id')
-    .like('transaction_id', 'MBSSC%')
-    .order('created_at', { ascending: false })
-    .limit(1);
-
-  if (error) throw error;
-
-  if (!data || data.length === 0) return 'MBSSC001';
-
-  const num = parseInt(data[0].transaction_id.replace('MBSSC', ''), 10);
-  return `MBSSC${String(num + 1).padStart(3, '0')}`;
-};
-
-/**
- * Create a new Supercar Gift transaction.
- */
-export const createSupercarTransaction = async (mainData, detailData) => {
-  const { data: transaction, error: mainError } = await supabase
-    .from('transactions')
-    .insert([mainData])
-    .select()
-    .single();
-
-  if (mainError) throw mainError;
-
-  const { error: detailError } = await supabase
-    .from('supercar_transactions')
-    .insert([{ ...detailData, transaction_ref: transaction.transaction_id }]);
-
-  if (detailError) throw detailError;
-
-  return transaction;
-};
-
-/**
- * Generates the next sequential MBSUC transaction ID.
- */
-export const generateNextUcId = async () => {
-  const { data, error } = await supabase
-    .from('transactions')
-    .select('transaction_id')
-    .like('transaction_id', 'MBSUC%')
-    .order('created_at', { ascending: false })
-    .limit(1);
-
-  if (error) throw error;
-
-  if (!data || data.length === 0) return 'MBSUC001';
-
-  const num = parseInt(data[0].transaction_id.replace('MBSUC', ''), 10);
-  return `MBSUC${String(num + 1).padStart(3, '0')}`;
-};
-
-/**
- * Create a new UC Order transaction.
- */
-export const createUcTransaction = async (mainData, detailData) => {
-  const { data: transaction, error: mainError } = await supabase
-    .from('transactions')
-    .insert([mainData])
-    .select()
-    .single();
-
-  if (mainError) throw mainError;
-
-  const { error: detailError } = await supabase
-    .from('uc_transactions')
-    .insert([{ ...detailData, transaction_ref: transaction.transaction_id }]);
-
-  if (detailError) throw detailError;
-
-  return transaction;
+  try {
+    // Note: In Google Sheets, we might want to delete from detail sheets too, 
+    // but without a common unique ID across sheets (only transaction_ref), 
+    // it depends on how the Apps Script handles it.
+    await api.deleteTransaction('transactions', id);
+  } catch (error) {
+    console.error('Error deleting transaction:', error);
+    throw error;
+  }
 };

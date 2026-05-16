@@ -12,13 +12,10 @@ export default function SupercarGift() {
   useEffect(() => {
     const fetchCars = async () => {
       try {
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from('supercar_gifts')
           .select('*')
-          .order('type', { ascending: true })
-          .order('price', { ascending: true });
-        
-        if (error) throw error;
+          .order('created_at', { ascending: false });
         setCars(data || []);
       } catch (error) {
         console.error("Error fetching supercars:", error);

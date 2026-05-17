@@ -12,7 +12,7 @@ import { fetchAllTransactions, deleteTransaction } from '../../services/transact
 
 import toast from 'react-hot-toast';
 import { exportToExcel } from '../../lib/excelExport';
-import { generateCustomerPDF, generateInternalPDF } from '../../lib/pdfGenerator';
+import { generateCustomerPDF, generateInternalPDF, testPDF } from '../../lib/pdfGenerator';
 
 export default function TransactionsList({ onAddNew }) {
   const [data, setData] = useState([]);
@@ -326,6 +326,13 @@ export default function TransactionsList({ onAddNew }) {
             style={{ padding: '10px 16px', fontSize: '12px' }}
           >
             <Download size={16} /> Export Excel
+          </button>
+          <button
+            onClick={testPDF}
+            className="btn btn-gold"
+            style={{ padding: '10px 16px', fontSize: '12px' }}
+          >
+            Test PDF
           </button>
         </div>
       </div>

@@ -12,6 +12,7 @@
  */
 
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { loadCustomerPDFSettings } from './pdfFieldConfig';
 
 // ─────────────────────────────────────────────
 // DESIGN SYSTEM TOKENS
@@ -76,29 +77,50 @@ function safeVal(v) {
   return String(v).replace(/₹/g, 'Rs.');
 }
 
-// ─────────────────────────────────────────────
-// CONFIG-BASED VISIBILITY FILTER
-// ─────────────────────────────────────────────
+const PDF_TEXT_REPLACEMENTS = {
+  '₹': 'Rs.',
+  '▲': 'Gain',
+  '▼': 'Loss',
+  '–': '-',
+  '—': '-',
+  '…': '...',
+  '•': '-',
+  '✓': 'Yes',
+  '✔': 'Yes',
+  '✕': 'x',
+  '×': 'x',
+  '→': '->',
+  '←': '<-',
+  '≥': '>=',
+  '≤': '<=',
+};
+
+function pdfSafeText(text, font) {
+  const replaced = Array.from(safeVal(text))
+    .map(char => PDF_TEXT_REPLACEMENTS[char] ?? char)
+    .join('')
+    .replace(/[\r\n\x00-\x1F\x7F-\x9F]/g, '');
+
+  return Array.from(replaced)
+    .filter(char => {
+      try {
+        font.widthOfTextAtSize(char, 1);
+        return true;
+      } catch {
+        return false;
+      }
+    })
+    .join('');
+}
+
 function applyConfigVisibility(tx, isInternal) {
   if (isInternal) return tx; // Always show everything for Internal PDF
   
   const clone = JSON.parse(JSON.stringify(tx));
-  const txType = clone.transaction_type || 'Account';
-  
-  let savedConfig;
-  try {
-    const raw = localStorage.getItem('mbs_pdf_fields_config');
-    if (raw) savedConfig = JSON.parse(raw);
-  } catch (e) {
-    console.warn('Failed to parse pdf fields config:', e);
-  }
+  const settings = loadCustomerPDFSettings();
 
-  if (!savedConfig || !savedConfig[txType]) return clone;
-
-  const modeMap = savedConfig[txType].customer || {};
-
-  // For any field that is false (unchecked), set its value in the clone to null
-  for (const [key, visible] of Object.entries(modeMap)) {
+  // For any field that is disabled (false), set its value in the clone to null
+  for (const [key, visible] of Object.entries(settings)) {
     if (visible === false) {
       if (key in clone) clone[key] = null;
       
@@ -179,8 +201,7 @@ function txt(page, fonts, text, x, y, {
   let maxWidthOfLines = 0;
   
   lines.forEach((line, index) => {
-    // Strip carriage returns or any remaining unencodable control characters from each line
-    const cleanLine = line.replace(/[\r\n\x00-\x1F\x7F-\x9F]/g, '');
+    const cleanLine = pdfSafeText(line, font);
     const lineY = y - (index * (size + 4));
     let drawX = x;
     const w = font.widthOfTextAtSize(cleanLine, size);
@@ -249,7 +270,7 @@ function wrappedText(page, fonts, text, x, y, {
   lineH  = 14,
 } = {}) {
   const font  = bold ? fonts.bold : fonts.regular;
-  const words = safeVal(text).split(/\s+/);
+  const words = safeVal(text).split(/\s+/).map(word => pdfSafeText(word, font));
   let line    = '';
   let curY    = y;
 
@@ -555,7 +576,7 @@ function drawFinancials(page, fonts, tx, y) {
     const cx = MARGIN + col * i;
     txt(page, fonts, label, cx, y - 14, { size: 7, color: C.goldMuted, bold: true, align: 'center', maxW: col });
     txt(page, fonts, value, cx, y - 32, { size: 13, color, bold: true, align: 'center', maxW: col });
-    const sign = i === 2 ? (isPos ? '▲ Gain' : '▼ Loss') : '';
+    const sign = i === 2 ? (isPos ? 'Gain' : 'Loss') : '';
     if (sign) txt(page, fonts, sign, cx, y - 46, { size: 7.5, color, align: 'center', maxW: col });
   });
 
@@ -701,20 +722,36 @@ async function buildPDF(tx, isInternal) {
  * Safari, Chrome, iOS/iPad devices, and prevents UUID-fallback naming.
  */
 function triggerDownload(bytes, filename) {
-  const blob = new Blob([bytes], { type: 'application/pdf' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.style.display = 'none';
-  a.href     = url;
-  a.download = filename;
-  
-  // CRITICAL: Appending to the body is strictly required for Safari & mobile browsers!
-  document.body.appendChild(a); 
-  a.click();
-  document.body.removeChild(a);
-  
-  // Clean up Object URL
-  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  try {
+    const safeName = String(filename || 'MBSX_Transaction')
+      .replace(/[\\/:*?"<>|]+/g, '_')
+      .replace(/\s+/g, '_');
+    const downloadName = safeName.toLowerCase().endsWith('.pdf') ? safeName : `${safeName}.pdf`;
+    const blob = new Blob([bytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = downloadName;
+    link.setAttribute('download', downloadName);
+    link.type = 'application/pdf';
+    link.rel = 'noopener';
+    link.style.display = 'none';
+
+    document.body.appendChild(link);
+    link.dispatchEvent(new MouseEvent('click', {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+    }));
+    document.body.removeChild(link);
+
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+  } catch (err) {
+    console.error('PDF DOWNLOAD ERROR:', err);
+    alert('PDF generation failed. Check console logs.');
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -728,7 +765,9 @@ function triggerDownload(bytes, filename) {
  */
 export async function generateCustomerPDF(tx) {
   const pdfDoc = await buildPDF(tx, false);
-  const bytes  = await pdfDoc.save();
+  const bytes  = await pdfDoc.save({
+    useObjectStreams: false,
+  });
   const txId   = safeVal(tx.transaction_id).replace(/\s+/g, '_');
   triggerDownload(bytes, `MBSX_Transaction_${txId}_Customer.pdf`);
 }
@@ -740,7 +779,9 @@ export async function generateCustomerPDF(tx) {
  */
 export async function generateInternalPDF(tx) {
   const pdfDoc = await buildPDF(tx, true);
-  const bytes  = await pdfDoc.save();
+  const bytes  = await pdfDoc.save({
+    useObjectStreams: false,
+  });
   const txId   = safeVal(tx.transaction_id).replace(/\s+/g, '_');
   triggerDownload(bytes, `MBSX_Transaction_${txId}_Admin.pdf`);
 }
@@ -754,4 +795,23 @@ export async function generateBothPDFs(tx) {
   // Small delay so browser doesn't block the second download
   await new Promise(r => setTimeout(r, 800));
   await generateInternalPDF(tx);
+}
+
+export async function testPDF() {
+  try {
+    const pdfDoc = await PDFDocument.create();
+
+    const page = pdfDoc.addPage([400, 400]);
+
+    page.drawText('PDF TEST WORKING');
+
+    const bytes = await pdfDoc.save({
+      useObjectStreams: false,
+    });
+
+    triggerDownload(bytes, 'test-pdf');
+
+  } catch (err) {
+    console.error(err);
+  }
 }

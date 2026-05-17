@@ -6,8 +6,8 @@ service cloud.firestore {
     // ── Helper: check if the requester is an authorized admin ──
     function isAdmin() {
       return request.auth != null && (
-        request.auth.uid == "paste_admin_1_firebase_uid_here" ||
-        request.auth.uid == "paste_admin_2_firebase_uid_here"
+        request.auth.uid == "yJDe1mSh28W1nfoVifZSomR6TiO2" ||
+        request.auth.uid == "FOv8lMfou9cy6QPtaep5zF2qiP92"
       );
     }
 
@@ -54,6 +54,12 @@ service cloud.firestore {
 
     match /payment_settings/{docId} {
       allow read, write: if isAdmin();
+    }
+
+    // ── admins collection ──────────────────────────────────────
+    match /admins/{docId} {
+      allow read: if request.auth != null && (isAdmin() || docId == request.auth.token.email.toLowerCase());
+      allow write: if isAdmin();
     }
 
     // ── Deny all other collections by default ──────────────────

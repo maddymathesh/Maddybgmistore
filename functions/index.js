@@ -2,6 +2,7 @@ const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, Timestamp } = require("firebase-admin/firestore");
+const { getAuth } = require("firebase-admin/auth");
 const { HttpsError, onCall } = require("firebase-functions/v2/https");
 
 initializeApp();
@@ -26,6 +27,8 @@ function getAdminUids() {
   const values = [
     process.env.ADMIN_UID_1,
     process.env.ADMIN_UID_2,
+    process.env.VITE_ADMIN_UID,
+    process.env.VITE_ADMIN_UID_2,
     ...(process.env.ADMIN_UIDS || "").split(","),
   ];
   return values.map((uid) => uid && uid.trim()).filter(Boolean);
@@ -270,4 +273,65 @@ exports.deletePaymentLink = onCall(async (request) => {
 
   await docRef.delete();
   return { success: true };
+});
+
+exports.addAdminUser = onCall(async (request) => {
+  requireAdmin(request);
+  const email = cleanText(request.data?.email);
+  if (!email || !/^[\w.\-]+@[\w.\-]+\.[\w]{2,8}$/.test(email)) {
+    throw new HttpsError("invalid-argument", "A valid email address is required.");
+  }
+
+  let userRecord;
+  try {
+    userRecord = await getAuth().getUserByEmail(email);
+  } catch (error) {
+    if (error.code === 'auth/user-not-found') {
+      userRecord = await getAuth().createUser({
+        email: email,
+        password: "MbsxAdminTempPass123!",
+        emailVerified: true,
+      });
+    } else {
+      throw new HttpsError("internal", error.message);
+    }
+  }
+
+  await getAuth().setCustomUserClaims(userRecord.uid, { admin: true });
+
+  await db.collection("admins").doc(userRecord.uid).set({
+    uid: userRecord.uid,
+    email: email,
+    role: "admin",
+    createdAt: Timestamp.now(),
+  });
+
+  return { success: true, uid: userRecord.uid, email: email };
+});
+
+exports.removeAdminUser = onCall(async (request) => {
+  requireAdmin(request);
+  const uid = cleanText(request.data?.uid);
+  if (!uid) {
+    throw new HttpsError("invalid-argument", "Admin User ID is required.");
+  }
+
+  if (uid === request.auth.uid) {
+    throw new HttpsError("permission-denied", "You cannot remove admin privileges from yourself.");
+  }
+
+  await getAuth().setCustomUserClaims(uid, null);
+  await db.collection("admins").doc(uid).delete();
+
+  return { success: true };
+});
+
+exports.listAdminUsers = onCall(async (request) => {
+  requireAdmin(request);
+  const snap = await db.collection("admins").get();
+  const list = [];
+  snap.forEach(doc => {
+    list.push(doc.data());
+  });
+  return { admins: list };
 });

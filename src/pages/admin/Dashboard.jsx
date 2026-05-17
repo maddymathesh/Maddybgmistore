@@ -14,8 +14,9 @@ import toast from "react-hot-toast";
 import Navbar from "../../components/Navbar";
 import { LogOut, Plus, Trash2, Pencil, Star, Copy, Users, TrendingUp, DollarSign, Camera, Coins, Zap, Car, Clock, ShieldCheck, User as UserIcon, Tag, Hash, ArrowRightLeft, MessageSquare, History, Key, Download, FileText, CheckCircle2, ThumbsUp, AlertCircle, Calendar } from "lucide-react";
 import { generateNextTransactionId, generateNextXsuitId, generateNextSupercarId, generateNextUcId } from "../../services/transactionService";
-import { db } from "../../firebase";
-import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, orderBy } from "firebase/firestore";
+import { db, functions } from "../../firebase";
+import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, orderBy, setDoc, getDoc } from "firebase/firestore";
+import { httpsCallable } from "firebase/functions";
 
 // ── Shared label style ────────────────────────────────────────
 const ls = {
@@ -88,6 +89,65 @@ export default function AdminDashboard() {
   const [tab, setTab] = useState("products");
 
   // ── States ────────────────────────────────────────
+  const [adminList, setAdminList] = useState([]);
+  const [loadingAdmins, setLoadingAdmins] = useState(false);
+  const [newAdminEmail, setNewAdminEmail] = useState("");
+  const [addingAdmin, setAddingAdmin] = useState(false);
+
+  const loadAdmins = async () => {
+    setLoadingAdmins(true);
+    try {
+      const querySnapshot = await getDocs(collection(db, "admins"));
+      const list = [];
+      querySnapshot.forEach((doc) => {
+        list.push({ uid: doc.id, ...doc.data() });
+      });
+      setAdminList(list);
+    } catch (err) {
+      toast.error("Failed to load admin list: " + err.message);
+    } finally {
+      setLoadingAdmins(false);
+    }
+  };
+
+  const handleAddAdmin = async (e) => {
+    e.preventDefault();
+    if (!newAdminEmail) return;
+    setAddingAdmin(true);
+    try {
+      const emailLower = newAdminEmail.trim().toLowerCase();
+      await setDoc(doc(db, "admins", emailLower), {
+        email: emailLower,
+        role: "admin",
+        createdAt: new Date().toISOString()
+      });
+      toast.success("Successfully authorized admin email!");
+      setNewAdminEmail("");
+      loadAdmins();
+    } catch (err) {
+      toast.error("Error: " + err.message);
+    } finally {
+      setAddingAdmin(false);
+    }
+  };
+
+  const handleRemoveAdmin = async (docId) => {
+    if (!confirm("Are you sure you want to revoke admin privileges for this email?")) return;
+    try {
+      await deleteDoc(doc(db, "admins", docId));
+      toast.success("Admin role revoked successfully.");
+      loadAdmins();
+    } catch (err) {
+      toast.error("Error: " + err.message);
+    }
+  };
+
+  useEffect(() => {
+    if (tab === "admin_controls") {
+      loadAdmins();
+    }
+  }, [tab]);
+
   const [products, setProducts] = useState([]);
   const [productForm, setProductForm] = useState(EMPTY_PRODUCT);
   const [editId, setEditId] = useState(null);
@@ -600,7 +660,8 @@ export default function AdminDashboard() {
               ["proofs", "Proofs"],
               ["payment_links", "Payments"],
               ["feedback", "Customer Feedback"],
-              ["activity_log", "Activity Log"]
+              ["activity_log", "Activity Log"],
+              ["admin_controls", "Admin Controls"]
             ].map(([key, label]) => (
               <button key={key} onClick={() => setTab(key)}
                 className={`admin-tab-btn ${tab === key ? 'active' : ''}`}>
@@ -1536,6 +1597,127 @@ export default function AdminDashboard() {
                   </div>
                 ))}
               </div>
+            </div>
+          );
+        })()}
+
+
+        {/* ADMIN CONTROLS TAB */}
+        {tab === "admin_controls" && (() => {
+          return (
+            <div style={{ display: "grid", gap: "24px" }} className="admin-grid">
+              
+              {/* Add Admin Form */}
+              <div className="admin-form-side">
+                <h3 className="form-title" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Key size={18} color="var(--gold)" /> Add New Admin
+                </h3>
+                <form onSubmit={handleAddAdmin} style={{ display: "grid", gap: "16px" }}>
+                  <div>
+                    <label style={sl}>Admin Email Address</label>
+                    <div style={{ position: "relative" }}>
+                      <UserIcon size={14} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--gold)" }} />
+                      <input 
+                        type="email" 
+                        required 
+                        placeholder="e.g. sethu@mbsx.store" 
+                        className="input" 
+                        style={{ paddingLeft: "36px" }} 
+                        value={newAdminEmail} 
+                        onChange={e => setNewAdminEmail(e.target.value)} 
+                      />
+                    </div>
+                  </div>
+                  
+                  <button 
+                    type="submit" 
+                    disabled={addingAdmin} 
+                    className="btn btn-gold" 
+                    style={{ width: "100%", justifyContent: "center", padding: "12px" }}
+                  >
+                    {addingAdmin ? "Creating..." : "Authorize Admin"}
+                  </button>
+                </form>
+
+                <div style={{ marginTop: "24px", padding: "16px", background: "rgba(255,215,0,0.03)", borderRadius: "8px", border: "1px dashed rgba(255,215,0,0.15)", fontSize: "12px", color: "var(--muted)", lineHeight: 1.5 }}>
+                  <strong style={{ color: "var(--gold)", display: "block", marginBottom: "6px" }}>ℹ️ Security Note:</strong>
+                  Adding an email creates/assigns a verified <strong>admin custom claim</strong> in Firebase Auth. The new administrator can log in directly and manage all aspects of the transaction panel securely.
+                </div>
+              </div>
+
+              {/* Admin List Section */}
+              <div style={{ background: "var(--card)", padding: "28px", borderRadius: "14px", border: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: "20px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <h3 style={{ fontSize: "15px", fontWeight: 700, margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
+                    <ShieldCheck size={18} style={{ color: "var(--gold)" }} /> Active Administrators
+                  </h3>
+                  <button 
+                    onClick={loadAdmins} 
+                    disabled={loadingAdmins} 
+                    className="btn btn-outline" 
+                    style={{ padding: "6px 12px", fontSize: "11px", borderColor: "var(--border-gold)", color: "var(--gold)" }}
+                  >
+                    Refresh List
+                  </button>
+                </div>
+
+                {loadingAdmins ? (
+                  <div style={{ padding: "60px", textAlign: "center", color: "var(--muted)" }}>
+                    Loading security claims registry...
+                  </div>
+                ) : (
+                  <div className="admin-table-wrap">
+                    <div className="table-responsive">
+                      <table className="admin-table">
+                        <thead>
+                          <tr>
+                            <th>Email Address</th>
+                            <th>Role & Claim</th>
+                            <th>Added Date</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {adminList.map((adm, idx) => (
+                            <tr key={adm.uid || idx}>
+                              <td style={{ fontWeight: 700, color: "#fff" }}>{adm.email}</td>
+                              <td>
+                                <span style={{ padding: "4px 8px", borderRadius: "4px", background: "var(--gold-dim)", color: "var(--gold)", fontSize: "11px", fontWeight: 700 }}>
+                                  {adm.role ? adm.role.toUpperCase() : "ADMIN"}
+                                </span>
+                              </td>
+                              <td style={{ fontSize: "12px", color: "var(--muted)" }}>
+                                {(() => {
+                                  if (!adm.createdAt) return "Primary Owner";
+                                  const d = adm.createdAt.seconds ? new Date(adm.createdAt.seconds * 1000) : new Date(adm.createdAt);
+                                  return isNaN(d.getTime()) ? "Authorized" : d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+                                })()}
+                              </td>
+                              <td>
+                                <button
+                                  onClick={() => handleRemoveAdmin(adm.uid)}
+                                  className="btn btn-outline"
+                                  style={{ padding: "6px 12px", fontSize: "11px", borderColor: "#ef4444", color: "#ef4444" }}
+                                >
+                                  Revoke
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                          {adminList.length === 0 && (
+                            <tr>
+                              <td colSpan="4" style={{ textAlign: "center", padding: "40px", color: "var(--muted)" }}>
+                                No dynamically managed admins listed. Primary owner configured in local environments.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+
             </div>
           );
         })()}

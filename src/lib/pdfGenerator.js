@@ -11,7 +11,8 @@ const RED_TEXT = rgb(0.85, 0.1, 0.1);
 const formatDate = (dateStr) => {
   if (!dateStr) return 'N/A';
   try {
-    return new Date(dateStr).toLocaleDateString('en-IN', {
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? dateStr : d.toLocaleDateString('en-IN', {
       day: '2-digit', month: 'short', year: 'numeric'
     });
   } catch {
@@ -20,7 +21,14 @@ const formatDate = (dateStr) => {
 };
 
 const buildPDF = async (tx, isInternal = false) => {
+  if (!tx) return;
+  
+  const type = tx.transaction_type || 'Account';
   const acc = tx.account_transactions?.[0] || {};
+  const xs = tx.xsuit_transactions?.[0] || {};
+  const sc = tx.supercar_transactions?.[0] || {};
+  const uc = tx.uc_transactions?.[0] || {};
+
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage([595, 842]); // A4
   const { width, height } = page.getSize();
@@ -67,14 +75,14 @@ const buildPDF = async (tx, isInternal = false) => {
   // ── TRANSACTION SUMMARY ─────────────────────────────────────────────────
   y = section('Transaction Summary', y);
 
-  draw('Transaction ID', 48, y, 9, bold);       draw(`#${tx.transaction_id}`, 180, y, 9, font);
+  draw('Transaction ID', 48, y, 9, bold);       draw(`#${tx.transaction_id || 'N/A'}`, 180, y, 9, font);
   draw('Transaction Date', 330, y, 9, bold);    draw(formatDate(tx.transaction_date), 460, y, 9, font);
   y -= 18;
   draw('Mode of Deal', 48, y, 9, bold);         draw(tx.mode_of_deal || 'N/A', 180, y, 9, font);
   draw('Mode of Payment', 330, y, 9, bold);     draw(tx.mode_of_payment || 'N/A', 460, y, 9, font);
   y -= 18;
   draw('Payment Status', 48, y, 9, bold);
-  const statusColor = tx.payment_status === 'Fully Paid' ? GREEN : rgb(0.9, 0.6, 0.1);
+  const statusColor = tx.payment_status === 'Fully Paid' || tx.payment_status === 'Paid' ? GREEN : rgb(0.9, 0.6, 0.1);
   draw(tx.payment_status || 'N/A', 180, y, 9, bold, statusColor);
   y -= 24;
   line(y);
@@ -104,11 +112,16 @@ const buildPDF = async (tx, isInternal = false) => {
   // ── PRODUCT DETAILS ─────────────────────────────────────────────────────
   y = section('Product Details', y);
   draw('Product Type', 48, y, 9, bold);
-  draw(tx.transaction_type === 'XSuit' ? 'XSuit Gift' : 'BGMI Account', 180, y, 9, font);
+  
+  let prodType = 'BGMI Account';
+  if (type === 'XSuit') prodType = 'XSuit Gift';
+  else if (type === 'Supercar') prodType = 'Supercar Gift';
+  else if (type === 'UC') prodType = 'UC Top-Up Order';
+  
+  draw(prodType, 180, y, 9, font);
   y -= 18;
 
-  if (tx.transaction_type === 'XSuit' && tx.xsuit_transactions?.[0]) {
-    const xs = tx.xsuit_transactions[0];
+  if (type === 'XSuit') {
     draw('XSuit Name', 48, y, 9, bold);          draw(xs.xsuit_name || 'N/A', 180, y, 9, font);
     draw('Gift Status', 330, y, 9, bold);
     draw(xs.gift_status || 'N/A', 460, y, 9, bold, xs.gift_status === 'Delivered' ? GREEN : rgb(0.9,0.6,0.1));
@@ -116,17 +129,16 @@ const buildPDF = async (tx, isInternal = false) => {
     draw('Delivery Date', 48, y, 9, bold);       draw(formatDate(xs.delivery_date), 180, y, 9, font);
     draw('Delivery Time', 330, y, 9, bold);      draw(xs.delivery_time || 'N/A', 460, y, 9, font);
     y -= 18;
-    draw('Gifter IG Name', 48, y, 9, bold);      draw(xs.gifter_ig_name || 'N/A', 180, y, 9, font);
-    draw('Gifter IG ID', 330, y, 9, bold);       draw(String(xs.gifter_ig_id || 'N/A'), 460, y, 9, font);
+    draw('Gifter In-Game Name', 48, y, 9, bold);  draw(xs.gifter_ig_name || 'N/A', 180, y, 9, font);
+    draw('Gifter In-Game ID', 330, y, 9, bold);   draw(String(xs.gifter_ig_id || 'N/A'), 460, y, 9, font);
     y -= 18;
     if (!isInternal) {
       // Customer copy: show buyer details
-      draw('Buyer IG Name', 48, y, 9, bold);     draw(xs.buyer_ig_name || 'N/A', 180, y, 9, font);
-      draw('Buyer IG ID', 330, y, 9, bold);      draw(String(xs.buyer_ig_id || 'N/A'), 460, y, 9, font);
+      draw('Buyer In-Game Name', 48, y, 9, bold); draw(xs.buyer_ig_name || 'N/A', 180, y, 9, font);
+      draw('Buyer In-Game ID', 330, y, 9, bold);  draw(String(xs.buyer_ig_id || 'N/A'), 460, y, 9, font);
       y -= 18;
     }
-  } else if (tx.transaction_type === 'Supercar' && tx.supercar_transactions?.[0]) {
-    const sc = tx.supercar_transactions[0];
+  } else if (type === 'Supercar') {
     draw('Supercar Name', 48, y, 9, bold);       draw(sc.supercar_name || 'N/A', 180, y, 9, font);
     draw('Card Tier', 330, y, 9, bold);          draw(sc.supercar_card_tier || 'N/A', 460, y, 9, font);
     y -= 18;
@@ -134,77 +146,109 @@ const buildPDF = async (tx, isInternal = false) => {
     draw(sc.gift_status || 'N/A', 180, y, 9, bold, sc.gift_status === 'Delivered' ? GREEN : rgb(0.9,0.6,0.1));
     draw('Delivery Date', 330, y, 9, bold);      draw(formatDate(sc.delivery_date), 460, y, 9, font);
     y -= 18;
-    draw('Gifter IG Name', 48, y, 9, bold);      draw(sc.gifter_ig_name || 'N/A', 180, y, 9, font);
-    draw('Gifter IG ID', 330, y, 9, bold);       draw(String(sc.gifter_ig_id || 'N/A'), 460, y, 9, font);
+    draw('Gifter In-Game Name', 48, y, 9, bold);  draw(sc.gifter_ig_name || 'N/A', 180, y, 9, font);
+    draw('Gifter In-Game ID', 330, y, 9, bold);   draw(String(sc.gifter_ig_id || 'N/A'), 460, y, 9, font);
     y -= 18;
     if (!isInternal) {
-      draw('Buyer IG Name', 48, y, 9, bold);     draw(sc.buyer_ig_name || 'N/A', 180, y, 9, font);
-      draw('Buyer IG ID', 330, y, 9, bold);      draw(String(sc.buyer_ig_id || 'N/A'), 460, y, 9, font);
+      draw('Buyer In-Game Name', 48, y, 9, bold); draw(sc.buyer_ig_name || 'N/A', 180, y, 9, font);
+      draw('Buyer In-Game ID', 330, y, 9, bold);  draw(String(sc.buyer_ig_id || 'N/A'), 460, y, 9, font);
       y -= 18;
     }
-  } else if (acc.product_link) {
-    draw('Product Reference', 330, y, 9, bold);  draw(acc.product_link.substring(0, 40), 460, y, 8, font);
+  } else if (type === 'UC') {
+    draw('UC Method', 48, y, 9, bold);           draw(uc.uc_method || 'N/A', 180, y, 9, font);
+    draw('UC Pack', 330, y, 9, bold);            draw(uc.uc_pack || 'N/A', 460, y, 9, font);
+    y -= 18;
+    draw('Number of Packs', 48, y, 9, bold);     draw(String(uc.num_packs || 0), 180, y, 9, font);
+    draw('Total UC', 330, y, 9, bold);           draw(`${uc.total_uc || 0} UC`, 460, y, 9, font);
+    y -= 18;
+    draw('Delivery Status', 48, y, 9, bold);
+    draw(uc.delivery_status || 'N/A', 180, y, 9, bold, uc.delivery_status === 'Delivered' ? GREEN : rgb(0.9,0.6,0.1));
+    draw('Delivery Date', 330, y, 9, bold);      draw(formatDate(uc.delivery_date), 460, y, 9, font);
+    y -= 18;
+  } else {
+    // Account details
+    if (acc.product_link) {
+      draw('Product Reference', 48, y, 9, bold);  draw(acc.product_link.substring(0, 70), 180, y, 8, font);
+      y -= 18;
+    }
   }
 
   y -= 10;
   line(y);
   y -= 18;
 
-  // ── LOGIN DETAILS ───────────────────────────────────────────────────────
-  y = section('Login Information', y);
-  draw('Primary Login', 48, y, 9, bold);        draw(acc.primary_login_provider || 'N/A', 180, y, 9, font);
-  draw('Secondary Login', 330, y, 9, bold);     draw(acc.secondary_login_provider || 'N/A', 460, y, 9, font);
-  y -= 18;
-  draw('Primary Mothermail', 48, y, 9, bold);   draw(acc.primary_mothermail_status || 'N/A', 180, y, 9, font);
-  draw('Secondary Mothermail', 330, y, 9, bold);draw(acc.secondary_mothermail_status || 'N/A', 460, y, 9, font);
-  y -= 18;
+  // ── TYPE-SPECIFIC SECTIONS (ONLY FOR ACCOUNTS) ──────────────────────────
+  if (type === 'Account') {
+    // ── LOGIN DETAILS ───────────────────────────────────────────────────────
+    y = section('Login Information', y);
+    draw('Primary Login', 48, y, 9, bold);        draw(acc.primary_login_provider || 'N/A', 180, y, 9, font);
+    draw('Secondary Login', 330, y, 9, bold);     draw(acc.secondary_login_provider || 'N/A', 460, y, 9, font);
+    y -= 18;
+    draw('Primary Mothermail', 48, y, 9, bold);   draw(acc.primary_mothermail_status || 'N/A', 180, y, 9, font);
+    draw('Secondary Mothermail', 330, y, 9, bold);draw(acc.secondary_mothermail_status || 'N/A', 460, y, 9, font);
+    y -= 18;
 
-  if (isInternal && acc.primary_credentials) {
-    y -= 6;
-    draw('Primary Credentials:', 48, y, 9, bold, RED_TEXT);
-    y -= 14;
-    const lines = (acc.primary_credentials || '').split('\n').slice(0, 3);
-    lines.forEach(l => { draw(l, 60, y, 9, font); y -= 13; });
+    if (isInternal && acc.primary_credentials) {
+      y -= 6;
+      draw('Primary Credentials:', 48, y, 9, bold, RED_TEXT);
+      y -= 14;
+      const lines = (acc.primary_credentials || '').split('\n').slice(0, 3);
+      lines.forEach(l => { draw(l, 60, y, 9, font); y -= 13; });
+    }
+
+    if (isInternal && acc.secondary_credentials) {
+      y -= 4;
+      draw('Secondary Credentials:', 48, y, 9, bold, RED_TEXT);
+      y -= 14;
+      const lines = (acc.secondary_credentials || '').split('\n').slice(0, 3);
+      lines.forEach(l => { draw(l, 60, y, 9, font); y -= 13; });
+    }
+
+    y -= 10;
+    line(y);
+    y -= 18;
+
+    // ── GUARANTEE DETAILS ───────────────────────────────────────────────────
+    y = section('Guarantee Information', y);
+    draw('Guarantee Plan', 48, y, 9, bold);       draw(acc.guarantee_plan || 'Not Applicable', 180, y, 9, font);
+    y -= 18;
+    draw('Primary Unlink Date', 48, y, 9, bold);  draw(formatDate(acc.primary_unlink_date), 180, y, 9, font);
+    draw('Secondary Unlink Date', 330, y, 9, bold);draw(formatDate(acc.secondary_unlink_date), 460, y, 9, font);
+    y -= 18;
+    draw('Primary Void Date', 48, y, 9, bold);    draw(acc.primary_guarantee_void === 'no_guarantee' ? 'No Guarantee' : formatDate(acc.primary_guarantee_void_date), 180, y, 9, font);
+    draw('Secondary Void Date', 330, y, 9, bold); draw(acc.secondary_guarantee_void === 'no_guarantee' ? 'No Guarantee' : formatDate(acc.secondary_guarantee_void_date), 460, y, 9, font);
+    y -= 22;
+    line(y);
+    y -= 18;
   }
 
-  if (isInternal && acc.secondary_credentials) {
-    y -= 4;
-    draw('Secondary Credentials:', 48, y, 9, bold, RED_TEXT);
-    y -= 14;
-    const lines = (acc.secondary_credentials || '').split('\n').slice(0, 3);
-    lines.forEach(l => { draw(l, 60, y, 9, font); y -= 13; });
-  }
-
-  y -= 10;
-  line(y);
-  y -= 18;
-
-  // ── GUARANTEE DETAILS ───────────────────────────────────────────────────
-  y = section('Guarantee Information', y);
-  draw('Guarantee Plan', 48, y, 9, bold);       draw(acc.guarantee_plan || 'Not Applicable', 180, y, 9, font);
-  y -= 18;
-  draw('Primary Unlink Date', 48, y, 9, bold);  draw(formatDate(acc.primary_unlink_date), 180, y, 9, font);
-  draw('Secondary Unlink Date', 330, y, 9, bold);draw(formatDate(acc.secondary_unlink_date), 460, y, 9, font);
-  y -= 18;
-  draw('Primary Void Date', 48, y, 9, bold);    draw(acc.primary_guarantee_void === 'no_guarantee' ? 'No Guarantee' : formatDate(acc.primary_guarantee_void_date), 180, y, 9, font);
-  draw('Secondary Void Date', 330, y, 9, bold); draw(acc.secondary_guarantee_void === 'no_guarantee' ? 'No Guarantee' : formatDate(acc.secondary_guarantee_void_date), 460, y, 9, font);
-  y -= 22;
-  line(y);
-  y -= 18;
-
-  // ── CONTACT DETAILS (INTERNAL ONLY) ─────────────────────────────────────
+  // ── CONTACT DETAILS ─────────────────────────────────────────────────────
   if (isInternal) {
     y = section('Contact & Seller Details (Internal)', y);
-    draw('Owner Phone', 48, y, 9, bold);        draw(tx.owner_phone || 'N/A', 180, y, 9, font);
+    
+    let ownerLabel = 'Owner Phone';
+    let resellerLabel = 'Reseller Phone';
+    
+    if (type === 'UC') {
+      ownerLabel = 'Loader Phone';
+      resellerLabel = 'UC Seller Phone';
+    } else if (type === 'XSuit' || type === 'Supercar') {
+      ownerLabel = 'Gifter Phone';
+    }
+
+    draw(ownerLabel, 48, y, 9, bold);           draw(tx.owner_phone || 'N/A', 180, y, 9, font);
     draw('Seller Phone', 330, y, 9, bold);      draw(tx.seller_phone || 'N/A', 460, y, 9, font);
     y -= 18;
-    draw('Reseller Phone', 48, y, 9, bold);     draw(tx.reseller_phone || 'N/A', 180, y, 9, font);
+    draw(resellerLabel, 48, y, 9, bold);        draw(tx.reseller_phone || 'N/A', 180, y, 9, font);
     draw('Buyer Phone', 330, y, 9, bold);       draw(tx.buyer_phone || 'N/A', 460, y, 9, font);
     y -= 18;
-    if (acc.owner_proof_link) {
-      draw('Owner Proof Link', 48, y, 9, bold); draw(acc.owner_proof_link.substring(0, 60), 180, y, 8, font);
+    
+    if (acc.owner_proof_link || tx.owner_proof_link) {
+      const link = acc.owner_proof_link || tx.owner_proof_link;
+      draw('Owner Proof Link', 48, y, 9, bold); draw(link.substring(0, 60), 180, y, 8, font);
       y -= 18;
     }
+    
     y -= 8;
     line(y);
     y -= 18;
@@ -228,7 +272,7 @@ const buildPDF = async (tx, isInternal = false) => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `${tx.transaction_id}_${isInternal ? 'Internal' : 'Customer'}.pdf`;
+  a.download = `${tx.transaction_id || 'Transaction'}_${isInternal ? 'Internal' : 'Customer'}.pdf`;
   a.click();
   URL.revokeObjectURL(url);
 };

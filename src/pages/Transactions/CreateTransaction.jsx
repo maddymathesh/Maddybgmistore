@@ -370,10 +370,6 @@ export default function CreateTransaction({ onBack }) {
                 ₹ {profit.toLocaleString('en-IN')}
               </div>
             </Field>
-            <Field span>
-              <Label>Account Owner Proof Link (Drive / Screenshot)</Label>
-              <input className={inp} placeholder="https://drive.google.com/..." {...register('owner_proof_link')} />
-            </Field>
           </div>
         );
 
@@ -392,6 +388,10 @@ export default function CreateTransaction({ onBack }) {
                 <input className={inp} placeholder="+91 00000 00000 or Void" {...register(key)} />
               </Field>
             ))}
+            <Field span>
+              <Label>Account Owner Proof Link (Drive / Screenshot)</Label>
+              <input className={inp} placeholder="https://drive.google.com/..." {...register('owner_proof_link')} />
+            </Field>
           </div>
         );
 

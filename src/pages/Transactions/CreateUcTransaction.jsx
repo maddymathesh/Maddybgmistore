@@ -94,7 +94,7 @@ export default function CreateUcTransaction({ onBack }) {
       delivery_status: 'Delivered',
       loader_phone: '+91',
       uc_seller_phone: '+91',
-      seller_phone: SELLER_PHONE,
+      seller_phone: '+91',
       buyer_phone: '+91',
     }
   });
@@ -306,9 +306,8 @@ export default function CreateUcTransaction({ onBack }) {
             <div><Label>Loader Phone Number</Label><input className="input" placeholder="+91 00000 00000 or Void" {...register('loader_phone')} /></div>
             <div><Label>UC Seller Phone Number</Label><input className="input" placeholder="+91 00000 00000 or Void" {...register('uc_seller_phone')} /></div>
             <div>
-              <Label>Seller Phone (Default — Readonly)</Label>
-              <div className="input" style={{ background: 'var(--bg2)', color: 'var(--muted)', fontWeight: 600, letterSpacing: '0.5px', cursor: 'not-allowed' }}>{SELLER_PHONE}</div>
-              <input type="hidden" value={SELLER_PHONE} {...register('seller_phone')} />
+              <Label>Seller Phone Number</Label>
+              <input className="input" placeholder="+91 00000 00000 or Void" {...register('seller_phone')} />
             </div>
             <div><Label>Buyer Phone Number</Label><input className="input" placeholder="+91 00000 00000 or Void" {...register('buyer_phone')} /></div>
           </div>

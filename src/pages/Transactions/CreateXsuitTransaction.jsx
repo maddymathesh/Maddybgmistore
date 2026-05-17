@@ -300,28 +300,28 @@ export default function CreateXsuitTransaction({ onBack }) {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
               <div style={{ background: 'var(--bg2)', border: '1px solid var(--border-gold)', borderRadius: 'var(--radius)', padding: '20px' }}>
-                <p className="slabel" style={{ marginBottom: '16px' }}><Camera size={14} style={{ display: 'inline', marginRight: '6px' }} />Gifter Instagram</p>
+                <p className="slabel" style={{ marginBottom: '16px' }}><Camera size={14} style={{ display: 'inline', marginRight: '6px' }} />Gifter In-Game Details</p>
                 <div style={{ display: 'grid', gap: '14px' }}>
                   <div>
-                    <Label>Gifter IG Name</Label>
-                    <input className="input" placeholder="@username" {...register('gifter_ig_name')} />
+                    <Label>Gifter In-Game Name</Label>
+                    <input className="input" placeholder="In-Game Name" {...register('gifter_ig_name')} />
                   </div>
                   <div>
-                    <Label>Gifter IG ID (Numeric)</Label>
+                    <Label>Gifter In-Game ID (Numeric)</Label>
                     <input className="input" placeholder="1234567890" type="number" {...register('gifter_ig_id')} />
                   </div>
                 </div>
               </div>
 
               <div style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '20px' }}>
-                <p className="slabel" style={{ marginBottom: '16px' }}><Camera size={14} style={{ display: 'inline', marginRight: '6px' }} />Buyer Instagram</p>
+                <p className="slabel" style={{ marginBottom: '16px' }}><Camera size={14} style={{ display: 'inline', marginRight: '6px' }} />Buyer In-Game Details</p>
                 <div style={{ display: 'grid', gap: '14px' }}>
                   <div>
-                    <Label>Buyer IG Name</Label>
-                    <input className="input" placeholder="@username" {...register('buyer_ig_name')} />
+                    <Label>Buyer In-Game Name</Label>
+                    <input className="input" placeholder="In-Game Name" {...register('buyer_ig_name')} />
                   </div>
                   <div>
-                    <Label>Buyer IG ID (Numeric)</Label>
+                    <Label>Buyer In-Game ID (Numeric)</Label>
                     <input className="input" placeholder="1234567890" type="number" {...register('buyer_ig_id')} />
                   </div>
                 </div>

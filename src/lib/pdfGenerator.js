@@ -1,281 +1,704 @@
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+/**
+ * pdfGenerator.js
+ * MBSx STORE — Production PDF Generator
+ * Built with pdf-lib (client-side, no server required)
+ *
+ * Usage:
+ *   import { generateCustomerPDF, generateInternalPDF } from './lib/pdfGenerator';
+ *   await generateCustomerPDF(transactionObject);
+ *   await generateInternalPDF(transactionObject);
+ *
+ * Requires: pdf-lib  →  npm install pdf-lib
+ */
 
-const BRAND_COLOR = rgb(0.05, 0.05, 0.12);
-const GOLD = rgb(1, 0.84, 0);
-const WHITE = rgb(1, 1, 1);
-const LIGHT_GRAY = rgb(0.7, 0.7, 0.7);
-const DARK_GRAY = rgb(0.15, 0.15, 0.2);
-const GREEN = rgb(0.1, 0.7, 0.3);
-const RED_TEXT = rgb(0.85, 0.1, 0.1);
+import { PDFDocument, rgb, StandardFonts, PageSizes } from 'pdf-lib';
 
-const formatDate = (dateStr) => {
-  if (!dateStr) return 'N/A';
-  try {
-    const d = new Date(dateStr);
-    return isNaN(d.getTime()) ? dateStr : d.toLocaleDateString('en-IN', {
-      day: '2-digit', month: 'short', year: 'numeric'
-    });
-  } catch {
-    return dateStr;
-  }
+// ─────────────────────────────────────────────
+// DESIGN SYSTEM TOKENS
+// ─────────────────────────────────────────────
+const C = {
+  bgDark:      rgb(0.05, 0.05, 0.12),   // Primary dark background
+  gold:        rgb(1.00, 0.84, 0.00),   // Bright gold accent
+  goldMuted:   rgb(0.85, 0.70, 0.10),   // Softer gold for secondary text
+  white:       rgb(1.00, 1.00, 1.00),
+  textDark:    rgb(0.15, 0.15, 0.20),   // Main body text
+  textMid:     rgb(0.35, 0.35, 0.42),   // Subdued labels
+  borderLight: rgb(0.80, 0.80, 0.85),   // Light rule lines
+  borderGold:  rgb(0.85, 0.72, 0.20),   // Gold rule lines
+  panelBg:     rgb(0.96, 0.96, 0.98),   // Light panel fill
+  panelDark:   rgb(0.10, 0.10, 0.18),   // Dark panel inside header
+  green:       rgb(0.08, 0.68, 0.28),   // Positive / paid
+  red:         rgb(0.85, 0.10, 0.10),   // Negative / unpaid
+  amber:       rgb(0.90, 0.55, 0.05),   // Warning / partial
 };
 
-const buildPDF = async (tx, isInternal = false) => {
-  if (!tx) return;
-  
-  const type = tx.transaction_type || 'Account';
-  const acc = tx.account_transactions?.[0] || {};
-  const xs = tx.xsuit_transactions?.[0] || {};
-  const sc = tx.supercar_transactions?.[0] || {};
-  const uc = tx.uc_transactions?.[0] || {};
+const SUPPORT_PHONE = '+91 90253 91516';
+const BRAND_NAME    = 'MBSx STORE';
+const PAGE_W        = 595;  // A4 width  (pts)
+const PAGE_H        = 842;  // A4 height (pts)
+const MARGIN        = 40;
+const CONTENT_W     = PAGE_W - MARGIN * 2;
 
+// ─────────────────────────────────────────────
+// DATE FORMATTER
+// ─────────────────────────────────────────────
+function formatDate(raw) {
+  if (!raw) return '—';
+  try {
+    const d = new Date(raw);
+    if (isNaN(d)) return raw;
+    const months = ['Jan','Feb','Mar','Apr','May','Jun',
+                    'Jul','Aug','Sep','Oct','Nov','Dec'];
+    const day   = String(d.getDate()).padStart(2, '0');
+    const month = months[d.getMonth()];
+    const year  = d.getFullYear();
+    return `${day}-${month}-${year}`;
+  } catch {
+    return raw;
+  }
+}
+
+function formatDateTime(raw) {
+  if (!raw) return '—';
+  try {
+    const d = new Date(raw);
+    if (isNaN(d)) return raw;
+    const time = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    return `${formatDate(raw)}  ${time}`;
+  } catch {
+    return raw;
+  }
+}
+
+function safeVal(v) {
+  if (v === null || v === undefined || v === '') return '—';
+  return String(v);
+}
+
+// ─────────────────────────────────────────────
+// LOGO LOADER (graceful fallback)
+// ─────────────────────────────────────────────
+async function tryLoadLogo(pdfDoc) {
+  try {
+    const res = await fetch('/logo.png');
+    if (!res.ok) return null;
+    const buf = await res.arrayBuffer();
+    return await pdfDoc.embedPng(buf);
+  } catch {
+    try {
+      const res = await fetch('/logo.jpg');
+      if (!res.ok) return null;
+      const buf = await res.arrayBuffer();
+      return await pdfDoc.embedJpg(buf);
+    } catch {
+      return null;
+    }
+  }
+}
+
+// ─────────────────────────────────────────────
+// DOCUMENT FACTORY
+// ─────────────────────────────────────────────
+async function createDoc() {
   const pdfDoc = await PDFDocument.create();
-  const page = pdfDoc.addPage([595, 842]); // A4
-  const { width, height } = page.getSize();
-
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-
-  const draw = (text, x, y, size = 10, f = font, color = rgb(0.1, 0.1, 0.15)) => {
-    page.drawText(String(text ?? 'N/A'), { x, y, size, font: f, color });
+  const page   = pdfDoc.addPage([PAGE_W, PAGE_H]);
+  const fonts  = {
+    regular: await pdfDoc.embedFont(StandardFonts.Helvetica),
+    bold:    await pdfDoc.embedFont(StandardFonts.HelveticaBold),
+    oblique: await pdfDoc.embedFont(StandardFonts.HelveticaOblique),
   };
+  const logo = await tryLoadLogo(pdfDoc);
+  return { pdfDoc, page, fonts, logo };
+}
 
-  const line = (y, opacity = 0.15) => {
-    page.drawLine({
-      start: { x: 40, y },
-      end: { x: width - 40, y },
-      thickness: 1,
-      color: rgb(0.5, 0.5, 0.5),
-      opacity,
-    });
-  };
+// ─────────────────────────────────────────────
+// LOW-LEVEL DRAWING HELPERS
+// ─────────────────────────────────────────────
 
-  const section = (title, y) => {
-    page.drawRectangle({ x: 40, y: y - 4, width: width - 80, height: 20, color: DARK_GRAY });
-    draw(title.toUpperCase(), 48, y + 2, 9, bold, GOLD);
-    return y - 30;
-  };
+/** Draw text at absolute (x, y). Returns text width. */
+function txt(page, fonts, text, x, y, {
+  size  = 10,
+  color = C.textDark,
+  bold  = false,
+  align = 'left',
+  maxW  = null,
+} = {}) {
+  const font  = bold ? fonts.bold : fonts.regular;
+  const str   = safeVal(text);
+  let drawX   = x;
 
-  // ── HEADER ──────────────────────────────────────────────────────────────
-  page.drawRectangle({ x: 0, y: height - 80, width, height: 80, color: BRAND_COLOR });
-  draw('MBSx STORE', 40, height - 38, 22, bold, GOLD);
-  draw('South India\'s #1 BGMI Account Marketplace', 40, height - 56, 9, font, LIGHT_GRAY);
-  draw(
-    isInternal ? '[ INTERNAL RECORD — CONFIDENTIAL ]' : '[ CUSTOMER RECEIPT & GUARANTEE CERTIFICATE ]',
-    width - 250,
-    height - 38,
-    9,
-    bold,
-    isInternal ? RED_TEXT : GREEN
-  );
-  draw(`Generated: ${new Date().toLocaleString('en-IN')}`, width - 250, height - 56, 8, font, LIGHT_GRAY);
+  if (align === 'center' && maxW) {
+    const w = font.widthOfTextAtSize(str, size);
+    drawX   = x + (maxW - w) / 2;
+  } else if (align === 'right' && maxW) {
+    const w = font.widthOfTextAtSize(str, size);
+    drawX   = x + maxW - w;
+  }
 
-  let y = height - 100;
+  page.drawText(str, { x: drawX, y, size, font: f => f, color });
+  // Avoid passing function, pdf-lib expects Font object
+  page.drawText(str, { x: drawX, y, size, font, color });
+  return font.widthOfTextAtSize(str, size);
+}
 
-  // ── TRANSACTION SUMMARY ─────────────────────────────────────────────────
-  y = section('Transaction Summary', y);
+/** Draw a horizontal rule */
+function hRule(page, x, y, width, { color = C.borderLight, thickness = 0.5 } = {}) {
+  page.drawLine({
+    start: { x, y },
+    end:   { x: x + width, y },
+    thickness,
+    color,
+  });
+}
 
-  draw('Transaction ID', 48, y, 9, bold);       draw(`#${tx.transaction_id || 'N/A'}`, 180, y, 9, font);
-  draw('Transaction Date', 330, y, 9, bold);    draw(formatDate(tx.transaction_date), 460, y, 9, font);
+/** Draw a filled rectangle */
+function rect(page, x, y, w, h, { fill = C.panelBg, border = null, borderW = 0.5 } = {}) {
+  page.drawRectangle({ x, y, width: w, height: h, color: fill });
+  if (border) {
+    page.drawRectangle({ x, y, width: w, height: h,
+      borderColor: border, borderWidth: borderW, color: undefined });
+  }
+}
+
+/** Two-column label + value row. Returns new y after drawing. */
+function labelRow(page, fonts, label, value, y, {
+  labelColor = C.textMid,
+  valueColor = C.textDark,
+  labelSize  = 8.5,
+  valueSize  = 9,
+  colSplit    = 160,
+  indent      = MARGIN,
+  bold        = false,
+  valueBold   = false,
+} = {}) {
+  txt(page, fonts, label, indent, y, { size: labelSize, color: labelColor });
+  txt(page, fonts, value, indent + colSplit, y, { size: valueSize, color: valueColor, bold: valueBold });
+  return y - 15;
+}
+
+/** Multi-line wrapped text. Returns new y after drawing. */
+function wrappedText(page, fonts, text, x, y, {
+  maxW   = CONTENT_W,
+  size   = 9,
+  color  = C.textDark,
+  bold   = false,
+  lineH  = 14,
+} = {}) {
+  const font  = bold ? fonts.bold : fonts.regular;
+  const words = safeVal(text).split(/\s+/);
+  let line    = '';
+  let curY    = y;
+
+  for (const word of words) {
+    const test = line ? `${line} ${word}` : word;
+    if (font.widthOfTextAtSize(test, size) > maxW && line) {
+      page.drawText(line, { x, y: curY, size, font, color });
+      curY -= lineH;
+      line  = word;
+    } else {
+      line = test;
+    }
+  }
+  if (line) page.drawText(line, { x, y: curY, size, font, color });
+  return curY - lineH;
+}
+
+// ─────────────────────────────────────────────
+// COMPOSITE LAYOUT BLOCKS
+// ─────────────────────────────────────────────
+
+/** Draw the branded header band. Returns y after header. */
+function drawHeader(page, fonts, logo, { label, txId, txDate }) {
+  const HEADER_H = 90;
+  const y0       = PAGE_H;
+
+  // Dark background band
+  rect(page, 0, y0 - HEADER_H, PAGE_W, HEADER_H, { fill: C.bgDark });
+
+  // Gold accent bar at very top
+  rect(page, 0, y0 - 4, PAGE_W, 4, { fill: C.gold });
+
+  // Logo or brand text
+  if (logo) {
+    const logoH = 42;
+    const logoW = (logo.width / logo.height) * logoH;
+    page.drawImage(logo, { x: MARGIN, y: y0 - HEADER_H + (HEADER_H - logoH) / 2, width: logoW, height: logoH });
+    // Brand name beside logo
+    txt(page, fonts, BRAND_NAME, MARGIN + logoW + 10, y0 - HEADER_H / 2 + 10,
+        { size: 18, color: C.gold, bold: true });
+    txt(page, fonts, 'BGMI Gaming Store', MARGIN + logoW + 10, y0 - HEADER_H / 2 - 6,
+        { size: 8.5, color: C.goldMuted });
+  } else {
+    txt(page, fonts, BRAND_NAME, MARGIN, y0 - 35, { size: 22, color: C.gold, bold: true });
+    txt(page, fonts, 'BGMI Gaming Store', MARGIN, y0 - 50, { size: 9, color: C.goldMuted });
+  }
+
+  // Right side — document label block
+  const rightX = PAGE_W - MARGIN - 150;
+  rect(page, rightX, y0 - HEADER_H + 12, 152, HEADER_H - 24, { fill: C.panelDark });
+  txt(page, fonts, label, rightX, y0 - HEADER_H + 12 + 46,
+      { size: 7.5, color: C.gold, bold: true, align: 'center', maxW: 152 });
+  txt(page, fonts, txId, rightX, y0 - HEADER_H + 12 + 30,
+      { size: 11, color: C.white, bold: true, align: 'center', maxW: 152 });
+  txt(page, fonts, formatDate(txDate), rightX, y0 - HEADER_H + 12 + 14,
+      { size: 8, color: C.goldMuted, align: 'center', maxW: 152 });
+
+  // Gold divider
+  hRule(page, 0, y0 - HEADER_H, PAGE_W, { color: C.gold, thickness: 1.2 });
+
+  return y0 - HEADER_H - 12;
+}
+
+/** Draw a section header band. Returns y after section header. */
+function sectionHeader(page, fonts, title, y) {
+  rect(page, MARGIN, y - 16, CONTENT_W, 20, { fill: C.bgDark });
+  // Gold left accent stripe
+  rect(page, MARGIN, y - 16, 4, 20, { fill: C.gold });
+  txt(page, fonts, title.toUpperCase(), MARGIN + 10, y - 8,
+      { size: 8, color: C.gold, bold: true });
+  return y - 16 - 10;
+}
+
+/** Draw a data panel (light bg, rounded border). Returns y after panel. */
+function openPanel(page, y, height) {
+  rect(page, MARGIN, y - height, CONTENT_W, height,
+       { fill: C.panelBg, border: C.borderLight, borderW: 0.6 });
+  return y - 6;
+}
+
+/** Draw the footer band. */
+function drawFooter(page, fonts, isInternal, excludePrintDate = false) {
+  const FOOT_H = 38;
+  const y0     = FOOT_H;
+
+  rect(page, 0, 0, PAGE_W, FOOT_H, { fill: C.bgDark });
+  hRule(page, 0, FOOT_H, PAGE_W, { color: C.gold, thickness: 0.8 });
+
+  if (!excludePrintDate) {
+    const generated = `Generated: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST`;
+    txt(page, fonts, generated, MARGIN, 24, { size: 7, color: C.textMid });
+  }
+
+  const notice = isInternal
+    ? 'CONFIDENTIAL — Internal use only. Do not share with customers.'
+    : `Support: ${SUPPORT_PHONE}  |  Thank you for choosing ${BRAND_NAME}!`;
+  txt(page, fonts, notice, MARGIN, 12, { size: 7.5, color: C.goldMuted });
+
+  // Page number right
+  txt(page, fonts, 'Page 1 of 1', 0, 24,
+      { size: 7, color: C.textMid, align: 'right', maxW: PAGE_W - MARGIN });
+}
+
+/** Draw a status badge (Paid / Unpaid / Partial). */
+function statusBadge(page, fonts, status, x, y) {
+  const s = safeVal(status).toLowerCase();
+  let fill  = C.green;
+  let label = safeVal(status);
+  if (s.includes('unpaid') || s.includes('pending')) fill = C.red;
+  else if (s.includes('partial'))                     fill = C.amber;
+
+  const W = 90, H = 14;
+  rect(page, x, y - 2, W, H, { fill });
+  txt(page, fonts, label.toUpperCase(), x, y + 1,
+      { size: 7, color: C.white, bold: true, align: 'center', maxW: W });
+}
+
+// ─────────────────────────────────────────────
+// SHARED INFO BLOCKS
+// ─────────────────────────────────────────────
+
+/** Draws deal basics (tx_id, date, mode, payment, status). Returns new y. */
+function drawDealInfo(page, fonts, tx, y, { showPrice = false } = {}) {
+  const rows = [
+    ['Transaction ID',   safeVal(tx.transaction_id)],
+    ['Date',             formatDateTime(tx.transaction_date)],
+    ['Mode of Deal',     safeVal(tx.mode_of_deal)],
+    ['Mode of Payment',  safeVal(tx.mode_of_payment)],
+  ];
+
+  for (const [label, value] of rows) {
+    y = labelRow(page, fonts, label, value, y);
+  }
+
+  // Status with badge
+  txt(page, fonts, 'Payment Status', MARGIN, y, { size: 8.5, color: C.textMid });
+  statusBadge(page, fonts, tx.payment_status, MARGIN + 160, y);
   y -= 18;
-  draw('Mode of Deal', 48, y, 9, bold);         draw(tx.mode_of_deal || 'N/A', 180, y, 9, font);
-  draw('Mode of Payment', 330, y, 9, bold);     draw(tx.mode_of_payment || 'N/A', 460, y, 9, font);
-  y -= 18;
-  draw('Payment Status', 48, y, 9, bold);
-  const statusColor = tx.payment_status === 'Fully Paid' || tx.payment_status === 'Paid' ? GREEN : rgb(0.9, 0.6, 0.1);
-  draw(tx.payment_status || 'N/A', 180, y, 9, bold, statusColor);
-  y -= 24;
-  line(y);
-  y -= 18;
 
-  // ── FINANCIAL DETAILS ───────────────────────────────────────────────────
+  if (showPrice) {
+    hRule(page, MARGIN, y + 4, CONTENT_W, { color: C.borderGold, thickness: 0.5 });
+    y -= 4;
+    y = labelRow(page, fonts, 'Sold Price', `Rs. ${Number(tx.sold_price || 0).toLocaleString('en-IN')}`, y,
+                 { valueColor: C.textDark, valueBold: true });
+  }
+
+  return y;
+}
+
+/** Draws contact block. Returns new y. */
+function drawContacts(page, fonts, contacts, y) {
+  for (const [label, value] of contacts) {
+    y = labelRow(page, fonts, label, value, y);
+  }
+  return y;
+}
+
+// ─────────────────────────────────────────────
+// TRANSACTION-TYPE SPECIFIC BLOCKS
+// ─────────────────────────────────────────────
+
+function drawAccountSection(page, fonts, acc, y, isInternal) {
+  y = sectionHeader(page, fonts, 'Account Login Details', y);
+  y -= 4;
+
+  y = labelRow(page, fonts, 'Primary Login',     safeVal(acc.primary_login_provider), y, { valueBold: true });
+  y = labelRow(page, fonts, 'Primary Credentials', safeVal(acc.primary_credentials), y);
+  y = labelRow(page, fonts, 'Primary Mothermail', safeVal(acc.primary_mothermail_status), y);
+  y -= 4;
+  y = labelRow(page, fonts, 'Secondary Login',    safeVal(acc.secondary_login_provider), y, { valueBold: true });
+  y = labelRow(page, fonts, 'Secondary Credentials', safeVal(acc.secondary_credentials), y);
+  y = labelRow(page, fonts, 'Secondary Mothermail', safeVal(acc.secondary_mothermail_status), y);
+  y -= 8;
+
+  y = sectionHeader(page, fonts, 'Guarantee & Warranty', y);
+  y -= 4;
+  y = labelRow(page, fonts, 'Guarantee Plan',          safeVal(acc.guarantee_plan), y, { valueBold: true });
+  y = labelRow(page, fonts, 'Primary Unlink Date',     formatDate(acc.primary_unlink_date), y);
+  y = labelRow(page, fonts, 'Primary Guarantee Void',  formatDate(acc.primary_guarantee_void_date), y);
+  y = labelRow(page, fonts, 'Secondary Unlink Date',   formatDate(acc.secondary_unlink_date), y);
+  y = labelRow(page, fonts, 'Secondary Guarantee Void', formatDate(acc.secondary_guarantee_void_date), y);
+  y -= 8;
+
+  if (acc.product_link && acc.product_link !== '—') {
+    y = sectionHeader(page, fonts, 'Product Reference', y);
+    y -= 4;
+    y = labelRow(page, fonts, 'Product Link', safeVal(acc.product_link), y,
+                 { valueColor: rgb(0.10, 0.30, 0.80) });
+    y -= 4;
+  }
+
+  return y;
+}
+
+function drawXSuitSection(page, fonts, xs, y, isInternal) {
+  y = sectionHeader(page, fonts, 'X-Suit Details', y);
+  y -= 4;
+
+  y = labelRow(page, fonts, 'X-Suit Name',    safeVal(xs.xsuit_name), y, { valueBold: true });
+  y = labelRow(page, fonts, 'Gift Status',     safeVal(xs.gift_status), y);
+  y = labelRow(page, fonts, 'Delivery Date',   formatDate(xs.delivery_date), y);
+  y = labelRow(page, fonts, 'Delivery Time',   safeVal(xs.delivery_time), y);
+  y -= 4;
+  y = labelRow(page, fonts, 'Buyer IG Name',   safeVal(xs.buyer_ig_name), y);
+  y = labelRow(page, fonts, 'Buyer IG ID',      safeVal(xs.buyer_ig_id), y);
+  y -= 4;
+
   if (isInternal) {
-    y = section('Financial Details (Internal Only)', y);
-    draw('Cost Price', 48, y, 9, bold);         draw(`₹ ${Number(tx.owner_price || 0).toLocaleString('en-IN')}`, 180, y, 9, font);
-    draw('Sold Price', 330, y, 9, bold);        draw(`₹ ${Number(tx.sold_price || 0).toLocaleString('en-IN')}`, 460, y, 9, font);
-    y -= 18;
-    draw('NET PROFIT', 48, y, 10, bold);
-    const profit = Number(tx.profit || 0);
-    draw(`₹ ${profit.toLocaleString('en-IN')}`, 180, y, 10, bold, profit >= 0 ? GREEN : RED_TEXT);
-    y -= 22;
-    line(y);
-    y -= 18;
-  } else {
-    y = section('Payment Confirmation', y);
-    draw('Amount Paid', 48, y, 9, bold);
-    draw(`₹ ${Number(tx.sold_price || 0).toLocaleString('en-IN')}`, 180, y, 11, bold, GREEN);
-    y -= 22;
-    line(y);
-    y -= 18;
+    hRule(page, MARGIN, y + 6, CONTENT_W, { color: C.borderGold });
+    y -= 2;
+    txt(page, fonts, 'SUPPLIER DETAILS', MARGIN, y, { size: 7.5, color: C.amber, bold: true });
+    y -= 14;
+    y = labelRow(page, fonts, 'Gifter IG Name',  safeVal(xs.gifter_ig_name), y);
+    y = labelRow(page, fonts, 'Gifter IG ID',    safeVal(xs.gifter_ig_id), y);
+    y -= 4;
   }
 
-  // ── PRODUCT DETAILS ─────────────────────────────────────────────────────
-  y = section('Product Details', y);
-  draw('Product Type', 48, y, 9, bold);
-  
-  let prodType = 'BGMI Account';
-  if (type === 'XSuit') prodType = 'XSuit Gift';
-  else if (type === 'Supercar') prodType = 'Supercar Gift';
-  else if (type === 'UC') prodType = 'UC Top-Up Order';
-  
-  draw(prodType, 180, y, 9, font);
+  return y;
+}
+
+function drawSupercarSection(page, fonts, sc, y, isInternal) {
+  y = sectionHeader(page, fonts, 'Supercar Details', y);
+  y -= 4;
+
+  y = labelRow(page, fonts, 'Supercar Name',    safeVal(sc.supercar_name), y, { valueBold: true });
+  y = labelRow(page, fonts, 'Card Tier (Tire)',  safeVal(sc.supercar_card_tier), y);
+  y = labelRow(page, fonts, 'Gift Status',       safeVal(sc.gift_status), y);
+  y = labelRow(page, fonts, 'Delivery Date',     formatDate(sc.delivery_date), y);
+  y -= 4;
+  y = labelRow(page, fonts, 'Buyer IG Name',     safeVal(sc.buyer_ig_name), y);
+  y = labelRow(page, fonts, 'Buyer IG ID',       safeVal(sc.buyer_ig_id), y);
+  y -= 4;
+
+  if (isInternal) {
+    hRule(page, MARGIN, y + 6, CONTENT_W, { color: C.borderGold });
+    y -= 2;
+    txt(page, fonts, 'SUPPLIER DETAILS', MARGIN, y, { size: 7.5, color: C.amber, bold: true });
+    y -= 14;
+    y = labelRow(page, fonts, 'Gifter IG Name',  safeVal(sc.gifter_ig_name), y);
+    y = labelRow(page, fonts, 'Gifter IG ID',    safeVal(sc.gifter_ig_id), y);
+    y -= 4;
+  }
+
+  return y;
+}
+
+function drawUCSection(page, fonts, uc, y) {
+  y = sectionHeader(page, fonts, 'UC Order Details', y);
+  y -= 4;
+
+  y = labelRow(page, fonts, 'UC Method',       safeVal(uc.uc_method), y, { valueBold: true });
+  y = labelRow(page, fonts, 'UC Pack',         safeVal(uc.uc_pack), y);
+  y = labelRow(page, fonts, 'Number of Packs', safeVal(uc.num_packs), y);
+  y = labelRow(page, fonts, 'Total UC',        safeVal(uc.total_uc), y);
+  y -= 4;
+
+  // Delivery status badge
+  txt(page, fonts, 'Delivery Status', MARGIN, y, { size: 8.5, color: C.textMid });
+  statusBadge(page, fonts, uc.delivery_status, MARGIN + 160, y);
   y -= 18;
 
-  if (type === 'XSuit') {
-    draw('XSuit Name', 48, y, 9, bold);          draw(xs.xsuit_name || 'N/A', 180, y, 9, font);
-    draw('Gift Status', 330, y, 9, bold);
-    draw(xs.gift_status || 'N/A', 460, y, 9, bold, xs.gift_status === 'Delivered' ? GREEN : rgb(0.9,0.6,0.1));
-    y -= 18;
-    draw('Delivery Date', 48, y, 9, bold);       draw(formatDate(xs.delivery_date), 180, y, 9, font);
-    draw('Delivery Time', 330, y, 9, bold);      draw(xs.delivery_time || 'N/A', 460, y, 9, font);
-    y -= 18;
-    draw('Gifter In-Game Name', 48, y, 9, bold);  draw(xs.gifter_ig_name || 'N/A', 180, y, 9, font);
-    draw('Gifter In-Game ID', 330, y, 9, bold);   draw(String(xs.gifter_ig_id || 'N/A'), 460, y, 9, font);
-    y -= 18;
-    if (!isInternal) {
-      // Customer copy: show buyer details
-      draw('Buyer In-Game Name', 48, y, 9, bold); draw(xs.buyer_ig_name || 'N/A', 180, y, 9, font);
-      draw('Buyer In-Game ID', 330, y, 9, bold);  draw(String(xs.buyer_ig_id || 'N/A'), 460, y, 9, font);
-      y -= 18;
-    }
-  } else if (type === 'Supercar') {
-    draw('Supercar Name', 48, y, 9, bold);       draw(sc.supercar_name || 'N/A', 180, y, 9, font);
-    draw('Card Tier', 330, y, 9, bold);          draw(sc.supercar_card_tier || 'N/A', 460, y, 9, font);
-    y -= 18;
-    draw('Gift Status', 48, y, 9, bold);
-    draw(sc.gift_status || 'N/A', 180, y, 9, bold, sc.gift_status === 'Delivered' ? GREEN : rgb(0.9,0.6,0.1));
-    draw('Delivery Date', 330, y, 9, bold);      draw(formatDate(sc.delivery_date), 460, y, 9, font);
-    y -= 18;
-    draw('Gifter In-Game Name', 48, y, 9, bold);  draw(sc.gifter_ig_name || 'N/A', 180, y, 9, font);
-    draw('Gifter In-Game ID', 330, y, 9, bold);   draw(String(sc.gifter_ig_id || 'N/A'), 460, y, 9, font);
-    y -= 18;
-    if (!isInternal) {
-      draw('Buyer In-Game Name', 48, y, 9, bold); draw(sc.buyer_ig_name || 'N/A', 180, y, 9, font);
-      draw('Buyer In-Game ID', 330, y, 9, bold);  draw(String(sc.buyer_ig_id || 'N/A'), 460, y, 9, font);
-      y -= 18;
-    }
-  } else if (type === 'UC') {
-    draw('UC Method', 48, y, 9, bold);           draw(uc.uc_method || 'N/A', 180, y, 9, font);
-    draw('UC Pack', 330, y, 9, bold);            draw(uc.uc_pack || 'N/A', 460, y, 9, font);
-    y -= 18;
-    draw('Number of Packs', 48, y, 9, bold);     draw(String(uc.num_packs || 0), 180, y, 9, font);
-    draw('Total UC', 330, y, 9, bold);           draw(`${uc.total_uc || 0} UC`, 460, y, 9, font);
-    y -= 18;
-    draw('Delivery Status', 48, y, 9, bold);
-    draw(uc.delivery_status || 'N/A', 180, y, 9, bold, uc.delivery_status === 'Delivered' ? GREEN : rgb(0.9,0.6,0.1));
-    draw('Delivery Date', 330, y, 9, bold);      draw(formatDate(uc.delivery_date), 460, y, 9, font);
-    y -= 18;
-  } else {
-    // Account details
-    if (acc.product_link) {
-      draw('Product Reference', 48, y, 9, bold);  draw(acc.product_link.substring(0, 70), 180, y, 8, font);
-      y -= 18;
-    }
-  }
+  y = labelRow(page, fonts, 'Delivery Date', formatDate(uc.delivery_date), y);
+  y -= 4;
+
+  return y;
+}
+
+/** Internal-only financial summary block. Returns new y. */
+function drawFinancials(page, fonts, tx, y) {
+  y = sectionHeader(page, fonts, 'Financial Summary — Confidential', y);
+  y -= 4;
+
+  const sold   = Number(tx.sold_price  || 0);
+  const cost   = Number(tx.owner_price || 0);
+  const profit = sold - cost;
+  const isPos  = profit >= 0;
+
+  rect(page, MARGIN, y - 52, CONTENT_W, 58, { fill: C.bgDark });
+
+  // Three-column financial figures
+  const col   = CONTENT_W / 3;
+  const cols  = [
+    { label: 'COST PRICE',  value: `Rs. ${cost.toLocaleString('en-IN')}`,   color: C.white },
+    { label: 'SOLD PRICE',  value: `Rs. ${sold.toLocaleString('en-IN')}`,   color: C.goldMuted },
+    { label: 'NET PROFIT',  value: `Rs. ${Math.abs(profit).toLocaleString('en-IN')}`, color: isPos ? C.green : C.red },
+  ];
+
+  cols.forEach(({ label, value, color }, i) => {
+    const cx = MARGIN + col * i;
+    txt(page, fonts, label, cx, y - 14, { size: 7, color: C.goldMuted, bold: true, align: 'center', maxW: col });
+    txt(page, fonts, value, cx, y - 32, { size: 13, color, bold: true, align: 'center', maxW: col });
+    const sign = i === 2 ? (isPos ? '▲ Gain' : '▼ Loss') : '';
+    if (sign) txt(page, fonts, sign, cx, y - 46, { size: 7.5, color, align: 'center', maxW: col });
+  });
+
+  y -= 58;
+
+  // Dividers inside dark block
+  hRule(page, MARGIN + col,     y + 6, 1, { color: C.borderGold, thickness: 0.5 });
+  hRule(page, MARGIN + col * 2, y + 6, 1, { color: C.borderGold, thickness: 0.5 });
 
   y -= 10;
-  line(y);
-  y -= 18;
+  return y;
+}
 
-  // ── TYPE-SPECIFIC SECTIONS (ONLY FOR ACCOUNTS) ──────────────────────────
+/** Internal-only contact block with all parties. Returns new y. */
+function drawInternalContacts(page, fonts, tx, y) {
+  y = sectionHeader(page, fonts, 'All Party Contacts — Admin Only', y);
+  y -= 4;
+
+  y = labelRow(page, fonts, 'Buyer Phone',     safeVal(tx.buyer_phone), y);
+  y = labelRow(page, fonts, 'Owner Phone',     safeVal(tx.owner_phone), y);
+  y = labelRow(page, fonts, 'Seller Phone',    safeVal(tx.seller_phone), y);
+  y = labelRow(page, fonts, 'Reseller Phone',  safeVal(tx.reseller_phone), y);
+  y -= 6;
+
+  if (tx.owner_proof_link) {
+    txt(page, fonts, 'Owner Proof Link', MARGIN, y, { size: 8.5, color: C.textMid });
+    txt(page, fonts, safeVal(tx.owner_proof_link), MARGIN + 160, y,
+        { size: 8.5, color: rgb(0.10, 0.30, 0.80) });
+    y -= 15;
+  }
+
+  y -= 4;
+  return y;
+}
+
+// ─────────────────────────────────────────────
+// WATERMARK (admin copies only)
+// ─────────────────────────────────────────────
+function drawWatermark(page, fonts) {
+  const label  = 'CONFIDENTIAL';
+  for (let i = 0; i < 3; i++) {
+    txt(page, fonts, label, 80 + i * 180, 500 - i * 120,
+        { size: 36, color: rgb(0.92, 0.78, 0.20), bold: true });
+  }
+}
+
+// ─────────────────────────────────────────────
+// CONFIG-BASED VISIBILITY FILTER
+// ─────────────────────────────────────────────
+function applyConfigVisibility(tx, isInternal) {
+  const clone = JSON.parse(JSON.stringify(tx));
+  const txType = clone.transaction_type || 'Account';
+  
+  let savedConfig;
+  try {
+    const raw = localStorage.getItem('mbs_pdf_fields_config');
+    if (raw) savedConfig = JSON.parse(raw);
+  } catch (e) {
+    console.warn('Failed to parse pdf fields config:', e);
+  }
+
+  if (!savedConfig || !savedConfig[txType]) return clone;
+
+  const mode = isInternal ? 'internal' : 'customer';
+  const modeMap = savedConfig[txType][mode] || {};
+
+  // For any field that is false (unchecked), set its value in the clone to null
+  for (const [key, visible] of Object.entries(modeMap)) {
+    if (visible === false) {
+      if (key in clone) clone[key] = null;
+      
+      const subTables = ['account_transactions', 'xsuit_transactions',
+                         'supercar_transactions', 'uc_transactions'];
+      for (const table of subTables) {
+        if (Array.isArray(clone[table])) {
+          clone[table] = clone[table].map(row => {
+            const r = { ...row };
+            if (key in r) r[key] = null;
+            return r;
+          });
+        }
+      }
+    }
+  }
+
+  return clone;
+}
+
+// ─────────────────────────────────────────────
+// CORE PDF BUILDERS
+// ─────────────────────────────────────────────
+
+/**
+ * Builds a complete PDF for the given transaction and mode.
+ * @param {Object}  tx         - Joined transaction object from your API/Sheets
+ * @param {boolean} isInternal - true = admin copy, false = customer copy
+ */
+async function buildPDF(tx, isInternal) {
+  const filteredTx = applyConfigVisibility(tx, isInternal);
+  const { pdfDoc, page, fonts, logo } = await createDoc();
+  const type = safeVal(filteredTx.transaction_type);  // 'Account' | 'XSuit' | 'Supercar' | 'UC'
+
+  // ── HEADER ──
+  const docLabel = isInternal
+    ? `[ CONFIDENTIAL — ADMIN COPY ]`
+    : `[ CUSTOMER COPY ]`;
+
+  let y = drawHeader(page, fonts, logo, {
+    label:  docLabel,
+    txId:   safeVal(filteredTx.transaction_id),
+    txDate: filteredTx.transaction_date,
+  });
+
+  y -= 8;
+
+  // ── DEAL INFORMATION ──
+  y = sectionHeader(page, fonts, 'Transaction Details', y);
+  y -= 4;
+  y = drawDealInfo(page, fonts, filteredTx, y, { showPrice: false });
+  y -= 10;
+
+  // ── TYPE-SPECIFIC PRODUCT SECTIONS ──
+  const acc = (filteredTx.account_transactions   || [])[0] || {};
+  const xs  = (filteredTx.xsuit_transactions     || [])[0] || {};
+  const sc  = (filteredTx.supercar_transactions  || [])[0] || {};
+  const uc  = (filteredTx.uc_transactions        || [])[0] || {};
+
   if (type === 'Account') {
-    // ── LOGIN DETAILS ───────────────────────────────────────────────────────
-    y = section('Login Information', y);
-    draw('Primary Login', 48, y, 9, bold);        draw(acc.primary_login_provider || 'N/A', 180, y, 9, font);
-    draw('Secondary Login', 330, y, 9, bold);     draw(acc.secondary_login_provider || 'N/A', 460, y, 9, font);
-    y -= 18;
-    draw('Primary Mothermail', 48, y, 9, bold);   draw(acc.primary_mothermail_status || 'N/A', 180, y, 9, font);
-    draw('Secondary Mothermail', 330, y, 9, bold);draw(acc.secondary_mothermail_status || 'N/A', 460, y, 9, font);
-    y -= 18;
-
-    if (isInternal && acc.primary_credentials) {
-      y -= 6;
-      draw('Primary Credentials:', 48, y, 9, bold, RED_TEXT);
-      y -= 14;
-      const lines = (acc.primary_credentials || '').split('\n').slice(0, 3);
-      lines.forEach(l => { draw(l, 60, y, 9, font); y -= 13; });
-    }
-
-    if (isInternal && acc.secondary_credentials) {
-      y -= 4;
-      draw('Secondary Credentials:', 48, y, 9, bold, RED_TEXT);
-      y -= 14;
-      const lines = (acc.secondary_credentials || '').split('\n').slice(0, 3);
-      lines.forEach(l => { draw(l, 60, y, 9, font); y -= 13; });
-    }
-
-    y -= 10;
-    line(y);
-    y -= 18;
-
-    // ── GUARANTEE DETAILS ───────────────────────────────────────────────────
-    y = section('Guarantee Information', y);
-    draw('Guarantee Plan', 48, y, 9, bold);       draw(acc.guarantee_plan || 'Not Applicable', 180, y, 9, font);
-    y -= 18;
-    draw('Primary Unlink Date', 48, y, 9, bold);  draw(formatDate(acc.primary_unlink_date), 180, y, 9, font);
-    draw('Secondary Unlink Date', 330, y, 9, bold);draw(formatDate(acc.secondary_unlink_date), 460, y, 9, font);
-    y -= 18;
-    draw('Primary Void Date', 48, y, 9, bold);    draw(acc.primary_guarantee_void === 'no_guarantee' ? 'No Guarantee' : formatDate(acc.primary_guarantee_void_date), 180, y, 9, font);
-    draw('Secondary Void Date', 330, y, 9, bold); draw(acc.secondary_guarantee_void === 'no_guarantee' ? 'No Guarantee' : formatDate(acc.secondary_guarantee_void_date), 460, y, 9, font);
-    y -= 22;
-    line(y);
-    y -= 18;
+    y = drawAccountSection(page, fonts, acc, y, isInternal);
+  } else if (type === 'XSuit') {
+    y = drawXSuitSection(page, fonts, xs, y, isInternal);
+  } else if (type === 'Supercar') {
+    y = drawSupercarSection(page, fonts, sc, y, isInternal);
+  } else if (type === 'UC') {
+    y = drawUCSection(page, fonts, uc, y);
   }
 
-  // ── CONTACT DETAILS ─────────────────────────────────────────────────────
+  y -= 4;
+
+  // ── CONTACTS ──
   if (isInternal) {
-    y = section('Contact & Seller Details (Internal)', y);
-    
-    let ownerLabel = 'Owner Phone';
-    let resellerLabel = 'Reseller Phone';
-    
-    if (type === 'UC') {
-      ownerLabel = 'Loader Phone';
-      resellerLabel = 'UC Seller Phone';
-    } else if (type === 'XSuit' || type === 'Supercar') {
-      ownerLabel = 'Gifter Phone';
-    }
-
-    draw(ownerLabel, 48, y, 9, bold);           draw(tx.owner_phone || 'N/A', 180, y, 9, font);
-    draw('Seller Phone', 330, y, 9, bold);      draw(tx.seller_phone || 'N/A', 460, y, 9, font);
-    y -= 18;
-    draw(resellerLabel, 48, y, 9, bold);        draw(tx.reseller_phone || 'N/A', 180, y, 9, font);
-    draw('Buyer Phone', 330, y, 9, bold);       draw(tx.buyer_phone || 'N/A', 460, y, 9, font);
-    y -= 18;
-    
-    if (acc.owner_proof_link || tx.owner_proof_link) {
-      const link = acc.owner_proof_link || tx.owner_proof_link;
-      draw('Owner Proof Link', 48, y, 9, bold); draw(link.substring(0, 60), 180, y, 8, font);
-      y -= 18;
-    }
-    
-    y -= 8;
-    line(y);
-    y -= 18;
+    y = drawFinancials(page, fonts, filteredTx, y);
+    y -= 4;
+    y = drawInternalContacts(page, fonts, filteredTx, y);
   } else {
-    // Customer copy: show only buyer phone & support info
-    y = section('Contact Information', y);
-    draw('Your Registered Phone', 48, y, 9, bold); draw(tx.buyer_phone || 'N/A', 220, y, 9, font);
-    y -= 22;
-    line(y);
-    y -= 18;
+    // Customer contacts — buyer phone + support only
+    y = sectionHeader(page, fonts, 'Contact Information', y);
+    y -= 4;
+    y = drawContacts(page, fonts, [
+      ['Your Phone',     safeVal(filteredTx.buyer_phone)],
+      ['MBSx Support',  SUPPORT_PHONE],
+    ], y);
   }
 
-  // ── FOOTER ───────────────────────────────────────────────────────────────
-  page.drawRectangle({ x: 0, y: 0, width, height: 60, color: BRAND_COLOR });
-  draw('Thank you for choosing MBSx Store!', 40, 38, 10, bold, WHITE);
-  draw('For support: WhatsApp / Telegram | @MBSxStore', 40, 20, 8, font, LIGHT_GRAY);
-  draw(`Document: ${isInternal ? 'INTERNAL RECORD' : 'CUSTOMER COPY'} | MBSx Store © ${new Date().getFullYear()}`, width - 260, 20, 7, font, LIGHT_GRAY);
+  // ── DISCLAIMER / NOTICE ──
+  y -= 12;
+  hRule(page, MARGIN, y, CONTENT_W, { color: C.borderGold, thickness: 0.5 });
+  y -= 12;
 
-  const pdfBytes = await pdfDoc.save();
-  const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${tx.transaction_id || 'Transaction'}_${isInternal ? 'Internal' : 'Customer'}.pdf`;
+  const notice = isInternal
+    ? 'This document is strictly confidential. Unauthorized disclosure is prohibited.'
+    : 'Please save this receipt. For support or warranty claims, contact MBSx Store with your Transaction ID.';
+
+  wrappedText(page, fonts, notice, MARGIN, y, {
+    maxW:  CONTENT_W,
+    size:  7.5,
+    color: C.textMid,
+  });
+
+  // ── FOOTER ──
+  drawFooter(page, fonts, isInternal, tx.exclude_print_date);
+
+  return pdfDoc;
+}
+
+// ─────────────────────────────────────────────
+// DOWNLOAD TRIGGER
+// ─────────────────────────────────────────────
+function triggerDownload(bytes, filename) {
+  const blob = new Blob([bytes], { type: 'application/pdf' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = filename;
   a.click();
-  URL.revokeObjectURL(url);
-};
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
 
-export const generateCustomerPDF = (tx) => buildPDF(tx, false);
-export const generateInternalPDF = (tx) => buildPDF(tx, true);
+// ─────────────────────────────────────────────
+// PUBLIC API
+// ─────────────────────────────────────────────
+
+/**
+ * Generate and download a customer-safe PDF for a transaction.
+ * @param {Object} tx - Joined transaction object
+ */
+export async function generateCustomerPDF(tx) {
+  const pdfDoc = await buildPDF(tx, false);
+  const bytes  = await pdfDoc.save();
+  const txId   = safeVal(tx.transaction_id).replace(/\s+/g, '_');
+  triggerDownload(bytes, `MBSx_Receipt_${txId}.pdf`);
+}
+
+/**
+ * Generate and download a full admin/internal PDF for a transaction.
+ * @param {Object} tx - Joined transaction object
+ */
+export async function generateInternalPDF(tx) {
+  const pdfDoc = await buildPDF(tx, true);
+  const bytes  = await pdfDoc.save();
+  const txId   = safeVal(tx.transaction_id).replace(/\s+/g, '_');
+  triggerDownload(bytes, `MBSx_Internal_${txId}.pdf`);
+}
+
+/**
+ * Generate both PDFs at once (useful for admin panels).
+ * @param {Object} tx
+ */
+export async function generateBothPDFs(tx) {
+  await generateCustomerPDF(tx);
+  // Small delay so browser doesn't block the second download
+  await new Promise(r => setTimeout(r, 600));
+  await generateInternalPDF(tx);
+}

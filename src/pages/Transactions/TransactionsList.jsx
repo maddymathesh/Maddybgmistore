@@ -7,7 +7,7 @@ import {
   flexRender,
 } from '@tanstack/react-table';
 import { motion } from 'framer-motion';
-import { Search, Filter, Eye, FileText, Download, Trash2, ChevronLeft, ChevronRight, FileOutput, Receipt, RefreshCw } from 'lucide-react';
+import { Search, Filter, Eye, FileText, Download, Trash2, ChevronLeft, ChevronRight, FileOutput, Receipt, RefreshCw, Calendar, CalendarOff } from 'lucide-react';
 import { fetchAllTransactions, deleteTransaction } from '../../services/transactionService';
 
 import toast from 'react-hot-toast';
@@ -19,6 +19,26 @@ export default function TransactionsList({ onAddNew }) {
   const [globalFilter, setGlobalFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('All');
   const [isLoading, setIsLoading] = useState(true);
+  const [columnVisibility, setColumnVisibility] = useState({});
+  const [showVisibilityDropdown, setShowVisibilityDropdown] = useState(false);
+  const [includePrintDate, setIncludePrintDate] = useState(true);
+
+  const handleCustomerDownload = async (tx) => {
+    const txWithDate = { ...tx, exclude_print_date: !includePrintDate };
+    await generateCustomerPDF(txWithDate);
+  };
+
+  const handleInternalDownload = async (tx) => {
+    const txWithDate = { ...tx, exclude_print_date: !includePrintDate };
+    await generateInternalPDF(txWithDate);
+  };
+
+  const handleBothDownload = async (tx) => {
+    const txWithDate = { ...tx, exclude_print_date: !includePrintDate };
+    await generateCustomerPDF(txWithDate);
+    await new Promise(r => setTimeout(r, 600));
+    await generateInternalPDF(txWithDate);
+  };
 
   useEffect(() => {
     loadData();
@@ -37,20 +57,23 @@ export default function TransactionsList({ onAddNew }) {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this transaction?')) return;
+  const handleDelete = async (tx) => {
+    if (!tx) return;
+    const identifier = tx.id || tx.transaction_id;
+    if (!window.confirm(`Are you sure you want to delete transaction ${tx.transaction_id || ''}?`)) return;
     
     // Optimistic UI update
     const previousData = [...data];
-    setData(prev => prev.filter(tx => tx.id !== id));
+    setData(prev => prev.filter(item => item.id !== tx.id && item.transaction_id !== tx.transaction_id));
     
     try {
-      await deleteTransaction(id);
-      toast.success('Transaction deleted');
+      await deleteTransaction(identifier);
+      toast.success('Transaction deleted successfully');
       // No need to reload data if it's optimistic, unless we want to ensure cache is cleared.
       // The backend will clear its cache automatically on delete.
     } catch (error) {
-      toast.error('Failed to delete transaction');
+      console.error('Failed to delete transaction:', error);
+      toast.error(`Failed to delete transaction: ${error.message || 'Unknown error'}`);
       // Revert optimistic update
       setData(previousData);
     }
@@ -116,11 +139,19 @@ export default function TransactionsList({ onAddNew }) {
         id: 'actions',
         header: 'Actions',
         cell: ({ row }) => (
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <button style={{ color: 'var(--muted)' }} title="View Details"><Eye size={16} /></button>
-            <button onClick={() => generateCustomerPDF(row.original)} style={{ color: 'var(--gold)' }} title="Customer PDF"><FileText size={16} /></button>
-            <button onClick={() => generateInternalPDF(row.original)} style={{ color: 'var(--orange)' }} title="Internal PDF"><FileOutput size={16} /></button>
-            <button onClick={() => handleDelete(row.original.id)} style={{ color: 'var(--red)' }} title="Delete"><Trash2 size={16} /></button>
+            <button onClick={() => handleCustomerDownload(row.original)} style={{ color: 'var(--gold)' }} title="Customer PDF"><FileText size={16} /></button>
+            <button onClick={() => handleInternalDownload(row.original)} style={{ color: 'var(--orange)' }} title="Internal PDF"><FileOutput size={16} /></button>
+            <button onClick={() => handleBothDownload(row.original)} style={{ color: '#2ecc71' }} title="Download Both PDFs"><Download size={16} /></button>
+            <button 
+              onClick={() => setIncludePrintDate(prev => !prev)} 
+              style={{ color: includePrintDate ? 'var(--gold)' : 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }} 
+              title={includePrintDate ? "Print Date Option (Active)" : "Print Date Option (Muted)"}
+            >
+              {includePrintDate ? <Calendar size={16} /> : <CalendarOff size={16} />}
+            </button>
+            <button onClick={() => handleDelete(row.original)} style={{ color: 'var(--red)' }} title="Delete"><Trash2 size={16} /></button>
           </div>
         )
       }
@@ -147,8 +178,10 @@ export default function TransactionsList({ onAddNew }) {
     columns,
     state: {
       globalFilter: debouncedFilter,
+      columnVisibility,
     },
     onGlobalFilterChange: setGlobalFilter,
+    onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -191,7 +224,44 @@ export default function TransactionsList({ onAddNew }) {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px', fontSize: '12px', cursor: 'pointer', color: 'var(--muted)', background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: '6px', height: '38px', userSelect: 'none' }}>
+            <input
+              type="checkbox"
+              checked={includePrintDate}
+              onChange={e => setIncludePrintDate(e.target.checked)}
+              style={{ accentColor: 'var(--gold)', cursor: 'pointer', width: '14px', height: '14px' }}
+            />
+            <span style={{ fontSize: '11px', color: 'var(--text)', fontWeight: 600 }}>Print Date Footer</span>
+          </label>
+
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setShowVisibilityDropdown(!showVisibilityDropdown)}
+              className="btn btn-outline"
+              style={{ padding: '10px 16px', fontSize: '12px', borderColor: 'var(--border-gold)', color: 'var(--gold)', display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <Eye size={16} /> Visibility
+            </button>
+            {showVisibilityDropdown && (
+              <div style={{ position: 'absolute', top: '44px', right: 0, background: 'var(--bg3)', border: '1px solid var(--border-gold)', borderRadius: '8px', zIndex: 100, padding: '8px 0', minWidth: '180px', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }}>
+                {table.getAllLeafColumns().map(column => {
+                  return (
+                    <label key={column.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', fontSize: '12px', cursor: 'pointer', color: 'var(--text)', transition: 'background 0.2s' }}>
+                      <input
+                        type="checkbox"
+                        checked={column.getIsVisible()}
+                        onChange={column.getToggleVisibilityHandler()}
+                        style={{ accentColor: 'var(--gold)', cursor: 'pointer', width: '15px', height: '15px' }}
+                      />
+                      {column.id === 'transaction_id' ? 'Tx ID' : column.id === 'transaction_type' ? 'Type' : column.id === 'transaction_date' ? 'Date' : column.id === 'sold_price' ? 'Amount' : column.id === 'buyer_phone' ? 'Customer Phone' : column.id === 'payment_status' ? 'Status' : column.id === 'actions' ? 'Actions' : column.id}
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           <button
             onClick={() => loadData(true)}
             className="btn btn-outline"

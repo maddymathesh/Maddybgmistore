@@ -8,6 +8,16 @@ import CreateTransaction from './CreateTransaction';
 import CreateXsuitTransaction from './CreateXsuitTransaction';
 import CreateSupercarTransaction from './CreateSupercarTransaction';
 import CreateUcTransaction from './CreateUcTransaction';
+import CustomersList from './CustomersList';
+import GuaranteesList from './GuaranteesList';
+import ReportsView from './ReportsView';
+import SettingsView from './SettingsView';
+import ProductInsights from './ProductInsights';
+import TasksAlerts from './TasksAlerts';
+import CustomerFeedback from './CustomerFeedback';
+import AdminActivityLog from './AdminActivityLog';
+import FinancialOverview from './FinancialOverview';
+
 import {
   LayoutDashboard,
   Receipt,
@@ -21,15 +31,24 @@ import {
   FileBarChart,
   Settings,
   LogOut,
-  Plus
+  Plus,
+  Layers,
+  CheckSquare,
+  MessageSquare,
+  History,
+  DollarSign
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+
 const SIDEBAR_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'transactions', label: 'Transactions', icon: Receipt },
+  { id: 'insights', label: 'Product Insights', icon: Layers },
+  { id: 'tasks', label: 'Tasks & Alerts', icon: CheckSquare },
+  { id: 'activity', label: 'Admin Activity Log', icon: History },
+  { id: 'financials', label: 'Financial Overview', icon: DollarSign },
   { id: 'customers', label: 'Customers', icon: Users },
   { id: 'guarantees', label: 'Guarantees', icon: ShieldCheck },
-  { id: 'proofs', label: 'Payment Proofs', icon: FileCheck },
   { id: 'reports', label: 'Reports', icon: FileBarChart },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
@@ -58,6 +77,22 @@ export default function TransactionsLayout() {
         return <CreateSupercarTransaction onBack={() => setActiveTab('transactions')} />;
       case 'create_uc':
         return <CreateUcTransaction onBack={() => setActiveTab('transactions')} />;
+      case 'insights':
+        return <ProductInsights />;
+      case 'tasks':
+        return <TasksAlerts />;
+      case 'activity':
+        return <AdminActivityLog />;
+      case 'financials':
+        return <FinancialOverview />;
+      case 'customers':
+        return <CustomersList />;
+      case 'guarantees':
+        return <GuaranteesList />;
+      case 'reports':
+        return <ReportsView />;
+      case 'settings':
+        return <SettingsView />;
       default:
         return (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '40vh', color: 'var(--muted)' }}>

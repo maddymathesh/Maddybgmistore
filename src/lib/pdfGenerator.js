@@ -72,7 +72,7 @@ function formatDateTime(raw) {
 
 function safeVal(v) {
   if (v === null || v === undefined || v === '') return '—';
-  return String(v);
+  return String(v).replace(/₹/g, 'Rs.');
 }
 
 // ─────────────────────────────────────────────
@@ -135,8 +135,6 @@ function txt(page, fonts, text, x, y, {
     drawX   = x + maxW - w;
   }
 
-  page.drawText(str, { x: drawX, y, size, font: f => f, color });
-  // Avoid passing function, pdf-lib expects Font object
   page.drawText(str, { x: drawX, y, size, font, color });
   return font.widthOfTextAtSize(str, size);
 }
@@ -528,6 +526,7 @@ function drawWatermark(page, fonts) {
 // CONFIG-BASED VISIBILITY FILTER
 // ─────────────────────────────────────────────
 function applyConfigVisibility(tx, isInternal) {
+  if (isInternal) return tx; // Always show all details for Internal copy
   const clone = JSON.parse(JSON.stringify(tx));
   const txType = clone.transaction_type || 'Account';
   

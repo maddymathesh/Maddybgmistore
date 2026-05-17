@@ -11,7 +11,7 @@
  * Requires: pdf-lib  →  npm install pdf-lib
  */
 
-import { PDFDocument, rgb, StandardFonts, PageSizes } from 'pdf-lib';
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
 // ─────────────────────────────────────────────
 // DESIGN SYSTEM TOKENS
@@ -40,7 +40,7 @@ const MARGIN        = 40;
 const CONTENT_W     = PAGE_W - MARGIN * 2;
 
 // ─────────────────────────────────────────────
-// DATE FORMATTER
+// DATE FORMATTERS & UTILITIES
 // ─────────────────────────────────────────────
 function formatDate(raw) {
   if (!raw) return '—';
@@ -72,7 +72,51 @@ function formatDateTime(raw) {
 
 function safeVal(v) {
   if (v === null || v === undefined || v === '') return '—';
+  // Guard against unencodable currency symbols (like ₹) by replacing them with Rs.
   return String(v).replace(/₹/g, 'Rs.');
+}
+
+// ─────────────────────────────────────────────
+// CONFIG-BASED VISIBILITY FILTER
+// ─────────────────────────────────────────────
+function applyConfigVisibility(tx, isInternal) {
+  if (isInternal) return tx; // Always show everything for Internal PDF
+  
+  const clone = JSON.parse(JSON.stringify(tx));
+  const txType = clone.transaction_type || 'Account';
+  
+  let savedConfig;
+  try {
+    const raw = localStorage.getItem('mbs_pdf_fields_config');
+    if (raw) savedConfig = JSON.parse(raw);
+  } catch (e) {
+    console.warn('Failed to parse pdf fields config:', e);
+  }
+
+  if (!savedConfig || !savedConfig[txType]) return clone;
+
+  const modeMap = savedConfig[txType].customer || {};
+
+  // For any field that is false (unchecked), set its value in the clone to null
+  for (const [key, visible] of Object.entries(modeMap)) {
+    if (visible === false) {
+      if (key in clone) clone[key] = null;
+      
+      const subTables = ['account_transactions', 'xsuit_transactions',
+                         'supercar_transactions', 'uc_transactions'];
+      for (const table of subTables) {
+        if (Array.isArray(clone[table])) {
+          clone[table] = clone[table].map(row => {
+            const r = { ...row };
+            if (key in r) r[key] = null;
+            return r;
+          });
+        }
+      }
+    }
+  }
+
+  return clone;
 }
 
 // ─────────────────────────────────────────────
@@ -115,7 +159,11 @@ async function createDoc() {
 // LOW-LEVEL DRAWING HELPERS
 // ─────────────────────────────────────────────
 
-/** Draw text at absolute (x, y). Returns text width. */
+/** 
+ * Draw text at absolute (x, y). 
+ * Natively supports multi-line text (splitting by newlines) to prevent WinAnsi encoding crashes.
+ * Returns the maximum width of drawn text.
+ */
 function txt(page, fonts, text, x, y, {
   size  = 10,
   color = C.textDark,
@@ -125,18 +173,30 @@ function txt(page, fonts, text, x, y, {
 } = {}) {
   const font  = bold ? fonts.bold : fonts.regular;
   const str   = safeVal(text);
-  let drawX   = x;
+  
+  // Split by newlines and draw each line downward to completely support line breaks!
+  const lines = str.split(/\r?\n/);
+  let maxWidthOfLines = 0;
+  
+  lines.forEach((line, index) => {
+    // Strip carriage returns or any remaining unencodable control characters from each line
+    const cleanLine = line.replace(/[\r\n\x00-\x1F\x7F-\x9F]/g, '');
+    const lineY = y - (index * (size + 4));
+    let drawX = x;
+    const w = font.widthOfTextAtSize(cleanLine, size);
+    if (w > maxWidthOfLines) maxWidthOfLines = w;
 
-  if (align === 'center' && maxW) {
-    const w = font.widthOfTextAtSize(str, size);
-    drawX   = x + (maxW - w) / 2;
-  } else if (align === 'right' && maxW) {
-    const w = font.widthOfTextAtSize(str, size);
-    drawX   = x + maxW - w;
-  }
+    if (align === 'center' && maxW) {
+      drawX = x + (maxW - w) / 2;
+    } else if (align === 'right' && maxW) {
+      drawX = x + maxW - w;
+    }
+    
+    // Draw the single safe line
+    page.drawText(cleanLine, { x: drawX, y: lineY, size, font, color });
+  });
 
-  page.drawText(str, { x: drawX, y, size, font, color });
-  return font.widthOfTextAtSize(str, size);
+  return maxWidthOfLines;
 }
 
 /** Draw a horizontal rule */
@@ -171,7 +231,13 @@ function labelRow(page, fonts, label, value, y, {
 } = {}) {
   txt(page, fonts, label, indent, y, { size: labelSize, color: labelColor });
   txt(page, fonts, value, indent + colSplit, y, { size: valueSize, color: valueColor, bold: valueBold });
-  return y - 15;
+  
+  // Calculate spacing depending on multiline values to prevent text overlapping!
+  const numLines = safeVal(value).split(/\r?\n/).length;
+  const lineH = valueSize + 4;
+  const heightOccupied = Math.max(15, numLines * lineH);
+  
+  return y - heightOccupied - 2;
 }
 
 /** Multi-line wrapped text. Returns new y after drawing. */
@@ -264,10 +330,9 @@ function openPanel(page, y, height) {
   return y - 6;
 }
 
-/** Draw the footer band. */
+/** Draw the footer band. Respects excludePrintDate option. */
 function drawFooter(page, fonts, isInternal, excludePrintDate = false) {
   const FOOT_H = 38;
-  const y0     = FOOT_H;
 
   rect(page, 0, 0, PAGE_W, FOOT_H, { fill: C.bgDark });
   hRule(page, 0, FOOT_H, PAGE_W, { color: C.gold, thickness: 0.8 });
@@ -307,23 +372,24 @@ function statusBadge(page, fonts, status, x, y) {
 
 /** Draws deal basics (tx_id, date, mode, payment, status). Returns new y. */
 function drawDealInfo(page, fonts, tx, y, { showPrice = false } = {}) {
-  const rows = [
-    ['Transaction ID',   safeVal(tx.transaction_id)],
-    ['Date',             formatDateTime(tx.transaction_date)],
-    ['Mode of Deal',     safeVal(tx.mode_of_deal)],
-    ['Mode of Payment',  safeVal(tx.mode_of_payment)],
-  ];
+  const rows = [];
+  if (tx.transaction_id !== null)      rows.push(['Transaction ID',   safeVal(tx.transaction_id)]);
+  if (tx.transaction_date !== null)    rows.push(['Date',             formatDateTime(tx.transaction_date)]);
+  if (tx.mode_of_deal !== null)        rows.push(['Mode of Deal',     safeVal(tx.mode_of_deal)]);
+  if (tx.mode_of_payment !== null)     rows.push(['Mode of Payment',  safeVal(tx.mode_of_payment)]);
 
   for (const [label, value] of rows) {
     y = labelRow(page, fonts, label, value, y);
   }
 
   // Status with badge
-  txt(page, fonts, 'Payment Status', MARGIN, y, { size: 8.5, color: C.textMid });
-  statusBadge(page, fonts, tx.payment_status, MARGIN + 160, y);
-  y -= 18;
+  if (tx.payment_status !== null) {
+    txt(page, fonts, 'Payment Status', MARGIN, y, { size: 8.5, color: C.textMid });
+    statusBadge(page, fonts, tx.payment_status, MARGIN + 160, y);
+    y -= 18;
+  }
 
-  if (showPrice) {
+  if (showPrice && tx.sold_price !== null) {
     hRule(page, MARGIN, y + 4, CONTENT_W, { color: C.borderGold, thickness: 0.5 });
     y -= 4;
     y = labelRow(page, fonts, 'Sold Price', `Rs. ${Number(tx.sold_price || 0).toLocaleString('en-IN')}`, y,
@@ -336,7 +402,9 @@ function drawDealInfo(page, fonts, tx, y, { showPrice = false } = {}) {
 /** Draws contact block. Returns new y. */
 function drawContacts(page, fonts, contacts, y) {
   for (const [label, value] of contacts) {
-    y = labelRow(page, fonts, label, value, y);
+    if (value !== null) {
+      y = labelRow(page, fonts, label, value, y);
+    }
   }
   return y;
 }
@@ -346,28 +414,38 @@ function drawContacts(page, fonts, contacts, y) {
 // ─────────────────────────────────────────────
 
 function drawAccountSection(page, fonts, acc, y, isInternal) {
-  y = sectionHeader(page, fonts, 'Account Login Details', y);
-  y -= 4;
+  const hasLogin = acc.primary_login_provider !== null || acc.primary_credentials !== null || acc.primary_mothermail_status !== null ||
+                   acc.secondary_login_provider !== null || acc.secondary_credentials !== null || acc.secondary_mothermail_status !== null;
+                   
+  if (hasLogin) {
+    y = sectionHeader(page, fonts, 'Account Login Details', y);
+    y -= 4;
 
-  y = labelRow(page, fonts, 'Primary Login',     safeVal(acc.primary_login_provider), y, { valueBold: true });
-  y = labelRow(page, fonts, 'Primary Credentials', safeVal(acc.primary_credentials), y);
-  y = labelRow(page, fonts, 'Primary Mothermail', safeVal(acc.primary_mothermail_status), y);
-  y -= 4;
-  y = labelRow(page, fonts, 'Secondary Login',    safeVal(acc.secondary_login_provider), y, { valueBold: true });
-  y = labelRow(page, fonts, 'Secondary Credentials', safeVal(acc.secondary_credentials), y);
-  y = labelRow(page, fonts, 'Secondary Mothermail', safeVal(acc.secondary_mothermail_status), y);
-  y -= 8;
+    if (acc.primary_login_provider !== null)    y = labelRow(page, fonts, 'Primary Login',     safeVal(acc.primary_login_provider), y, { valueBold: true });
+    if (acc.primary_credentials !== null)       y = labelRow(page, fonts, 'Primary Credentials', safeVal(acc.primary_credentials), y);
+    if (acc.primary_mothermail_status !== null)  y = labelRow(page, fonts, 'Primary Mothermail', safeVal(acc.primary_mothermail_status), y);
+    y -= 4;
+    if (acc.secondary_login_provider !== null)  y = labelRow(page, fonts, 'Secondary Login',    safeVal(acc.secondary_login_provider), y, { valueBold: true });
+    if (acc.secondary_credentials !== null)     y = labelRow(page, fonts, 'Secondary Credentials', safeVal(acc.secondary_credentials), y);
+    if (acc.secondary_mothermail_status !== null) y = labelRow(page, fonts, 'Secondary Mothermail', safeVal(acc.secondary_mothermail_status), y);
+    y -= 8;
+  }
 
-  y = sectionHeader(page, fonts, 'Guarantee & Warranty', y);
-  y -= 4;
-  y = labelRow(page, fonts, 'Guarantee Plan',          safeVal(acc.guarantee_plan), y, { valueBold: true });
-  y = labelRow(page, fonts, 'Primary Unlink Date',     formatDate(acc.primary_unlink_date), y);
-  y = labelRow(page, fonts, 'Primary Guarantee Void',  formatDate(acc.primary_guarantee_void_date), y);
-  y = labelRow(page, fonts, 'Secondary Unlink Date',   formatDate(acc.secondary_unlink_date), y);
-  y = labelRow(page, fonts, 'Secondary Guarantee Void', formatDate(acc.secondary_guarantee_void_date), y);
-  y -= 8;
+  const hasGuarantee = acc.guarantee_plan !== null || acc.primary_unlink_date !== null || acc.primary_guarantee_void_date !== null ||
+                       acc.secondary_unlink_date !== null || acc.secondary_guarantee_void_date !== null;
+                       
+  if (hasGuarantee) {
+    y = sectionHeader(page, fonts, 'Guarantee & Warranty', y);
+    y -= 4;
+    if (acc.guarantee_plan !== null)                y = labelRow(page, fonts, 'Guarantee Plan',          safeVal(acc.guarantee_plan), y, { valueBold: true });
+    if (acc.primary_unlink_date !== null)           y = labelRow(page, fonts, 'Primary Unlink Date',     formatDate(acc.primary_unlink_date), y);
+    if (acc.primary_guarantee_void_date !== null)   y = labelRow(page, fonts, 'Primary Guarantee Void',  formatDate(acc.primary_guarantee_void_date), y);
+    if (acc.secondary_unlink_date !== null)         y = labelRow(page, fonts, 'Secondary Unlink Date',   formatDate(acc.secondary_unlink_date), y);
+    if (acc.secondary_guarantee_void_date !== null) y = labelRow(page, fonts, 'Secondary Guarantee Void', formatDate(acc.secondary_guarantee_void_date), y);
+    y -= 8;
+  }
 
-  if (acc.product_link && acc.product_link !== '—') {
+  if (acc.product_link && acc.product_link !== '—' && acc.product_link !== null) {
     y = sectionHeader(page, fonts, 'Product Reference', y);
     y -= 4;
     y = labelRow(page, fonts, 'Product Link', safeVal(acc.product_link), y,
@@ -382,13 +460,13 @@ function drawXSuitSection(page, fonts, xs, y, isInternal) {
   y = sectionHeader(page, fonts, 'X-Suit Details', y);
   y -= 4;
 
-  y = labelRow(page, fonts, 'X-Suit Name',    safeVal(xs.xsuit_name), y, { valueBold: true });
-  y = labelRow(page, fonts, 'Gift Status',     safeVal(xs.gift_status), y);
-  y = labelRow(page, fonts, 'Delivery Date',   formatDate(xs.delivery_date), y);
-  y = labelRow(page, fonts, 'Delivery Time',   safeVal(xs.delivery_time), y);
+  if (xs.xsuit_name !== null)    y = labelRow(page, fonts, 'X-Suit Name',    safeVal(xs.xsuit_name), y, { valueBold: true });
+  if (xs.gift_status !== null)   y = labelRow(page, fonts, 'Gift Status',     safeVal(xs.gift_status), y);
+  if (xs.delivery_date !== null) y = labelRow(page, fonts, 'Delivery Date',   formatDate(xs.delivery_date), y);
+  if (xs.delivery_time !== null) y = labelRow(page, fonts, 'Delivery Time',   safeVal(xs.delivery_time), y);
   y -= 4;
-  y = labelRow(page, fonts, 'Buyer IG Name',   safeVal(xs.buyer_ig_name), y);
-  y = labelRow(page, fonts, 'Buyer IG ID',      safeVal(xs.buyer_ig_id), y);
+  if (xs.buyer_ig_name !== null) y = labelRow(page, fonts, 'Buyer IG Name',   safeVal(xs.buyer_ig_name), y);
+  if (xs.buyer_ig_id !== null)   y = labelRow(page, fonts, 'Buyer IG ID',      safeVal(xs.buyer_ig_id), y);
   y -= 4;
 
   if (isInternal) {
@@ -408,13 +486,13 @@ function drawSupercarSection(page, fonts, sc, y, isInternal) {
   y = sectionHeader(page, fonts, 'Supercar Details', y);
   y -= 4;
 
-  y = labelRow(page, fonts, 'Supercar Name',    safeVal(sc.supercar_name), y, { valueBold: true });
-  y = labelRow(page, fonts, 'Card Tier (Tire)',  safeVal(sc.supercar_card_tier), y);
-  y = labelRow(page, fonts, 'Gift Status',       safeVal(sc.gift_status), y);
-  y = labelRow(page, fonts, 'Delivery Date',     formatDate(sc.delivery_date), y);
+  if (sc.supercar_name !== null)      y = labelRow(page, fonts, 'Supercar Name',    safeVal(sc.supercar_name), y, { valueBold: true });
+  if (sc.supercar_card_tier !== null) y = labelRow(page, fonts, 'Card Tier (Tire)',  safeVal(sc.supercar_card_tier), y);
+  if (sc.gift_status !== null)        y = labelRow(page, fonts, 'Gift Status',       safeVal(sc.gift_status), y);
+  if (sc.delivery_date !== null)      y = labelRow(page, fonts, 'Delivery Date',     formatDate(sc.delivery_date), y);
   y -= 4;
-  y = labelRow(page, fonts, 'Buyer IG Name',     safeVal(sc.buyer_ig_name), y);
-  y = labelRow(page, fonts, 'Buyer IG ID',       safeVal(sc.buyer_ig_id), y);
+  if (sc.buyer_ig_name !== null)      y = labelRow(page, fonts, 'Buyer IG Name',     safeVal(sc.buyer_ig_name), y);
+  if (sc.buyer_ig_id !== null)        y = labelRow(page, fonts, 'Buyer IG ID',       safeVal(sc.buyer_ig_id), y);
   y -= 4;
 
   if (isInternal) {
@@ -434,18 +512,20 @@ function drawUCSection(page, fonts, uc, y) {
   y = sectionHeader(page, fonts, 'UC Order Details', y);
   y -= 4;
 
-  y = labelRow(page, fonts, 'UC Method',       safeVal(uc.uc_method), y, { valueBold: true });
-  y = labelRow(page, fonts, 'UC Pack',         safeVal(uc.uc_pack), y);
-  y = labelRow(page, fonts, 'Number of Packs', safeVal(uc.num_packs), y);
-  y = labelRow(page, fonts, 'Total UC',        safeVal(uc.total_uc), y);
+  if (uc.uc_method !== null)     y = labelRow(page, fonts, 'UC Method',       safeVal(uc.uc_method), y, { valueBold: true });
+  if (uc.uc_pack !== null)       y = labelRow(page, fonts, 'UC Pack',         safeVal(uc.uc_pack), y);
+  if (uc.num_packs !== null)     y = labelRow(page, fonts, 'Number of Packs', safeVal(uc.num_packs), y);
+  if (uc.total_uc !== null)      y = labelRow(page, fonts, 'Total UC',        safeVal(uc.total_uc), y);
   y -= 4;
 
   // Delivery status badge
-  txt(page, fonts, 'Delivery Status', MARGIN, y, { size: 8.5, color: C.textMid });
-  statusBadge(page, fonts, uc.delivery_status, MARGIN + 160, y);
-  y -= 18;
+  if (uc.delivery_status !== null) {
+    txt(page, fonts, 'Delivery Status', MARGIN, y, { size: 8.5, color: C.textMid });
+    statusBadge(page, fonts, uc.delivery_status, MARGIN + 160, y);
+    y -= 18;
+  }
 
-  y = labelRow(page, fonts, 'Delivery Date', formatDate(uc.delivery_date), y);
+  if (uc.delivery_date !== null) y = labelRow(page, fonts, 'Delivery Date', formatDate(uc.delivery_date), y);
   y -= 4;
 
   return y;
@@ -494,13 +574,13 @@ function drawInternalContacts(page, fonts, tx, y) {
   y = sectionHeader(page, fonts, 'All Party Contacts — Admin Only', y);
   y -= 4;
 
-  y = labelRow(page, fonts, 'Buyer Phone',     safeVal(tx.buyer_phone), y);
-  y = labelRow(page, fonts, 'Owner Phone',     safeVal(tx.owner_phone), y);
-  y = labelRow(page, fonts, 'Seller Phone',    safeVal(tx.seller_phone), y);
-  y = labelRow(page, fonts, 'Reseller Phone',  safeVal(tx.reseller_phone), y);
+  if (tx.buyer_phone !== null)    y = labelRow(page, fonts, 'Buyer Phone',     safeVal(tx.buyer_phone), y);
+  if (tx.owner_phone !== null)    y = labelRow(page, fonts, 'Owner Phone',     safeVal(tx.owner_phone), y);
+  if (tx.seller_phone !== null)   y = labelRow(page, fonts, 'Seller Phone',    safeVal(tx.seller_phone), y);
+  if (tx.reseller_phone !== null) y = labelRow(page, fonts, 'Reseller Phone',  safeVal(tx.reseller_phone), y);
   y -= 6;
 
-  if (tx.owner_proof_link) {
+  if (tx.owner_proof_link !== null && tx.owner_proof_link) {
     txt(page, fonts, 'Owner Proof Link', MARGIN, y, { size: 8.5, color: C.textMid });
     txt(page, fonts, safeVal(tx.owner_proof_link), MARGIN + 160, y,
         { size: 8.5, color: rgb(0.10, 0.30, 0.80) });
@@ -515,54 +595,11 @@ function drawInternalContacts(page, fonts, tx, y) {
 // WATERMARK (admin copies only)
 // ─────────────────────────────────────────────
 function drawWatermark(page, fonts) {
-  const label  = 'CONFIDENTIAL';
+  const label = 'CONFIDENTIAL';
   for (let i = 0; i < 3; i++) {
     txt(page, fonts, label, 80 + i * 180, 500 - i * 120,
         { size: 36, color: rgb(0.92, 0.78, 0.20), bold: true });
   }
-}
-
-// ─────────────────────────────────────────────
-// CONFIG-BASED VISIBILITY FILTER
-// ─────────────────────────────────────────────
-function applyConfigVisibility(tx, isInternal) {
-  if (isInternal) return tx; // Always show all details for Internal copy
-  const clone = JSON.parse(JSON.stringify(tx));
-  const txType = clone.transaction_type || 'Account';
-  
-  let savedConfig;
-  try {
-    const raw = localStorage.getItem('mbs_pdf_fields_config');
-    if (raw) savedConfig = JSON.parse(raw);
-  } catch (e) {
-    console.warn('Failed to parse pdf fields config:', e);
-  }
-
-  if (!savedConfig || !savedConfig[txType]) return clone;
-
-  const mode = isInternal ? 'internal' : 'customer';
-  const modeMap = savedConfig[txType][mode] || {};
-
-  // For any field that is false (unchecked), set its value in the clone to null
-  for (const [key, visible] of Object.entries(modeMap)) {
-    if (visible === false) {
-      if (key in clone) clone[key] = null;
-      
-      const subTables = ['account_transactions', 'xsuit_transactions',
-                         'supercar_transactions', 'uc_transactions'];
-      for (const table of subTables) {
-        if (Array.isArray(clone[table])) {
-          clone[table] = clone[table].map(row => {
-            const r = { ...row };
-            if (key in r) r[key] = null;
-            return r;
-          });
-        }
-      }
-    }
-  }
-
-  return clone;
 }
 
 // ─────────────────────────────────────────────
@@ -575,8 +612,10 @@ function applyConfigVisibility(tx, isInternal) {
  * @param {boolean} isInternal - true = admin copy, false = customer copy
  */
 async function buildPDF(tx, isInternal) {
-  const filteredTx = applyConfigVisibility(tx, isInternal);
   const { pdfDoc, page, fonts, logo } = await createDoc();
+  
+  // Filter visibility based on configuration (Customer Copy only)
+  const filteredTx = applyConfigVisibility(tx, isInternal);
   const type = safeVal(filteredTx.transaction_type);  // 'Account' | 'XSuit' | 'Supercar' | 'UC'
 
   // ── HEADER ──
@@ -626,7 +665,7 @@ async function buildPDF(tx, isInternal) {
     y = sectionHeader(page, fonts, 'Contact Information', y);
     y -= 4;
     y = drawContacts(page, fonts, [
-      ['Your Phone',     safeVal(filteredTx.buyer_phone)],
+      ['Your Phone',    filteredTx.buyer_phone !== null ? safeVal(filteredTx.buyer_phone) : null],
       ['MBSx Support',  SUPPORT_PHONE],
     ], y);
   }
@@ -655,13 +694,26 @@ async function buildPDF(tx, isInternal) {
 // ─────────────────────────────────────────────
 // DOWNLOAD TRIGGER
 // ─────────────────────────────────────────────
+
+/**
+ * Triggers a bulletproof direct PDF download in the browser.
+ * Appends anchor temporarily to document body to ensure 100% compatibility with
+ * Safari, Chrome, iOS/iPad devices, and prevents UUID-fallback naming.
+ */
 function triggerDownload(bytes, filename) {
   const blob = new Blob([bytes], { type: 'application/pdf' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
+  a.style.display = 'none';
   a.href     = url;
   a.download = filename;
+  
+  // CRITICAL: Appending to the body is strictly required for Safari & mobile browsers!
+  document.body.appendChild(a); 
   a.click();
+  document.body.removeChild(a);
+  
+  // Clean up Object URL
   setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
@@ -671,24 +723,26 @@ function triggerDownload(bytes, filename) {
 
 /**
  * Generate and download a customer-safe PDF for a transaction.
+ * Filename format: MBSX_Transaction_<TRANSACTION_ID>_Customer.pdf
  * @param {Object} tx - Joined transaction object
  */
 export async function generateCustomerPDF(tx) {
   const pdfDoc = await buildPDF(tx, false);
   const bytes  = await pdfDoc.save();
   const txId   = safeVal(tx.transaction_id).replace(/\s+/g, '_');
-  triggerDownload(bytes, `MBSx_Receipt_${txId}.pdf`);
+  triggerDownload(bytes, `MBSX_Transaction_${txId}_Customer.pdf`);
 }
 
 /**
  * Generate and download a full admin/internal PDF for a transaction.
+ * Filename format: MBSX_Transaction_<TRANSACTION_ID>_Admin.pdf
  * @param {Object} tx - Joined transaction object
  */
 export async function generateInternalPDF(tx) {
   const pdfDoc = await buildPDF(tx, true);
   const bytes  = await pdfDoc.save();
   const txId   = safeVal(tx.transaction_id).replace(/\s+/g, '_');
-  triggerDownload(bytes, `MBSx_Internal_${txId}.pdf`);
+  triggerDownload(bytes, `MBSX_Transaction_${txId}_Admin.pdf`);
 }
 
 /**
@@ -698,6 +752,6 @@ export async function generateInternalPDF(tx) {
 export async function generateBothPDFs(tx) {
   await generateCustomerPDF(tx);
   // Small delay so browser doesn't block the second download
-  await new Promise(r => setTimeout(r, 600));
+  await new Promise(r => setTimeout(r, 800));
   await generateInternalPDF(tx);
 }

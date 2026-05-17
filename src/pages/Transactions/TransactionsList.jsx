@@ -25,20 +25,47 @@ export default function TransactionsList({ onAddNew }) {
   const [selectedTxForDetails, setSelectedTxForDetails] = useState(null);
 
   const handleCustomerDownload = async (tx) => {
-    const txWithDate = { ...tx, exclude_print_date: !includePrintDate };
-    await generateCustomerPDF(txWithDate);
+    await toast.promise(
+      (async () => {
+        const txWithDate = { ...tx, exclude_print_date: !includePrintDate };
+        await generateCustomerPDF(txWithDate);
+      })(),
+      {
+        loading: `Generating Customer PDF for ${tx.transaction_id || ''}...`,
+        success: 'Customer PDF downloaded successfully! 🎉',
+        error: 'Failed to generate Customer PDF. ❌',
+      }
+    );
   };
 
   const handleInternalDownload = async (tx) => {
-    const txWithDate = { ...tx, exclude_print_date: !includePrintDate };
-    await generateInternalPDF(txWithDate);
+    await toast.promise(
+      (async () => {
+        const txWithDate = { ...tx, exclude_print_date: !includePrintDate };
+        await generateInternalPDF(txWithDate);
+      })(),
+      {
+        loading: `Generating Admin PDF for ${tx.transaction_id || ''}...`,
+        success: 'Admin PDF downloaded successfully! 🚀',
+        error: 'Failed to generate Admin PDF. ❌',
+      }
+    );
   };
 
   const handleBothDownload = async (tx) => {
-    const txWithDate = { ...tx, exclude_print_date: !includePrintDate };
-    await generateCustomerPDF(txWithDate);
-    await new Promise(r => setTimeout(r, 600));
-    await generateInternalPDF(txWithDate);
+    await toast.promise(
+      (async () => {
+        const txWithDate = { ...tx, exclude_print_date: !includePrintDate };
+        await generateCustomerPDF(txWithDate);
+        await new Promise(r => setTimeout(r, 800)); // Delay to prevent browser blocking double downloads
+        await generateInternalPDF(txWithDate);
+      })(),
+      {
+        loading: `Generating both PDFs for ${tx.transaction_id || ''}...`,
+        success: 'Both PDFs downloaded successfully! 📄✨',
+        error: 'Failed to generate one or both PDFs. ❌',
+      }
+    );
   };
 
   useEffect(() => {

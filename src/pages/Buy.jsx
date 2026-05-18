@@ -3,7 +3,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import {
   ShoppingCart, Lock, Banknote, CheckCircle,
-  MessageCircle, Target, Shield, Gamepad2, Flame, Star
+  MessageCircle, Target, Shield, Gamepad2, Flame, Star,Send
 } from "lucide-react";
 
 export default function Buy() {

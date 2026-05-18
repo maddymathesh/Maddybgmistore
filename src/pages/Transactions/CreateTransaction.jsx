@@ -292,65 +292,77 @@ export default function CreateTransaction({ onBack }) {
 
       // ── STEP 2: Guarantee ─────────────────────────────────────────────────
       case 2:
-        return (
-          <div style={{ display: 'grid', gap: '28px' }}>
-            <Field span>
-              <Label>Guarantee Plan</Label>
-              <select className={inp} {...register('guarantee_plan')}>
-                {[
-                  'Not Applicable',
-                  '37 Days For Primary Login',
-                  '22 Days For Primary Login',
-                  '37 Days For Secondary Login',
-                  '22 Days For Secondary Login',
-                  '75 Days For Primary & Secondary Logins',
-                ].map(o => <option key={o}>{o}</option>)}
+       // inside your component
+const guaranteePlan = watch('guarantee_plan'); // react-hook-form watch
+
+return (
+  <div style={{ display: 'grid', gap: '28px' }}>
+    <Field span>
+      <Label>Guarantee Plan</Label>
+      <select className={inp} {...register('guarantee_plan')}>
+        {[
+          'Not Applicable',
+          '37 Days For Primary Login',
+          '22 Days For Primary Login',
+          '37 Days For Secondary Login',
+          '22 Days For Secondary Login',
+          '75 Days For Primary & Secondary Logins',
+        ].map(o => <option key={o}>{o}</option>)}
+      </select>
+    </Field>
+
+    {/* Primary Dates */}
+    {guaranteePlan !== 'Not Applicable' && (
+      <div style={{ background: 'var(--bg2)', border: '1px solid var(--border-gold)', borderRadius: 'var(--radius)', padding: '24px' }}>
+        <p className="slabel" style={{ marginBottom: '16px' }}>Primary Login — Dates</p>
+        <div style={grid}>
+          <Field>
+            <Label>Primary Unlink Eligible Date</Label>
+            <input type="date" className={inp} {...register('primary_unlink_date')} />
+          </Field>
+          <Field>
+            <Label>Primary Guarantee Void Date</Label>
+            <div style={{ display: 'grid', gap: '8px' }}>
+              <select className={inp} {...register('primary_guarantee_void')}>
+                <option value="date">Set a Date</option>
+                <option value="no_guarantee">No Guarantee</option>
               </select>
-            </Field>
-
-            {/* Primary Dates */}
-            <div style={{ background: 'var(--bg2)', border: '1px solid var(--border-gold)', borderRadius: 'var(--radius)', padding: '24px' }}>
-              <p className="slabel" style={{ marginBottom: '16px' }}>Primary Login — Dates</p>
-              <div style={grid}>
-                <Field>
-                  <Label>Primary Unlink Eligible Date</Label>
-                  <input type="date" className={inp} {...register('primary_unlink_date')} />
-                </Field>
-                <Field>
-                  <Label>Primary Guarantee Void Date</Label>
-                  <div style={{ display: 'grid', gap: '8px' }}>
-                    <select className={inp} {...register('primary_guarantee_void')}>
-                      <option value="date">Set a Date</option>
-                      <option value="no_guarantee">No Guarantee</option>
-                    </select>
-                    {primaryVoid === 'date' && <input type="date" className={inp} {...register('primary_guarantee_void_date')} />}
-                  </div>
-                </Field>
-              </div>
+              {primaryVoid === 'date' && (
+                <input type="date" className={inp} {...register('primary_guarantee_void_date')} />
+              )}
             </div>
+          </Field>
+        </div>
+      </div>
+    )}
 
-            {/* Secondary Dates */}
-            <div style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '24px' }}>
-              <p className="slabel" style={{ marginBottom: '16px' }}>Secondary Login — Dates</p>
-              <div style={grid}>
-                <Field>
-                  <Label>Secondary Unlink Eligible Date</Label>
-                  <input type="date" className={inp} {...register('secondary_unlink_date')} />
-                </Field>
-                <Field>
-                  <Label>Secondary Guarantee Void Date</Label>
-                  <div style={{ display: 'grid', gap: '8px' }}>
-                    <select className={inp} {...register('secondary_guarantee_void')}>
-                      <option value="date">Set a Date</option>
-                      <option value="no_guarantee">No Guarantee</option>
-                    </select>
-                    {secondaryVoid === 'date' && <input type="date" className={inp} {...register('secondary_guarantee_void_date')} />}
-                  </div>
-                </Field>
-              </div>
+    {/* Secondary Dates */}
+    {guaranteePlan !== 'Not Applicable' && (
+      <div style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '24px' }}>
+        <p className="slabel" style={{ marginBottom: '16px' }}>Secondary Login — Dates</p>
+        <div style={grid}>
+          <Field>
+            <Label>Secondary Unlink Eligible Date</Label>
+            <input type="date" className={inp} {...register('secondary_unlink_date')} />
+          </Field>
+          <Field>
+            <Label>Secondary Guarantee Void Date</Label>
+            <div style={{ display: 'grid', gap: '8px' }}>
+              <select className={inp} {...register('secondary_guarantee_void')}>
+                <option value="date">Set a Date</option>
+                <option value="no_guarantee">No Guarantee</option>
+              </select>
+              {secondaryVoid === 'date' && (
+                <input type="date" className={inp} {...register('secondary_guarantee_void_date')} />
+              )}
             </div>
-          </div>
-        );
+          </Field>
+        </div>
+      </div>
+    )}
+  </div>
+);
+
 
       // ── STEP 3: Financials ────────────────────────────────────────────────
       case 3:
@@ -378,20 +390,47 @@ export default function CreateTransaction({ onBack }) {
         return (
           <div style={grid}>
             {[
-              { label: 'Account Owner Phone', key: 'owner_phone' },
-              { label: 'Seller Phone Number', key: 'seller_phone' },
-              { label: 'Reseller Phone Number', key: 'reseller_phone' },
-              { label: 'Buyer Phone Number', key: 'buyer_phone' },
-            ].map(({ label, key }) => (
-              <Field key={key}>
-                <Label>{label}</Label>
-                <input className={inp} placeholder="+91 00000 00000 or Void" {...register(key)} />
-              </Field>
-            ))}
-            <Field span>
-              <Label>Account Owner Proof Link (Drive / Screenshot)</Label>
-              <input className={inp} placeholder="https://drive.google.com/..." {...register('owner_proof_link')} />
-            </Field>
+  { label: 'Account Owner Phone', key: 'owner_phone' },
+  { label: 'Seller Phone Number', key: 'seller_phone' },
+  { label: 'Reseller Phone Number', key: 'reseller_phone' },
+  { label: 'Buyer Phone Number', key: 'buyer_phone' },
+].map(({ label, key }) => (
+  <Field key={key}>
+    <Label>{label}</Label>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      {/* Country Code Dropdown */}
+      <select {...register(`${key}_countryCode`)} style={{ padding: '6px',backgroundColor:"#111520" } }>
+        <option value="+91">+91</option>
+        <option value="+1">+1</option>
+        <option value="+44">+44</option>
+        {/* Add more codes later */}
+      </select>
+
+      {/* Phone Number Input */}
+      <input
+        className={inp}
+        placeholder="98765 09876"
+        maxLength={10}
+        {...register(key, {
+          pattern: {
+            value: /^[0-9]{10}$/,   // only digits, exactly 10
+            message: 'Enter a valid 10-digit number',
+          },
+        })}
+      />
+    </div>
+  </Field>
+))}
+<Field span>
+  <Label>Account Owner Proof Link (Drive / Screenshot)</Label>
+  <input
+    className={inp}
+    placeholder="https://drive.google.com/..."
+    {...register('owner_proof_link')}
+  />
+</Field>
+
+        
           </div>
         );
 

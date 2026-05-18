@@ -4,15 +4,48 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Camera, ExternalLink, Loader2 } from "lucide-react";
 
-const MONTHS_ORDER = [
-  "January 2026","February 2026","March 2026","April 2026",
-  "May 2026","June 2026","July 2026","August 2026",
-  "September 2026","October 2026","November 2026","December 2026"
-];
+
+
+
 
 export default function ProofAndFeedback() {
   const [proofs, setProofs] = useState([]);
   const [loading, setLoading] = useState(true);
+
+const [MONTHS_ORDER, setMonthsOrder] = useState([]);
+
+useEffect(() => {
+  getMonthsOrder().then(setMonthsOrder);
+}, []);
+
+
+
+
+
+async function getMonthsOrder() {
+  const { data, error } = await supabase
+    .from("proofs")
+    .select("month")
+    .order("month", { ascending: true });
+
+  if (error) {
+    console.error(error);
+    return [];
+  }
+
+  // Deduplicate months
+  const uniqueMonths = [...new Set(data.map(p => p.month))];
+
+  return uniqueMonths;
+}
+
+const grouped = MONTHS_ORDER.reduce((acc, m) => {
+  const items = proofs.filter(p => p.month === m);
+  if (items.length > 0) acc[m] = items;
+  return acc;
+}, {});
+
+  // console.log('proofs', proofs);
 
   useEffect(() => {
     const fetchProofs = async () => {
@@ -31,12 +64,6 @@ export default function ProofAndFeedback() {
     fetchProofs();
   }, []);
 
-  // Group by month preserving Jan → Dec order
-  const grouped = MONTHS_ORDER.reduce((acc, m) => {
-    const items = proofs.filter(p => p.month === m);
-    if (items.length > 0) acc[m] = items;
-    return acc;
-  }, {});
 
   return (
     <>
@@ -79,27 +106,57 @@ export default function ProofAndFeedback() {
                     </span>
                   </div>
 
-                  {/* Proof Grid */}
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))", gap: "24px" }}>
-                    {monthProofs.map((p) => (
-                      <div key={p.id} className="card"
-                        style={{ padding: "0", overflow: "hidden", border: "1px solid rgba(255,215,0,0.12)", transition: "transform 0.3s, box-shadow 0.3s", cursor: "default" }}
-                        onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 12px 40px rgba(255,215,0,0.1)"; }}
-                        onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}>
-                        <div style={{ position: "relative", aspectRatio: "3/4", overflow: "hidden" }}>
-                          <img src={p.image_url} alt={p.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                          <a href={p.image_url} target="_blank" rel="noreferrer"
-                            style={{ position: "absolute", top: "12px", right: "12px", background: "rgba(0,0,0,0.65)", backdropFilter: "blur(4px)", borderRadius: "50%", width: "34px", height: "34px", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
-                            <ExternalLink size={14} />
-                          </a>
-                        </div>
-                        <div style={{ padding: "16px", background: "var(--card)" }}>
-                          <h3 style={{ fontSize: "14px", fontWeight: 700 }}>{p.title}</h3>
-                          <p style={{ fontSize: "11px", color: "var(--gold)", textTransform: "uppercase", marginTop: "4px", letterSpacing: "0.5px" }}>{p.month}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                 {/* Proof Grid */}
+<div style={{ 
+  display: "grid", 
+  gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))", 
+  gap: "24px" 
+}}>
+  {monthProofs.map((p) => (
+    <div key={p.id} className="card"
+      style={{ 
+        padding: "0", 
+        overflow: "hidden", 
+        border: "1px solid rgba(255,215,0,0.12)", 
+        transition: "transform 0.3s, box-shadow 0.3s", 
+        cursor: "default" 
+      }}
+      onMouseEnter={e => { 
+        e.currentTarget.style.transform = "translateY(-4px)"; 
+        e.currentTarget.style.boxShadow = "0 12px 40px rgba(255,215,0,0.1)"; 
+      }}
+      onMouseLeave={e => { 
+        e.currentTarget.style.transform = ""; 
+        e.currentTarget.style.boxShadow = ""; 
+      }}>
+      <div style={{ position: "relative", aspectRatio: "3/4", overflow: "hidden" }}>
+        <img src={p.image_url} alt={p.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        <a href={p.image_url} target="_blank" rel="noreferrer"
+          style={{ 
+            position: "absolute", 
+            top: "12px", 
+            right: "12px", 
+            background: "rgba(0,0,0,0.65)", 
+            backdropFilter: "blur(4px)", 
+            borderRadius: "50%", 
+            width: "34px", 
+            height: "34px", 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "center", 
+            color: "#fff" 
+          }}>
+          <ExternalLink size={14} />
+        </a>
+      </div>
+      <div style={{ padding: "16px", background: "var(--card)" }}>
+        <h3 style={{ fontSize: "14px", fontWeight: 700 }}>{p.title}</h3>
+        <p style={{ fontSize: "11px", color: "var(--gold)", textTransform: "uppercase", marginTop: "4px", letterSpacing: "0.5px" }}>{p.month}</p>
+      </div>
+    </div>
+  ))}
+</div>
+
                 </div>
               ))}
             </div>

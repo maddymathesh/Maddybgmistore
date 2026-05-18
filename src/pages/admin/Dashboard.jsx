@@ -324,26 +324,6 @@ export default function AdminDashboard() {
     } catch (e) { toast.error(e.message); }
   };
 
-  // ── Review CRUD ────────────────────────────────────────────
-  const saveReview = async () => {
-    if (!reviewForm.name || !reviewForm.text) return toast.error("Required fields missing");
-    setSavingReview(true);
-    try {
-      const { error } = await supabase.from('reviews').insert([{
-        name: reviewForm.name,
-        text: reviewForm.text,
-        stars: Number(reviewForm.stars),
-        image_url: reviewForm.image_url,
-        tracking_id: reviewForm.tracking_id,
-        status: 'approved',
-      }]);
-      if (error) throw error;
-      toast.success("Review published!");
-      setReviewForm(EMPTY_REVIEW);
-      fetchData();
-    } catch (e) { toast.error(e.message); }
-    finally { setSavingReview(false); }
-  };
 
   const approveReview = async (id) => {
     try {
@@ -516,7 +496,7 @@ export default function AdminDashboard() {
         const formData = new FormData();
         formData.append("file", carImage);
         formData.append("upload_preset", uploadPreset);
-        formData.append("folder", "mbs_supercars");
+        formData.append("folder", "maddy_bgmi_store/Proofs/Supercars");
 
         const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
           method: "POST",

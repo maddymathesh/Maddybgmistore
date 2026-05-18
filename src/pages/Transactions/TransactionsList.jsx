@@ -52,21 +52,21 @@ export default function TransactionsList({ onAddNew }) {
     );
   };
 
-  const handleBothDownload = async (tx) => {
-    await toast.promise(
-      (async () => {
-        const txWithDate = { ...tx, exclude_print_date: !includePrintDate };
-        await generateCustomerPDF(txWithDate);
-        await new Promise(r => setTimeout(r, 800)); // Delay to prevent browser blocking double downloads
-        await generateInternalPDF(txWithDate);
-      })(),
-      {
-        loading: `Generating both PDFs for ${tx.transaction_id || ''}...`,
-        success: 'Both PDFs downloaded successfully! 📄✨',
-        error: 'Failed to generate one or both PDFs. ❌',
-      }
-    );
-  };
+  // const handleBothDownload = async (tx) => {
+  //   await toast.promise(
+  //     (async () => {
+  //       const txWithDate = { ...tx, exclude_print_date: !includePrintDate };
+  //       await generateCustomerPDF(txWithDate);
+  //       await new Promise(r => setTimeout(r, 800)); // Delay to prevent browser blocking double downloads
+  //       await generateInternalPDF(txWithDate);
+  //     })(),
+  //     {
+  //       loading: `Generating both PDFs for ${tx.transaction_id || ''}...`,
+  //       success: 'Both PDFs downloaded successfully! 📄✨',
+  //       error: 'Failed to generate one or both PDFs. ❌',
+  //     }
+  //   );
+  // };
 
   useEffect(() => {
     loadData();
@@ -167,25 +167,11 @@ export default function TransactionsList({ onAddNew }) {
         id: 'actions',
         header: 'Actions',
         cell: ({ row }) => (
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <button onClick={() => setSelectedTxForDetails(row.original)} style={{ color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }} title="View Details"><Eye size={16} /></button>
-            <button onClick={() => handleCustomerDownload(row.original)} style={{ color: 'var(--gold)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }} title="Customer PDF"><FileText size={16} /></button>
-            <button onClick={() => handleInternalDownload(row.original)} style={{ color: 'var(--orange)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }} title="Internal PDF"><FileOutput size={16} /></button>
-            <button onClick={() => handleBothDownload(row.original)} style={{ color: '#2ecc71', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }} title="Download Both PDFs"><Download size={16} /></button>
-            <button 
-              onClick={() => {
-                setIncludePrintDate(prev => {
-                  const next = !prev;
-                  toast.success(next ? 'Print Date Footer Enabled' : 'Print Date Footer Disabled');
-                  return next;
-                });
-              }} 
-              style={{ color: includePrintDate ? 'var(--gold)' : 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }} 
-              title={includePrintDate ? "Print Date Option (Active)" : "Print Date Option (Muted)"}
-            >
-              {includePrintDate ? <Calendar size={16} /> : <CalendarOff size={16} />}
-            </button>
-            <button onClick={() => handleDelete(row.original)} style={{ color: 'var(--red)' }} title="Delete"><Trash2 size={16} /></button>
+          <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <button onClick={() => setSelectedTxForDetails(row.original)} style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text)', background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: '6px', cursor: 'pointer', padding: '4px 10px', fontSize: '11px', fontWeight: 600 }}><Eye size={13} /> View</button>
+            <button onClick={() => handleCustomerDownload(row.original)} style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--gold)', background: 'var(--gold-dim)', border: '1px solid var(--border-gold)', borderRadius: '6px', cursor: 'pointer', padding: '4px 10px', fontSize: '11px', fontWeight: 600 }}><FileText size={13} /> Cust PDF</button>
+            <button onClick={() => handleInternalDownload(row.original)} style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--orange)', background: 'rgba(251,146,60,0.1)', border: '1px solid rgba(251,146,60,0.3)', borderRadius: '6px', cursor: 'pointer', padding: '4px 10px', fontSize: '11px', fontWeight: 600 }}><FileOutput size={13} /> Int PDF</button>
+            <button onClick={() => handleDelete(row.original)} style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--red)', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '6px', cursor: 'pointer', padding: '4px 10px', fontSize: '11px', fontWeight: 600 }}><Trash2 size={13} /> Delete</button>
           </div>
         )
       }
@@ -616,13 +602,13 @@ export default function TransactionsList({ onAddNew }) {
                 >
                   <FileOutput size={16} /> Internal PDF
                 </button>
-                <button
+                {/* <button
                   onClick={() => handleBothDownload(tx)}
                   className="btn btn-green"
                   style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '12px', cursor: 'pointer' }}
                 >
                   <Download size={16} /> Download Both
-                </button>
+                </button> */}
               </div>
             </div>
           </div>

@@ -30,7 +30,7 @@ export default function CustomersList() {
   const customers = useMemo(() => {
     const map = {};
     data.forEach(tx => {
-      const phone = tx.buyer_phone ? tx.buyer_phone.trim() : 'Unknown';
+      const phone = tx.buyer_phone ? tx.buyer_phone : 'Unknown';
       if (!map[phone]) {
         map[phone] = {
           phone,
@@ -54,11 +54,14 @@ export default function CustomersList() {
     return Object.values(map).sort((a, b) => b.totalSpent - a.totalSpent);
   }, [data]);
 
-  const filteredCustomers = useMemo(() => {
-    return customers.filter(c => 
-      c.phone.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [customers, searchQuery]);
+const filteredCustomers = useMemo(() => {
+  return customers.filter((c) =>
+    (c.phone || "")
+      .toString()
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  );
+}, [customers, searchQuery]);
 
   return (
     <div className="space-y-6">

@@ -107,7 +107,6 @@ export default function ProductInsights() {
                   </div>
                   <div>
                     <h4 style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--text)' }}>{prod.label}</h4>
-                    <span style={{ fontSize: '10px', color: 'var(--muted)' }}>Share of Revenue: {percentage}%</span>
                   </div>
                 </div>
 
@@ -126,10 +125,6 @@ export default function ProductInsights() {
                     <p style={{ fontSize: '10px', color: 'var(--muted)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Net Profits</p>
                     <p style={{ fontSize: '14px', fontWeight: 800, color: '#2ecc71', margin: 0 }}>₹{profit.toLocaleString('en-IN')}</p>
                   </div>
-                </div>
-
-                <div style={{ height: '6px', background: 'var(--bg2)', borderRadius: '3px', overflow: 'hidden', marginBottom: '8px' }}>
-                  <div style={{ width: `${percentage}%`, height: '100%', background: prod.color, borderRadius: '3px' }} />
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--muted)' }}>

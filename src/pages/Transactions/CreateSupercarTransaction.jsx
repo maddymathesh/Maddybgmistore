@@ -420,7 +420,7 @@ export default function CreateSupercarTransaction({ onBack }) {
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit(onSubmit)} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }}>
+      <form onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }}>
         <AnimatePresence mode="wait">
           <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.18 }} className="card" style={{ padding: '32px' }}>
@@ -444,7 +444,10 @@ export default function CreateSupercarTransaction({ onBack }) {
               Next Step <ChevronRight size={16} />
             </button>
           ) : (
-            <button type="submit" disabled={isSubmitting || !canSubmit} className="btn btn-gold" style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: (!canSubmit && !isSubmitting) ? 0.5 : 1 }}>
+            <button
+              type="button"
+              onClick={handleSubmit(onSubmit)}
+              disabled={isSubmitting || !canSubmit} className="btn btn-gold" style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: (!canSubmit && !isSubmitting) ? 0.5 : 1 }}>
               {isSubmitting
                 ? <><span style={{ width: '15px', height: '15px', border: '2px solid rgba(0,0,0,0.3)', borderTopColor: '#000', borderRadius: '50%', display: 'inline-block', animation: 'spin .7s linear infinite' }} /> Saving...</>
                 : <><Save size={16} /> Save Transaction</>}

@@ -448,7 +448,7 @@ export default function CreateTransaction({ onBack }) {
       </div>
 
       {/* Form card */}
-      <form onSubmit={handleSubmit(onSubmit)} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }}>
+      <form onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }}>
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
@@ -490,7 +490,8 @@ export default function CreateTransaction({ onBack }) {
             </button>
           ) : (
             <button
-              type="submit"
+              type="button"
+              onClick={handleSubmit(onSubmit)}
               disabled={isSubmitting || !canSubmit}
               className="btn btn-gold"
               style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: (!canSubmit && !isSubmitting) ? 0.5 : 1 }}

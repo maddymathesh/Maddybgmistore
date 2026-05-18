@@ -1,4 +1,5 @@
 import * as api from './api';
+import { sanitizePhone } from '../utils/formatters';
 
 /**
  * Generates the next sequential ID by fetching all transactions and finding the max.
@@ -77,9 +78,17 @@ export const fetchDashboardStats = async (forceRefresh = false) => {
  */
 const createFullTransaction = async (mainData, detailData, detailSheet) => {
   try {
+    const sanitizedMainData = { ...mainData };
+    const phoneFields = ['buyer_phone', 'owner_phone', 'seller_phone', 'reseller_phone'];
+    phoneFields.forEach(field => {
+      if (sanitizedMainData[field]) {
+        sanitizedMainData[field] = sanitizePhone(sanitizedMainData[field]);
+      }
+    });
+
     // 1. Insert main transaction
     const transaction = await api.createTransaction('transactions', {
-      ...mainData,
+      ...sanitizedMainData,
       id: crypto.randomUUID(),
       created_at: new Date().toISOString()
     });

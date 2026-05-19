@@ -120,3 +120,40 @@ ALTER TABLE public.proofs DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.admin_payment_settings DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.payment_links DISABLE ROW LEVEL SECURITY;
 
+-- =====================================================================
+-- 9. SITE VIEWS COUNTER (Global Analytics)
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS public.site_views (
+  id              TEXT PRIMARY KEY,
+  count           BIGINT NOT NULL DEFAULT 0,
+  updated_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Initialize view counter with a handsome base value representing real traffic since 2019
+INSERT INTO public.site_views (id, count)
+VALUES ('total_views', 14852)
+ON CONFLICT (id) DO NOTHING;
+
+-- Disable RLS so public users can increment it
+ALTER TABLE public.site_views DISABLE ROW LEVEL SECURITY;
+
+-- Database function to atomically increment views and return the updated count
+CREATE OR REPLACE FUNCTION increment_views()
+RETURNS BIGINT
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  new_count BIGINT;
+BEGIN
+  INSERT INTO public.site_views (id, count)
+  VALUES ('total_views', 14853)
+  ON CONFLICT (id) DO UPDATE
+  SET count = public.site_views.count + 1
+  RETURNING count INTO new_count;
+  
+  RETURN new_count;
+END;
+$$;
+
+

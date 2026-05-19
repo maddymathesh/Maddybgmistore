@@ -5,6 +5,92 @@ import { ReactLenis } from "lenis/react";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollDownIndicator from "./components/ScrollDownIndicator";
 import WhatsAppFloat from "./components/WhatsAppFloat";
+import { supabase } from "./utils/supabase";
+
+let hasIncremented = false;
+
+function launchGoldenConfetti() {
+  const canvas = document.createElement("canvas");
+  canvas.style.position = "fixed";
+  canvas.style.inset = "0";
+  canvas.style.width = "100%";
+  canvas.style.height = "100%";
+  canvas.style.pointerEvents = "none";
+  canvas.style.zIndex = "999999";
+  document.body.appendChild(canvas);
+
+  const ctx = canvas.getContext("2d");
+  let width = (canvas.width = window.innerWidth);
+  let height = (canvas.height = window.innerHeight);
+
+  window.addEventListener("resize", () => {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  });
+
+  const colors = ["#FFD700", "#FFA500", "#FF8C00", "#EEE8AA", "#B8860B"];
+  const particles = [];
+
+  // Emit confetti upwards from the bottom-center
+  for (let i = 0; i < 150; i++) {
+    particles.push({
+      x: width / 2,
+      y: height + 20,
+      vx: (Math.random() - 0.5) * 22,
+      vy: -Math.random() * 18 - 14,
+      radius: Math.random() * 6 + 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      opacity: 1,
+      rotation: Math.random() * 360,
+      rotationSpeed: (Math.random() - 0.5) * 8,
+      gravity: 0.28,
+      drag: 0.98,
+    });
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, width, height);
+    let alive = false;
+
+    particles.forEach((p) => {
+      p.vy += p.gravity;
+      p.vx *= p.drag;
+      p.vy *= p.drag;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rotation += p.rotationSpeed;
+      p.opacity -= 0.007;
+
+      if (p.opacity > 0) {
+        alive = true;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rotation * Math.PI) / 180);
+        ctx.globalAlpha = p.opacity;
+        ctx.fillStyle = p.color;
+        
+        if (Math.random() > 0.4) {
+          ctx.fillRect(-p.radius, -p.radius / 2, p.radius * 2, p.radius);
+        } else {
+          ctx.beginPath();
+          ctx.arc(0, 0, p.radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+    });
+
+    if (alive) {
+      requestAnimationFrame(animate);
+    } else {
+      if (document.body.contains(canvas)) {
+        document.body.removeChild(canvas);
+      }
+    }
+  }
+
+  animate();
+}
 
 // ── Lazy-loaded pages ─────────────
 const Home = lazy(() => import("./pages/Home"));
@@ -75,9 +161,78 @@ function PageLoader() {
 export default function App() {
   // Delay Lenis to avoid blocking initial render
   const [enableSmooth, setEnableSmooth] = useState(false);
+  const [celebrationUser, setCelebrationUser] = useState(null);
 
   useEffect(() => {
     setEnableSmooth(true);
+
+    if (hasIncremented) return;
+    hasIncremented = true;
+
+    async function handleViewsFlow() {
+      const dbCounted = sessionStorage.getItem("mbs_db_counted");
+
+      try {
+        if (!dbCounted) {
+          // 1. New Session -> Increment views in Supabase atomically!
+          const { data, error } = await supabase.rpc("increment_views");
+          
+          if (!error && data !== null) {
+            const finalCount = Number(data);
+            sessionStorage.setItem("mbs_db_counted", "true");
+            window.mbs_current_views = finalCount;
+            window.dispatchEvent(new CustomEvent("mbs_views_updated", { detail: finalCount }));
+            
+            if (finalCount % 10 === 0) {
+              setCelebrationUser(finalCount);
+              setTimeout(launchGoldenConfetti, 400);
+            }
+          } else {
+            // Fallback select and update if RPC is missing
+            const { data: selectData, error: selectError } = await supabase
+              .from("site_views")
+              .select("count")
+              .eq("id", "total_views")
+              .single();
+
+            if (!selectError && selectData) {
+              const nextCount = Number(selectData.count) + 1;
+              await supabase.from("site_views").update({ count: nextCount }).eq("id", "total_views");
+              
+              sessionStorage.setItem("mbs_db_counted", "true");
+              window.mbs_current_views = nextCount;
+              window.dispatchEvent(new CustomEvent("mbs_views_updated", { detail: nextCount }));
+              
+              if (nextCount % 10 === 0) {
+                setCelebrationUser(nextCount);
+                setTimeout(launchGoldenConfetti, 400);
+              }
+            } else {
+              console.error("Supabase view tracking failed:", selectError?.message || error?.message);
+            }
+          }
+        } else {
+          // 2. Refresh within the same session -> Simply select read-only from Supabase!
+          const { data, error } = await supabase
+            .from("site_views")
+            .select("count")
+            .eq("id", "total_views")
+            .single();
+
+          if (!error && data) {
+            const currentCount = Number(data.count);
+            window.mbs_current_views = currentCount;
+            window.dispatchEvent(new CustomEvent("mbs_views_updated", { detail: currentCount }));
+          } else {
+            console.error("Supabase views read failed:", error?.message);
+          }
+        }
+      } catch (err) {
+        console.error("View tracking error:", err.message);
+      }
+    }
+
+    handleViewsFlow();
   }, []);
 
   const AppContent = (
@@ -246,6 +401,81 @@ export default function App() {
           }
         />
       </Routes>
+
+      {celebrationUser && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 100000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "rgba(8, 10, 15, 0.85)",
+            backdropFilter: "blur(10px)",
+            animation: "fadeIn 0.4s ease forwards",
+          }}
+        >
+          <div
+            style={{
+              width: "90%",
+              maxWidth: "480px",
+              background: "linear-gradient(135deg, #111520 0%, #0a0d14 100%)",
+              border: "2px solid #FFD700",
+              borderRadius: "24px",
+              padding: "40px 30px",
+              textAlign: "center",
+              boxShadow: "0 0 50px rgba(255, 215, 0, 0.25)",
+              animation: "popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+              position: "relative",
+              overflow: "hidden"
+            }}
+          >
+            {/* Golden radial background glow */}
+            <div style={{ position: "absolute", width: "300px", height: "300px", background: "radial-gradient(circle, rgba(255,215,0,0.08) 0%, transparent 70%)", top: "-100px", left: "90px", zIndex: 0, pointerEvents: "none" }} />
+            
+            <div style={{ position: "relative", zIndex: 1 }}>
+              <div style={{ fontSize: "52px", marginBottom: "15px", animation: "bounce 1s infinite alternate" }}>🏆</div>
+              <h2 style={{ fontFamily: "var(--font-h)", fontSize: "28px", fontWeight: 900, color: "var(--gold)", letterSpacing: "1px", marginBottom: "12px", textTransform: "uppercase" }}>
+                Congratulations!
+              </h2>
+              <p style={{ color: "#fff", fontSize: "16px", fontWeight: 500, lineHeight: 1.6, marginBottom: "20px" }}>
+                You are visitor number <span style={{ color: "var(--gold)", fontWeight: 800, fontSize: "22px", textShadow: "0 0 8px rgba(255,215,0,0.4)" }}>{celebrationUser.toLocaleString()}</span> to the Maddy BGMI Store!
+              </p>
+              <p style={{ color: "var(--muted)", fontSize: "13px", lineHeight: 1.6, marginBottom: "30px", maxWidth: "380px", margin: "0 auto 30px" }}>
+                South India's most trusted BGMI marketplace since 2019. Thank you for celebrating this milestone with us! 🚀
+              </p>
+              
+              <button
+                onClick={() => {
+                  setCelebrationUser(null);
+                  launchGoldenConfetti(); // Play a nice celebratory second burst
+                }}
+                className="btn btn-gold"
+                style={{
+                  padding: "12px 35px",
+                  fontSize: "14px",
+                  fontWeight: 700,
+                  borderRadius: "30px",
+                  boxShadow: "0 4px 15px rgba(255, 215, 0, 0.3)",
+                  transition: "transform 0.2s",
+                  cursor: "pointer"
+                }}
+                onMouseEnter={e => e.currentTarget.style.transform = "scale(1.05)"}
+                onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+              >
+                Awesome, Let's Shop!
+              </button>
+            </div>
+            
+            <style>{`
+              @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+              @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+              @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+            `}</style>
+          </div>
+        </div>
+      )}
     </BrowserRouter>
   );
 

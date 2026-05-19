@@ -1,5 +1,7 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingCart, Banknote, KeyRound, Star, Heart } from "lucide-react";
+import { ShoppingCart, Banknote, KeyRound, Star, Heart, Eye } from "lucide-react";
+import { supabase } from "../utils/supabase";
 
 // Social icon buttons
 const socials = [
@@ -54,6 +56,24 @@ const contacts = [
 ];
 
 export default function Footer() {
+  const [views, setViews] = useState(null);
+
+  useEffect(() => {
+    // Listen for views loaded/incremented updates from App.jsx
+    const handleUpdate = (e) => {
+      if (e.detail !== undefined && e.detail !== null) {
+        setViews(e.detail);
+      }
+    };
+    window.addEventListener("mbs_views_updated", handleUpdate);
+    
+    // Check if App already loaded it in window global
+    if (window.mbs_current_views) {
+      setViews(window.mbs_current_views);
+    }
+
+    return () => window.removeEventListener("mbs_views_updated", handleUpdate);
+  }, []);
   return (
     <footer style={{ background: "var(--bg2)", borderTop: "1px solid rgba(255,215,0,0.18)", padding: "60px 5% 20px" }}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: "40px", marginBottom: "40px" }}>
@@ -117,6 +137,42 @@ export default function Footer() {
 
       </div>
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: "20px", textAlign: "center", fontSize: "12px", color: "var(--muted)" }}>
+        {/* Sleek View Counter Badge */}
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}>
+          <div style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            background: "rgba(255, 215, 0, 0.04)",
+            border: "1px solid rgba(255, 215, 0, 0.15)",
+            borderRadius: "20px",
+            padding: "6px 16px",
+            fontSize: "12px",
+            color: "var(--gold)",
+            fontWeight: 600,
+            letterSpacing: "0.5px",
+            boxShadow: "0 0 20px rgba(255, 215, 0, 0.02)",
+            backdropFilter: "blur(4px)",
+            transition: "transform 0.3s ease, border-color 0.3s ease",
+            cursor: "default"
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.transform = "scale(1.03)";
+            e.currentTarget.style.borderColor = "rgba(255, 215, 0, 0.35)";
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.transform = "scale(1)";
+            e.currentTarget.style.borderColor = "rgba(255, 215, 0, 0.15)";
+          }}
+          >
+            <Eye size={13} style={{ filter: "drop-shadow(0 0 2px rgba(255, 215, 0, 0.5))", color: "var(--gold)" }} />
+            <span>TOTAL VIEWS:</span>
+            <span style={{ color: "#fff", fontFamily: "var(--font-h)", fontWeight: 700, letterSpacing: "1px" }}>
+              {views !== null ? views.toLocaleString() : "..."}
+            </span>
+          </div>
+        </div>
+
         Made with <Heart size={11} fill="#ef4444" color="#ef4444" style={{ display:"inline", verticalAlign:"middle", margin:"0 2px" }} /> in South India &nbsp;·&nbsp; © 2026 Maddy BGMI Store &nbsp;·&nbsp; Not affiliated with BGMI or Krafton.
       </div>
     </footer>

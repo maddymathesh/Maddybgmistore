@@ -30,6 +30,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+
 /* Custom Brand Cursor on desktop */
 @media (pointer: fine) {
 
@@ -271,7 +272,17 @@ img {
 .ssub {
   color: var(--muted);
   max-width: 520px;
-  margin-bottom: 50px;
+
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  backdrop-filter: blur(11px);
+  padding: 10px;
+  background-color: #23232333;
+  border: 2px solid white;
 }
 
 .g {
@@ -1088,10 +1099,6 @@ select.input {
 
   .stitle {
     margin-bottom: 10px;
-  }
-
-  .ssub {
-    margin-bottom: 30px;
   }
 }
 

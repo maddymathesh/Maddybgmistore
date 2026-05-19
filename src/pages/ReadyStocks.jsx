@@ -123,7 +123,7 @@ export default function ReadyStocks() {
           <img src="/ready-stocks-banner.png" alt="" className="hero-bg" />
           <div className="hero-content">
             <h1 className="stitle">Ready To Play <br/><span className="g">Accounts</span></h1>
-            <p className="ssub">Premium BGMI IDs handpicked for elite gamers.</p>
+            <p className="ssub">Explore Premium BGMI IDs handpicked for elite gamers.</p>
           </div>
         </section>
 
@@ -162,9 +162,9 @@ export default function ReadyStocks() {
 
         <style>{`
           .rs-page { background: var(--bg); color: #fff; min-height: 100vh; padding-top: 84px; }
-          .rs-hero { position: relative; height: 50vh; display: flex; alignItems: center; justifyContent: center; overflow: hidden; }
-          .hero-bg { position: absolute; inset: 0; width: 100%; height: 100%; objectFit: cover; filter: brightness(0.3); transform: scale(1.1); }
-          .hero-content { position: relative; zIndex: 2; textAlign: center; }
+          .rs-hero { position: relative; height: 90vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+          .hero-bg { position: absolute; inset: 0; width: 100%; height: 100%;    background-position: top; background-size: cover; object-fit :cover; filter: brightness(0.3); transform: scale(1.1); }
+          .hero-content { position: relative; z-index: 2; textAlign: center; backdrop-filter: blur(11px); padding: 20px; background-color: #23232333; border: 2px solid white; border-radius: 33px; }
           
           .rs-container { maxWidth: 1100px; margin: 0 auto; padding: 40px 20px; }
           
@@ -220,12 +220,12 @@ export default function ReadyStocks() {
           .loading-state { grid-column: 1/-1; text-align: center; padding: 100px; color: var(--gold); }
           .no-results { grid-column: 1/-1; text-align: center; padding: 50px; color: var(--muted); font-size: 18px; }
 
-          @media (max-width: 768px) {
-            .filter-bar { position: static; }
-            .select-group { width: 100%; }
-            .select-group select { flex: 1; }
-            .rs-hero { height: 40vh; }
-          }
+          // @media (max-width: 768px) {
+          //   .filter-bar { position: static; }
+          //   .select-group { width: 100%; }
+          //   .select-group select { flex: 1; }
+          //   .rs-hero { height: 40vh; }
+          // }
         `}</style>
       </div>
       <Footer />

@@ -36,6 +36,8 @@
     "autoprefixer": "^10.5.0",
     "postcss": "^8.5.13",
     "postcss-preset-env": "^11.2.1",
+    "sharp": "^0.34.5",
+    "svgo": "^4.0.1",
     "tailwindcss": "^4.2.4",
     "vite": "^7.3.3",
     "vite-plugin-compression": "^0.5.1",

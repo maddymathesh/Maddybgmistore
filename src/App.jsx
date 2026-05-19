@@ -169,26 +169,28 @@ export default function App() {
     if (hasIncremented) return;
     hasIncremented = true;
 
+
+
     async function handleViewsFlow() {
       const dbCounted = sessionStorage.getItem("mbs_db_counted");
+      let activeCount = 14852;
 
       try {
         if (!dbCounted) {
-          // 1. New Session -> Increment views in Supabase atomically!
+          // 1. First load of this browser session -> Write & increment views in Supabase
           const { data, error } = await supabase.rpc("increment_views");
-          
           if (!error && data !== null) {
-            const finalCount = Number(data);
+            activeCount = Number(data);
+            localStorage.setItem("mbs_live_views", String(activeCount));
             sessionStorage.setItem("mbs_db_counted", "true");
-            window.mbs_current_views = finalCount;
-            window.dispatchEvent(new CustomEvent("mbs_views_updated", { detail: finalCount }));
+            window.dispatchEvent(new CustomEvent("mbs_views_updated", { detail: activeCount }));
             
-            if (finalCount % 10 === 0) {
-              setCelebrationUser(finalCount);
+            if (activeCount % 10 === 0) {
+              setCelebrationUser(activeCount);
               setTimeout(launchGoldenConfetti, 400);
             }
           } else {
-            // Fallback select and update if RPC is missing
+            // Standard update fallback for Supabase
             const { data: selectData, error: selectError } = await supabase
               .from("site_views")
               .select("count")
@@ -196,23 +198,22 @@ export default function App() {
               .single();
 
             if (!selectError && selectData) {
-              const nextCount = Number(selectData.count) + 1;
-              await supabase.from("site_views").update({ count: nextCount }).eq("id", "total_views");
-              
+              activeCount = Number(selectData.count) + 1;
+              await supabase.from("site_views").update({ count: activeCount }).eq("id", "total_views");
+              localStorage.setItem("mbs_live_views", String(activeCount));
               sessionStorage.setItem("mbs_db_counted", "true");
-              window.mbs_current_views = nextCount;
-              window.dispatchEvent(new CustomEvent("mbs_views_updated", { detail: nextCount }));
+              window.dispatchEvent(new CustomEvent("mbs_views_updated", { detail: activeCount }));
               
-              if (nextCount % 10 === 0) {
-                setCelebrationUser(nextCount);
+              if (activeCount % 10 === 0) {
+                setCelebrationUser(activeCount);
                 setTimeout(launchGoldenConfetti, 400);
               }
             } else {
-              console.error("Supabase view tracking failed:", selectError?.message || error?.message);
+              throw new Error("Supabase first visit increment failed");
             }
           }
         } else {
-          // 2. Refresh within the same session -> Simply select read-only from Supabase!
+          // 2. Already counted in this session -> Simply fetch the count to read
           const { data, error } = await supabase
             .from("site_views")
             .select("count")
@@ -220,16 +221,39 @@ export default function App() {
             .single();
 
           if (!error && data) {
-            const currentCount = Number(data.count);
-            window.mbs_current_views = currentCount;
-            window.dispatchEvent(new CustomEvent("mbs_views_updated", { detail: currentCount }));
+            activeCount = Number(data.count);
+            localStorage.setItem("mbs_live_views", String(activeCount));
+            window.dispatchEvent(new CustomEvent("mbs_views_updated", { detail: activeCount }));
           } else {
-            console.error("Supabase views read failed:", error?.message);
+            throw new Error("Supabase subsequent visit fetch failed");
           }
         }
       } catch (err) {
-        console.error("View tracking error:", err.message);
+        console.warn("View tracking DB handle fallback triggered:", err.message);
+        
+        // 3. LocalStorage Fallback (100% Offline/Quota Safe)
+        let localViews = localStorage.getItem("mbs_fallback_views");
+        if (!localViews) {
+          localViews = "14852";
+        }
+        
+        if (!dbCounted) {
+          activeCount = Number(localViews) + 1;
+          localStorage.setItem("mbs_fallback_views", String(activeCount));
+          sessionStorage.setItem("mbs_db_counted", "true");
+        } else {
+          activeCount = Number(localViews);
+        }
+        
+        localStorage.setItem("mbs_live_views", String(activeCount));
+        window.dispatchEvent(new CustomEvent("mbs_views_updated", { detail: activeCount }));
+        
+        if (!dbCounted && activeCount % 10 === 0) {
+          setCelebrationUser(activeCount);
+          setTimeout(launchGoldenConfetti, 400);
+        }
       }
+
     }
 
     handleViewsFlow();

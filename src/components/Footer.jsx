@@ -56,7 +56,10 @@ const contacts = [
 ];
 
 export default function Footer() {
-  const [views, setViews] = useState(null);
+  const [views, setViews] = useState(() => {
+    const cached = localStorage.getItem("mbs_live_views");
+    return cached ? Number(cached) : null;
+  });
 
   useEffect(() => {
     // Listen for views loaded/incremented updates from App.jsx
@@ -66,10 +69,15 @@ export default function Footer() {
       }
     };
     window.addEventListener("mbs_views_updated", handleUpdate);
-    
-    // Check if App already loaded it in window global
+
+    // Check if App already loaded it in window global or check localStorage
     if (window.mbs_current_views) {
       setViews(window.mbs_current_views);
+    } else {
+      const cached = localStorage.getItem("mbs_live_views");
+      if (cached) {
+        setViews(Number(cached));
+      }
     }
 
     return () => window.removeEventListener("mbs_views_updated", handleUpdate);
@@ -111,10 +119,10 @@ export default function Footer() {
               { to: "/reviews", label: "Reviews", icon: <Star size={13} /> },
               { to: "/terms", label: "Terms & Conditions", icon: <Scale size={13} /> },
             ].map(l => (
-              <Link key={l.to} to={l.to} style={{ color: "var(--muted)", fontSize: "13px", textDecoration: "none", transition: "color .2s", display:"flex", alignItems:"center", gap:"7px" }}
+              <Link key={l.to} to={l.to} style={{ color: "var(--muted)", fontSize: "13px", textDecoration: "none", transition: "color .2s", display: "flex", alignItems: "center", gap: "7px" }}
                 onMouseEnter={e => e.currentTarget.style.color = "var(--text)"}
                 onMouseLeave={e => e.currentTarget.style.color = "var(--muted)"}
-              ><span style={{ color:"var(--gold)" }}>{l.icon}</span>{l.label}</Link>
+              ><span style={{ color: "var(--gold)" }}>{l.icon}</span>{l.label}</Link>
             ))}
           </div>
         </div>
@@ -157,14 +165,14 @@ export default function Footer() {
             transition: "transform 0.3s ease, border-color 0.3s ease",
             cursor: "default"
           }}
-          onMouseEnter={e => {
-            e.currentTarget.style.transform = "scale(1.03)";
-            e.currentTarget.style.borderColor = "rgba(255, 215, 0, 0.35)";
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.transform = "scale(1)";
-            e.currentTarget.style.borderColor = "rgba(255, 215, 0, 0.15)";
-          }}
+            onMouseEnter={e => {
+              e.currentTarget.style.transform = "scale(1.03)";
+              e.currentTarget.style.borderColor = "rgba(255, 215, 0, 0.35)";
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = "scale(1)";
+              e.currentTarget.style.borderColor = "rgba(255, 215, 0, 0.15)";
+            }}
           >
             <Eye size={13} style={{ filter: "drop-shadow(0 0 2px rgba(255, 215, 0, 0.5))", color: "var(--gold)" }} />
             <span>TOTAL VIEWS:</span>
@@ -174,7 +182,7 @@ export default function Footer() {
           </div>
         </div>
 
-        Made with <Heart size={11} fill="#ef4444" color="#ef4444" style={{ display:"inline", verticalAlign:"middle", margin:"0 2px" }} /> in South India &nbsp;·&nbsp; © 2026 <Link to="/terms" style={{ color: "var(--gold)", textDecoration: "none", transition: "opacity 0.2s" }} onMouseEnter={e => e.currentTarget.style.opacity = 0.8} onMouseLeave={e => e.currentTarget.style.opacity = 1}>Maddy BGMI Store</Link> &nbsp;·&nbsp; <Link to="/terms" style={{ color: "var(--muted)", textDecoration: "underline", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "var(--gold)"} onMouseLeave={e => e.currentTarget.style.color = "var(--muted)"}>Terms & Conditions</Link> &nbsp;·&nbsp; Not affiliated with BGMI or Krafton.
+        Made with <Heart size={11} fill="#ef4444" color="#ef4444" style={{ display: "inline", verticalAlign: "middle", margin: "0 2px" }} /> in South India &nbsp;·&nbsp; © 2026 <Link to="/terms" style={{ color: "var(--gold)", textDecoration: "none", transition: "opacity 0.2s" }} onMouseEnter={e => e.currentTarget.style.opacity = 0.8} onMouseLeave={e => e.currentTarget.style.opacity = 1}>Maddy BGMI Store</Link> &nbsp;·&nbsp; <Link to="/terms" style={{ color: "var(--muted)", textDecoration: "underline", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "var(--gold)"} onMouseLeave={e => e.currentTarget.style.color = "var(--muted)"}>Terms & Conditions</Link> &nbsp;·&nbsp; Not affiliated with BGMI or Krafton.
       </div>
     </footer>
   );

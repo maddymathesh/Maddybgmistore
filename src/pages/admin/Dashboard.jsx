@@ -154,6 +154,7 @@ export default function AdminDashboard() {
   const [savingProduct, setSavingProduct] = useState(false);
 
   const [reviews, setReviews] = useState([]);
+  const [feedbacks, setFeedbacks] = useState([]);
   const [reviewForm, setReviewForm] = useState(EMPTY_REVIEW);
   const [savingReview, setSavingReview] = useState(false);
   const [approvingId, setApprovingId] = useState(null);
@@ -201,6 +202,30 @@ export default function AdminDashboard() {
   const [carImage, setCarImage] = useState(null);
   const [savingCar, setSavingCar] = useState(false);
 
+  const toggleFeedbackStatus = async (id, currentStatus) => {
+    const newStatus = currentStatus === 'read' ? 'unread' : 'read';
+    try {
+      const { error } = await supabase.from('customer_feedback').update({ status: newStatus }).eq('id', id);
+      if (error) throw error;
+      toast.success(`Feedback marked as ${newStatus}`);
+      setFeedbacks(prev => prev.map(f => f.id === id ? { ...f, status: newStatus } : f));
+    } catch (e) {
+      toast.error(e.message);
+    }
+  };
+
+  const deleteFeedback = async (id) => {
+    if (!confirm("Are you sure you want to delete this customer feedback?")) return;
+    try {
+      const { error } = await supabase.from('customer_feedback').delete().eq('id', id);
+      if (error) throw error;
+      toast.success("Feedback deleted successfully");
+      setFeedbacks(prev => prev.filter(f => f.id !== id));
+    } catch (e) {
+      toast.error(e.message);
+    }
+  };
+
 
 
   const fetchData = async () => {
@@ -233,6 +258,16 @@ export default function AdminDashboard() {
       setXsuits(xs || []);
       setSupercars(sc || []);
       if (settingsResult?.data) setPaymentSettings(settingsResult.data);
+
+      // Safe fetch feedbacks
+      try {
+        const { data: fb, error: fbErr } = await supabase.from('customer_feedback').select('*').order('created_at', { ascending: false });
+        if (!fbErr && fb) {
+          setFeedbacks(fb);
+        }
+      } catch (fbErrEx) {
+        console.warn("Feedback table loading error:", fbErrEx.message);
+      }
     } catch (globalErr) {
       console.error("Global Data Fetch Error:", globalErr);
     }
@@ -1483,10 +1518,12 @@ export default function AdminDashboard() {
 
         {/* CUSTOMER FEEDBACK TAB */}
         {tab === "feedback" && (() => {
-          const approvedReviews = reviews.filter(r => r.status === "approved" || !r.status);
-          const totalStars = approvedReviews.reduce((sum, r) => sum + (r.stars || 5), 0);
-          const csatScore = approvedReviews.length ? (totalStars / approvedReviews.length).toFixed(1) : "5.0";
+          const totalStars = feedbacks.reduce((sum, f) => sum + (f.stars || 5), 0);
+          const csatScore = feedbacks.length ? (totalStars / feedbacks.length).toFixed(1) : "5.0";
           const csatPct = Math.round((Number(csatScore) / 5) * 100);
+          
+          const unreadCount = feedbacks.filter(f => f.status === 'unread').length;
+          const readCount = feedbacks.filter(f => f.status === 'read').length;
 
           return (
             <div style={{ display: "grid", gap: "24px" }}>
@@ -1501,48 +1538,159 @@ export default function AdminDashboard() {
                     </svg>
                     <div style={{ position: "absolute", display: "flex", flexDirection: "column", alignItems: "center" }}>
                       <span style={{ fontSize: "28px", fontWeight: 900, color: "var(--text)" }}>{csatScore}</span>
-                      <span style={{ fontSize: "9px", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>CSAT Score</span>
+                      <span style={{ fontSize: "9px", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Store CSAT</span>
                     </div>
                   </div>
-                  <h4 style={{ fontSize: "14px", fontWeight: 700, margin: "0 0 6px" }}>Client Trust Index</h4>
+                  <h4 style={{ fontSize: "14px", fontWeight: 700, margin: "0 0 6px" }}>Constructive CSAT Index</h4>
                   <p style={{ fontSize: "12px", color: "var(--muted)", margin: 0, maxWidth: "240px", lineHeight: 1.4 }}>
-                    Evaluated from {approvedReviews.length} verified post-deal customer ratings.
+                    Calculated from {feedbacks.length} store improvement ratings.
                   </p>
                 </div>
 
-                {/* Review stream */}
-                <div style={{ background: "var(--card)", padding: "24px", borderRadius: "14px", border: "1px solid var(--border)" }}>
-                  <h3 style={{ fontSize: "15px", fontWeight: 700, marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px" }}>
-                    <MessageSquare size={16} style={{ color: "var(--gold)" }} /> Live Customer Reviews
+                {/* CRM stats panel */}
+                <div style={{ background: "var(--card)", padding: "24px", borderRadius: "14px", border: "1px solid var(--border)", display: "flex", flexDirection: "column", justifyContent: "space-between", gap: "12px" }}>
+                  <h3 style={{ fontSize: "15px", fontWeight: 700, margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
+                    <Sparkles size={16} style={{ color: "var(--gold)" }} /> CRM Action Center
                   </h3>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "14px", maxHeight: "350px", overflowY: "auto", paddingRight: "4px" }}>
-                    {approvedReviews.map((r, i) => (
-                      <div key={r.id || i} style={{ background: "var(--bg2)", border: "1px solid var(--border)", padding: "12px", borderRadius: "6px" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-                          <span style={{ fontSize: "12px", fontWeight: 700 }}>{r.name || "Anonymous"}</span>
-                          <div style={{ display: "flex", gap: "2px" }}>
-                            {[...Array(5)].map((_, idx) => (
-                              <Star key={idx} size={10} fill={idx < (r.stars || 5) ? "var(--gold)" : "transparent"} stroke="var(--gold)" />
-                            ))}
-                          </div>
-                        </div>
-                        <p style={{ fontSize: "12px", margin: "4px 0", color: "var(--text)" }}>
-                          "{r.text}"
-                        </p>
-                        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "6px", fontSize: "10px", color: "var(--muted)" }}>
-                          <span>Tracking: {r.tracking_id || "N/A"}</span>
-                          <span>{new Date(r.created_at || Date.now()).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-                    ))}
-                    {approvedReviews.length === 0 && (
-                      <div style={{ padding: "30px", textAlign: "center", color: "var(--muted)", fontSize: "12px" }}>
-                        No approved reviews found in Supabase database.
-                      </div>
-                    )}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                    <div style={{ background: "rgba(239, 68, 68, 0.05)", border: "1px solid rgba(239, 68, 68, 0.15)", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
+                      <span style={{ fontSize: "22px", fontWeight: 900, color: "#ef4444", display: "block" }}>{unreadCount}</span>
+                      <span style={{ fontSize: "10px", color: "var(--muted)", textTransform: "uppercase" }}>Unread Feedback</span>
+                    </div>
+                    <div style={{ background: "rgba(34, 197, 94, 0.05)", border: "1px solid rgba(34, 197, 94, 0.15)", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
+                      <span style={{ fontSize: "22px", fontWeight: 900, color: "#22c55e", display: "block" }}>{readCount}</span>
+                      <span style={{ fontSize: "10px", color: "var(--muted)", textTransform: "uppercase" }}>Read / Processed</span>
+                    </div>
+                  </div>
+                  <div style={{ background: "rgba(255,215,0,0.03)", border: "1px dashed rgba(255,215,0,0.15)", padding: "10px 14px", borderRadius: "8px", fontSize: "11px", color: "var(--muted)", lineHeight: 1.4 }}>
+                    💡 <strong>What Customers Want:</strong> Review specific requested items in cards below. Click the WhatsApp button to fulfill requests directly!
                   </div>
                 </div>
 
+              </div>
+
+              {/* Feedbacks Listing */}
+              <div style={{ background: "var(--card)", borderRadius: "14px", border: "1px solid var(--border)", overflow: "hidden" }}>
+                <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", background: "rgba(255,215,0,0.02)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <h3 style={{ fontSize: "14px", fontWeight: 800 }}>📬 Customer Feedback Registry</h3>
+                  <span style={{ fontSize: "11px", color: "var(--muted)" }}>{feedbacks.length} submitted suggestions</span>
+                </div>
+                
+                {feedbacks.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "60px 20px", color: "var(--muted)", fontSize: "13px" }}>
+                    No customer feedbacks submitted yet. Share the link <b style={{ color: "var(--gold)" }}>/feedback</b> with your clients to start collecting suggestions!
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    {feedbacks.map((f, i) => {
+                      const dateStr = f.created_at ? new Date(f.created_at).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : "N/A";
+                      const isUnread = f.status === 'unread';
+                      
+                      // WhatsApp contact link
+                      const hasPhone = f.phone && f.phone !== "Not provided" && f.phone.trim() !== "";
+                      const cleanedPhone = hasPhone ? f.phone.replace(/[^\d]/g, "") : "";
+                      const formattedPhoneForWhatsApp = cleanedPhone.startsWith("91") ? cleanedPhone : cleanedPhone.length === 10 ? `91${cleanedPhone}` : cleanedPhone;
+                      const waText = encodeURIComponent(`Hi ${f.name}!\nThis is Maddy from Maddy BGMI Store. Thank you for leaving valuable feedback regarding: "${f.comment}".\n\nI noticed you wanted: "${f.desired_items}". I'd love to help you find the perfect account!`);
+                      const waUrl = `https://wa.me/${formattedPhoneForWhatsApp}?text=${waText}`;
+
+                      return (
+                        <div 
+                          key={f.id || i} 
+                          style={{ 
+                            padding: "20px", 
+                            borderBottom: "1px solid var(--border)", 
+                            background: isUnread ? "rgba(255, 215, 0, 0.01)" : "transparent",
+                            transition: "background 0.2s"
+                          }}
+                        >
+                          <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "10px", alignItems: "flex-start", marginBottom: "10px" }}>
+                            <div>
+                              <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                                <span style={{ fontWeight: 800, fontSize: "15px", color: "#fff" }}>{f.name}</span>
+                                <span style={{ display: "flex", gap: "2px" }}>
+                                  {[...Array(5)].map((_, idx) => (
+                                    <Star key={idx} size={11} fill={idx < (f.stars || 5) ? "var(--gold)" : "transparent"} stroke="var(--gold)" />
+                                  ))}
+                                </span>
+                                <span style={{
+                                  fontSize: "9px",
+                                  fontWeight: 900,
+                                  padding: "2px 6px",
+                                  borderRadius: "4px",
+                                  background: isUnread ? "rgba(239,68,68,0.15)" : "rgba(34,197,94,0.15)",
+                                  color: isUnread ? "#ef4444" : "#22c55e",
+                                  textTransform: "uppercase"
+                                }}>
+                                  {isUnread ? "NEW / UNREAD" : "READ"}
+                                </span>
+                              </div>
+                              <div style={{ fontSize: "11px", color: "var(--muted)", marginTop: "4px" }}>
+                                Submitted: {dateStr} {hasPhone && `• WhatsApp: ${f.phone}`}
+                              </div>
+                            </div>
+
+                            <div style={{ display: "flex", gap: "8px" }}>
+                              <button
+                                onClick={() => toggleFeedbackStatus(f.id, f.status)}
+                                className="btn btn-outline"
+                                style={{ 
+                                  padding: "6px 12px", 
+                                  fontSize: "11px", 
+                                  borderColor: isUnread ? "var(--green)" : "var(--muted)", 
+                                  color: isUnread ? "var(--green)" : "var(--muted)" 
+                                }}
+                              >
+                                {isUnread ? "Mark Read" : "Mark Unread"}
+                              </button>
+                              
+                              {hasPhone && (
+                                <a
+                                  href={waUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="btn btn-gold"
+                                  style={{ 
+                                    padding: "6px 12px", 
+                                    fontSize: "11px", 
+                                    fontWeight: 700,
+                                    textDecoration: "none",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: "4px"
+                                  }}
+                                >
+                                  <MessageSquare size={12} fill="currentColor" /> Chat Client
+                                </a>
+                              )}
+
+                              <button
+                                onClick={() => deleteFeedback(f.id)}
+                                className="btn btn-outline"
+                                style={{ padding: "6px 12px", fontSize: "11px", borderColor: "#ef4444", color: "#ef4444" }}
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            </div>
+                          </div>
+
+                          <p style={{ fontSize: "13px", color: "var(--text)", lineHeight: 1.5, margin: "0 0 10px", background: "rgba(255,255,255,0.02)", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.03)" }}>
+                            <strong>Suggestions & Experience:</strong> "{f.comment}"
+                          </p>
+
+                          {f.desired_items && f.desired_items !== "None specified" && f.desired_items.trim() !== "" && (
+                            <div style={{ background: "rgba(255,215,0,0.04)", border: "1px solid rgba(255,215,0,0.18)", padding: "12px 16px", borderRadius: "8px", display: "flex", alignItems: "flex-start", gap: "8px" }}>
+                              <Sparkles size={14} style={{ color: "var(--gold)", flexShrink: 0, marginTop: "2px" }} />
+                              <div>
+                                <strong style={{ fontSize: "11px", color: "var(--gold)", textTransform: "uppercase", display: "block", marginBottom: "2px" }}>Desired Accounts or BGMI Products</strong>
+                                <span style={{ fontSize: "12px", color: "#fff", fontWeight: 600 }}>"{f.desired_items}"</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           );

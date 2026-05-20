@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingCart, Banknote, KeyRound, Star, Heart, Eye } from "lucide-react";
+import { ShoppingCart, Banknote, KeyRound, Star, Heart, Eye, Scale } from "lucide-react";
 import { supabase } from "../utils/supabase";
 
 // Social icon buttons
@@ -109,6 +109,7 @@ export default function Footer() {
               { to: "/sell", label: "Sell Accounts", icon: <Banknote size={13} /> },
               { to: "/recovery", label: "Account Recovery", icon: <KeyRound size={13} /> },
               { to: "/reviews", label: "Reviews", icon: <Star size={13} /> },
+              { to: "/terms", label: "Terms & Conditions", icon: <Scale size={13} /> },
             ].map(l => (
               <Link key={l.to} to={l.to} style={{ color: "var(--muted)", fontSize: "13px", textDecoration: "none", transition: "color .2s", display:"flex", alignItems:"center", gap:"7px" }}
                 onMouseEnter={e => e.currentTarget.style.color = "var(--text)"}
@@ -173,7 +174,7 @@ export default function Footer() {
           </div>
         </div>
 
-        Made with <Heart size={11} fill="#ef4444" color="#ef4444" style={{ display:"inline", verticalAlign:"middle", margin:"0 2px" }} /> in South India &nbsp;·&nbsp; © 2026 Maddy BGMI Store &nbsp;·&nbsp; Not affiliated with BGMI or Krafton.
+        Made with <Heart size={11} fill="#ef4444" color="#ef4444" style={{ display:"inline", verticalAlign:"middle", margin:"0 2px" }} /> in South India &nbsp;·&nbsp; © 2026 <Link to="/terms" style={{ color: "var(--gold)", textDecoration: "none", transition: "opacity 0.2s" }} onMouseEnter={e => e.currentTarget.style.opacity = 0.8} onMouseLeave={e => e.currentTarget.style.opacity = 1}>Maddy BGMI Store</Link> &nbsp;·&nbsp; <Link to="/terms" style={{ color: "var(--muted)", textDecoration: "underline", transition: "color 0.2s" }} onMouseEnter={e => e.currentTarget.style.color = "var(--gold)"} onMouseLeave={e => e.currentTarget.style.color = "var(--muted)"}>Terms & Conditions</Link> &nbsp;·&nbsp; Not affiliated with BGMI or Krafton.
       </div>
     </footer>
   );

@@ -1,7 +1,9 @@
+import { useState, useEffect } from "react";
+import { supabase } from "../utils/supabase";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { Gamepad2, ShoppingCart, Banknote, CheckCircle, Zap, Shield, Star, Trophy, Lock, Smartphone,CircleDollarSign } from "lucide-react";
+import { Gamepad2, ShoppingCart, Banknote, CheckCircle, Zap, Shield, Star, Trophy, Lock, Smartphone, CircleDollarSign, Car, Coins, Sparkles, ArrowRight, RefreshCw } from "lucide-react";
 import CountUp from "../components/CountUp";
 import LightRays from "../components/LightRays";
 
@@ -61,6 +63,46 @@ const connectChannels = [
 ];
 
 export default function Home() {
+  const [avgRating, setAvgRating] = useState(4.8);
+  const [buyerReviews, setBuyerReviews] = useState([]);
+
+  useEffect(() => {
+    const fetchAverageRating = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('reviews')
+          .select('stars')
+          .eq('status', 'approved');
+        
+        if (!error && data && data.length > 0) {
+          const totalStars = data.reduce((sum, r) => sum + (r.stars || 5), 0);
+          const avg = (totalStars / data.length).toFixed(1);
+          setAvgRating(parseFloat(avg));
+        }
+      } catch (err) {
+        console.warn("Could not fetch ratings, using default 4.8", err);
+      }
+    };
+    const fetchLatestReviews = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('reviews')
+          .select('*')
+          .eq('status', 'approved')
+          .order('created_at', { ascending: false })
+          .limit(3);
+        
+        if (!error && data) {
+          setBuyerReviews(data);
+        }
+      } catch (err) {
+        console.warn("Could not fetch buyer reviews for homepage", err);
+      }
+    };
+    fetchAverageRating();
+    fetchLatestReviews();
+  }, []);
+
   return (
     <>
       <Navbar />
@@ -103,8 +145,8 @@ export default function Home() {
             Buy and sell verified BGMI accounts safely — budget to premium. Trusted by 2000+ players since 2019.
           </p>
           <div style={{ display:"flex", gap:"14px", justifyContent:"center", flexWrap:"wrap" }}>
-            <Link to="/buy" className="btn btn-gold" style={{ display:"inline-flex", alignItems:"center", gap:"7px" }}><ShoppingCart size={15} /> Buy An Account</Link>
-            <Link to="/sell" className="btn btn-outline" style={{ display:"inline-flex", alignItems:"center", gap:"7px" }}><Banknote size={15} /> Sell Your Account</Link>
+            <Link to="/buy" className="btn btn-outline-gold" style={{ display:"inline-flex", alignItems:"center", gap:"7px" }}><ShoppingCart size={15} /> Buy An Account</Link>
+            <Link to="/sell" className="btn btn-green" style={{ display:"inline-flex", alignItems:"center", gap:"7px" }}><Banknote size={15} /> Sell Your Account</Link>
           </div>
           <div style={{ display:"flex", gap:"24px", justifyContent:"center", marginTop:"40px", flexWrap:"wrap" }}>
             {[
@@ -131,10 +173,10 @@ export default function Home() {
           <div className="stat-l">Happy Buyers</div>
         </div>
         <div className="stat">
-          <div className="stat-n">
-            ₹<CountUp from={0} to={60} duration={2} />L+
+          <div className="stat-n" style={{ whiteSpace: "nowrap" }}>
+            ₹<CountUp from={0} to={60} duration={2} /> Lakhs+
           </div>
-          <div className="stat-l">Accounts Sold</div>
+          <div className="stat-l">Worth of Accounts Sold to Date</div>
         </div>
         <div className="stat">
           <div className="stat-n">
@@ -144,35 +186,144 @@ export default function Home() {
         </div>
         <div className="stat">
           <div className="stat-n">
-            <CountUp from={0} to={4.7} duration={2} /> ★
+            <CountUp from={0} to={avgRating} duration={2} /> ★
           </div>
           <div className="stat-l">Star Rated</div>
         </div>
       </div>
 
-      {/* BUY / SELL / RECOVERY GRID */}
-           <section className="section">
+      {/* WHAT WE OFFER */}
+      <section className="section">
         <div className="slabel">What We Offer</div>
-        <h2 className="stitle">Buy or Sell — We've Got You</h2>
-        <p className="ssub">Choose what you're looking for below and we'll take care of the rest.</p>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap:"20px", maxWidth:"1200px" }}>
-          <div style={{ background:"linear-gradient(135deg,rgba(255,107,53,.25),rgba(255,215,0,.12)),var(--card)", border:"1px solid var(--border-gold)", borderRadius:"18px", padding:"36px 32px", minHeight:"220px", display:"flex", flexDirection:"column", justifyContent:"flex-end", cursor:"pointer", transition:"transform .25s", position:"relative" }}>
-            <div style={{ position:"absolute", top:"28px", right:"28px", opacity:.2, color:"var(--gold)" }}><ShoppingCart size={52} /></div>
-            <h3 style={{ fontFamily:"var(--font-h)", fontSize:"26px", fontWeight:700, marginBottom:"8px" }}>Buy an Account</h3>
-            <p style={{ color:"var(--muted)", fontSize:"13px", marginBottom:"20px" }}>Choose from ready stock or get a custom account built to your exact specs and budget.</p>
-            <Link to="/readystocks" className="btn btn-gold" style={{ alignSelf:"flex-start", display:"inline-flex", alignItems:"center", gap:"7px" }}><ShoppingCart size={14} />Buy Now →</Link>
+        <h2 className="stitle">Your All-in-One BGMI Marketplace</h2>
+        <p className="ssub" style={{ marginBottom: "40px" }}>Your complete gaming catalog. Simple, highly secure, and verified marketplace.</p>
+        
+        {/* Tier 1: Core Offerings (Buying, Selling, Exchanging) */}
+        <div className="core-grid">
+          {/* Buy Card */}
+          <div className="home-card-offer card-buy-core">
+            <div style={{ position: "absolute", top: "24px", right: "24px", opacity: 0.15, color: "var(--gold)" }}><ShoppingCart size={68} /></div>
+            <div>
+              <span style={{ fontSize: "10px", background: "var(--gold-dim)", color: "var(--gold)", border: "1px solid var(--gold-border)", padding: "4px 10px", borderRadius: "100px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px" }}>Secure Purchase</span>
+              <h3 style={{ fontFamily: "var(--font-h)", fontSize: "24px", fontWeight: 800, marginTop: "12px", marginBottom: "8px", color: "#fff" }}>Explore Verified Accounts</h3>
+              <p style={{ color: "var(--muted)", fontSize: "13px", lineHeight: 1.6, marginBottom: "20px" }}>
+                Choose between instant-delivery Ready-to-Play listings, market-available channel deals, or request custom-sourced profiles tailored to your exact budget and skin requirements within 24-48 hours.
+              </p>
+              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 28px", display: "grid", gap: "8px" }}>
+                {[
+                  "🎮 Ready-to-Play: Hand-secured verified listings",
+                  "📢 Market Available: Channel deals posted daily",
+                  "⚡ Custom Sourcing: Sourced to budget in 48 hours"
+                ].map(item => (
+                  <li key={item} style={{ fontSize: "12px", color: "var(--text)", display: "flex", alignItems: "center", gap: "8px", fontWeight: 600 }}>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <Link to="/buy" className="btn btn-outline-gold" style={{ alignSelf: "flex-start", display: "inline-flex", alignItems: "center", gap: "7px", padding: "10px 22px", fontSize: "13px", textDecoration: "none" }}>
+              <ShoppingCart size={14} /> Click here to buy an account <ArrowRight size={13} />
+            </Link>
           </div>
-          <div style={{ background:"linear-gradient(135deg,rgba(34,197,94,.18),rgba(30,144,255,.1)),var(--card)", border:"1px solid var(--border-gold)", borderRadius:"18px", padding:"36px 32px", minHeight:"220px", display:"flex", flexDirection:"column", justifyContent:"flex-end", cursor:"pointer", transition:"transform .25s", position:"relative" }}>
-            <div style={{ position:"absolute", top:"28px", right:"28px", opacity:.2, color:"#22C55E" }}><Banknote size={52} /></div>
-            <h3 style={{ fontFamily:"var(--font-h)", fontSize:"26px", fontWeight:700, marginBottom:"8px" }}>Sell Your Account</h3>
-            <p style={{ color:"var(--muted)", fontSize:"13px", marginBottom:"20px" }}>Get maximum value for your BGMI account — instant payout or hold & sell for best price.</p>
-            <Link to="/sell" className="btn btn-green" style={{ alignSelf:"flex-start", display:"inline-flex", alignItems:"center", gap:"7px" }}><CircleDollarSign size={14} />Sell Now →</Link>
+
+          {/* Sell Card */}
+          <div className="home-card-offer card-sell-core">
+            <div style={{ position: "absolute", top: "24px", right: "24px", opacity: 0.15, color: "#10b981" }}><CircleDollarSign size={68} /></div>
+            <div>
+              <span style={{ fontSize: "10px", background: "rgba(16,185,129,0.1)", color: "#34d399", border: "1px solid rgba(16,185,129,0.25)", padding: "4px 10px", borderRadius: "100px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px" }}>Transparent Deal</span>
+              <h3 style={{ fontFamily: "var(--font-h)", fontSize: "24px", fontWeight: 800, marginTop: "12px", marginBottom: "8px", color: "#fff" }}>Sell & Get Instant Cash</h3>
+              <p style={{ color: "var(--muted)", fontSize: "13px", lineHeight: 1.6, marginBottom: "20px" }}>
+                Sell your BGMI account securely with direct, transparent evaluation rates and immediate cash-out via UPI, Bank Transfer, or Cash deals.
+              </p>
+              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 28px", display: "grid", gap: "8px" }}>
+                {[
+                  "💰 Top Market Valuation: Immediate fair rates",
+                  "⚡ Instant Cashouts: Dispatched via UPI & Cash",
+                  "🛡️ 100% Safe Escrow: Fully secured transparency"
+                ].map(item => (
+                  <li key={item} style={{ fontSize: "12px", color: "var(--text)", display: "flex", alignItems: "center", gap: "8px", fontWeight: 600 }}>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <Link to="/sell" className="btn btn-green" style={{ alignSelf: "flex-start", display: "inline-flex", alignItems: "center", gap: "7px", padding: "10px 22px", fontSize: "13px", textDecoration: "none" }}>
+              <CircleDollarSign size={14} /> Click here to sell your account <ArrowRight size={13} />
+            </Link>
           </div>
-          <div style={{ background:"linear-gradient(135deg,rgba(168,85,247,.18),rgba(236,72,153,.1)),var(--card)", border:"1px solid var(--border-gold)", borderRadius:"18px", padding:"36px 32px", minHeight:"220px", display:"flex", flexDirection:"column", justifyContent:"flex-end", cursor:"pointer", transition:"transform .25s", position:"relative" }}>
-            <div style={{ position:"absolute", top:"28px", right:"28px", opacity:.2, color:"#A855F7" }}><Shield size={52} /></div>
-            <h3 style={{ fontFamily:"var(--font-h)", fontSize:"26px", fontWeight:700, marginBottom:"8px" }}>Account Recovery</h3>
-            <p style={{ color:"var(--muted)", fontSize:"13px", marginBottom:"20px" }}>Lost access to your account? We can help you recover it safely and securely.</p>
-            <Link to="/recovery" className="btn btn-outline" style={{ alignSelf:"flex-start", display:"inline-flex", alignItems:"center", gap:"7px" }}><Shield size={14} />Recover Now →</Link>
+
+          {/* Exchange Card */}
+          <div className="home-card-offer card-exchange-core">
+            <div style={{ position: "absolute", top: "24px", right: "24px", opacity: 0.15, color: "#a855f7" }}><RefreshCw size={68} /></div>
+            <div>
+              <span style={{ fontSize: "10px", background: "rgba(168,85,247,0.1)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.25)", padding: "4px 10px", borderRadius: "100px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px" }}>Secure Trade</span>
+              <h3 style={{ fontFamily: "var(--font-h)", fontSize: "24px", fontWeight: 800, marginTop: "12px", marginBottom: "8px", color: "#fff" }}>Trade Up to Your Dream Account</h3>
+              <p style={{ color: "var(--muted)", fontSize: "13px", lineHeight: 1.6, marginBottom: "20px" }}>
+                Swap your existing BGMI account for any higher or lower tier listing on our platform, supported by secure appraisal valuations and escrow protection.
+              </p>
+              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 28px", display: "grid", gap: "8px" }}>
+                {[
+                  "🔄 Tier Upgrades: Swap for premium inventory",
+                  "🛡️ Escrow Trade Protection: Dual handover security",
+                  "🤝 Fair Valuation: Instant adjustment appraisals"
+                ].map(item => (
+                  <li key={item} style={{ fontSize: "12px", color: "var(--text)", display: "flex", alignItems: "center", gap: "8px", fontWeight: 600 }}>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <Link to="/exchange" className="btn btn-purple" style={{ alignSelf: "flex-start", display: "inline-flex", alignItems: "center", gap: "7px", padding: "10px 22px", fontSize: "13px", textDecoration: "none" }}>
+              <RefreshCw size={14} /> Click here to exchange your account <ArrowRight size={13} />
+            </Link>
+          </div>
+        </div>
+
+        {/* Tier 2: Expanded Catalog (UC, X-Suit, Supercar) */}
+        <div style={{ textAlign: "center", marginTop: "48px", marginBottom: "24px" }}>
+          <div style={{ fontSize: "11px", fontWeight: 800, color: "var(--gold)", letterSpacing: "2px", textTransform: "uppercase" }}>
+            ⚡ ADDITIONAL CATALOG & ELITE SERVICES
+          </div>
+        </div>
+
+        <div className="catalog-grid">
+          {/* UC Purchase */}
+          <div className="sub-tile tile-uc">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
+              <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "rgba(59,130,246,0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "#60a5fa", border: "1px solid rgba(59,130,246,0.2)" }}><Coins size={20} /></div>
+              <span style={{ fontSize: "9px", background: "rgba(59,130,246,0.15)", color: "#60a5fa", padding: "2px 6px", borderRadius: "4px", fontWeight: 900 }}>FAST</span>
+            </div>
+            <h4 style={{ fontFamily: "var(--font-h)", fontSize: "18px", fontWeight: 700, margin: "0 0 6px", color: "#fff" }}>UC Packs Store</h4>
+            <p style={{ color: "var(--muted)", fontSize: "12px", lineHeight: 1.5, margin: "0 0 20px" }}>Instant UC Top-ups using your Character ID or secure View Login methods.</p>
+            <Link to="/services/uc" className="btn btn-blue w-full" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px", padding: "8px", fontSize: "12px", textDecoration: "none" }}>
+              Buy UC Packs →
+            </Link>
+          </div>
+
+          {/* X-Suits Gifting */}
+          <div className="sub-tile tile-xsuit">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
+              <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "rgba(168,85,247,0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "#c084fc", border: "1px solid rgba(168,85,247,0.2)" }}><Sparkles size={20} /></div>
+              <span style={{ fontSize: "9px", background: "rgba(168,85,247,0.15)", color: "#c084fc", padding: "2px 6px", borderRadius: "4px", fontWeight: 900 }}>EXCLUSIVE</span>
+            </div>
+            <h4 style={{ fontFamily: "var(--font-h)", fontSize: "18px", fontWeight: 700, margin: "0 0 6px", color: "#fff" }}>X-Suit Gifting Deals</h4>
+            <p style={{ color: "var(--muted)", fontSize: "12px", lineHeight: 1.5, margin: "0 0 20px" }}>Acquire legendary X-Suit packages safely at a fraction of standard draw prices.</p>
+            <Link to="/services/xsuit" className="btn btn-purple w-full" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px", padding: "8px", fontSize: "12px", textDecoration: "none" }}>
+              Explore X-Suits →
+            </Link>
+          </div>
+
+          {/* Supercars Gifting */}
+          <div className="sub-tile tile-supercar">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
+              <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "rgba(249,115,22,0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fb923c", border: "1px solid rgba(249,115,22,0.2)" }}><Car size={20} /></div>
+              <span style={{ fontSize: "9px", background: "rgba(249,115,22,0.15)", color: "#fb923c", padding: "2px 6px", borderRadius: "4px", fontWeight: 900 }}>EXOTIC</span>
+            </div>
+            <h4 style={{ fontFamily: "var(--font-h)", fontSize: "18px", fontWeight: 700, margin: "0 0 6px", color: "#fff" }}>Supercar Gifting Events</h4>
+            <p style={{ color: "var(--muted)", fontSize: "12px", lineHeight: 1.5, margin: "0 0 20px" }}>Drive home your dream 1-Card, 2-Card, or 3-Card sports vehicle variants.</p>
+            <Link to="/services/supercar" className="btn btn-orange w-full" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px", padding: "8px", fontSize: "12px", textDecoration: "none" }}>
+              Explore Cars →
+            </Link>
           </div>
         </div>
       </section>
@@ -264,13 +415,22 @@ export default function Home() {
         <h2 className="stitle">About Maddy BGMI Store</h2>
         <div style={{ background:"var(--card)", border:"1px solid var(--border-gold)", borderRadius:"var(--radius)", padding:"clamp(24px, 5vw, 40px)", display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(min(100%, 320px), 1fr))", gap:"40px", alignItems:"start" }}>
           <div>
-            <h3 style={{ fontFamily:"var(--font-h)", fontSize:"24px", fontWeight:700, marginBottom:"16px" }}>From a Passion to South India's Most Trusted BGMI Marketplace</h3>
-            <p style={{ color:"var(--muted)", fontSize:"14px", lineHeight:1.8, marginBottom:"12px" }}>Maddy BGMI Store's journey started in 2019 with the founding of Maddy Recovery Hub, recovering BGMI accounts and building a reputation of trust across South India.</p>
-            <p style={{ color:"var(--muted)", fontSize:"14px", lineHeight:1.8 }}>What started as a small WhatsApp trading group has grown into a full-fledged platform serving thousands of players. Every transaction is handled personally, every account is verified, and every buyer walks away satisfied.</p>
+            <h3 style={{ fontFamily:"var(--font-h)", fontSize:"24px", fontWeight:700, marginBottom:"16px" }}>From Maddy Recovery Hub to South India’s Most Trusted BGMI Marketplace</h3>
+            <p style={{ color:"var(--muted)", fontSize:"14px", lineHeight:1.8, marginBottom:"12px" }}>Our journey began in 2019 with a singular mission: bringing absolute security and technical credibility to the gaming community. By resolving complex login issues and recovering high-value assets, we established a gold standard of safety that became the core DNA of the <strong>Maddy BGMI Store</strong>.</p>
+            <p style={{ color:"var(--muted)", fontSize:"14px", lineHeight:1.8 }}>Through years of organic growth, expanding communities, and evolving gaming demands, we transitioned into the region's premier hub for verified accounts, elite skins, and instant in-game services. Today, every single handover is secure, every purchase is certified, and our legacy of trust since 2019 stands stronger than ever.</p>
           </div>
           <ul style={{ listStyle:"none", position:"relative", paddingLeft:"24px" }}>
             <div style={{ position:"absolute", left:"7px", top:"8px", bottom:"8px", width:"2px", background:"linear-gradient(to bottom, var(--gold), var(--orange))" }} />
-            {[["2019","Founded Maddy Recovery Hub. Recovered 2000+ accounts worth ₹30L."],["2020","Founded Maddy BGMI Store as a WhatsApp group with 238 members."],["2021","Expanded to Telegram, Instagram & YouTube."],["2022","800+ buyers & ₹20L worth sold. Face-to-Face deal for ₹2L."],["2023–2024","1000+ accounts & ₹60L worth sold. Launched website."],["2025–2026","2000+ buyers. Premium listings & new website. 🎉"]].map(([yr,desc]) => (
+            {[
+              ["2019", "Launched Maddy Recovery Hub, helping recover over 1,000 hacked or locked BGMI accounts worth ₹30L+ and establishing ultimate technical trust."],
+              ["2020", "Formed the Maddy BGMI Store as an exclusive WhatsApp trading group starting with 238 passionate members."],
+              ["2021", "Expanded our presence to official channels across Telegram, Instagram, and YouTube to reach gaming communities nationwide."],
+              ["2022", "Reached 800+ happy buyers and ₹20L in trading volume, introducing high-value, secure face-to-face deals across South India."],
+              ["2023", "Crossed 1,000+ successful account handovers and ₹60L in lifetime sales volume, adding premium X-Suits and Supercars to our portfolio."],
+              ["2024", "Refined our buyer guarantees and expanded our services to character ID top-ups and safe UC/X-Suit gifting catalog streams."],
+              ["2025", "Built an automated secure customer database, providing secure exchanges and professional invoices for high-end players."],
+              ["2026", "Fully launched our premium high-speed website, offering instant transfer, fair market pricing, and multiple secure payment modes. 🎉"]
+            ].map(([yr,desc]) => (
               <li key={yr} style={{ position:"relative", marginBottom:"22px" }}>
                 <div style={{ position:"absolute", left:"-20px", top:"7px", width:"10px", height:"10px", borderRadius:"50%", background:"var(--gold)", border:"2px solid var(--bg)" }} />
                 <strong style={{ fontFamily:"var(--font-h)", fontSize:"16px", color:"var(--gold)" }}>{yr}</strong>
@@ -302,18 +462,236 @@ export default function Home() {
         </div>
       </section>
 
+      {/* LIVE BUYER REVIEWS & FEEDBACK */}
+      <section className="section-alt" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+        <div className="slabel">Proofs & Feedback</div>
+        <h2 className="stitle">What Our Buyers Say</h2>
+        <p className="ssub" style={{ marginBottom: "40px" }}>Real feedback and transaction proofs from our verified buyers.</p>
+        
+        {buyerReviews.length > 0 ? (
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+            gap: "24px",
+            maxWidth: "1200px",
+            margin: "0 auto 40px"
+          }}>
+            {buyerReviews.map(r => (
+              <div key={r.id} className="card" style={{ padding: "24px", background: "var(--card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+                    <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--gold)", color: "#000", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "16px" }}>
+                      {(r.name || "?")[0]}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 700, color: "#fff" }}>{r.name}</div>
+                      {r.tracking_id && <div style={{ fontSize: "11px", color: "var(--gold)", fontWeight: 600 }}>ID: {r.tracking_id}</div>}
+                      <div style={{ fontSize: "12px", color: "var(--muted)" }}>{new Date(r.created_at).toLocaleDateString()}</div>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: "2px", marginBottom: "12px" }}>
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} size={14} fill={i < (r.stars || 5) ? "var(--gold)" : "transparent"} color="var(--gold)" />
+                    ))}
+                  </div>
+                  <p style={{ fontSize: "13.5px", lineHeight: 1.6, color: "var(--text)", margin: 0 }}>{r.text}</p>
+                </div>
+                {r.image_url && (
+                  <div style={{ marginTop: "16px", overflow: "hidden", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
+                    <img src={r.image_url} alt="Proof" style={{ width: "100%", maxHeight: "200px", objectFit: "cover" }} />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ textAlign: "center", padding: "40px", color: "var(--muted)" }}>
+            Loading live feedback proofs...
+          </div>
+        )}
+        
+        <div style={{ textAlign: "center" }}>
+          <Link to="/reviews" className="btn btn-outline-gold" style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "12px 28px", textDecoration: "none" }}>
+            <Star size={15} /> View All Reviews & Proofs →
+          </Link>
+        </div>
+      </section>
+
       {/* CTA */}
-      <section className="section-alt" style={{ textAlign:"center" }}>
+      <section className="section" style={{ textAlign:"center", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
         <h2 className="stitle">Why Are You Waiting For?</h2>
         <p style={{ color:"var(--muted)", marginBottom:"32px" }}>Join 2000+ players who found their dream BGMI account.</p>
         <div style={{ display:"flex", gap:"14px", justifyContent:"center", flexWrap:"wrap" }}>
-          <Link to="/buy" className="btn btn-gold" style={{ display:"inline-flex", alignItems:"center", gap:"7px" }}><ShoppingCart size={15} /> Buy An Account</Link>
+          <Link to="/buy" className="btn btn-outline-gold" style={{ display:"inline-flex", alignItems:"center", gap:"7px" }}><ShoppingCart size={15} /> Buy An Account</Link>
           <Link to="/sell" className="btn btn-green"><CircleDollarSign size={15} /> Sell Your Account</Link>
         </div>
       </section>
 
       </div>
       <Footer />
+      
+      <style>{`
+        .core-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+          gap: 24px;
+          max-width: 1200px;
+          margin: 0 auto 40px;
+        }
+        .catalog-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          gap: 20px;
+          max-width: 1200px;
+          margin: 0 auto;
+        }
+        .home-card-offer {
+          border-radius: 20px;
+          padding: 40px 32px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          position: relative;
+          transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+          overflow: hidden;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .home-card-offer:hover {
+          transform: translateY(-6px);
+        }
+        .card-buy-core {
+          border: 1px solid rgba(255, 215, 0, 0.15);
+          background: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(8, 10, 15, 0.98) 100%);
+        }
+        .card-buy-core:hover {
+          border-color: rgba(255, 215, 0, 0.45);
+          box-shadow: 0 15px 40px rgba(255, 215, 0, 0.15);
+        }
+        .card-sell-core {
+          border: 1px solid rgba(16, 185, 129, 0.15);
+          background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(8, 10, 15, 0.98) 100%);
+        }
+        .card-sell-core:hover {
+          border-color: rgba(16, 185, 129, 0.45);
+          box-shadow: 0 15px 40px rgba(16, 185, 129, 0.15);
+        }
+        .card-exchange-core {
+          border: 1px solid rgba(168, 85, 247, 0.15);
+          background: linear-gradient(135deg, rgba(168, 85, 247, 0.05) 0%, rgba(8, 10, 15, 0.98) 100%);
+        }
+        .card-exchange-core:hover {
+          border-color: rgba(168, 85, 247, 0.45);
+          box-shadow: 0 15px 40px rgba(168, 85, 247, 0.15);
+        }
+
+        .sub-tile {
+          border-radius: 16px;
+          padding: 28px 24px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          position: relative;
+          transition: all 0.25s ease;
+          background: var(--card);
+        }
+        .sub-tile:hover {
+          transform: translateY(-4px);
+        }
+        .tile-uc {
+          border: 1px solid rgba(59, 130, 246, 0.12);
+        }
+        .tile-uc:hover {
+          border-color: rgba(59, 130, 246, 0.4);
+          box-shadow: 0 10px 25px rgba(59, 130, 246, 0.08);
+        }
+        .tile-xsuit {
+          border: 1px solid rgba(168, 85, 247, 0.12);
+        }
+        .tile-xsuit:hover {
+          border-color: rgba(168, 85, 247, 0.4);
+          box-shadow: 0 10px 25px rgba(168, 85, 247, 0.08);
+        }
+        .tile-supercar {
+          border: 1px solid rgba(249, 115, 22, 0.12);
+        }
+        .tile-supercar:hover {
+          border-color: rgba(249, 115, 22, 0.4);
+          box-shadow: 0 10px 25px rgba(249, 115, 22, 0.08);
+        }
+        .tile-custom {
+          border: 1px solid rgba(255, 215, 0, 0.12);
+        }
+        .tile-custom:hover {
+          border-color: rgba(255, 215, 0, 0.4);
+          box-shadow: 0 10px 25px rgba(255, 215, 0, 0.08);
+        }
+
+        .btn-blue {
+          background: rgba(59, 130, 246, 0.08);
+          color: #60a5fa;
+          border: 1px solid rgba(59, 130, 246, 0.25);
+          font-weight: 700;
+          transition: all 0.2s;
+        }
+        .btn-blue:hover {
+          background: #3b82f6;
+          color: #fff;
+          border-color: #3b82f6;
+          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+        .btn-purple {
+          background: rgba(168, 85, 247, 0.08);
+          color: #c084fc;
+          border: 1px solid rgba(168, 85, 247, 0.25);
+          font-weight: 700;
+          transition: all 0.2s;
+        }
+        .btn-purple:hover {
+          background: #a855f7;
+          color: #fff;
+          border-color: #a855f7;
+          box-shadow: 0 4px 12px rgba(168, 85, 247, 0.2);
+        }
+        .btn-orange {
+          background: rgba(249, 115, 22, 0.08);
+          color: #fb923c;
+          border: 1px solid rgba(249, 115, 22, 0.25);
+          font-weight: 700;
+          transition: all 0.2s;
+        }
+        .btn-orange:hover {
+          background: #f97316;
+          color: #fff;
+          border-color: #f97316;
+          box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);
+        }
+        .btn-green {
+          background: rgba(16, 185, 129, 0.08);
+          color: #34d399;
+          border: 1px solid rgba(16, 185, 129, 0.25);
+          font-weight: 700;
+          transition: all 0.2s;
+        }
+        .btn-green:hover {
+          background: #10b981;
+          color: #fff;
+          border-color: #10b981;
+          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+        .btn-outline-gold {
+          background: rgba(255, 215, 0, 0.03);
+          color: var(--gold);
+          border: 1px solid rgba(255, 215, 0, 0.25);
+          font-weight: 700;
+          transition: all 0.2s;
+        }
+        .btn-outline-gold:hover {
+          background: var(--gold);
+          color: #000;
+          border-color: var(--gold);
+          box-shadow: 0 4px 15px rgba(255, 215, 0, 0.35);
+        }
+      `}</style>
     </>
   );
 }

@@ -22,15 +22,16 @@ const navLinks = [
       { to: "/services/supercar", label: "Supercar Gift" },
     ],
   },
-  { to: "/recovery", label: "Recovery" },
   {
     label: "Reviews",
     subLinks: [
       { to: "/reviews", label: "Buyer Reviews" },
       { to: "/proofs", label: "Proof & Feedback" },
+      { to: "/feedback", label: "Customer Feedback" },
     ],
   },
   { to: "/connectwithus", label: "Connect" },
+  { to: "/terms", label: "Terms & Conditions" },
 ];
 
 const tickerItems = [

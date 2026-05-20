@@ -110,6 +110,10 @@ const PaymentPage = lazy(() => import("./pages/PaymentPage"));
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
 const Transactions = lazy(() => import("./pages/Transactions"));
 const PageNotFound = lazy(() => import("./pages/PageNotFound"));
+const TermsConditions = lazy(() => import("./pages/TermsConditions"));
+const CustomerFeedbackPage = lazy(() => import("./pages/CustomerFeedbackPage"));
+
+
 
 // Scroll to top on route change
 function ScrollToTop() {
@@ -375,6 +379,23 @@ export default function App() {
               </Suspense>
             }
           />
+          <Route
+            path="/terms"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <TermsConditions />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/feedback"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <CustomerFeedbackPage />
+              </Suspense>
+            }
+          />
+
 
               <Route
             path="/pay/:paymentId"

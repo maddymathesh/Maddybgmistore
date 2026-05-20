@@ -89,13 +89,13 @@ export default function TransactionsList({ onAddNew }) {
     if (!tx) return;
     const identifier = tx.id || tx.transaction_id;
     if (!window.confirm(`Are you sure you want to delete transaction ${tx.transaction_id || ''}?`)) return;
-    
+
     // Optimistic UI update
     const previousData = [...data];
     setData(prev => prev.filter(item => item.id !== tx.id && item.transaction_id !== tx.transaction_id));
-    
+
     try {
-      await deleteTransaction(identifier);
+      await deleteTransaction(tx);
       toast.success('Transaction deleted successfully');
       // No need to reload data if it's optimistic, unless we want to ensure cache is cleared.
       // The backend will clear its cache automatically on delete.
@@ -128,7 +128,7 @@ export default function TransactionsList({ onAddNew }) {
           else if (type === 'XSuit') statusClass += ' status-pending';
           else if (type === 'Supercar') statusClass += ' status-sold';
           else statusClass += ' status-available';
-          
+
           return (
             <span className={statusClass}>
               {type}
@@ -242,7 +242,7 @@ export default function TransactionsList({ onAddNew }) {
               placeholder="Search ID or Phone..."
             />
           </div>
-          
+
           <div style={{ position: 'relative' }}>
             <Filter size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
             <select
@@ -335,9 +335,9 @@ export default function TransactionsList({ onAddNew }) {
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </th>
                   ))}
                 </tr>
@@ -405,215 +405,215 @@ export default function TransactionsList({ onAddNew }) {
             </button>
           </div>
         </div>
-      {/* Transaction Details Modal */}
-      {selectedTxForDetails && (() => {
-        const tx = selectedTxForDetails;
-        const type = tx.transaction_type || 'Account';
-        
-        // 1. Deal basics
-        const dealBasics = [
-          ['Transaction ID', tx.transaction_id, true],
-          ['Transaction Type', type],
-          ['Transaction Date', tx.transaction_date ? new Date(tx.transaction_date).toLocaleString('en-IN') : '—'],
-          ['Mode of Deal', tx.mode_of_deal],
-          ['Mode of Payment', tx.mode_of_payment],
-          ['Payment Status', tx.payment_status, true]
-        ];
+        {/* Transaction Details Modal */}
+        {selectedTxForDetails && (() => {
+          const tx = selectedTxForDetails;
+          const type = tx.transaction_type || 'Account';
 
-        // 2. Product-specific details
-        let productItems = [];
-        if (type === 'Account') {
-          const acc = tx.account_transactions?.[0] || {};
-          productItems = [
-            ['Primary Login Provider', acc.primary_login_provider, true],
-            ['Primary Credentials', acc.primary_credentials],
-            ['Primary Mothermail', acc.primary_mothermail_status],
-            ['Secondary Login Provider', acc.secondary_login_provider, true],
-            ['Secondary Credentials', acc.secondary_credentials],
-            ['Secondary Mothermail', acc.secondary_mothermail_status],
-            ['Guarantee Plan', acc.guarantee_plan, true],
-            ['Primary Unlink Date', acc.primary_unlink_date ? new Date(acc.primary_unlink_date).toLocaleDateString('en-IN') : '—'],
-            ['Primary Void Date', acc.primary_guarantee_void_date ? new Date(acc.primary_guarantee_void_date).toLocaleDateString('en-IN') : '—'],
-            ['Secondary Unlink Date', acc.secondary_unlink_date ? new Date(acc.secondary_unlink_date).toLocaleDateString('en-IN') : '—'],
-            ['Secondary Void Date', acc.secondary_guarantee_void_date ? new Date(acc.secondary_guarantee_void_date).toLocaleDateString('en-IN') : '—'],
-            ['Product Link', acc.product_link]
+          // 1. Deal basics
+          const dealBasics = [
+            ['Transaction ID', tx.transaction_id, true],
+            ['Transaction Type', type],
+            ['Transaction Date', tx.transaction_date ? new Date(tx.transaction_date).toLocaleString('en-IN') : '—'],
+            ['Mode of Deal', tx.mode_of_deal],
+            ['Mode of Payment', tx.mode_of_payment],
+            ['Payment Status', tx.payment_status, true]
           ];
-        } else if (type === 'XSuit') {
-          const xs = tx.xsuit_transactions?.[0] || {};
-          productItems = [
-            ['X-Suit Name', xs.xsuit_name, true],
-            ['Gift Status', xs.gift_status],
-            ['Delivery Date', xs.delivery_date ? new Date(xs.delivery_date).toLocaleDateString('en-IN') : '—'],
-            ['Delivery Time', xs.delivery_time],
-            ['Buyer In-Game Name', xs.buyer_ig_name],
-            ['Buyer In-Game ID', xs.buyer_ig_id, true],
-            ['Gifter In-Game Name', xs.gifter_ig_name],
-            ['Gifter In-Game ID', xs.gifter_ig_id]
-          ];
-        } else if (type === 'Supercar') {
-          const sc = tx.supercar_transactions?.[0] || {};
-          productItems = [
-            ['Supercar Name', sc.supercar_name, true],
-            ['Card Tier (Tire)', sc.supercar_card_tier],
-            ['Gift Status', sc.gift_status],
-            ['Delivery Date', sc.delivery_date ? new Date(sc.delivery_date).toLocaleDateString('en-IN') : '—'],
-            ['Buyer In-Game Name', sc.buyer_ig_name],
-            ['Buyer In-Game ID', sc.buyer_ig_id, true],
-            ['Gifter In-Game Name', sc.gifter_ig_name],
-            ['Gifter In-Game ID', sc.gifter_ig_id]
-          ];
-        } else if (type === 'UC') {
-          const uc = tx.uc_transactions?.[0] || {};
-          productItems = [
-            ['UC Method', uc.uc_method, true],
-            ['UC Pack', uc.uc_pack],
-            ['Number of Packs', uc.num_packs],
-            ['Total UC', uc.total_uc, true],
-            ['Delivery Status', uc.delivery_status],
-            ['Delivery Date', uc.delivery_date ? new Date(uc.delivery_date).toLocaleDateString('en-IN') : '—']
-          ];
-        }
 
-        // 3. Finances
-        const sold = Number(tx.sold_price || 0);
-        const cost = Number(tx.owner_price || 0);
-        const profit = sold - cost;
-        const profitColor = profit >= 0 ? '#2ecc71' : '#ef4444';
+          // 2. Product-specific details
+          let productItems = [];
+          if (type === 'Account') {
+            const acc = tx.account_transactions?.[0] || {};
+            productItems = [
+              ['Primary Login Provider', acc.primary_login_provider, true],
+              ['Primary Credentials', acc.primary_credentials],
+              ['Primary Mothermail', acc.primary_mothermail_status],
+              ['Secondary Login Provider', acc.secondary_login_provider, true],
+              ['Secondary Credentials', acc.secondary_credentials],
+              ['Secondary Mothermail', acc.secondary_mothermail_status],
+              ['Guarantee Plan', acc.guarantee_plan, true],
+              ['Primary Unlink Date', acc.primary_unlink_date ? new Date(acc.primary_unlink_date).toLocaleDateString('en-IN') : '—'],
+              ['Primary Void Date', acc.primary_guarantee_void_date ? new Date(acc.primary_guarantee_void_date).toLocaleDateString('en-IN') : '—'],
+              ['Secondary Unlink Date', acc.secondary_unlink_date ? new Date(acc.secondary_unlink_date).toLocaleDateString('en-IN') : '—'],
+              ['Secondary Void Date', acc.secondary_guarantee_void_date ? new Date(acc.secondary_guarantee_void_date).toLocaleDateString('en-IN') : '—'],
+              ['Product Link', acc.product_link]
+            ];
+          } else if (type === 'XSuit') {
+            const xs = tx.xsuit_transactions?.[0] || {};
+            productItems = [
+              ['X-Suit Name', xs.xsuit_name, true],
+              ['Gift Status', xs.gift_status],
+              ['Delivery Date', xs.delivery_date ? new Date(xs.delivery_date).toLocaleDateString('en-IN') : '—'],
+              ['Delivery Time', xs.delivery_time],
+              ['Buyer In-Game Name', xs.buyer_ig_name],
+              ['Buyer In-Game ID', xs.buyer_ig_id, true],
+              ['Gifter In-Game Name', xs.gifter_ig_name],
+              ['Gifter In-Game ID', xs.gifter_ig_id]
+            ];
+          } else if (type === 'Supercar') {
+            const sc = tx.supercar_transactions?.[0] || {};
+            productItems = [
+              ['Supercar Name', sc.supercar_name, true],
+              ['Card Tier (Tire)', sc.supercar_card_tier],
+              ['Gift Status', sc.gift_status],
+              ['Delivery Date', sc.delivery_date ? new Date(sc.delivery_date).toLocaleDateString('en-IN') : '—'],
+              ['Buyer In-Game Name', sc.buyer_ig_name],
+              ['Buyer In-Game ID', sc.buyer_ig_id, true],
+              ['Gifter In-Game Name', sc.gifter_ig_name],
+              ['Gifter In-Game ID', sc.gifter_ig_id]
+            ];
+          } else if (type === 'UC') {
+            const uc = tx.uc_transactions?.[0] || {};
+            productItems = [
+              ['UC Method', uc.uc_method, true],
+              ['UC Pack', uc.uc_pack],
+              ['Number of Packs', uc.num_packs],
+              ['Total UC', uc.total_uc, true],
+              ['Delivery Status', uc.delivery_status],
+              ['Delivery Date', uc.delivery_date ? new Date(uc.delivery_date).toLocaleDateString('en-IN') : '—']
+            ];
+          }
 
-        // 4. Contacts
-        const contactItems = [
-          ['Buyer Phone', tx.buyer_phone],
-          ['Owner Phone', tx.owner_phone],
-          ['Seller Phone', tx.seller_phone],
-          ['Reseller Phone', tx.reseller_phone]
-        ];
+          // 3. Finances
+          const sold = Number(tx.sold_price || 0);
+          const cost = Number(tx.owner_price || 0);
+          const profit = sold - cost;
+          const profitColor = profit >= 0 ? '#2ecc71' : '#ef4444';
 
-        return (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(5, 5, 10, 0.85)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-            zIndex: 1000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px'
-          }}>
+          // 4. Contacts
+          const contactItems = [
+            ['Buyer Phone', tx.buyer_phone],
+            ['Owner Phone', tx.owner_phone],
+            ['Seller Phone', tx.seller_phone],
+            ['Reseller Phone', tx.reseller_phone]
+          ];
+
+          return (
             <div style={{
-              background: 'var(--bg3)',
-              border: '1px solid var(--border-gold)',
-              borderRadius: '16px',
-              maxWidth: '800px',
-              width: '100%',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              padding: '32px',
-              boxShadow: '0 20px 50px rgba(0,0,0,0.8)',
-              position: 'relative'
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(5, 5, 10, 0.85)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px'
             }}>
-              {/* Top Bar / Header */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px', borderBottom: '1px solid var(--border-gold)', paddingBottom: '16px' }}>
-                <div>
-                  <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    Transaction Details
-                    <span style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '4px', background: 'var(--gold-dim)', color: 'var(--gold)', fontWeight: 700 }}>
-                      {type}
-                    </span>
-                  </h2>
-                  <p style={{ fontSize: '12px', color: 'var(--muted)', margin: '4px 0 0 0' }}>Unique Ref: {tx.transaction_id}</p>
-                </div>
-                <button
-                  onClick={() => setSelectedTxForDetails(null)}
-                  style={{
-                    background: 'none',
-                    border: '1px solid var(--border)',
-                    borderRadius: '8px',
-                    color: 'var(--muted)',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    padding: '8px 16px',
-                    transition: 'all 0.2s'
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'var(--gold)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--muted)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
-                >
-                  Close
-                </button>
-              </div>
-
-              {/* Deal Info Section */}
-              {renderDetailSection('📊 Deal Information', dealBasics)}
-
-              {/* Product Info Section */}
-              {renderDetailSection('🎮 Product Details', productItems)}
-
-              {/* Financial Section */}
-              <div style={{ marginBottom: '24px' }}>
-                <h3 style={{ fontSize: '13px', textTransform: 'uppercase', color: 'var(--gold)', letterSpacing: '0.1em', margin: '0 0 12px 0', borderBottom: '1px solid var(--border)', paddingBottom: '6px', fontWeight: 700 }}>💰 Financial Overview (Confidential)</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px 24px', background: '#111122', padding: '16px', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '2px' }}>Cost Price</span>
-                    <span style={{ fontSize: '16px', color: '#fff', fontWeight: 700 }}>₹{cost.toLocaleString()}</span>
+              <div style={{
+                background: 'var(--bg3)',
+                border: '1px solid var(--border-gold)',
+                borderRadius: '16px',
+                maxWidth: '800px',
+                width: '100%',
+                maxHeight: '90vh',
+                overflowY: 'auto',
+                padding: '32px',
+                boxShadow: '0 20px 50px rgba(0,0,0,0.8)',
+                position: 'relative'
+              }}>
+                {/* Top Bar / Header */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px', borderBottom: '1px solid var(--border-gold)', paddingBottom: '16px' }}>
+                  <div>
+                    <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      Transaction Details
+                      <span style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '4px', background: 'var(--gold-dim)', color: 'var(--gold)', fontWeight: 700 }}>
+                        {type}
+                      </span>
+                    </h2>
+                    <p style={{ fontSize: '12px', color: 'var(--muted)', margin: '4px 0 0 0' }}>Unique Ref: {tx.transaction_id}</p>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '2px' }}>Sold Price</span>
-                    <span style={{ fontSize: '16px', color: 'var(--gold)', fontWeight: 700 }}>₹{sold.toLocaleString()}</span>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '2px' }}>Net Profit</span>
-                    <span style={{ fontSize: '16px', color: profitColor, fontWeight: 800 }}>
-                      ₹{profit.toLocaleString()} {profit >= 0 ? '▲' : '▼'}
-                    </span>
+                  <button
+                    onClick={() => setSelectedTxForDetails(null)}
+                    style={{
+                      background: 'none',
+                      border: '1px solid var(--border)',
+                      borderRadius: '8px',
+                      color: 'var(--muted)',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      padding: '8px 16px',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'var(--gold)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--muted)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
+                  >
+                    Close
+                  </button>
+                </div>
+
+                {/* Deal Info Section */}
+                {renderDetailSection('📊 Deal Information', dealBasics)}
+
+                {/* Product Info Section */}
+                {renderDetailSection('🎮 Product Details', productItems)}
+
+                {/* Financial Section */}
+                <div style={{ marginBottom: '24px' }}>
+                  <h3 style={{ fontSize: '13px', textTransform: 'uppercase', color: 'var(--gold)', letterSpacing: '0.1em', margin: '0 0 12px 0', borderBottom: '1px solid var(--border)', paddingBottom: '6px', fontWeight: 700 }}>💰 Financial Overview (Confidential)</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px 24px', background: '#111122', padding: '16px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '2px' }}>Cost Price</span>
+                      <span style={{ fontSize: '16px', color: '#fff', fontWeight: 700 }}>₹{cost.toLocaleString()}</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '2px' }}>Sold Price</span>
+                      <span style={{ fontSize: '16px', color: 'var(--gold)', fontWeight: 700 }}>₹{sold.toLocaleString()}</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '2px' }}>Net Profit</span>
+                      <span style={{ fontSize: '16px', color: profitColor, fontWeight: 800 }}>
+                        ₹{profit.toLocaleString()} {profit >= 0 ? '▲' : '▼'}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Contacts Section */}
-              {renderDetailSection('📞 Party Contacts', contactItems)}
+                {/* Contacts Section */}
+                {renderDetailSection('📞 Party Contacts', contactItems)}
 
-              {tx.owner_proof_link && (
-                <div style={{ marginBottom: '32px' }}>
-                  <h3 style={{ fontSize: '13px', textTransform: 'uppercase', color: 'var(--gold)', letterSpacing: '0.1em', margin: '0 0 12px 0', borderBottom: '1px solid var(--border)', paddingBottom: '6px', fontWeight: 700 }}>🔗 Ownership Proof</h3>
-                  <a href={tx.owner_proof_link} target="_blank" rel="noopener noreferrer" style={{ fontSize: '13px', color: '#3b82f6', textDecoration: 'underline', wordBreak: 'break-all' }}>
-                    {tx.owner_proof_link}
-                  </a>
-                </div>
-              )}
+                {tx.owner_proof_link && (
+                  <div style={{ marginBottom: '32px' }}>
+                    <h3 style={{ fontSize: '13px', textTransform: 'uppercase', color: 'var(--gold)', letterSpacing: '0.1em', margin: '0 0 12px 0', borderBottom: '1px solid var(--border)', paddingBottom: '6px', fontWeight: 700 }}>🔗 Ownership Proof</h3>
+                    <a href={tx.owner_proof_link} target="_blank" rel="noopener noreferrer" style={{ fontSize: '13px', color: '#3b82f6', textDecoration: 'underline', wordBreak: 'break-all' }}>
+                      {tx.owner_proof_link}
+                    </a>
+                  </div>
+                )}
 
-              {/* Action Buttons in Modal */}
-              <div style={{ borderTop: '1px solid var(--border)', paddingTop: '24px', display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'flex-end' }}>
-                <button
-                  onClick={() => handleCustomerDownload(tx)}
-                  className="btn btn-gold"
-                  style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '12px', cursor: 'pointer' }}
-                >
-                  <FileText size={16} /> Customer PDF
-                </button>
-                <button
-                  onClick={() => handleInternalDownload(tx)}
-                  className="btn btn-outline"
-                  style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '12px', borderColor: 'var(--orange)', color: 'var(--orange)', cursor: 'pointer', background: 'none' }}
-                >
-                  <FileOutput size={16} /> Internal PDF
-                </button>
-                {/* <button
+                {/* Action Buttons in Modal */}
+                <div style={{ borderTop: '1px solid var(--border)', paddingTop: '24px', display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'flex-end' }}>
+                  <button
+                    onClick={() => handleCustomerDownload(tx)}
+                    className="btn btn-gold"
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '12px', cursor: 'pointer' }}
+                  >
+                    <FileText size={16} /> Customer PDF
+                  </button>
+                  <button
+                    onClick={() => handleInternalDownload(tx)}
+                    className="btn btn-outline"
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '12px', borderColor: 'var(--orange)', color: 'var(--orange)', cursor: 'pointer', background: 'none' }}
+                  >
+                    <FileOutput size={16} /> Internal PDF
+                  </button>
+                  {/* <button
                   onClick={() => handleBothDownload(tx)}
                   className="btn btn-green"
                   style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '12px', cursor: 'pointer' }}
                 >
                   <Download size={16} /> Download Both
                 </button> */}
+                </div>
               </div>
             </div>
-          </div>
-        );
-      })()}
+          );
+        })()}
       </div>
     </div>
   );

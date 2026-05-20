@@ -125,12 +125,53 @@ export const createUcTransaction = (mainData, detailData) =>
 /**
  * Delete a transaction by its ID.
  */
-export const deleteTransaction = async (id) => {
+export const deleteTransaction = async (txOrId) => {
   try {
-    // Note: In Google Sheets, we might want to delete from detail sheets too, 
-    // but without a common unique ID across sheets (only transaction_ref), 
-    // it depends on how the Apps Script handles it.
-    await api.deleteTransaction('transactions', id);
+    if (typeof txOrId === 'object' && txOrId !== null) {
+      const tx = txOrId;
+      const mainId = tx.id;
+      const promises = [];
+
+      // 1. Delete main transaction from 'transactions' sheet
+      if (mainId) {
+        promises.push(api.deleteTransaction('transactions', mainId));
+      }
+
+      // 2. Delete matching rows in detail sheets in parallel
+      if (tx.account_transactions && tx.account_transactions.length > 0) {
+        tx.account_transactions.forEach(detail => {
+          if (detail.id) {
+            promises.push(api.deleteTransaction('account_transactions', detail.id));
+          }
+        });
+      }
+      if (tx.xsuit_transactions && tx.xsuit_transactions.length > 0) {
+        tx.xsuit_transactions.forEach(detail => {
+          if (detail.id) {
+            promises.push(api.deleteTransaction('xsuit_transactions', detail.id));
+          }
+        });
+      }
+      if (tx.supercar_transactions && tx.supercar_transactions.length > 0) {
+        tx.supercar_transactions.forEach(detail => {
+          if (detail.id) {
+            promises.push(api.deleteTransaction('supercar_transactions', detail.id));
+          }
+        });
+      }
+      if (tx.uc_transactions && tx.uc_transactions.length > 0) {
+        tx.uc_transactions.forEach(detail => {
+          if (detail.id) {
+            promises.push(api.deleteTransaction('uc_transactions', detail.id));
+          }
+        });
+      }
+
+      await Promise.all(promises);
+    } else {
+      // Fallback if only id is passed (old behavior or fallback)
+      await api.deleteTransaction('transactions', txOrId);
+    }
   } catch (error) {
     console.error('Error deleting transaction:', error);
     throw error;

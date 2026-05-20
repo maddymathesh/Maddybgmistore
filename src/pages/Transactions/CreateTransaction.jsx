@@ -63,6 +63,10 @@ export default function CreateTransaction({ onBack }) {
       seller_phone: '+91',
       reseller_phone: '+91',
       buyer_phone: '+91',
+      owner_phone_countryCode: '+91',
+      seller_phone_countryCode: '+91',
+      reseller_phone_countryCode: '+91',
+      buyer_phone_countryCode: '+91',
     }
   });
 
@@ -79,9 +83,21 @@ export default function CreateTransaction({ onBack }) {
   const primaryVoid = watch('primary_guarantee_void');
   const secondaryVoid = watch('secondary_guarantee_void');
 
+  const countryCodes = {
+    owner_phone: watch('owner_phone_countryCode') || '+91',
+    seller_phone: watch('seller_phone_countryCode') || '+91',
+    reseller_phone: watch('reseller_phone_countryCode') || '+91',
+    buyer_phone: watch('buyer_phone_countryCode') || '+91',
+  };
+
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
+      const cleanPhone = (val, key) => {
+        const prefix = countryCodes[key] || '+91';
+        if (!val || val === prefix) return '';
+        return val;
+      };
       const mainData = {
         transaction_id: data.transaction_id,
         transaction_type: 'Account',
@@ -92,10 +108,10 @@ export default function CreateTransaction({ onBack }) {
         owner_price: costPrice,
         sold_price: soldPrice,
         profit: profit,
-        buyer_phone: data.buyer_phone,
-        owner_phone: data.owner_phone,
-        seller_phone: data.seller_phone,
-        reseller_phone: data.reseller_phone,
+        buyer_phone: cleanPhone(data.buyer_phone, 'buyer_phone'),
+        owner_phone: cleanPhone(data.owner_phone, 'owner_phone'),
+        seller_phone: cleanPhone(data.seller_phone, 'seller_phone'),
+        reseller_phone: cleanPhone(data.reseller_phone, 'reseller_phone'),
       };
       const detailData = {
         product_link: data.product_link,
@@ -390,37 +406,89 @@ return (
         return (
           <div style={grid}>
             {[
-  { label: 'Account Owner Phone', key: 'owner_phone' },
-  { label: 'Seller Phone Number', key: 'seller_phone' },
-  { label: 'Reseller Phone Number', key: 'reseller_phone' },
-  { label: 'Buyer Phone Number', key: 'buyer_phone' },
-].map(({ label, key }) => (
-  <Field key={key}>
-    <Label>{label}</Label>
-    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-      {/* Country Code Dropdown */}
-      <select {...register(`${key}_countryCode`)} style={{ padding: '6px',backgroundColor:"#111520" } }>
-        <option value="+91">+91</option>
-        <option value="+1">+1</option>
-        <option value="+44">+44</option>
-        {/* Add more codes later */}
-      </select>
+              { label: 'Account Owner Phone', key: 'owner_phone' },
+              { label: 'Seller Phone Number', key: 'seller_phone' },
+              { label: 'Reseller Phone Number', key: 'reseller_phone' },
+              { label: 'Buyer Phone Number', key: 'buyer_phone' },
+            ].map(({ label, key }) => {
+              const prefix = countryCodes[key] || '+91';
+              const prefixLen = prefix.length;
+              return (
+                <Field key={key}>
+                  <Label>{label}</Label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    {/* Country Code Dropdown */}
+                    <select
+                      {...register(`${key}_countryCode`, {
+                        onChange: (e) => {
+                          const newPrefix = e.target.value;
+                          const currentPhone = watch(key) || '';
+                          const restDigits = currentPhone.replace(/^\+(91|1|44)/, '');
+                          setValue(key, newPrefix + restDigits);
+                        }
+                      })}
+                      style={{
+                        padding: '6px',
+                        backgroundColor: "#111520",
+                        color: "#fff",
+                        border: "1px solid var(--border)",
+                        borderRadius: "4px",
+                        opacity: 0.9,
+                        cursor: "pointer"
+                      }}
+                    >
+                      <option value="+91">+91</option>
+                      <option value="+1">+1</option>
+                      <option value="+44">+44</option>
+                    </select>
 
-      {/* Phone Number Input */}
-      <input
-        className={inp}
-        placeholder="98765 09876"
-        maxLength={10}
-        {...register(key, {
-          pattern: {
-            value: /^[0-9]{10}$/,   // only digits, exactly 10
-            message: 'Enter a valid 10-digit number',
-          },
-        })}
-      />
-    </div>
-  </Field>
-))}
+                    {/* Phone Number Input with Dynamic Locked prefix */}
+                    <input
+                      className={inp}
+                      placeholder="98765 09876"
+                      maxLength={prefixLen + 10}
+                      onKeyDown={(e) => {
+                        const selectionStart = e.target.selectionStart;
+                        if (e.key === 'Backspace' && selectionStart <= prefixLen) {
+                          e.preventDefault();
+                        }
+                        if (e.key === 'Delete' && selectionStart < prefixLen) {
+                          e.preventDefault();
+                        }
+                      }}
+                      {...register(key, {
+                        required: false,
+                        onChange: (e) => {
+                          let val = e.target.value;
+                          if (!val.startsWith(prefix)) {
+                            val = prefix + val.replace(/^\+?[0-9]*/, '');
+                          }
+                          const rest = val.substring(prefixLen).replace(/[^0-9]/g, '');
+                          val = prefix + rest;
+                          if (val.length > prefixLen + 10) {
+                            val = val.substring(0, prefixLen + 10);
+                          }
+                          e.target.value = val;
+                          setValue(key, val);
+                        },
+                        validate: (val) => {
+                          if (!val || val === prefix) return true;
+                          const rest = val.substring(prefixLen);
+                          if (rest.length === 0) return true;
+                          if (rest.length === 10 && /^[0-9]+$/.test(rest)) return true;
+                          return `Enter a valid 10-digit number starting with ${prefix}`;
+                        }
+                      })}
+                    />
+                  </div>
+                  {errors[key] && (
+                    <p style={{ color: 'var(--red)', fontSize: '11px', marginTop: '4px' }}>
+                      {errors[key].message || 'This field is required'}
+                    </p>
+                  )}
+                </Field>
+              );
+            })}
 <Field span>
   <Label>Account Owner Proof Link (Drive / Screenshot)</Label>
   <input

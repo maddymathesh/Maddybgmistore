@@ -68,7 +68,7 @@ function launchGoldenConfetti() {
         ctx.rotate((p.rotation * Math.PI) / 180);
         ctx.globalAlpha = p.opacity;
         ctx.fillStyle = p.color;
-        
+
         if (Math.random() > 0.4) {
           ctx.fillRect(-p.radius, -p.radius / 2, p.radius * 2, p.radius);
         } else {
@@ -188,7 +188,7 @@ export default function App() {
             localStorage.setItem("mbs_live_views", String(activeCount));
             sessionStorage.setItem("mbs_db_counted", "true");
             window.dispatchEvent(new CustomEvent("mbs_views_updated", { detail: activeCount }));
-            
+
             if (activeCount % 10 === 0) {
               setCelebrationUser(activeCount);
               setTimeout(launchGoldenConfetti, 400);
@@ -207,7 +207,7 @@ export default function App() {
               localStorage.setItem("mbs_live_views", String(activeCount));
               sessionStorage.setItem("mbs_db_counted", "true");
               window.dispatchEvent(new CustomEvent("mbs_views_updated", { detail: activeCount }));
-              
+
               if (activeCount % 10 === 0) {
                 setCelebrationUser(activeCount);
                 setTimeout(launchGoldenConfetti, 400);
@@ -234,13 +234,13 @@ export default function App() {
         }
       } catch (err) {
         console.warn("View tracking DB handle fallback triggered:", err.message);
-        
+
         // 3. LocalStorage Fallback (100% Offline/Quota Safe)
         let localViews = localStorage.getItem("mbs_fallback_views");
         if (!localViews) {
           localViews = "14852";
         }
-        
+
         if (!dbCounted) {
           activeCount = Number(localViews) + 1;
           localStorage.setItem("mbs_fallback_views", String(activeCount));
@@ -248,10 +248,10 @@ export default function App() {
         } else {
           activeCount = Number(localViews);
         }
-        
+
         localStorage.setItem("mbs_live_views", String(activeCount));
         window.dispatchEvent(new CustomEvent("mbs_views_updated", { detail: activeCount }));
-        
+
         if (!dbCounted && activeCount % 10 === 0) {
           setCelebrationUser(activeCount);
           setTimeout(launchGoldenConfetti, 400);
@@ -397,10 +397,10 @@ export default function App() {
           />
 
 
-              <Route
+          <Route
             path="/pay/:paymentId"
             element={
-              <Suspense fallback={ <PageLoader />}>
+              <Suspense fallback={<PageLoader />}>
                 <PaymentPage />
               </Suspense>
             }
@@ -478,7 +478,7 @@ export default function App() {
           >
             {/* Golden radial background glow */}
             <div style={{ position: "absolute", width: "300px", height: "300px", background: "radial-gradient(circle, rgba(255,215,0,0.08) 0%, transparent 70%)", top: "-100px", left: "90px", zIndex: 0, pointerEvents: "none" }} />
-            
+
             <div style={{ position: "relative", zIndex: 1 }}>
               <div style={{ fontSize: "52px", marginBottom: "15px", animation: "bounce 1s infinite alternate" }}>🏆</div>
               <h2 style={{ fontFamily: "var(--font-h)", fontSize: "28px", fontWeight: 900, color: "var(--gold)", letterSpacing: "1px", marginBottom: "12px", textTransform: "uppercase" }}>
@@ -490,7 +490,7 @@ export default function App() {
               <p style={{ color: "var(--muted)", fontSize: "13px", lineHeight: 1.6, marginBottom: "30px", maxWidth: "380px", margin: "0 auto 30px" }}>
                 South India's most trusted BGMI marketplace since 2019. Thank you for celebrating this milestone with us! 🚀
               </p>
-              
+
               <button
                 onClick={() => {
                   setCelebrationUser(null);
@@ -512,7 +512,7 @@ export default function App() {
                 Awesome, Let's Shop!
               </button>
             </div>
-            
+
             <style>{`
               @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
               @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }

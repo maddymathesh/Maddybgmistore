@@ -85,7 +85,7 @@ export default function CreateUcTransaction({ onBack }) {
   }, [step]);
 
 
-  const { register, handleSubmit, watch, setValue } = useForm({
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
     defaultValues: {
       transaction_date: new Date().toISOString().split('T')[0],
       mode_of_deal: 'WhatsApp',
@@ -96,6 +96,10 @@ export default function CreateUcTransaction({ onBack }) {
       uc_seller_phone: '+91',
       seller_phone: '+91',
       buyer_phone: '+91',
+      loader_phone_countryCode: '+91',
+      uc_seller_phone_countryCode: '+91',
+      seller_phone_countryCode: '+91',
+      buyer_phone_countryCode: '+91',
     }
   });
 
@@ -112,6 +116,13 @@ export default function CreateUcTransaction({ onBack }) {
   const costPrice = parseFloat(watch('owner_price')) || 0;
   const soldPrice = parseFloat(watch('sold_price')) || 0;
   const profit = soldPrice - costPrice;
+
+  const countryCodes = {
+    loader_phone: watch('loader_phone_countryCode') || '+91',
+    uc_seller_phone: watch('uc_seller_phone_countryCode') || '+91',
+    seller_phone: watch('seller_phone_countryCode') || '+91',
+    buyer_phone: watch('buyer_phone_countryCode') || '+91',
+  };
   const packUcValue = selectedPack ? (Number(selectedPack.uc_amount?.toString().replace(/[^0-9]/g, '')) || 0) : 0;
   const totalUc = packUcValue * (numPacks || 0);
 
@@ -119,6 +130,11 @@ export default function CreateUcTransaction({ onBack }) {
     if (!selectedMethod) { toast.error('Please select a UC Method.'); setStep(1); return; }
     setIsSubmitting(true);
     try {
+      const cleanPhone = (val, key) => {
+        const prefix = countryCodes[key] || '+91';
+        if (!val || val === prefix) return '';
+        return val;
+      };
       const packLabel = selectedPack ? selectedPack.uc_amount : '';
       const mainData = {
         transaction_id: nextId,
@@ -130,10 +146,10 @@ export default function CreateUcTransaction({ onBack }) {
         owner_price: costPrice,
         sold_price: soldPrice,
         profit,
-        buyer_phone: data.buyer_phone,
-        owner_phone: data.loader_phone,
-        seller_phone: data.seller_phone,
-        reseller_phone: data.uc_seller_phone,
+        buyer_phone: cleanPhone(data.buyer_phone, 'buyer_phone'),
+        owner_phone: cleanPhone(data.loader_phone, 'loader_phone'),
+        seller_phone: cleanPhone(data.seller_phone, 'seller_phone'),
+        reseller_phone: cleanPhone(data.uc_seller_phone, 'uc_seller_phone'),
       };
       const detailData = {
         uc_method: selectedMethod,
@@ -303,13 +319,90 @@ export default function CreateUcTransaction({ onBack }) {
       case 4:
         return (
           <div style={grid}>
-            <div><Label>Loader Phone Number</Label><input className="input" placeholder="+91 00000 00000 or Void" {...register('loader_phone')} /></div>
-            <div><Label>UC Seller Phone Number</Label><input className="input" placeholder="+91 00000 00000 or Void" {...register('uc_seller_phone')} /></div>
-            <div>
-              <Label>Seller Phone Number</Label>
-              <input className="input" placeholder="+91 00000 00000 or Void" {...register('seller_phone')} />
-            </div>
-            <div><Label>Buyer Phone Number</Label><input className="input" placeholder="+91 00000 00000 or Void" {...register('buyer_phone')} /></div>
+            {[
+              { label: 'Loader Phone Number',    key: 'loader_phone' },
+              { label: 'UC Seller Phone Number', key: 'uc_seller_phone' },
+              { label: 'Seller Phone Number',    key: 'seller_phone' },
+              { label: 'Buyer Phone Number',     key: 'buyer_phone' },
+            ].map(({ label, key }) => {
+              const prefix = countryCodes[key] || '+91';
+              const prefixLen = prefix.length;
+              return (
+                <div key={key}>
+                  <Label>{label}</Label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    {/* Country Code Dropdown */}
+                    <select
+                      {...register(`${key}_countryCode`, {
+                        onChange: (e) => {
+                          const newPrefix = e.target.value;
+                          const currentPhone = watch(key) || '';
+                          const restDigits = currentPhone.replace(/^\+(91|1|44)/, '');
+                          setValue(key, newPrefix + restDigits);
+                        }
+                      })}
+                      style={{
+                        padding: '6px',
+                        backgroundColor: "#111520",
+                        color: "#fff",
+                        border: "1px solid var(--border)",
+                        borderRadius: "4px",
+                        opacity: 0.9,
+                        cursor: "pointer"
+                      }}
+                    >
+                      <option value="+91">+91</option>
+                      <option value="+1">+1</option>
+                      <option value="+44">+44</option>
+                    </select>
+
+                    {/* Phone Number Input with Dynamic Locked prefix */}
+                    <input
+                      className="input"
+                      placeholder="98765 09876"
+                      maxLength={prefixLen + 10}
+                      onKeyDown={(e) => {
+                        const selectionStart = e.target.selectionStart;
+                        if (e.key === 'Backspace' && selectionStart <= prefixLen) {
+                          e.preventDefault();
+                        }
+                        if (e.key === 'Delete' && selectionStart < prefixLen) {
+                          e.preventDefault();
+                        }
+                      }}
+                      {...register(key, {
+                        required: false,
+                        onChange: (e) => {
+                          let val = e.target.value;
+                          if (!val.startsWith(prefix)) {
+                            val = prefix + val.replace(/^\+?[0-9]*/, '');
+                          }
+                          const rest = val.substring(prefixLen).replace(/[^0-9]/g, '');
+                          val = prefix + rest;
+                          if (val.length > prefixLen + 10) {
+                            val = val.substring(0, prefixLen + 10);
+                          }
+                          e.target.value = val;
+                          setValue(key, val);
+                        },
+                        validate: (val) => {
+                          if (!val || val === prefix) return true;
+                          const rest = val.substring(prefixLen);
+                          if (rest.length === 0) return true;
+                          if (rest.length === 10 && /^[0-9]+$/.test(rest)) return true;
+                          return `Enter a valid 10-digit number starting with ${prefix}`;
+                        }
+                      })}
+                    />
+                  </div>
+                  {errors[key] && (
+                    <p style={{ color: 'var(--red)', fontSize: '11px', marginTop: '4px' }}>
+                      {errors[key].message || 'This field is required'}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         );
 

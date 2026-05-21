@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Banknote, Zap, MessageCircle, Lock, Video, FileText, BarChart, ShieldCheck, Megaphone, Clock, Handshake, CheckCircle } from "lucide-react";
 
 export default function Sell() {
+  const [activeTrustCard, setActiveTrustCard] = useState(null);
   return (
     <>
       <Navbar />
@@ -152,19 +154,39 @@ export default function Sell() {
           </div>
         </section>
 
-        {/* WHY */}
-        <section className="section-alt">
-          <h2 className="stitle" style={{ display:"flex", alignItems:"center", gap:"10px", justifyContent:"center" }}>
-            <ShieldCheck size={28} style={{ color:"var(--gold)" }} /> Why Choose Maddy Store?
+        {/* WHY TRUST */}
+        <section className="section" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+          <h2 className="stitle" style={{ display: "flex", alignItems: "center", gap: "12px", justifyContent: "center", fontSize: "clamp(26px,4vw,38px)", marginBottom: "32px", fontFamily: "var(--font-h)" }}>
+            <ShieldCheck size={28} style={{ color: "var(--gold)" }} /> Why Trust <span className="g">Maddy Store?</span>
           </h2>
-          <div className="why-grid" style={{ maxWidth:"800px", marginBottom:"32px" }}>
-            {["Trusted Since 2019","Safe & Secure Handling","Transparent Pricing Always","Fast Payouts After Sale"].map(w => (
-              <div key={w} className="why-item"><div className="why-check"><CheckCircle size={16} /></div><span>{w}</span></div>
+          
+          <div className="why-us-grid" style={{ marginBottom: "40px" }}>
+            {[
+              { h: "100% Trusted Deals", p: "Over 5000+ satisfied customers globally." },
+              { h: "Safe Transfers", p: "Proprietary security protocol for handovers." },
+              { h: "24/7 Support", p: "Dedicated team for after-sales assistance." },
+              { h: "Verified Listings", p: "Every account is manually checked by Maddy." }
+            ].map((item, idx) => (
+              <div 
+                key={item.h} 
+                className={`why-us-card why-us-card-green ${activeTrustCard === idx ? 'highlighted' : ''}`}
+                onClick={() => setActiveTrustCard(idx)}
+                style={{ cursor: "pointer" }}
+              >
+                <div className="why-us-icon-wrap" style={{ color: "#22c55e", background: "rgba(34, 197, 94, 0.04)", borderColor: "rgba(34, 197, 94, 0.15)" }}>
+                  <CheckCircle size={20} />
+                </div>
+                <h3>{item.h}</h3>
+                <p>{item.p}</p>
+              </div>
             ))}
           </div>
-          <a href="https://wa.me/+919025391516?text=Hi!%20I%20need%20help%20selling%20my%20BGMI%20account." target="_blank" rel="noreferrer" className="btn btn-green" style={{ display:"inline-flex", alignItems:"center", gap:"8px", justifyContent:"center" }}>
-            <MessageCircle size={15} /> Contact Us on WhatsApp
-          </a>
+
+          <div style={{ textAlign: "center" }}>
+            <a href="https://wa.me/+919025391516?text=Hi!%20I%20need%20help%20selling%20my%20BGMI%20account." target="_blank" rel="noreferrer" className="btn btn-green" style={{ display: "inline-flex", alignItems: "center", gap: "8px", justifyContent: "center" }}>
+              <MessageCircle size={15} /> Contact Us on WhatsApp
+            </a>
+          </div>
         </section>
       </div>
       <Footer />

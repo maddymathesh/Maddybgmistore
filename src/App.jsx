@@ -113,6 +113,9 @@ const Transactions = lazy(() => import("./pages/Transactions"));
 const PageNotFound = lazy(() => import("./pages/PageNotFound"));
 const TermsConditions = lazy(() => import("./pages/TermsConditions"));
 const CustomerFeedbackPage = lazy(() => import("./pages/CustomerFeedbackPage"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
+const FAQ = lazy(() => import("./pages/FAQ"));
 
 
 
@@ -385,6 +388,30 @@ export default function App() {
             element={
               <Suspense fallback={<PageLoader />}>
                 <TermsConditions />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/privacy"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <PrivacyPolicy />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/refunds"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <RefundPolicy />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/faq"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <FAQ />
               </Suspense>
             }
           />

@@ -1,12 +1,12 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { Scale, Shield, CreditCard, Truck, UserCheck, HelpCircle, AlertTriangle, ChevronRight } from "lucide-react";
+import { Scale, Shield, CreditCard, Truck, UserCheck, HelpCircle, AlertTriangle, ChevronRight, Gavel, FileText } from "lucide-react";
 
 export default function TermsConditions() {
   const sections = [
     {
       id: "introduction",
-      icon: <Scale size={20} className="text-gold" style={{ color: "var(--gold)" }} />,
+      icon: <Scale size={20} style={{ color: "var(--gold)" }} />,
       title: "1. Agreement to Terms",
       content: [
         "Welcome to Maddy BGMI Store (referred to as 'we', 'our', 'us', or 'the Store'). By accessing, browsing, or using our website, services, or purchasing products, you agree to be bound by these Terms and Conditions and all applicable laws and regulations.",
@@ -16,7 +16,7 @@ export default function TermsConditions() {
     },
     {
       id: "services",
-      icon: <Shield size={20} className="text-gold" style={{ color: "var(--gold)" }} />,
+      icon: <Shield size={20} style={{ color: "var(--gold)" }} />,
       title: "2. Services & Digital Goods",
       content: [
         "Maddy BGMI Store acts as South India's premium curated marketplace for Battlegrounds Mobile India (BGMI) related services, including but not limited to BGMI account purchases, sales, account exchanges, Unknown Cash (UC) pack purchases, and premium item gifting (X-Suits, Supercars).",
@@ -26,17 +26,17 @@ export default function TermsConditions() {
     },
     {
       id: "payments",
-      icon: <CreditCard size={20} className="text-gold" style={{ color: "var(--gold)" }} />,
+      icon: <CreditCard size={20} style={{ color: "var(--gold)" }} />,
       title: "3. Pricing, Payments & Refunds",
       content: [
         "Pricing for all products (UC, Accounts, Gifting) is dynamically set and displayed. We reserve the right to modify prices at any time without prior notice based on market demand and developer updates.",
         "Payments must be initiated through our designated automated transaction links or direct verified admin coordinates. Every transaction is tracked via a unique payment ID to ensure integrity and anti-fraud compliance.",
-        "Refund Policy: Due to the immediate, digital, and consumable nature of virtual goods and account ownership transfers, ALL SALES ARE FINAL. Refunds or cancellations will not be issued once credentials have been shared or UC has been successfully credited, except in proven cases where delivery is impossible."
+        "Refund Policy: Due to the immediate, digital, and consumable nature of virtual goods and account ownership transfers, ALL SALES ARE FINAL. Refunds or cancellations will not be issued once credentials have been shared or UC has been successfully credited, except in proven cases where delivery is impossible. Sourcing deposits are handled under our dedicated Refund & Return Policy rules."
       ]
     },
     {
       id: "delivery",
-      icon: <Truck size={20} className="text-gold" style={{ color: "var(--gold)" }} />,
+      icon: <Truck size={20} style={{ color: "var(--gold)" }} />,
       title: "4. Verification & Delivery Times",
       content: [
         "Account Delivery: Upon successful verification of payment, account credentials are typically handed over within 30 minutes to 3 hours, depending on administrative verification, social linkage safety checks, and queue sizes.",
@@ -46,7 +46,7 @@ export default function TermsConditions() {
     },
     {
       id: "obligations",
-      icon: <UserCheck size={20} className="text-gold" style={{ color: "var(--gold)" }} />,
+      icon: <UserCheck size={20} style={{ color: "var(--gold)" }} />,
       title: "5. User Conduct & Eligibility",
       content: [
         "By participating in our marketplace, you confirm that you are at least 18 years of age or possess legal parental/guardian consent to make online financial transactions.",
@@ -56,18 +56,39 @@ export default function TermsConditions() {
     },
     {
       id: "disclaimer",
-      icon: <AlertTriangle size={20} className="text-gold" style={{ color: "var(--gold)" }} />,
-      title: "6. Krafton Disclaimer & IP",
+      icon: <AlertTriangle size={20} style={{ color: "var(--gold)" }} />,
+      title: "6. Krafton Disclaimer & IP Notice",
       content: [
         "Maddy BGMI Store is an independent, third-party player-to-player service and digital goods provider. We are NOT officially affiliated with, endorsed by, sponsored by, or associated with KRAFTON, Inc., PUBG Corporation, Tencent Games, or any of their parent companies or subsidiaries.",
-        "All copyrights, trademarks, game names, character assets, and graphics belong entirely to their respective intellectual property owners (Krafton, Inc.). We claim no ownership over the game's actual proprietary codes or assets.",
+        "All copyrights, trademarks, game names, character assets, and graphics belong entirely to their respective intellectual property owners (Krafton, Inc. / Tencent Games). We claim no ownership over the game's actual proprietary codes or assets.",
         "Buying, selling, or trading virtual assets may technically violate the standard Terms of Service (ToS) of the game developers. By proceeding with a purchase or sale, users acknowledge and accept any associated risk of in-game actions or bans."
       ]
     },
     {
+      id: "jurisdiction",
+      icon: <Gavel size={20} style={{ color: "var(--gold)" }} />,
+      title: "7. Governing Law & Jurisdiction",
+      content: [
+        "These Terms and Conditions are governed by, and shall be construed in accordance with, the laws of the Republic of India.",
+        "You explicitly agree that any legal dispute, controversy, claim, or transaction issue arising out of or in connection with Maddy BGMI Store services, website listings, or marketplace trades shall be subject exclusively to the jurisdiction of the competent courts of Chennai, Tamil Nadu, India."
+      ]
+    },
+    {
+      id: "dmca",
+      icon: <FileText size={20} style={{ color: "var(--gold)" }} />,
+      title: "8. Copyright Notice & DMCA Takedown Procedure",
+      content: [
+        "All original website layouts, custom graphics, text descriptions, branding, logo identities, and database systems are Copyright © 2026 Maddy BGMI Store. All rights reserved.",
+        "Intellectual Property Takedown: We respect the copyright claims of others. If you are a copyright owner or authorized agent and believe that any listing or user-uploaded media infringes upon your copyright, you may submit a formal notification under standard intellectual property laws.",
+        "Takedown requests must be emailed directly to our administrative desk: maddybgmistoreog@gmail.com.",
+        "Claims must include: 1) Physical/electronic signature of the authorized copyright owner, 2) Clear identification of the copyrighted work claimed to have been infringed, 3) Direct URL link(s) of the listing on our store, and 4) Complete contact coordinates (email, phone, address).",
+        "Upon receipt of a verified claim, we guarantee a strict 48-hour response window to review, investigate, and deactivate any infringing asset."
+      ]
+    },
+    {
       id: "support",
-      icon: <HelpCircle size={20} className="text-gold" style={{ color: "var(--gold)" }} />,
-      title: "7. Contact & Support",
+      icon: <HelpCircle size={20} style={{ color: "var(--gold)" }} />,
+      title: "9. Contact & Support Coordination",
       content: [
         "For any inquiries regarding our terms, payment issues, transaction verification, or account handovers, please connect with us directly using our official channels:",
         "• WhatsApp Support: +91 90253 91516",
@@ -153,7 +174,7 @@ export default function TermsConditions() {
 
             {/* Terms List */}
             <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-              {sections.map((sec, idx) => (
+              {sections.map((sec) => (
                 <div 
                   key={sec.id}
                   id={sec.id}

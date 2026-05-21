@@ -437,6 +437,56 @@ export default function Buy() {
             padding: "35px",
             boxShadow: "0 20px 50px rgba(0,0,0,0.3)"
           }}>
+            {/* Customer-friendly Unlink Summary Block */}
+            <div style={{
+              background: "linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(255, 215, 0, 0.01) 100%)",
+              border: "1px dashed rgba(255, 215, 0, 0.25)",
+              borderRadius: "16px",
+              padding: "24px",
+              marginBottom: "30px",
+              display: "flex",
+              gap: "20px",
+              alignItems: "flex-start",
+              flexWrap: "wrap"
+            }}>
+              <div style={{
+                width: "48px",
+                height: "48px",
+                borderRadius: "12px",
+                background: "rgba(255, 215, 0, 0.1)",
+                border: "1px solid rgba(255, 215, 0, 0.3)",
+                color: "var(--gold)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0
+              }}>
+                <Shield size={22} />
+              </div>
+              <div style={{ flex: 1, minWidth: "260px" }}>
+                <h4 style={{
+                  fontFamily: "var(--font-h)",
+                  fontSize: "16px",
+                  color: "#fff",
+                  margin: "0 0 8px 0",
+                  letterSpacing: "0.5px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px"
+                }}>
+                  Understanding Your Unlink Process & Guarantee Timeline
+                </h4>
+                <p style={{
+                  color: "var(--muted)",
+                  fontSize: "13.5px",
+                  lineHeight: "1.6",
+                  margin: 0
+                }}>
+                  Unlinking in BGMI is the official system for safely removing one of the two linked logins. When you purchase an account, you receive full ownership of the <strong>primary secure login</strong>, and the <strong>secondary login</strong> is set to unlink. Enforced by BGMI, this secondary unlink has a strict <strong>7-day waiting period</strong>. Our premium <strong>Unlink Guarantee</strong> fully covers you throughout this entire 7-day window—if any issues or recovery attempts occur, we issue a full refund or replacement. Please note that once this 7-day guarantee period expires, the transaction is officially finalized, full ownership is permanently yours, and support/guarantees end.
+                </p>
+              </div>
+            </div>
+
             {/* Tabs Header */}
             <div style={{
               display: "flex",

@@ -256,11 +256,12 @@ export default function Buy() {
                   {[
                     "Browse & Review: View pre-listed accounts complete with inventory videos, specifications, pricing, and unlink guarantees.",
                     "Contact Support: Message us directly on WhatsApp or Telegram with the specific account details you wish to buy.",
-                    "Flexible Booking: Pay either a 15% non-refundable deposit to book the account, or complete full payment directly.",
-                    "24-Hour Hold & Binding: Bookings hold the account for 24 hours. After full payment, we immediately link your recovery email & phone number.",
-                    "Handover & Invoice: We deliver secure credentials along with an official transaction invoice detailing your unlink guarantee period.",
-                    "Unlink Protection: Enjoy absolute safety. If any issues occur within the guarantee period, we provide a replacement or a complete refund.",
-                    "Lobby Feedback: Once successfully logged in, upload your lobby screenshot and leave your feedback on our official reviews page."
+                    "Choose Deal Mode: Choose your transaction mode (secure Online transfer or Face-to-Face meetup for high-tier ₹80K+ deals) before final booking.",
+                    "Flexible Booking: Pay either a 15% non-refundable deposit to hold the account for 24 hours, or complete full payment directly.",
+                    "Binding & Handover: We link your recovery details immediately after full payment and deliver credentials with an unlink guarantee invoice.",
+                    "Unlink Protection: Enjoy absolute safety. If any issues occur within the guarantee period, we provide a replacement or full refund.",
+                    "Lobby & Chat Feedback: Send a lobby screenshot and chat feedback directly to our support team upon login.",
+                    "Submit Website Review: Share your official buying experience and rating on our website's reviews page."
                   ].map((step, idx) => {
                     const [title, body] = step.split(":");
                     return (
@@ -304,10 +305,12 @@ export default function Buy() {
                   {[
                     "Join Official Feeds: Click both the WhatsApp and Telegram buttons below to join our active daily feeds.",
                     "Review Daily Listings: Browse through our daily posted verified accounts, ranging from ₹5,000 to several lakh.",
+                    "Choose Deal Mode: Select either secure Online transfer or Face-to-Face meetup (for high-tier ₹80K+ deals) before finalizing.",
                     "15% Booking or Full Pay: Pay a 15% non-refundable booking deposit to hold the account for 24 hours, or pay in full.",
                     "Secure Account Binding: Once full payment is received, we bind your active recovery email and phone number to secure ownership.",
                     "Invoice & Dates: We issue an official invoice detailing your transaction, specific unlink date, and guarantee expiration.",
-                    "Unlink Process & Feedback: Follow the strict unlink safety process, secure your logins, and upload your lobby feedback."
+                    "Lobby & Chat Feedback: Send a lobby screenshot and chat feedback directly to our support team upon receiving the credentials.",
+                    "Submit Website Review: Share your official buying experience and rating on our website's reviews page."
                   ].map((step, idx) => {
                     const [title, body] = step.split(":");
                     return (
@@ -352,11 +355,14 @@ export default function Buy() {
                 <h4 className="steps-heading">Custom Sourcing Steps:</h4>
                 <ul className="steps-list-custom">
                   {[
-                    "Contact & Share Details: Share your budget, skin wishlist, supercar demands, or gun labs.",
-                    "Pay 15% Search Deposit: Pay a 15% booking deposit to initiate the personalized sourcing sweep.",
-                    "Personalized Matches: We present the closest matches (Note: exact 100% factory match cannot be guaranteed).",
-                    "Approve & Finalize: Review video logs of the sourced account and approve your match.",
-                    "Balance & Credentials Handover: Pay the remaining 85% to receive full secured account transfer."
+                    "Contact & Share Details: Reach out on WhatsApp/Telegram and share your budget and specific account demands (skins, supercar garage, gun labs).",
+                    "Discuss Match Scope: We discuss and align on a realistic budget and feasible in-game requirements.",
+                    "15% Security Deposit: Pay a 15% refundable security deposit to initiate the personalized 24-48 hour sourcing sweep.",
+                    "Sourcing & Cooldown: We find the closest matching accounts (Note: exact 100% factory match cannot be guaranteed; full refund if no match).",
+                    "Choose Deal Mode: Select secure Online transfer or Face-to-Face meetup (for ₹80K+ deals) before confirming the account.",
+                    "Final Booking & Handover: Sourced account approval turns deposit non-refundable; full payment secures ownership and delivery.",
+                    "Lobby & Chat Feedback: Share a login lobby screenshot and your feedback directly in our support chat upon login.",
+                    "Submit Website Review: Share your official sourcing experience and rating on our website's reviews page."
                   ].map((step, idx) => {
                     const [title, body] = step.split(":");
                     return (

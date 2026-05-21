@@ -1,8 +1,30 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { Scale, Shield, CreditCard, Truck, UserCheck, HelpCircle, AlertTriangle, ChevronRight, Gavel, FileText } from "lucide-react";
+import useSEO from "../hooks/useSEO";
+import { 
+  Scale, 
+  Shield, 
+  CreditCard, 
+  Truck, 
+  UserCheck, 
+  HelpCircle, 
+  AlertTriangle, 
+  ChevronRight, 
+  Gavel, 
+  FileText, 
+  Users, 
+  RefreshCw, 
+  Coins, 
+  Flame, 
+  Car 
+} from "lucide-react";
 
 export default function TermsConditions() {
+  useSEO(
+    "Terms & Conditions — Legal Guidelines",
+    "Official terms and conditions declaring Chennai jurisdiction, copyright details, DMCA takedown SLAs, and transaction rules."
+  );
+
   const sections = [
     {
       id: "introduction",
@@ -15,49 +37,71 @@ export default function TermsConditions() {
       ]
     },
     {
-      id: "services",
+      id: "buy-service",
       icon: <Shield size={20} style={{ color: "var(--gold)" }} />,
-      title: "2. Services & Digital Goods",
+      title: "2. Account Buying (Purchase Protocol)",
       content: [
-        "Maddy BGMI Store acts as South India's premium curated marketplace for Battlegrounds Mobile India (BGMI) related services, including but not limited to BGMI account purchases, sales, account exchanges, Unknown Cash (UC) pack purchases, and premium item gifting (X-Suits, Supercars).",
-        "We guarantee the initial verification and validity of accounts listed on our platform. However, once account credentials are legally transferred to the buyer, all security, linked social logins, and subsequent maintenance are the sole responsibility of the buyer.",
-        "All transactions must follow our official verification and secure escrow protocol to ensure the safety of both buyers and sellers."
+        "Escrow Guarantee: Maddy BGMI Store acts as South India's premium curated marketplace for Battlegrounds Mobile India (BGMI) accounts. We guarantee the initial integrity and validity of all account credentials listed on our platform.",
+        "Social Linkages: BGMI accounts may possess single or dual logins linked to various social platforms (including X/Twitter, Facebook, Google Play Games, Apple ID, or Game Center). The linking configuration is clearly described on each product catalog page.",
+        "Buyer Responsibility & Password Wipe: Upon completion of a transaction, all credentials are transferred directly to the buyer. At that moment, the buyer assumes absolute responsibility for maintaining account security (including enabling two-factor authentication, changing linked passwords, and updating phone numbers). The Maddy BGMI Store permanently erases all credentials from its logs upon successful transfer.",
+        "Zero-Ban Risk Guarantee: We guarantee that all listed accounts are free from active bans or developer blacklists at the time of purchase. However, any subsequent bans resulting from the buyer's gameplay, usage of third-party modifications, hacks, or violations of Krafton's end-user agreements are the sole responsibility of the buyer."
+      ]
+    },
+    {
+      id: "sell-service",
+      icon: <Flame size={20} style={{ color: "var(--gold)" }} />,
+      title: "3. Account Selling (Instant Sell vs. Hold & Sell)",
+      content: [
+        "Instant Sell: Under the Instant Sell option, sellers receive direct cash payouts. We conduct a thorough market evaluation and present a cash offer. The seller must share all linked logins for credential verification. Once our verification team secures the account and alters the linkages to prevent rollbacks, payment (via UPI, Bank Transfer, or Cash) is made immediately. Under no circumstances will the account be returned to the original seller once secured.",
+        "Hold & Sell (Hold-to-Earn): Under the Hold & Sell option, sellers contract MBS to broadcast their listing. The seller must agree to secure one primary login with our verification coordinate to ensure listing exclusivity and prevent dual-selling fraud. We create a custom showcase review and broadcast it to our highly engaged Telegram, Instagram, and WhatsApp channels. Most accounts sell within a 3-7 day window; if unsold, mutual price revisions may be adjusted.",
+        "Owner Payout & Safety Auditing: For Hold & Sell listings, final owner payout is initiated immediately after the buyer completes verification of the newly secured social linkages. Before final payment processing under either Sell mode, MBS requires the owner to submit a valid government-issued ID proof (e.g. Aadhaar Card, PAN Card, or Driving License). This information is kept encrypted and is solely retained to deter recovery scams or rollback fraud.",
+        "Legal Warning on Rollback Scams: Any seller attempting to initiate a security rollback, exploit recovery algorithms, or reclaim a sold account will be permanently blacklisted across South Indian gaming networks. MBS reserves the absolute right to dispatch their verified government ID records directly to competent Indian cyber-crime cells for prosecution."
+      ]
+    },
+    {
+      id: "exchange-service",
+      icon: <RefreshCw size={20} style={{ color: "var(--gold)" }} />,
+      title: "4. Account Exchanges (Trade-In Protocol)",
+      content: [
+        "Trade-In Valuation: Customers may trade in their existing verified BGMI account to purchase a higher-tier listing. We conduct an official market evaluation of the customer's trade-in account, and issue a trade credit quotation.",
+        "Balance Offsets: If the trade credit is lower than the value of the desired upgrade account, the customer must settle the difference (balance offset) via UPI or bank transfer. If the trade credit is higher than the desired account, MBS will secure the trade-in account and pay the surplus difference to the customer.",
+        "Secure Sequencing: For security purposes, MBS must completely secure and verify all linked logins of the trade-in account before credentials for the new, upgraded account are handed over to the customer. All exchange actions are final, and ID proof is mandatory."
+      ]
+    },
+    {
+      id: "uc-service",
+      icon: <Coins size={20} style={{ color: "var(--gold)" }} />,
+      title: "5. Unknown Cash (UC) Purchases",
+      content: [
+        "Sourcing and Pricing: We offer highly optimized UC packages with dynamic pricing based on server availability and bulk imports.",
+        "Direct Character ID Recharge: This option requires no account access. The customer must input their exact numeric Character ID. MBS delivers the UC packages officially in-game. The customer bears absolute responsibility for providing the correct Character ID; we cannot retrieve or refund UC sent to an incorrect ID provided by the customer.",
+        "Login-Based UC Recharge: For high-tier packs requiring secure in-game top-ups, the customer provides encrypted login credentials. MBS guarantees that these credentials are encrypted during transmission and are immediately deleted from all communications upon delivery verification."
+      ]
+    },
+    {
+      id: "gift-service",
+      icon: <Car size={20} style={{ color: "var(--gold)" }} />,
+      title: "6. X-Suits & Supercar Gifting Services",
+      content: [
+        "In-Game Gifting Limits: Premium cosmetics, legendary upgradable X-Suits, and custom showroom supercars (available in 1-card, 2-card, or 3-card gifting formats) are delivered officially via the in-game gifting system.",
+        "Friendship Latency Clause: The BGMI game engine enforces a strict 72-hour friendship cooldown period before premium gifts can be successfully dispatched to a newly added Character ID. Customers must accept our in-game friend request immediately upon booking to initiate this timer.",
+        "Irreversibility: Once a gift is sent to the verified Character ID, the transaction is irreversible and 100% final. Due to the high cost of supercar showroom cards and mythic X-Suits, changes to the target Character ID cannot be made once friend coordinates are locked."
       ]
     },
     {
       id: "payments",
       icon: <CreditCard size={20} style={{ color: "var(--gold)" }} />,
-      title: "3. Pricing, Payments & Refunds",
+      title: "7. Pricing, Payments & Refunds",
       content: [
-        "Pricing for all products (UC, Accounts, Gifting) is dynamically set and displayed. We reserve the right to modify prices at any time without prior notice based on market demand and developer updates.",
-        "Payments must be initiated through our designated automated transaction links or direct verified admin coordinates. Every transaction is tracked via a unique payment ID to ensure integrity and anti-fraud compliance.",
-        "Refund Policy: Due to the immediate, digital, and consumable nature of virtual goods and account ownership transfers, ALL SALES ARE FINAL. Refunds or cancellations will not be issued once credentials have been shared or UC has been successfully credited, except in proven cases where delivery is impossible. Sourcing deposits are handled under our dedicated Refund & Return Policy rules."
-      ]
-    },
-    {
-      id: "delivery",
-      icon: <Truck size={20} style={{ color: "var(--gold)" }} />,
-      title: "4. Verification & Delivery Times",
-      content: [
-        "Account Delivery: Upon successful verification of payment, account credentials are typically handed over within 30 minutes to 3 hours, depending on administrative verification, social linkage safety checks, and queue sizes.",
-        "UC Packs & Gifting: UC recharges and special cosmetic gifts (X-Suits, Supercars) are sent directly to the provided BGMI Character ID. Delivery usually takes 10 to 45 minutes but can sometimes take up to 24 hours in case of game server latency.",
-        "Providing an incorrect Character ID or social login link is the buyer's responsibility, and we cannot recover or refund assets sent to an incorrect ID provided by the customer."
-      ]
-    },
-    {
-      id: "obligations",
-      icon: <UserCheck size={20} style={{ color: "var(--gold)" }} />,
-      title: "5. User Conduct & Eligibility",
-      content: [
-        "By participating in our marketplace, you confirm that you are at least 18 years of age or possess legal parental/guardian consent to make online financial transactions.",
-        "Users agree not to list or attempt to sell fraudulent, stolen, or blacklisted accounts. Any seller attempting to initiate a security rollback or reclaim a sold account ('recovery scam') will be permanently banned from the community, blacklisted across South Indian gaming networks, and reported to relevant cyber law enforcement.",
-        "You agree to provide true, accurate, and current information when filling out transaction forms or submitting reviews."
+        "Pricing Integrity: All pricing is dynamically set based on currency exchange rates and asset rarity. MBS reserves the right to adjust prices without notice.",
+        "Scouting & Booking Deposits: For custom bespoke account sourcing requests, we collect a 15% scouting deposit. If our scouts cannot locate a suitable account match matching the customer's specified parameters within 24-48 hours, the deposit is fully refunded. If a matching account within budget parameters is scouted and subsequently rejected by the customer, the deposit is retained as a search labor fee. Upon selection and confirmation, the deposit locks as a non-refundable booking fee.",
+        "Digital Irreversibility: Due to the immediate, digital, and consumable nature of virtual goods and account ownership transfers, ALL SALES ARE FINAL. Refunds or cancellations will not be issued once credentials have been shared or UC has been successfully credited, except in proven cases where delivery is impossible."
       ]
     },
     {
       id: "disclaimer",
       icon: <AlertTriangle size={20} style={{ color: "var(--gold)" }} />,
-      title: "6. Krafton Disclaimer & IP Notice",
+      title: "8. Krafton Disclaimer & IP Notice",
       content: [
         "Maddy BGMI Store is an independent, third-party player-to-player service and digital goods provider. We are NOT officially affiliated with, endorsed by, sponsored by, or associated with KRAFTON, Inc., PUBG Corporation, Tencent Games, or any of their parent companies or subsidiaries.",
         "All copyrights, trademarks, game names, character assets, and graphics belong entirely to their respective intellectual property owners (Krafton, Inc. / Tencent Games). We claim no ownership over the game's actual proprietary codes or assets.",
@@ -67,7 +111,7 @@ export default function TermsConditions() {
     {
       id: "jurisdiction",
       icon: <Gavel size={20} style={{ color: "var(--gold)" }} />,
-      title: "7. Governing Law & Jurisdiction",
+      title: "9. Governing Law & Jurisdiction",
       content: [
         "These Terms and Conditions are governed by, and shall be construed in accordance with, the laws of the Republic of India.",
         "You explicitly agree that any legal dispute, controversy, claim, or transaction issue arising out of or in connection with Maddy BGMI Store services, website listings, or marketplace trades shall be subject exclusively to the jurisdiction of the competent courts of Chennai, Tamil Nadu, India."
@@ -76,7 +120,7 @@ export default function TermsConditions() {
     {
       id: "dmca",
       icon: <FileText size={20} style={{ color: "var(--gold)" }} />,
-      title: "8. Copyright Notice & DMCA Takedown Procedure",
+      title: "10. Copyright Notice & DMCA Takedown Procedure",
       content: [
         "All original website layouts, custom graphics, text descriptions, branding, logo identities, and database systems are Copyright © 2026 Maddy BGMI Store. All rights reserved.",
         "Intellectual Property Takedown: We respect the copyright claims of others. If you are a copyright owner or authorized agent and believe that any listing or user-uploaded media infringes upon your copyright, you may submit a formal notification under standard intellectual property laws.",
@@ -88,7 +132,7 @@ export default function TermsConditions() {
     {
       id: "support",
       icon: <HelpCircle size={20} style={{ color: "var(--gold)" }} />,
-      title: "9. Contact & Support Coordination",
+      title: "11. Contact & Support Coordination",
       content: [
         "For any inquiries regarding our terms, payment issues, transaction verification, or account handovers, please connect with us directly using our official channels:",
         "• WhatsApp Support: +91 90253 91516",
@@ -129,13 +173,13 @@ export default function TermsConditions() {
           <p 
             style={{ 
               color: "var(--muted)", 
-              maxWidth: "600px", 
+              maxWidth: "650px", 
               margin: "12px auto 0", 
               fontSize: "14px", 
               lineHeight: 1.6 
             }}
           >
-            Effective Date: May 20, 2026. Please read these terms carefully before utilizing our marketplace.
+            Effective Date: May 22, 2026. Fully updated to incorporate Buy, Sell (Instant vs. Hold & Sell), Trade-In Exchanges, UC top-ups, and Gifting regulations. Please read these terms carefully.
           </p>
         </section>
 
@@ -205,7 +249,8 @@ export default function TermsConditions() {
                         display: "flex", 
                         alignItems: "center", 
                         justifyContent: "center",
-                        border: "1px solid rgba(255, 215, 0, 0.2)"
+                        border: "1px solid rgba(255, 215, 0, 0.2)",
+                        flexShrink: 0
                       }}
                     >
                       {sec.icon}

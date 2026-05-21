@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
+import useSEO from "../../hooks/useSEO";
 import { 
   MessageCircle, Send, Loader2, Info, CheckCircle, 
   Car, ShieldCheck, Clock, Users, Smartphone, Zap, Flame
@@ -8,6 +9,10 @@ import {
 import { supabase } from "../../utils/supabase";
 
 export default function SupercarGift() {
+  useSEO(
+    "BGMI Supercar Gifting — Custom Showroom Cards",
+    "Gift elite supercars with customized card counts safely to your BGMI lobby. 1-card, 2-card, 3-card options at premium rates."
+  );
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedFilter, setSelectedFilter] = useState("all"); // 'all', '1-card', '2-card', '3-card'
@@ -339,7 +344,8 @@ export default function SupercarGift() {
                     }}>
                       <img 
                         src={c.image_url} 
-                        alt={c.name} 
+                        alt={c.name}
+                        loading="lazy"
                         className="hover-zoom"
                         style={{
                           width: "100%",

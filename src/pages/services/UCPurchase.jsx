@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
+import useSEO from "../../hooks/useSEO";
 import { 
   MessageCircle, Send, Loader2, Clock, Shield, LogIn, 
   Gamepad2, AlertTriangle, CheckCircle, Zap, Banknote, 
@@ -271,6 +272,10 @@ function UcPackCard({ pack, accentColor, glowClass, contactPrefix }) {
 
 // ── Main Page Component ──────────────────────────────────────
 export default function UCPurchase() {
+  useSEO(
+    "Buy BGMI UC — Instant Sourcing & Cheap Packs",
+    "Cheap Unknown Cash (UC) recharges credited directly to your Character ID or secure login. 100% safe & official in-game purchase."
+  );
   const [packs, setPacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeMethod, setActiveMethod] = useState("view_login");

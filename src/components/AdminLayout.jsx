@@ -1,5 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { Menu, X } from "lucide-react";
 import toast from "react-hot-toast";
 
 const navItems = [
@@ -13,6 +15,7 @@ export default function AdminLayout({ children, title }) {
   const { pathname } = useLocation();
   const { logout, user } = useAuth();
   const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -22,13 +25,43 @@ export default function AdminLayout({ children, title }) {
 
   return (
     <div className="admin-layout">
-      <aside className="admin-sidebar">
-        <div className="admin-sidebar-logo">
-          ⚙️ <span>MADDY</span> ADMIN
+      {/* Sidebar Overlay Backdrop on Mobile */}
+      <div 
+        className={`admin-sidebar-overlay ${isSidebarOpen ? "active" : ""}`}
+        onClick={() => setIsSidebarOpen(false)}
+      />
+
+      {/* Sidebar */}
+      <aside className={`admin-sidebar ${isSidebarOpen ? "open" : ""}`}>
+        <div className="admin-sidebar-logo" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            ⚙️ <span>MADDY</span> ADMIN
+          </div>
+          <button 
+            onClick={() => setIsSidebarOpen(false)}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "var(--muted)",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "4px",
+              borderRadius: "4px"
+            }}
+            className="mobile-only-close-btn"
+          >
+            <X size={18} />
+          </button>
         </div>
         {navItems.map(item => (
-          <Link key={item.to} to={item.to}
-            className={`admin-nav-item ${pathname === item.to ? "active" : ""}`}>
+          <Link 
+            key={item.to} 
+            to={item.to}
+            onClick={() => setIsSidebarOpen(false)}
+            className={`admin-nav-item ${pathname === item.to ? "active" : ""}`}
+          >
             <span className="nav-icon">{item.icon}</span>
             {item.label}
           </Link>
@@ -45,12 +78,34 @@ export default function AdminLayout({ children, title }) {
         </div>
       </aside>
 
+      {/* Main Content Area */}
       <main className="admin-main">
         <div className="admin-header">
-          <h1 className="admin-title">{title}</h1>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <button 
+              onClick={() => setIsSidebarOpen(true)} 
+              className="mobile-sidebar-toggle" 
+              aria-label="Toggle Sidebar"
+            >
+              <Menu size={20} />
+            </button>
+            <h1 className="admin-title">{title}</h1>
+          </div>
         </div>
         {children}
       </main>
+
+      {/* Scoped close button rule */}
+      <style>{`
+        .mobile-only-close-btn {
+          display: none !important;
+        }
+        @media (max-width: 1024px) {
+          .mobile-only-close-btn {
+            display: flex !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

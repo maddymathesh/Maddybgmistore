@@ -1,8 +1,13 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import useSEO from "../hooks/useSEO";
 import { Shield, Lock, Database, UserCheck, Share2, HelpCircle, ChevronRight, Eye } from "lucide-react";
 
 export default function PrivacyPolicy() {
+  useSEO(
+    "Privacy Policy — Zero-Retention Credentials Safety",
+    "Outlining encryption standards, cookie usage, and our instant social password wipe to guarantee absolute privacy safety."
+  );
   const sections = [
     {
       id: "collection",

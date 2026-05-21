@@ -3,9 +3,14 @@ import { supabase } from "../utils/supabase";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ReviewForm from "../components/ReviewForm";
+import useSEO from "../hooks/useSEO";
 import { Star, Loader2, ChevronDown } from "lucide-react";
 
 export default function Reviews() {
+  useSEO(
+    "Verified Customer Reviews — 2000+ Happy Buyers",
+    "Explore thousands of real transaction proofs and reviews from South Indian players. Real feedback, 100% verified safety."
+  );
   const [reviews, setReviews] = useState([]);
   const [stats, setStats] = useState({ averageRating: 0, totalReviews: 0 });
   const [loading, setLoading] = useState(true);
@@ -102,7 +107,7 @@ export default function Reviews() {
                   {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={14} fill={i < (r.stars || 5) ? "var(--gold)" : "transparent"} color="var(--gold)" />)}
                 </div>
                 <p style={{ fontSize: "14px", lineHeight: 1.6 }}>{r.text}</p>
-                {r.image_url && <img src={r.image_url} alt="Proof" style={{ width: "100%", borderRadius: "8px", marginTop: "12px" }} />}
+                {r.image_url && <img src={r.image_url} alt="Proof" loading="lazy" style={{ width: "100%", borderRadius: "8px", marginTop: "12px" }} />}
               </div>
             ))}
           </div>

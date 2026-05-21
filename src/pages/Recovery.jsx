@@ -1,8 +1,13 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import useSEO from "../hooks/useSEO";
 import { Shield, Zap, CheckCircle } from "lucide-react";
 
 export default function Recovery() {
+  useSEO(
+    "BGMI Account Recovery — Restoring Credentials Safely",
+    "Lost your BGMI account? Our dedicated recovery service gets it back safely. Over 2000+ accounts restored since 2019."
+  );
   return (
     <>
       <Navbar />

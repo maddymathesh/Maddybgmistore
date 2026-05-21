@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import useSEO from "../hooks/useSEO";
 import { Search, Lock, Link2, MessageCircle, CheckCircle, ShoppingBag, Banknote, ShoppingCart, Loader2, Play, ChevronRight, Send } from "lucide-react";
 
 // ── YouTube embed helper ──────────────────────────────────────
@@ -50,7 +51,7 @@ function StockCard({ stock }) {
     <div className="premium-card">
       <div className="card-video-wrap">
         {embed ? (
-          <iframe src={embed} title="Preview" allow="autoplay; encrypted-media" allowFullScreen className="card-iframe" />
+          <iframe src={embed} title="Preview" loading="lazy" allow="autoplay; encrypted-media" allowFullScreen className="card-iframe" />
         ) : (
           <div className="no-video"><Play size={40} /></div>
         )}
@@ -97,6 +98,10 @@ function StockCard({ stock }) {
 }
 
 export default function ReadyStocks() {
+  useSEO(
+    "Ready Stocks Catalog — Verified BGMI Accounts",
+    "Browse our catalog of 100% verified premium ready-to-play Battlegrounds Mobile India accounts. Safe social logins & instant delivery."
+  );
   const [stocks, setStocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");

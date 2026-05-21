@@ -36,7 +36,9 @@ import {
   CheckSquare,
   MessageSquare,
   History,
-  DollarSign
+  DollarSign,
+  Menu,
+  X
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -57,6 +59,7 @@ export default function TransactionsLayout() {
   const isAuthenticated = useTransactionStore((state) => state.isAuthenticated);
   const logout = useTransactionStore((state) => state.logout);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
   if (!isAuthenticated) {
@@ -105,10 +108,35 @@ export default function TransactionsLayout() {
 
   return (
     <div className="admin-layout" style={{ background: 'var(--bg)', color: 'var(--text)', fontFamily: 'var(--font-b)' }}>
+      {/* Sidebar Overlay Backdrop on Mobile */}
+      <div 
+        className={`admin-sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
+        onClick={() => setIsSidebarOpen(false)}
+      />
+
       {/* Sidebar */}
-      <aside className="admin-sidebar">
-        <div className="admin-sidebar-logo" style={{ lineHeight: 1.2 }}>
-          MBSx <br/><span style={{ fontSize: '14px' }}>Transaction Panel</span>
+      <aside className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`}>
+        <div className="admin-sidebar-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', lineHeight: 1.2 }}>
+          <div>
+            MBSx <br/><span style={{ fontSize: '14px', color: '#fff' }}>Transaction Panel</span>
+          </div>
+          <button 
+            onClick={() => setIsSidebarOpen(false)}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "var(--muted)",
+              cursor: "pointer",
+              display: "none",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "4px",
+              borderRadius: "4px"
+            }}
+            className="mobile-only-close-btn"
+          >
+            <X size={18} />
+          </button>
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '0 12px' }}>
@@ -118,7 +146,10 @@ export default function TransactionsLayout() {
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => {
+                  setActiveTab(item.id);
+                  setIsSidebarOpen(false);
+                }}
                 className={`admin-nav-item ${isActive ? 'active' : ''}`}
                 style={{ width: '100%', border: 'none', background: isActive ? 'var(--gold-dim)' : 'transparent', borderRadius: '8px', marginBottom: '4px', justifyContent: 'flex-start' }}
               >
@@ -144,16 +175,25 @@ export default function TransactionsLayout() {
       {/* Main Content Area */}
       <main className="admin-main">
         <div className="admin-header">
-          <div>
-            <h1 className="admin-title">
-              {activeTab.replace('_', ' ')} <span style={{ color: 'var(--gold)' }}>Panel</span>
-            </h1>
-            <p style={{ fontSize: '13px', color: 'var(--muted)', marginTop: '4px' }}>
-              {new Date().toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-            </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button 
+              onClick={() => setIsSidebarOpen(true)} 
+              className="mobile-sidebar-toggle" 
+              aria-label="Toggle Sidebar"
+            >
+              <Menu size={20} />
+            </button>
+            <div>
+              <h1 className="admin-title">
+                {activeTab.replace('_', ' ')} <span style={{ color: 'var(--gold)' }}>Panel</span>
+              </h1>
+              <p style={{ fontSize: '13px', color: 'var(--muted)', marginTop: '4px' }}>
+                {new Date().toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+              </p>
+            </div>
           </div>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }} className="admin-header-actions">
             {(activeTab === 'transactions') && (
               <>
                 <button onClick={() => setActiveTab('create_account')} className="btn btn-gold" style={{ fontSize: '12px', padding: '10px 16px' }}>
@@ -170,7 +210,7 @@ export default function TransactionsLayout() {
                 </button>
               </>
             )}
-            <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--gold), var(--orange))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000' }}>
+            <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--gold), var(--orange))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000' }} className="hide-mobile">
               <ShieldCheck size={22} />
             </div>
           </div>
@@ -191,6 +231,34 @@ export default function TransactionsLayout() {
           </AnimatePresence>
         </div>
       </main>
+
+      {/* Mobile styling overrides */}
+      <style>{`
+        @media (max-width: 1024px) {
+          .mobile-only-close-btn {
+            display: flex !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .admin-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+          }
+          .admin-header-actions {
+            width: 100%;
+            gap: 8px;
+          }
+          .admin-header-actions button {
+            flex: 1;
+            min-width: 120px;
+            justify-content: center;
+          }
+          .hide-mobile {
+            display: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

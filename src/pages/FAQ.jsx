@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import useSEO from "../hooks/useSEO";
 import { 
   Search, HelpCircle, ChevronDown, ShoppingBag, 
   RefreshCw, ShieldCheck, Gamepad2, Landmark, 
@@ -8,6 +9,10 @@ import {
 } from "lucide-react";
 
 export default function FAQ() {
+  useSEO(
+    "Frequently Asked Questions & Help Center",
+    "Preempting common queries about account handovers, payments, safety, trade conditions, and customized sourcing."
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [expandedIndex, setExpandedIndex] = useState(null);

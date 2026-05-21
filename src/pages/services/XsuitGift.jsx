@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
+import useSEO from "../../hooks/useSEO";
 import { 
   MessageCircle, Send, Loader2, Info, CheckCircle, 
   ShieldCheck, Clock, Zap, Star, Trophy, Users, Smartphone
@@ -8,6 +9,10 @@ import {
 import { supabase } from "../../utils/supabase";
 
 export default function XsuitGift() {
+  useSEO(
+    "BGMI X-Suit Gifting — Legendary Mythic Outfits",
+    "Source premium upgradable mythic X-Suits delivered officially in-game to your account via secure lobby gifting."
+  );
   const [suits, setSuits] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -256,6 +261,7 @@ export default function XsuitGift() {
                       <img 
                         src={s.image_url} 
                         alt={s.name} 
+                        loading="lazy"
                         className="hover-zoom"
                         style={{
                           width: "100%",

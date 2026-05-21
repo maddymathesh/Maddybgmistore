@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import useSEO from "../hooks/useSEO";
 import {
   ShoppingCart, Lock, Banknote, CheckCircle,
   MessageCircle, Target, Shield, Gamepad2, Flame, Star, Send,
@@ -9,6 +10,10 @@ import {
 } from "lucide-react";
 
 export default function Buy() {
+  useSEO(
+    "Buy BGMI Accounts — 100% Secure & Verified Listings",
+    "Browse verified high-tier BGMI accounts. Safe single-login details, custom requirement sourcing, and professional handovers."
+  );
   const [activeOption, setActiveOption] = useState(0); // 0 = Ready-to-Play, 1 = Market-Available, 2 = Custom Order
   const [activeTrustCard, setActiveTrustCard] = useState(null);
   const [activeFaq, setActiveFaq] = useState(null);

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../utils/supabase";
 import { Link } from "react-router-dom";
+import useSEO from "../hooks/useSEO";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Gamepad2, ShoppingCart, Banknote, CheckCircle, Zap, Shield, Star, Trophy, Lock, Smartphone, CircleDollarSign, Car, Coins, Sparkles, ArrowRight, RefreshCw, Volume2, Users, Flame, Award, Info, Clock } from "lucide-react";
@@ -85,6 +86,10 @@ const StepBadge = ({ num, color }) => (
 );
 
 export default function Home() {
+  useSEO(
+    "Maddy BGMI Store — Buy & Sell BGMI Accounts",
+    "South India's #1 verified marketplace for premium BGMI accounts since 2019. Budget to premium skins & supercars."
+  );
   const [avgRating, setAvgRating] = useState(4.8);
   const [buyerReviews, setBuyerReviews] = useState([]);
   const [activeCatalogTab, setActiveCatalogTab] = useState("uc");
@@ -846,7 +851,7 @@ export default function Home() {
                 </div>
                 {r.image_url && (
                   <div style={{ marginTop: "16px", overflow: "hidden", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
-                    <img src={r.image_url} alt="Proof" style={{ width: "100%", maxHeight: "200px", objectFit: "cover" }} />
+                    <img src={r.image_url} alt="Proof" loading="lazy" style={{ width: "100%", maxHeight: "200px", objectFit: "cover" }} />
                   </div>
                 )}
               </div>

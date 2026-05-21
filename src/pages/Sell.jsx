@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import useSEO from "../hooks/useSEO";
 import { 
   Banknote, Zap, Lock, Video, FileText, BarChart, ShieldCheck, 
   Megaphone, Clock, Handshake, CheckCircle, MessageCircle, 
@@ -9,6 +10,10 @@ import {
 } from "lucide-react";
 
 export default function Sell() {
+  useSEO(
+    "Sell BGMI Accounts — Instant Cash & Hold & Sell",
+    "Instantly cash out your high-tier BGMI account or list it across our Telegram & WhatsApp channels using Hold & Sell."
+  );
   const [activeOption, setActiveOption] = useState(0); // 0 = Hold & Sell, 1 = Instant Sell
   const [activeTrustCard, setActiveTrustCard] = useState(null);
   const [activeFaq, setActiveFaq] = useState(null);

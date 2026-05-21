@@ -1,8 +1,13 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import useSEO from "../hooks/useSEO";
 import { AlertCircle, RotateCcw, ShieldAlert, Award, FileText, CheckCircle2, ChevronRight } from "lucide-react";
 
 export default function RefundPolicy() {
+  useSEO(
+    "Refund & Return Policy — Sourcing Details",
+    "Clear guidelines detailing digital asset irreversibility, Customized sourcing deposit returns, and official dispute limits."
+  );
   const sections = [
     {
       id: "finality",

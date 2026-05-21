@@ -1335,3 +1335,96 @@ select.input {
   visibility: visible;
   transform: translateY(0);
 }
+
+/* ===== WHY US / TRUST SHARE STYLES ===== */
+.why-us-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+@media (max-width: 991px) {
+  .why-us-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 567px) {
+  .why-us-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.why-us-card {
+  background: rgba(17, 21, 32, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 32px 24px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+}
+.why-us-card.highlighted {
+  border-color: rgba(255, 215, 0, 0.25);
+  box-shadow: 0 15px 35px rgba(255, 215, 0, 0.06), inset 0 0 15px rgba(255, 215, 0, 0.01);
+  background: rgba(17, 21, 32, 0.65);
+}
+.why-us-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(255, 215, 0, 0.35);
+  box-shadow: 0 20px 40px rgba(255, 215, 0, 0.1), inset 0 0 20px rgba(255, 215, 0, 0.02);
+  background: rgba(17, 21, 32, 0.65);
+}
+.why-us-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: rgba(255, 215, 0, 0.04);
+  border: 1px solid rgba(255, 215, 0, 0.15);
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 22px;
+  transition: all 0.3s ease;
+}
+.why-us-card.highlighted .why-us-icon-wrap,
+.why-us-card:hover .why-us-icon-wrap {
+  background: rgba(255, 215, 0, 0.1);
+  border-color: rgba(255, 215, 0, 0.35);
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.12);
+}
+.why-us-card h3 {
+  font-family: var(--font-h);
+  font-size: 19px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 10px 0;
+  letter-spacing: 0.5px;
+}
+.why-us-card p {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Green Highlight Overrides (for trust cards) */
+.why-us-card-green.highlighted {
+  border-color: rgba(34, 197, 94, 0.25) !important;
+  box-shadow: 0 15px 35px rgba(34, 197, 94, 0.06), inset 0 0 15px rgba(34, 197, 94, 0.01) !important;
+}
+.why-us-card-green:hover {
+  border-color: rgba(34, 197, 94, 0.35) !important;
+  box-shadow: 0 20px 40px rgba(34, 197, 94, 0.1), inset 0 0 20px rgba(34, 197, 94, 0.02) !important;
+}
+.why-us-card-green.highlighted .why-us-icon-wrap,
+.why-us-card-green:hover .why-us-icon-wrap {
+  background: rgba(34, 197, 94, 0.1) !important;
+  border-color: rgba(34, 197, 94, 0.35) !important;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.12) !important;
+}

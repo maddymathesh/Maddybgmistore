@@ -302,11 +302,12 @@ export default function Buy() {
                 <h4 className="steps-heading">Feed Booking Steps:</h4>
                 <ul className="steps-list-custom">
                   {[
-                    "Join Official Feed: Click the channel buttons below to join our Telegram or WhatsApp feeds.",
-                    "Pick Your Account: Review the fresh daily listings posted on our feed with specs and pricing.",
-                    "Pay 15% Booking Deposit: Book your choice instantly by paying a 15% non-refundable lock amount.",
-                    "Pay remaining 85% Balance: Complete the rest of the payment within 24 hours to secure the deal.",
-                    "Secure Account Handover: Our agents verify logins, safe-out sellers, and transfer ownership to you."
+                    "Join Official Feeds: Click both the WhatsApp and Telegram buttons below to join our active daily feeds.",
+                    "Review Daily Listings: Browse through our daily posted verified accounts, ranging from ₹5,000 to several lakh.",
+                    "15% Booking or Full Pay: Pay a 15% non-refundable booking deposit to hold the account for 24 hours, or pay in full.",
+                    "Secure Account Binding: Once full payment is received, we bind your active recovery email and phone number to secure ownership.",
+                    "Invoice & Dates: We issue an official invoice detailing your transaction, specific unlink date, and guarantee expiration.",
+                    "Unlink Process & Feedback: Follow the strict unlink safety process, secure your logins, and upload your lobby feedback."
                   ].map((step, idx) => {
                     const [title, body] = step.split(":");
                     return (

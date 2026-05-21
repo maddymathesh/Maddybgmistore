@@ -4,7 +4,8 @@ import Footer from "../components/Footer";
 import { 
   Banknote, Zap, Lock, Video, FileText, BarChart, ShieldCheck, 
   Megaphone, Clock, Handshake, CheckCircle, MessageCircle, 
-  ChevronDown, ChevronUp, AlertTriangle, Shield, Award, Sparkles, Info 
+  ChevronDown, ChevronUp, AlertTriangle, Shield, Award, Sparkles, Info,
+  Smartphone, Key, Users, QrCode, MapPin, CreditCard, HelpCircle, Check
 } from "lucide-react";
 
 export default function Sell() {
@@ -12,6 +13,96 @@ export default function Sell() {
   const [activeTrustCard, setActiveTrustCard] = useState(null);
   const [activeFaq, setActiveFaq] = useState(null);
   const [activeUnlinkTab, setActiveUnlinkTab] = useState(0); // 0 = Checklist, 1 = Rules, 2 = Guarantee
+
+  // Steps data for Hold & Sell
+  const holdAndSellSteps = [
+    {
+      title: "Customer Contact & Sharing",
+      body: "Contact us via WhatsApp or Telegram and securely share your account video, inventory description, or logins.",
+      icon: <MessageCircle size={18} />,
+    },
+    {
+      title: "Market Price Evaluation",
+      body: "We evaluate the true market price of your inventory based on upgrading labs, classic skins, etc., and inform you of the value.",
+      icon: <BarChart size={18} />,
+    },
+    {
+      title: "Verification & Login Lock",
+      body: "Once we agree on the market price, we add an official login or secure one login method for complete ownership verification.",
+      icon: <ShieldCheck size={18} />,
+    },
+    {
+      title: "Professional Listing & Channel Broadcast",
+      body: "We record a new professional preview video, write a comprehensive description, and broadcast your listing across our VIP channels (Telegram, WhatsApp, etc.).",
+      icon: <Megaphone size={18} />,
+    },
+    {
+      title: "3-7 Days Typical Listing Cycle",
+      body: "Typically, listings sell in 3 to 7 days. If the account does not sell in this window, we adjust the price and re-list it.",
+      icon: <Clock size={18} />,
+    },
+    {
+      title: "Double-Login Securing for Buyer",
+      body: "Once a buyer is secured, we take over custody and secure both logins for the buyer to ensure a safe, permanent transfer.",
+      icon: <Lock size={18} />,
+    },
+    {
+      title: "Owner Government ID KYC Proof",
+      body: "Before releasing the final payment, we collect the owner's valid government ID proof (Aadhaar or PAN Card) for future reference and keep it secure.",
+      icon: <FileText size={18} />,
+    },
+    {
+      title: "Payout Release & Delivery Confirmation",
+      body: "We pay the original owner after the buyer confirms successful delivery. Full or partial payment depends on guarantees, cleared via UPI, Bank Transfer, USDT, BTC, or F2F Cash for large accounts.",
+      icon: <CreditCard size={18} />,
+    }
+  ];
+
+  // Steps data for Instant Sell
+  const instantSellSteps = [
+    {
+      title: "Support Connection & Logins",
+      body: "Message us on WhatsApp or Telegram and securely share temporary credentials for audit access.",
+      icon: <MessageCircle size={18} />,
+    },
+    {
+      title: "Live Inventory Scan",
+      body: "Our analysts perform an immediate valuation and present a solid, direct wholesale cash buyout offer within hours.",
+      icon: <BarChart size={18} />,
+    },
+    {
+      title: "Select Mode of Dealing",
+      body: "Choose secure Online Transfer or Face-to-Face meetup (strictly reserved for premium ₹80,000+ accounts).",
+      icon: <MapPin size={18} />,
+    },
+    {
+      title: "KYC & Identity Verification",
+      body: "Submit government-issued ID proof (Aadhaar or PAN Card) to verify ownership and authorize buyout.",
+      icon: <FileText size={18} />,
+    },
+    {
+      title: "Single/Dual Login Security",
+      body: "We audit bindings. For dual logins, we secure the primary login and submit the secondary unlink request.",
+      icon: <ShieldCheck size={18} />,
+    },
+    {
+      title: "Quarantine Cooldown Timelines",
+      body: "If unlinks require a 7-day wait or links require 30 days, the account is held in secure quarantine.",
+      icon: <Clock size={18} />,
+    },
+    {
+      title: "Irreversible Handover Clause",
+      body: "Seller signs terms for complete credential detachment. Once locked, the account cannot be returned.",
+      icon: <Lock size={18} />,
+    },
+    {
+      title: "Immediate Wholesale Payout",
+      body: "Funds are instantly released via UPI, Bank Transfer, or liquid Cash (for F2F deals) within 1-2 hours of binding.",
+      icon: <CreditCard size={18} />,
+    }
+  ];
+
+  const currentSteps = activeOption === 0 ? holdAndSellSteps : instantSellSteps;
 
   return (
     <>
@@ -68,41 +159,51 @@ export default function Sell() {
               maxWidth: "620px", margin: "0 auto 32px", lineHeight: 1.7,
               textShadow: "0 1px 8px rgba(0,0,0,0.5)",
             }}>
-              Maximize your return by listing with us under Hold & Sell, or cash out instantly at wholesale rates. Secure valuation, KYC audits, and verified payments.
+              Maximize your return under Hold & Sell, or cash out immediately with Instant Sell. Secure valuation, KYC audits, and verified payments.
             </p>
             <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
-              <a href="#selling-options" style={{
-                display: "inline-flex", alignItems: "center", gap: "8px",
-                padding: "14px 30px", borderRadius: "10px",
-                background: "linear-gradient(135deg, var(--gold), var(--orange))",
-                color: "#000", fontFamily: "var(--font-h)", fontWeight: 700,
-                fontSize: "14px", textDecoration: "none", letterSpacing: "0.5px",
-                boxShadow: "0 4px 20px rgba(255,215,0,0.3)",
-                transition: "transform 0.2s"
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-2px)"}
-              onMouseLeave={(e) => e.currentTarget.style.transform = "none"}>
-                <Lock size={16} /> Hold & Sell Option
-              </a>
-              <a href="#selling-options" style={{
-                display: "inline-flex", alignItems: "center", gap: "8px",
-                padding: "14px 30px", borderRadius: "10px",
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.15)",
-                color: "#fff", fontFamily: "var(--font-h)", fontWeight: 700,
-                fontSize: "14px", textDecoration: "none", letterSpacing: "0.5px",
-                transition: "all 0.2s"
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "var(--gold)";
-                e.currentTarget.style.background = "rgba(255,215,0,0.04)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)";
-                e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-              }}>
-                <Zap size={16} /> Instant Cash Option
-              </a>
+              <button 
+                onClick={() => {
+                  setActiveOption(0);
+                  document.getElementById("selling-options")?.scrollIntoView({ behavior: "smooth" });
+                }}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: "8px",
+                  padding: "14px 30px", borderRadius: "10px",
+                  background: "linear-gradient(135deg, var(--gold), var(--orange))",
+                  color: "#000", fontFamily: "var(--font-h)", fontWeight: 700,
+                  fontSize: "14px", border: "none", cursor: "pointer", letterSpacing: "0.5px",
+                  boxShadow: "0 4px 20px rgba(255,215,0,0.3)",
+                  transition: "transform 0.2s"
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-2px)"}
+                onMouseLeave={(e) => e.currentTarget.style.transform = "none"}>
+                <Clock size={16} /> Hold & Sell Option
+              </button>
+              <button 
+                onClick={() => {
+                  setActiveOption(1);
+                  document.getElementById("selling-options")?.scrollIntoView({ behavior: "smooth" });
+                }}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: "8px",
+                  padding: "14px 30px", borderRadius: "10px",
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  color: "#fff", fontFamily: "var(--font-h)", fontWeight: 700,
+                  fontSize: "14px", cursor: "pointer", letterSpacing: "0.5px",
+                  transition: "all 0.2s"
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "var(--gold)";
+                  e.currentTarget.style.background = "rgba(255,215,0,0.04)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)";
+                  e.currentTarget.style.background = "rgba(255,255,255,0.05)";
+                }}>
+                <Zap size={16} /> Instant Sell Option
+              </button>
             </div>
           </div>
         </section>
@@ -170,10 +271,10 @@ export default function Sell() {
                 </div>
                 <div>
                   <strong style={{ color: "#fff", display: "block", fontSize: "15px", marginBottom: "6px", fontFamily: "var(--font-h)", letterSpacing: "0.5px" }}>
-                    Strict KYC Verification
+                    Strict KYC & ID Audits
                   </strong>
                   <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.6", display: "block" }}>
-                    All sellers must provide valid government-issued ID proof and a live, continuous screen recording of the in-game inventory to verify complete account ownership before any payout.
+                    To prevent disputes, we securely collect the owner's valid government ID proof (Aadhaar or PAN Card) before final payment for future reference and keep it 100% secure.
                   </span>
                 </div>
               </div>
@@ -191,10 +292,10 @@ export default function Sell() {
                 </div>
                 <div>
                   <strong style={{ color: "#fff", display: "block", fontSize: "15px", marginBottom: "6px", fontFamily: "var(--font-h)", letterSpacing: "0.5px" }}>
-                    Instant Payout Release
+                    Flexible Deal Modes & F2F
                   </strong>
                   <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.6", display: "block" }}>
-                    We transfer 100% of your agreed payout amount via UPI, Bank Transfer, or USDT within 1-2 hours once security audits complete and recovery details are successfully bound to the buyer.
+                    Choose secure online escrow transfer or a Face-to-Face meetup. Cash meetups are strictly reserved for premium account valuations above <strong>₹80,000+</strong> (travel expenses covered by the buyer).
                   </span>
                 </div>
               </div>
@@ -203,19 +304,19 @@ export default function Sell() {
               <div style={{ display: "flex", gap: "14px" }}>
                 <div style={{
                   width: "32px", height: "32px", borderRadius: "50%",
-                  background: "rgba(34, 197, 94, 0.12)", border: "1px solid rgba(34, 197, 94, 0.3)",
+                  background: "rgba(239, 68, 68, 0.12)", border: "1px solid rgba(239, 68, 68, 0.3)",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  color: "#4ade80", fontWeight: 700, flexShrink: 0,
+                  color: "#f87171", fontWeight: 700, flexShrink: 0,
                   fontSize: "14px", fontFamily: "var(--font-h)"
                 }}>
                   03
                 </div>
                 <div>
                   <strong style={{ color: "#fff", display: "block", fontSize: "15px", marginBottom: "6px", fontFamily: "var(--font-h)", letterSpacing: "0.5px" }}>
-                    Zero Recovery Policy
+                    Irrevocable Handover Policy
                   </strong>
                   <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.6", display: "block" }}>
-                    Maddy Store maintains a strict zero-tolerance policy for pull-backs. Any attempts to recover credentials post-handover will trigger direct cybercrime reporting using your verified KYC documents.
+                    Once our security team detaches bindings and binds the account to the buyer, <strong>the account cannot be returned under any circumstances</strong> to prevent pull-backs. Payout is 100% locked & guaranteed.
                   </span>
                 </div>
               </div>
@@ -224,7 +325,7 @@ export default function Sell() {
         </section>
 
         {/* ── OPTIONS GRID SECTION ────────────────────────── */}
-        <section id="selling-options" className="section" style={{ background: "radial-gradient(circle at bottom, rgba(255,215,0,0.015), transparent)", padding: "50px 5% 80px" }}>
+        <section id="selling-options" className="section" style={{ background: "radial-gradient(circle at bottom, rgba(255,215,0,0.015), transparent)", padding: "50px 5% 50px" }}>
           <div style={{ textAlign: "center", marginBottom: "50px" }}>
             <span className="slabel">Selling Methods</span>
             <h2 className="stitle">Two Curated Ways to Cash Out <span className="g">Your Account</span></h2>
@@ -241,38 +342,26 @@ export default function Sell() {
             >
               <div className="sell-option-header">
                 <span className="badge-tag-custom tag-blue">
-                  <Lock size={11} fill="currentColor" /> Maximum Payout
+                  <Clock size={11} fill="currentColor" /> Maximum Payout
                 </span>
                 <h3 className="sell-option-title">Hold & Sell</h3>
               </div>
               <p className="sell-option-desc">
-                Get the maximum market value for your account. You list the account with us, we market it across our VIP communities, and handle the secure transfer. Average sale time ranges from a few days to a week.
+                Get 100% maximum market value for your account. You list the account with us, we record an HD video, write the description, market it across our massive VIP communities, and handle the secure double-login transfer. Average sale time is 3-7 days.
               </p>
 
               <div className="steps-container">
                 <h4 className="steps-heading">Secure Hold & Sell Steps:</h4>
                 <ul className="steps-list-custom">
-                  {[
-                    "Record Inventory Video: Capture a complete screen recording displaying outfits, gun labs, popularities, and supercars.",
-                    "Submit Details & Evaluate: Share your video and account details via WhatsApp or Telegram for our security evaluations.",
-                    "Align Payout Value: We discuss and agree on a realistic market pricing model to maximize your final return.",
-                    "Listing & Marketing: We generate highly polished preview banners and feature your account across our nationwide VIP feeds.",
-                    "Secured Buyer Hold: Once a buyer pays the 15% booking amount, we securely lock and prepare the account for transfer.",
-                    "Ownership Cooldown & Binding: We submit social unlinking requests and secure recovery details on behalf of the buyer.",
-                    "Instant Commission Release: The buyer completes full payment, and we instantly release 100% of your agreed payout.",
-                    "Submit Website Review: Share your professional selling experience and rating on our website's reviews page."
-                  ].map((step, idx) => {
-                    const [title, body] = step.split(":");
-                    return (
-                      <li key={idx} className="step-item-custom">
-                        <span className="step-num step-num-blue">{idx + 1}</span>
-                        <div>
-                          <strong className="step-title">{title}</strong>
-                          <span className="step-body">{body}</span>
-                        </div>
-                      </li>
-                    );
-                  })}
+                  {holdAndSellSteps.slice(0, 8).map((step, idx) => (
+                    <li key={idx} className="step-item-custom">
+                      <span className="step-num step-num-blue">{idx + 1}</span>
+                      <div>
+                        <strong className="step-title">{step.title}</strong>
+                        <span className="step-body">{step.body}</span>
+                      </div>
+                    </li>
+                  ))}
                 </ul>
               </div>
 
@@ -292,36 +381,24 @@ export default function Sell() {
                 <span className="badge-tag-custom tag-green">
                   <Zap size={11} fill="currentColor" /> Instant Payout
                 </span>
-                <h3 className="sell-option-title">Sell Instantly</h3>
+                <h3 className="sell-option-title">Instant Sell</h3>
               </div>
               <p className="sell-option-desc">
                 Need immediate cash? Sell your account directly to us at wholesale rates. We skip listing delays, marketing wait times, and buyer meetups, providing a direct fixed buyout offer and immediate payment within hours.
               </p>
 
               <div className="steps-container">
-                <h4 className="steps-heading">Instant Cash Steps:</h4>
+                <h4 className="steps-heading">Instant Sell Steps:</h4>
                 <ul className="steps-list-custom">
-                  {[
-                    "Record Inventory Video: Capture a detailed screen recording of outfits, weapon finishes, popularities, and supercars.",
-                    "Submit for Evaluation: Share the clip and base credentials with our security audits team on WhatsApp or Telegram.",
-                    "Receive Fixed Buyout Offer: We perform a quick base valuation and present a solid, direct cash offer within hours.",
-                    "Accept the Cash Offer: Review the wholesale valuation and agree to the immediate buyout payment terms.",
-                    "Secure Handover Audits: Provide full recovery credentials. Our team validates bindings and locks ownership structures.",
-                    "Instant Payment Release: Get paid instantly! We transfer 100% of the agreed funds via UPI, Bank, or USDT.",
-                    "Verification & Feedback: Provide your handover receipt and screenshot confirmation inside our support chat.",
-                    "Submit Website Review: Share your fast-selling experience and rating on our website's reviews page."
-                  ].map((step, idx) => {
-                    const [title, body] = step.split(":");
-                    return (
-                      <li key={idx} className="step-item-custom">
-                        <span className="step-num step-num-green">{idx + 1}</span>
-                        <div>
-                          <strong className="step-title">{title}</strong>
-                          <span className="step-body">{body}</span>
-                        </div>
-                      </li>
-                    );
-                  })}
+                  {instantSellSteps.slice(0, 8).map((step, idx) => (
+                    <li key={idx} className="step-item-custom">
+                      <span className="step-num step-num-green">{idx + 1}</span>
+                      <div>
+                        <strong className="step-title">{step.title}</strong>
+                        <span className="step-body">{step.body}</span>
+                      </div>
+                    </li>
+                  ))}
                 </ul>
               </div>
 
@@ -330,6 +407,247 @@ export default function Sell() {
                   <Zap size={18} /> Sell Instantly Now →
                 </a>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── INTERACTIVE TIMELINE FLOW VISUALIZER ────────────────── */}
+        <section className="section" style={{ background: "rgba(10, 13, 20, 0.4)", borderTop: "1px solid rgba(255, 255, 255, 0.05)", padding: "70px 5% 80px" }}>
+          <div style={{ textAlign: "center", marginBottom: "50px" }}>
+            <span className="slabel">Interactive Roadmap</span>
+            <h2 className="stitle">Visual Handover & <span className="g">Escrow Timeline</span></h2>
+            <p className="ssub" style={{ margin: "0 auto", maxWidth: "600px" }}>
+              Track the exact progress pathway of your selected selling mode. Switch options in the grid above to dynamically preview the timeline.
+            </p>
+          </div>
+
+          <div style={{ maxWidth: "850px", margin: "0 auto" }}>
+            {/* Mode Switcher inside Timeline section */}
+            <div style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "12px",
+              marginBottom: "40px"
+            }}>
+              <button 
+                onClick={() => setActiveOption(0)}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "10px 22px",
+                  borderRadius: "30px",
+                  background: activeOption === 0 ? "rgba(59, 130, 246, 0.12)" : "transparent",
+                  border: activeOption === 0 ? "1px solid #3b82f6" : "1px solid rgba(255,255,255,0.1)",
+                  color: activeOption === 0 ? "#60a5fa" : "var(--muted)",
+                  fontFamily: "var(--font-h)",
+                  fontWeight: 700,
+                  fontSize: "13px",
+                  cursor: "pointer",
+                  transition: "all 0.25s"
+                }}
+              >
+                <Clock size={14} /> Hold & Sell Pathway
+              </button>
+              <button 
+                onClick={() => setActiveOption(1)}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "10px 22px",
+                  borderRadius: "30px",
+                  background: activeOption === 1 ? "rgba(34, 197, 94, 0.12)" : "transparent",
+                  border: activeOption === 1 ? "1px solid #22c55e" : "1px solid rgba(255,255,255,0.1)",
+                  color: activeOption === 1 ? "#4ade80" : "var(--muted)",
+                  fontFamily: "var(--font-h)",
+                  fontWeight: 700,
+                  fontSize: "13px",
+                  cursor: "pointer",
+                  transition: "all 0.25s"
+                }}
+              >
+                <Zap size={14} /> Instant Sell Pathway
+              </button>
+            </div>
+
+            {/* Timeline Wrapper */}
+            <div style={{
+              position: "relative",
+              paddingLeft: "45px",
+              borderLeft: `2px dashed ${activeOption === 0 ? "rgba(59,130,246,0.3)" : "rgba(34,197,94,0.3)"}`,
+              marginLeft: "15px"
+            }}>
+              {/* Highlight active trace line */}
+              <div style={{
+                position: "absolute",
+                left: "-2px",
+                top: 0,
+                bottom: 0,
+                width: "2px",
+                background: `linear-gradient(to bottom, ${activeOption === 0 ? "#3b82f6, #60a5fa" : "#22c55e, #4ade80"})`,
+                boxShadow: `0 0 10px ${activeOption === 0 ? "rgba(59,130,246,0.5)" : "rgba(34,197,94,0.5)"}`,
+                transition: "all 0.5s ease"
+              }} />
+
+              {/* Steps Generator */}
+              {currentSteps.map((step, idx) => (
+                <div key={idx} className="timeline-node-card fade-in" style={{
+                  position: "relative",
+                  marginBottom: "35px",
+                  background: "rgba(17, 21, 32, 0.35)",
+                  border: "1px solid rgba(255, 255, 255, 0.04)",
+                  borderRadius: "14px",
+                  padding: "20px 24px",
+                  boxShadow: "0 10px 30px rgba(0,0,0,0.15)"
+                }}>
+                  {/* Glowing Node Icon */}
+                  <div style={{
+                    position: "absolute",
+                    left: "-66px",
+                    top: "18px",
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "50%",
+                    background: "#080a0f",
+                    border: `2px solid ${activeOption === 0 ? "#3b82f6" : "#22c55e"}`,
+                    boxShadow: `0 0 12px ${activeOption === 0 ? "rgba(59, 130, 246, 0.4)" : "rgba(34, 197, 94, 0.4)"}`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: activeOption === 0 ? "#60a5fa" : "#4ade80",
+                    zIndex: 2,
+                    transition: "all 0.3s ease"
+                  }}>
+                    {step.icon}
+                  </div>
+
+                  <div style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                    gap: "8px",
+                    marginBottom: "8px"
+                  }}>
+                    <h3 style={{
+                      fontFamily: "var(--font-h)",
+                      fontSize: "16px",
+                      color: "#fff",
+                      margin: 0,
+                      fontWeight: 700,
+                      letterSpacing: "0.5px"
+                    }}>
+                      {step.title}
+                    </h3>
+                    <span style={{
+                      fontSize: "11px",
+                      fontFamily: "var(--font-h)",
+                      fontWeight: 700,
+                      background: activeOption === 0 ? "rgba(59,130,246,0.1)" : "rgba(34,197,94,0.1)",
+                      border: `1px solid ${activeOption === 0 ? "rgba(59,130,246,0.3)" : "rgba(34,197,94,0.3)"}`,
+                      color: activeOption === 0 ? "#60a5fa" : "#4ade80",
+                      padding: "2px 10px",
+                      borderRadius: "100px",
+                      textTransform: "uppercase"
+                    }}>
+                      Step 0{idx + 1}
+                    </span>
+                  </div>
+
+                  <p style={{
+                    color: "var(--muted)",
+                    fontSize: "13px",
+                    lineHeight: "1.6",
+                    margin: 0
+                  }}>
+                    {step.body}
+                  </p>
+
+                  {/* Enhanced conditional labels inside specific steps */}
+                  {activeOption === 0 && idx === 4 && (
+                    <div style={{
+                      display: "flex",
+                      gap: "10px",
+                      marginTop: "12px",
+                      flexWrap: "wrap"
+                    }}>
+                      <span className="pill-deal-mode yellow-border"><Clock size={11} /> 3-7 Days Average Sell Time</span>
+                      <span className="pill-deal-mode gold-border"><Award size={11} /> Price Adjustment Re-listing Policy</span>
+                    </div>
+                  )}
+
+                  {activeOption === 0 && idx === 5 && (
+                    <div style={{
+                      display: "flex",
+                      gap: "10px",
+                      marginTop: "12px",
+                      flexWrap: "wrap"
+                    }}>
+                      <span className="pill-deal-mode red-border"><Lock size={11} /> Secure BOTH logins locked for Buyer</span>
+                    </div>
+                  )}
+
+                  {activeOption === 0 && idx === 6 && (
+                    <div style={{
+                      display: "flex",
+                      gap: "10px",
+                      marginTop: "12px",
+                      flexWrap: "wrap"
+                    }}>
+                      <span className="pill-deal-mode green-border"><Check size={11} /> Government Aadhaar/PAN Proof Secured</span>
+                    </div>
+                  )}
+
+                  {activeOption === 0 && idx === 7 && (
+                    <div style={{
+                      display: "flex",
+                      gap: "10px",
+                      marginTop: "12px",
+                      flexWrap: "wrap"
+                    }}>
+                      <span className="pill-deal-mode gold-border"><MapPin size={11} /> Payout Released after Buyer delivery confirmation</span>
+                      <span className="pill-deal-mode green-border"><CreditCard size={11} /> UPI, Bank, USDT, BTC, or Face-to-Face cash for large accounts</span>
+                    </div>
+                  )}
+
+                  {activeOption === 1 && idx === 2 && (
+                    <div style={{
+                      display: "flex",
+                      gap: "10px",
+                      marginTop: "12px",
+                      flexWrap: "wrap"
+                    }}>
+                      <span className="pill-deal-mode"><MapPin size={11} /> Online Transfer (Instant & Escrowed)</span>
+                      <span className="pill-deal-mode gold-border"><Users size={11} /> Face-to-Face Meetup (Available strictly for ₹80,000+ valuations)</span>
+                    </div>
+                  )}
+
+                  {activeOption === 1 && idx === 3 && (
+                    <div style={{
+                      display: "flex",
+                      gap: "10px",
+                      marginTop: "12px",
+                      flexWrap: "wrap"
+                    }}>
+                      <span className="pill-deal-mode green-border"><Check size={11} /> PAN Card Validated</span>
+                      <span className="pill-deal-mode green-border"><Check size={11} /> Aadhaar Card Verified</span>
+                    </div>
+                  )}
+
+                  {activeOption === 1 && idx === 6 && (
+                    <div style={{
+                      display: "flex",
+                      gap: "10px",
+                      marginTop: "12px",
+                      flexWrap: "wrap"
+                    }}>
+                      <span className="pill-deal-mode red-border"><AlertTriangle size={11} /> Irrevocable: No returns once binds are secured</span>
+                      <span className="pill-deal-mode yellow-border"><Clock size={11} /> 7-Day Unlink Cooldown / 30-Day Link Wait</span>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -470,6 +788,7 @@ export default function Sell() {
                       background: isActive ? "rgba(34, 197, 94, 0.08)" : "transparent",
                       border: isActive ? "1px solid rgba(34, 197, 94, 0.4)" : "1px solid transparent",
                       color: isActive ? "#4ade80" : "var(--muted)",
+                      cursor: "pointer",
                       transition: "all 0.2s"
                     }}
                   >
@@ -563,9 +882,9 @@ export default function Sell() {
                   We prioritize seller trust just as much as buyer security. Review how we protect you and execute secure payouts:
                 </p>
                 <ul style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.8", paddingLeft: "20px", marginBottom: "20px" }}>
-                  <li style={{ marginBottom: "8px" }}><strong style={{ color: "#fff" }}>Secure KYC Encrypted Storage:</strong> Your KYC documents are saved on fully secure, encrypted servers, and are only accessed in the event of an account dispute.</li>
+                  <li style={{ marginBottom: "8px" }}><strong style={{ color: "#fff" }}>Secure KYC Encrypted Storage:</strong> Your government ID (Aadhaar or PAN Card) is saved on fully secure, encrypted servers, and is only accessed in the event of an account dispute.</li>
                   <li style={{ marginBottom: "8px" }}><strong style={{ color: "#fff" }}>100% Guarded Payments:</strong> We hold buyer funds in a secure bank escrow, eliminating any risk of chargebacks or fraudulent reversals once your account is delivered.</li>
-                  <li style={{ marginBottom: "8px" }}><strong style={{ color: "#fff" }}>Direct Payout Release:</strong> 100% of your payout is transferred directly via UPI, Bank, or USDT within 1-2 hours of credential validation.</li>
+                  <li style={{ marginBottom: "8px" }}><strong style={{ color: "#fff" }}>Direct Payout Release:</strong> 100% of your payout is transferred directly via UPI, Bank Transfer, USDT, BTC, or Cash within 1-2 hours of credential validation.</li>
                 </ul>
                 <div style={{
                   background: "rgba(239, 68, 68, 0.08)",
@@ -600,31 +919,31 @@ export default function Sell() {
             {[
               {
                 q: "How do I get paid and how long does the payout take?",
-                a: "For both options, payouts are made via UPI, Bank Transfer, USDT, or Liquid Cash based on your preference. Under Hold & Sell, payment is released instantly the moment a buyer finishes full payment. Under Instant Sell, the agreed buyout funds are fully released within 1 to 2 hours after our technical security team completes the credential audit and secures ownership."
+                a: "For both options, payouts are made via UPI, Bank Transfer, USDT, BTC, or Cash based on your preference. Under Hold & Sell, payment is released after the buyer confirms successful delivery. Payout can be full or partial depending on security guarantees. Under Instant Sell, the agreed buyout funds are fully released within 1 to 2 hours after our technical security team completes the credential audit and secures ownership."
               },
               {
-                q: "What is the difference between Hold & Sell vs. Sell Instantly?",
-                a: "Hold & Sell allows you to get 100% maximum market value because we list it to direct buyers, though it takes a few days to a week. Sell Instantly gives you immediate cash within hours directly from us, but at a wholesale payout rate (usually 20-30% lower than open market value) to offset the inventory carrying risks."
+                q: "What is the difference between Hold & Sell vs. Instant Sell?",
+                a: "Hold & Sell allows you to get 100% maximum market value because we list it to direct buyers, though it takes a few days to a week (typically 3-7 days). Instant Sell gives you immediate cash within hours directly from us, but at a wholesale buyout rate (usually 20-30% lower than open market value) to offset the inventory carrying risks."
               },
               {
-                q: "Can I still log in and play on my account during Hold & Sell listing?",
+                q: "Why is there a ₹80,000+ threshold for Face-to-Face deals?",
+                a: "Face-to-Face cash meetups require significant travel coordination, local safety setup, and escrow monitoring. To ensure it is mutually viable, F2F dealing is strictly reserved for premium BGMI accounts with valuations exceeding ₹80,000. All accounts below ₹80K are handled securely through our verified Online Escrow systems."
+              },
+              {
+                q: "What are the exact unlinking rules and cooldown timelines?",
+                a: "BGMI unlinking requires 7 days to complete for secondary logins (e.g. Google/Twitter/X). If a seller logs into that unlinking account during the 7-day period, the unlink is automatically cancelled by the game. Fresh linking slots require a 30-day incubation lock before an unlink can be requested. Payouts are safely processed while unlinks complete under our Unlink Guarantee."
+              },
+              {
+                q: "Why is the sale completely irreversible once the account is secured?",
+                a: "Maddy Store binds recovery emails and recovery phone numbers to the buyer's credentials during security isolation to guarantee account security. Once detaching is done and bindings are locked, the credentials are permanently handed over, making retrieval impossible. Consequently, secured accounts cannot be returned under any circumstances."
+              },
+              {
+                q: "What KYC documents do I need to provide and how is my data secured?",
+                a: "We require a valid government-issued ID (such as an Aadhaar Card or PAN Card) to verify ownership and deter recovery fraud. All KYC data is stored on heavily encrypted offline servers and is only used to cooperate with official cybercrime departments in the event of retrieval attempts."
+              },
+              {
+                q: "Can I still log in and play on my account during a Hold & Sell listing?",
                 a: "Yes, you can absolutely continue playing classic matches, rank pushes, or custom rooms. However, you must strictly: (1) not bind any new social logins, (2) not change the linking region, (3) not spend inventory assets like UC or Rename Cards, and (4) notify our support team immediately if you unlock high-tier outfits or labs so we can update your listing video."
-              },
-              {
-                q: "Why do you require a detailed video of the account inventory first?",
-                a: "An inventory video acts as our core valuation sheet. It allows our pricing analysts to inspect your outfits (X-Suits, Conqueror frames), upgraded weapon labs, supercars, popularity counts, and achievements. It is also used to generate the premium buyers preview catalog featured across our VIP channels."
-              },
-              {
-                q: "What happens if I attempt to recover the account after getting paid?",
-                a: "Maddy Store enforces a strict zero-tolerance policy against retrieval fraud. Before payouts, we secure verified KYC credentials of the seller. If any recovery attempt or login dispute is detected post-handover, we permanently blacklist your details and immediately file a formal cybercrime complaint (cyber theft & financial fraud) with your KYC documents."
-              },
-              {
-                q: "Are there any listing fees or upfront commissions?",
-                a: "No. Listing your account on Maddy Store is 100% free. For Hold & Sell, we add our small commission margin on top of your agreed payout amount, which is paid entirely by the buyer. You will receive exactly the payout amount agreed upon during evaluation."
-              },
-              {
-                q: "How does the social network unlink wait period affect my payout?",
-                a: "If your account has secondary social bindings undergoing an unlink wait period (e.g. unlinking Twitter/X), you will still receive your payout as scheduled. Our team holds the account under our Unlink Guarantee system. Sellers are required to cooperate and ensure they do not cancel the unlink request by accidentally logging into the unlinking social network."
               }
             ].map((faq, idx) => {
               const isOpen = activeFaq === idx;
@@ -653,7 +972,10 @@ export default function Sell() {
                       fontWeight: 600,
                       textAlign: "left",
                       fontFamily: "var(--font-h)",
-                      letterSpacing: "0.5px"
+                      letterSpacing: "0.5px",
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer"
                     }}
                   >
                     <span>{faq.q}</span>
@@ -808,7 +1130,7 @@ export default function Sell() {
             border-radius: 50%;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justifyContent: center;
             font-family: var(--font-h);
             font-size: 11px;
             font-weight: 700;
@@ -829,7 +1151,7 @@ export default function Sell() {
           
           .step-body {
             color: var(--muted);
-            font-size: 11px;
+            font-size: 11.5px;
             line-height: 1.5;
             display: block;
           }
@@ -870,12 +1192,59 @@ export default function Sell() {
           }
           
           .fade-in {
-            animation: fadeIn 0.35s ease both;
+            animation: fadeIn 0.4s ease both;
           }
           
           @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
+            from { opacity: 0; transform: translateY(12px); }
             to { opacity: 1; transform: translateY(0); }
+          }
+
+          .timeline-node-card {
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+          }
+
+          .timeline-node-card:hover {
+            transform: translateX(4px);
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            background: rgba(17, 21, 32, 0.55) !important;
+          }
+
+          .pill-deal-mode {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.8);
+          }
+
+          .gold-border {
+            border-color: rgba(255, 215, 0, 0.25);
+            color: var(--gold);
+            background: rgba(255, 215, 0, 0.03);
+          }
+
+          .green-border {
+            border-color: rgba(34, 197, 94, 0.25);
+            color: #4ade80;
+            background: rgba(34, 197, 94, 0.03);
+          }
+
+          .red-border {
+            border-color: rgba(239, 68, 68, 0.25);
+            color: #f87171;
+            background: rgba(239, 68, 68, 0.03);
+          }
+
+          .yellow-border {
+            border-color: rgba(234, 179, 8, 0.25);
+            color: #facc15;
+            background: rgba(234, 179, 8, 0.03);
           }
 
           @media (max-width: 768px) {

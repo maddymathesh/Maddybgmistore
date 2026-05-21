@@ -4,7 +4,7 @@ import Footer from "../components/Footer";
 import { 
   Banknote, Zap, Lock, Video, FileText, BarChart, ShieldCheck, 
   Megaphone, Clock, Handshake, CheckCircle, MessageCircle, 
-  ChevronDown, ChevronUp, AlertTriangle, Shield, Award, Sparkles 
+  ChevronDown, ChevronUp, AlertTriangle, Shield, Award, Sparkles, Info 
 } from "lucide-react";
 
 export default function Sell() {

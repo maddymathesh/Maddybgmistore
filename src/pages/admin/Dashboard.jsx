@@ -160,10 +160,10 @@ export default function AdminDashboard() {
   const [approvingId, setApprovingId] = useState(null);
 
   const [proofs, setProofs] = useState([]);
-  const [proofForm, setProofForm] = useState({ 
-    title: "", 
-    month: new Date().toLocaleString('en-US', { month: 'long' }), 
-    year: new Date().getFullYear().toString() 
+  const [proofForm, setProofForm] = useState({
+    title: "",
+    month: new Date().toLocaleString('en-US', { month: 'long' }),
+    year: new Date().getFullYear().toString()
   });
   const [savingProof, setSavingProof] = useState(false);
   const [proofImage, setProofImage] = useState(null);
@@ -201,6 +201,44 @@ export default function AdminDashboard() {
   const [carEditId, setCarEditId] = useState(null);
   const [carImage, setCarImage] = useState(null);
   const [savingCar, setSavingCar] = useState(false);
+
+  // ── Google Drive Image ID Feature additions ─────────────────
+  const [imageSource, setImageSource] = useState("upload");
+  const [driveFileId, setDriveFileId] = useState("");
+
+  // Helper to extract file ID from raw ID or full Google Drive link
+  function extractDriveFileId(input) {
+    if (!input) return "";
+    // If already a plain file ID
+    if (!input.includes("drive.google.com")) {
+      return input.trim();
+    }
+    // Extract from URL pattern /d/<ID>
+    const match = input.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    return match ? match[1] : "";
+  }
+
+  // Returns preview URL; accepts either raw ID or full link
+  function getDrivePreviewUrl(input) {
+    const fileId = extractDriveFileId(input);
+    return fileId ? `https://lh3.googleusercontent.com/d/${fileId}=w2000` : "";
+  }
+
+  const handleSourceChange = (src) => {
+    setImageSource(src);
+    setDriveFileId("");
+    setProofImage(null);
+    setXsuitImage(null);
+    setCarImage(null);
+  };
+
+  useEffect(() => {
+    setImageSource("upload");
+    setDriveFileId("");
+    setProofImage(null);
+    setXsuitImage(null);
+    setCarImage(null);
+  }, [tab]);
 
   const toggleFeedbackStatus = async (id, currentStatus) => {
     const newStatus = currentStatus === 'read' ? 'unread' : 'read';
@@ -389,23 +427,29 @@ export default function AdminDashboard() {
 
   // ── Proofs CRUD (Cloudinary) ───────────────────────────
   const saveProof = async () => {
-    if (!proofImage) return toast.error("Please select a proof image");
     if (!proofForm.title.trim()) return toast.error("Please enter a title");
+    if (imageSource === "drive" && !extractDriveFileId(driveFileId.trim())) return toast.error("Please enter a valid Google Drive File ID or link");
+    if (imageSource === "upload" && !proofImage) return toast.error("Please select a proof image");
     setSavingProof(true);
     try {
-      const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-      const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
-      const formData = new FormData();
-      formData.append("file", proofImage);
-      formData.append("upload_preset", uploadPreset);
-      formData.append("folder", `mbs_proofs/${proofForm.month.replace(" ", "_")}`);
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-        method: "POST",
-        body: formData,
-      });
-      const json = await res.json();
-      if (json.error) throw new Error(json.error.message);
-      const url = json.secure_url;
+      let url = "";
+      if (imageSource === "drive") {
+        url = getDrivePreviewUrl(driveFileId.trim());
+      } else {
+        const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+        const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+        const formData = new FormData();
+        formData.append("file", proofImage);
+        formData.append("upload_preset", uploadPreset);
+        formData.append("folder", `mbs_proofs/${proofForm.month.replace(" ", "_")}`);
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+          method: "POST",
+          body: formData,
+        });
+        const json = await res.json();
+        if (json.error) throw new Error(json.error.message);
+        url = json.secure_url;
+      }
 
       const fullMonth = `${proofForm.month} ${proofForm.year}`;
       const { error } = await supabase.from('proofs').insert([{
@@ -415,9 +459,10 @@ export default function AdminDashboard() {
       }]);
       if (error) throw error;
 
-      toast.success(`Proof uploaded to ${fullMonth}!`);
+      toast.success(`Proof saved to ${fullMonth}!`);
       setProofForm({ ...proofForm, title: "" });
       setProofImage(null);
+      setDriveFileId("");
       fetchData();
     } catch (e) { toast.error(e.message); }
     finally { setSavingProof(false); }
@@ -472,10 +517,13 @@ export default function AdminDashboard() {
   // ── Xsuit Gifts CRUD ────────────────────────────────────────
   const saveXsuit = async () => {
     if (!xsuitForm.name || !xsuitForm.price) return toast.error("Required fields missing");
+    if (imageSource === "drive" && !extractDriveFileId(driveFileId.trim())) return toast.error("Please enter a valid Google Drive File ID or link");
     setSavingXsuit(true);
     try {
       let url = xsuitForm.image_url;
-      if (xsuitImage) {
+      if (imageSource === "drive") {
+        url = getDrivePreviewUrl(driveFileId.trim());
+      } else if (xsuitImage) {
         const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
         const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
         const formData = new FormData();
@@ -505,6 +553,8 @@ export default function AdminDashboard() {
       }
       setXsuitForm(EMPTY_XSUIT);
       setXsuitImage(null);
+      setDriveFileId("");
+      setImageSource("upload");
       fetchData();
     } catch (e) { toast.error(e.message); }
     finally { setSavingXsuit(false); }
@@ -522,10 +572,13 @@ export default function AdminDashboard() {
   // ── Supercar Gifts CRUD (Firebase) ──────────────────────────
   const saveCar = async () => {
     if (!carForm.name || !carForm.price) return toast.error("Required fields missing");
+    if (imageSource === "drive" && !extractDriveFileId(driveFileId.trim())) return toast.error("Please enter a valid Google Drive File ID or link");
     setSavingCar(true);
     try {
       let url = carForm.image_url;
-      if (carImage) {
+      if (imageSource === "drive") {
+        url = getDrivePreviewUrl(driveFileId.trim());
+      } else if (carImage) {
         const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
         const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
         const formData = new FormData();
@@ -563,6 +616,8 @@ export default function AdminDashboard() {
       }
       setCarForm(EMPTY_CAR);
       setCarImage(null);
+      setDriveFileId("");
+      setImageSource("upload");
       fetchData();
     } catch (e) { toast.error(e.message); }
     finally { setSavingCar(false); }
@@ -722,7 +777,7 @@ export default function AdminDashboard() {
                   </div>
                   <div>
                     <label style={ls}>Promo Tag</label>
-                    <select className="input" value={productForm.tag} onChange={e => setProductForm({...productForm, tag: e.target.value})}>
+                    <select className="input" value={productForm.tag} onChange={e => setProductForm({ ...productForm, tag: e.target.value })}>
                       {PROMO_TAGS.map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
                   </div>
@@ -764,9 +819,9 @@ export default function AdminDashboard() {
                       <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "4px" }}>
                         <span style={{ fontSize: "13px", fontWeight: 800, color: "var(--gold)" }}>₹{Number(p.price).toLocaleString("en-IN")}</span>
                         {p.tag && p.tag !== "None" && (
-                          <span style={{ 
-                            fontSize: "9px", fontWeight: 900, background: "var(--gold)", color: "#000", 
-                            padding: "2px 6px", borderRadius: "4px", textTransform: "uppercase" 
+                          <span style={{
+                            fontSize: "9px", fontWeight: 900, background: "var(--gold)", color: "#000",
+                            padding: "2px 6px", borderRadius: "4px", textTransform: "uppercase"
                           }}>
                             {p.tag}
                           </span>
@@ -932,24 +987,49 @@ export default function AdminDashboard() {
                     </select>
                   </div>
                   <div>
-                    <label style={sl}>Image</label>
-                    <div style={{ border: "2px dashed var(--border-gold)", padding: "12px 16px", borderRadius: "8px", textAlign: "center", cursor: "pointer", background: "rgba(255,215,0,0.02)" }}>
-                      {proofImage ? (
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                          <span style={{ fontSize: "12px", color: "var(--green)" }}>✓ {proofImage.name.slice(0, 20)}...</span>
-                          <button onClick={() => setProofImage(null)} style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontSize: "18px" }}>×</button>
-                        </div>
-                      ) : (
-                        <label style={{ cursor: "pointer" }}>
-                          <div style={{ fontSize: "12px", color: "var(--muted)" }}>Click to choose file</div>
-                          <input type="file" accept="image/*" hidden onChange={e => setProofImage(e.target.files[0])} />
-                        </label>
-                      )}
+                    <label style={sl}>Image Source</label>
+                    <div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}>
+                      <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", cursor: "pointer", color: imageSource === "upload" ? "var(--gold)" : "var(--muted)" }}>
+                        <input type="radio" name="proofImageSource" checked={imageSource === "upload"} onChange={() => handleSourceChange("upload")} style={{ accentColor: "var(--gold)" }} />
+                        File Upload
+                      </label>
+                      <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", cursor: "pointer", color: imageSource === "drive" ? "var(--gold)" : "var(--muted)" }}>
+                        <input type="radio" name="proofImageSource" checked={imageSource === "drive"} onChange={() => handleSourceChange("drive")} style={{ accentColor: "var(--gold)" }} />
+                        Drive Image ID
+                      </label>
                     </div>
                   </div>
                   <div>
+                    <label style={sl}>Image Input</label>
+                    {imageSource === "upload" ? (
+                      <div style={{ border: "2px dashed var(--border-gold)", padding: "12px 16px", borderRadius: "8px", textAlign: "center", cursor: "pointer", background: "rgba(255,215,0,0.02)" }}>
+                        {proofImage ? (
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                            <span style={{ fontSize: "12px", color: "var(--green)" }}>✓ {proofImage.name.slice(0, 20)}...</span>
+                            <button onClick={() => setProofImage(null)} style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontSize: "18px" }}>×</button>
+                          </div>
+                        ) : (
+                          <label style={{ cursor: "pointer" }}>
+                            <div style={{ fontSize: "12px", color: "var(--muted)" }}>Click to choose file</div>
+                            <input type="file" accept="image/*" hidden onChange={e => setProofImage(e.target.files[0])} />
+                          </label>
+                        )}
+                      </div>
+                    ) : (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                        <input className="input" placeholder="Google Drive File ID" value={driveFileId} onChange={e => setDriveFileId(e.target.value.trim())} />
+                        {driveFileId && (
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "rgba(255,255,255,0.02)", padding: "6px", borderRadius: "6px", border: "1px solid var(--border)" }}>
+                            <img src={getDrivePreviewUrl(driveFileId)} alt="Drive Preview" style={{ width: "40px", height: "40px", objectFit: "cover", borderRadius: "4px", border: "1px solid rgba(255,215,0,0.3)" }} />
+                            <span style={{ fontSize: "10px", color: "var(--green)" }}>Live Drive Preview</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div>
                     <button onClick={saveProof} disabled={savingProof} className="btn btn-gold w-full" style={{ padding: "12px" }}>
-                      {savingProof ? "Uploading to Cloudinary..." : "Upload Proof"}
+                      {savingProof ? "Saving..." : "Upload Proof"}
                     </button>
                   </div>
                 </div>
@@ -1032,7 +1112,7 @@ export default function AdminDashboard() {
                   </div>
                   <div>
                     <label style={sl}>Promo Tag</label>
-                    <select className="input" value={ucForm.tag} onChange={e => setUcForm({...ucForm, tag: e.target.value})}>
+                    <select className="input" value={ucForm.tag} onChange={e => setUcForm({ ...ucForm, tag: e.target.value })}>
                       {PROMO_TAGS.map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
                   </div>
@@ -1110,25 +1190,57 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <label style={sl}>Promo Tag</label>
-                  <select className="input" value={xsuitForm.tag} onChange={e => setXsuitForm({...xsuitForm, tag: e.target.value})}>
+                  <select className="input" value={xsuitForm.tag} onChange={e => setXsuitForm({ ...xsuitForm, tag: e.target.value })}>
                     {PROMO_TAGS.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
 
-                <div style={{ border: "2px dashed var(--border-gold)", padding: "20px", borderRadius: "8px", textAlign: "center" }}>
-                  {xsuitImage ? (
-                    <div style={{ fontSize: "12px", color: "var(--green)" }}>{xsuitImage.name} selected</div>
-                  ) : (
-                    <label style={{ cursor: "pointer" }}>
-                      <div style={{ fontSize: "12px" }}>{xsuitForm.image_url ? "Change Image" : "Click to Upload Xsuit Image"}</div>
-                      <input type="file" hidden onChange={e => setXsuitImage(e.target.files[0])} />
+                <div>
+                  <label style={sl}>Image Source</label>
+                  <div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", cursor: "pointer", color: imageSource === "upload" ? "var(--gold)" : "var(--muted)" }}>
+                      <input type="radio" name="xsuitImageSource" checked={imageSource === "upload"} onChange={() => handleSourceChange("upload")} style={{ accentColor: "var(--gold)" }} />
+                      File Upload
                     </label>
+                    <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", cursor: "pointer", color: imageSource === "drive" ? "var(--gold)" : "var(--muted)" }}>
+                      <input type="radio" name="xsuitImageSource" checked={imageSource === "drive"} onChange={() => handleSourceChange("drive")} style={{ accentColor: "var(--gold)" }} />
+                      Drive Image ID
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label style={sl}>Image Input</label>
+                  {imageSource === "upload" ? (
+                    <div style={{ border: "2px dashed var(--border-gold)", padding: "20px", borderRadius: "8px", textAlign: "center" }}>
+                      {xsuitImage ? (
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <span style={{ fontSize: "12px", color: "var(--green)" }}>{xsuitImage.name} selected</span>
+                          <button onClick={() => setXsuitImage(null)} style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontSize: "18px" }}>×</button>
+                        </div>
+                      ) : (
+                        <label style={{ cursor: "pointer" }}>
+                          <div style={{ fontSize: "12px" }}>{xsuitForm.image_url ? "Change Image" : "Click to Upload Xsuit Image"}</div>
+                          <input type="file" hidden onChange={e => setXsuitImage(e.target.files[0])} />
+                        </label>
+                      )}
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                      <input className="input" placeholder="Google Drive File ID" value={driveFileId} onChange={e => setDriveFileId(e.target.value.trim())} />
+                      {driveFileId && (
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "rgba(255,255,255,0.02)", padding: "6px", borderRadius: "6px", border: "1px solid var(--border)" }}>
+                          <img src={getDrivePreviewUrl(driveFileId)} alt="Drive Preview" style={{ width: "40px", height: "40px", objectFit: "cover", borderRadius: "4px", border: "1px solid rgba(255,215,0,0.3)" }} />
+                          <span style={{ fontSize: "10px", color: "var(--green)" }}>Live Drive Preview</span>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
 
                 <div style={{ display: "flex", gap: "8px" }}>
                   <button onClick={saveXsuit} disabled={savingXsuit} className="btn btn-gold w-full">{xsuitEditId ? "Update Xsuit" : "Save Xsuit"}</button>
-                  {xsuitEditId && <button onClick={() => { setXsuitEditId(null); setXsuitForm(EMPTY_XSUIT); setXsuitImage(null); }} className="btn btn-outline">Cancel</button>}
+                  {xsuitEditId && <button onClick={() => { setXsuitEditId(null); setXsuitForm(EMPTY_XSUIT); setXsuitImage(null); setImageSource("upload"); setDriveFileId(""); }} className="btn btn-outline">Cancel</button>}
                 </div>
               </div>
             </div>
@@ -1144,7 +1256,18 @@ export default function AdminDashboard() {
                         <Zap size={30} style={{ opacity: 0.2 }} />
                       )}
                       <div style={{ position: "absolute", top: "5px", right: "5px", display: "flex", gap: "4px" }}>
-                        <button onClick={() => { setXsuitEditId(x.id); setXsuitForm(x); }} style={{ background: "rgba(0,0,0,0.6)", border: "none", color: "var(--gold)", borderRadius: "4px", padding: "4px", cursor: "pointer" }}><Pencil size={12} /></button>
+                        <button onClick={() => {
+                          setXsuitEditId(x.id);
+                          setXsuitForm(x);
+                          if (x.image_url && x.image_url.includes("drive.google.com")) {
+                            setImageSource("drive");
+                            const match = x.image_url.match(/[?&]id=([^&]+)/);
+                            setDriveFileId(match ? match[1] : "");
+                          } else {
+                            setImageSource("upload");
+                            setDriveFileId("");
+                          }
+                        }} style={{ background: "rgba(0,0,0,0.6)", border: "none", color: "var(--gold)", borderRadius: "4px", padding: "4px", cursor: "pointer" }} title="Edit"><Pencil size={12} /></button>
                         <button onClick={() => deleteXsuit(x.id)} style={{ background: "rgba(239,68,68,0.8)", border: "none", color: "#fff", borderRadius: "4px", padding: "4px", cursor: "pointer" }}><Trash2 size={12} /></button>
                       </div>
                     </div>
@@ -1175,7 +1298,7 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <label style={sl}>Promo Tag</label>
-                  <select className="input" value={carForm.tag} onChange={e => setCarForm({...carForm, tag: e.target.value})}>
+                  <select className="input" value={carForm.tag} onChange={e => setCarForm({ ...carForm, tag: e.target.value })}>
                     {PROMO_TAGS.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
@@ -1188,20 +1311,52 @@ export default function AdminDashboard() {
                   </select>
                 </div>
 
-                <div style={{ border: "2px dashed var(--border-gold)", padding: "20px", borderRadius: "8px", textAlign: "center" }}>
-                  {carImage ? (
-                    <div style={{ fontSize: "12px", color: "var(--green)" }}>{carImage.name} selected</div>
-                  ) : (
-                    <label style={{ cursor: "pointer" }}>
-                      <div style={{ fontSize: "12px" }}>{carForm.image_url ? "Change Image" : "Click to Upload Supercar Image"}</div>
-                      <input type="file" hidden onChange={e => setCarImage(e.target.files[0])} />
+                <div>
+                  <label style={sl}>Image Source</label>
+                  <div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", cursor: "pointer", color: imageSource === "upload" ? "var(--gold)" : "var(--muted)" }}>
+                      <input type="radio" name="carImageSource" checked={imageSource === "upload"} onChange={() => handleSourceChange("upload")} style={{ accentColor: "var(--gold)" }} />
+                      File Upload
                     </label>
+                    <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", cursor: "pointer", color: imageSource === "drive" ? "var(--gold)" : "var(--muted)" }}>
+                      <input type="radio" name="carImageSource" checked={imageSource === "drive"} onChange={() => handleSourceChange("drive")} style={{ accentColor: "var(--gold)" }} />
+                      Drive Image ID
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label style={sl}>Image Input</label>
+                  {imageSource === "upload" ? (
+                    <div style={{ border: "2px dashed var(--border-gold)", padding: "20px", borderRadius: "8px", textAlign: "center" }}>
+                      {carImage ? (
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <span style={{ fontSize: "12px", color: "var(--green)" }}>{carImage.name} selected</span>
+                          <button onClick={() => setCarImage(null)} style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontSize: "18px" }}>×</button>
+                        </div>
+                      ) : (
+                        <label style={{ cursor: "pointer" }}>
+                          <div style={{ fontSize: "12px" }}>{carForm.image_url ? "Change Image" : "Click to Upload Supercar Image"}</div>
+                          <input type="file" hidden onChange={e => setCarImage(e.target.files[0])} />
+                        </label>
+                      )}
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                      <input className="input" placeholder="Google Drive File ID" value={driveFileId} onChange={e => setDriveFileId(e.target.value.trim())} />
+                      {driveFileId && (
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "rgba(255,255,255,0.02)", padding: "6px", borderRadius: "6px", border: "1px solid var(--border)" }}>
+                          <img src={getDrivePreviewUrl(driveFileId)} alt="Drive Preview" style={{ width: "40px", height: "40px", objectFit: "cover", borderRadius: "4px", border: "1px solid rgba(255,215,0,0.3)" }} />
+                          <span style={{ fontSize: "10px", color: "var(--green)" }}>Live Drive Preview</span>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
 
                 <div style={{ display: "flex", gap: "8px" }}>
                   <button onClick={saveCar} disabled={savingCar} className="btn btn-gold w-full">{carEditId ? "Update Car" : "Save Car"}</button>
-                  {carEditId && <button onClick={() => { setCarEditId(null); setCarForm(EMPTY_CAR); setCarImage(null); }} className="btn btn-outline">Cancel</button>}
+                  {carEditId && <button onClick={() => { setCarEditId(null); setCarForm(EMPTY_CAR); setCarImage(null); setImageSource("upload"); setDriveFileId(""); }} className="btn btn-outline">Cancel</button>}
                 </div>
               </div>
             </div>
@@ -1217,8 +1372,19 @@ export default function AdminDashboard() {
                         <Car size={30} style={{ opacity: 0.2 }} />
                       )}
                       <div style={{ position: "absolute", top: "5px", right: "5px", display: "flex", gap: "4px" }}>
-                        <button onClick={() => { setCarEditId(c.id); setCarForm(c); }} style={{ background: "rgba(0,0,0,0.6)", border: "none", color: "var(--gold)", borderRadius: "4px", padding: "4px", cursor: "pointer" }}><Pencil size={12} /></button>
-                        <button onClick={() => deleteCar(c.id)} style={{ background: "rgba(239,68,68,0.8)", border: "none", color: "#fff", borderRadius: "4px", padding: "4px", cursor: "pointer" }}><Trash2 size={12} /></button>
+                        <button onClick={() => {
+                          setCarEditId(c.id);
+                          setCarForm(c);
+                          if (c.image_url && c.image_url.includes("drive.google.com")) {
+                            setImageSource("drive");
+                            const match = c.image_url.match(/[?&]id=([^&]+)/);
+                            setDriveFileId(match ? match[1] : "");
+                          } else {
+                            setImageSource("upload");
+                            setDriveFileId("");
+                          }
+                        }} style={{ background: "rgba(0,0,0,0.6)", border: "none", color: "var(--gold)", borderRadius: "4px", padding: "4px", cursor: "pointer" }} title="Edit"><Pencil size={12} /></button>
+                        <button onClick={() => deleteCar(c.id)} style={{ background: "rgba(239,68,68,0.8)", border: "none", color: "#fff", borderRadius: "4px", padding: "4px", cursor: "pointer" }} title="Delete"><Trash2 size={12} /></button>
                       </div>
                       <div style={{ position: "absolute", bottom: "5px", left: "5px", background: "var(--gold)", color: "#000", fontSize: "9px", fontWeight: 900, padding: "2px 6px", borderRadius: "4px" }}>
                         {c.type}
@@ -1469,7 +1635,7 @@ export default function AdminDashboard() {
                             <tr key={link.id} style={{ borderBottom: "1px solid var(--border)", opacity: isExpired ? 0.6 : 1 }}>
                               <td style={{ padding: "13px 16px", fontWeight: 700, fontFamily: "monospace", fontSize: "12px", color: "var(--gold)" }}>{link.id}</td>
                               <td>
-                                <span style={{ 
+                                <span style={{
                                   padding: "2px 8px", borderRadius: "10px", fontSize: "10px", fontWeight: 800,
                                   background: link.status === "active" ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)",
                                   color: link.status === "active" ? "#22c55e" : "#ef4444"
@@ -1521,14 +1687,14 @@ export default function AdminDashboard() {
           const totalStars = feedbacks.reduce((sum, f) => sum + (f.stars || 5), 0);
           const csatScore = feedbacks.length ? (totalStars / feedbacks.length).toFixed(1) : "5.0";
           const csatPct = Math.round((Number(csatScore) / 5) * 100);
-          
+
           const unreadCount = feedbacks.filter(f => f.status === 'unread').length;
           const readCount = feedbacks.filter(f => f.status === 'read').length;
 
           return (
             <div style={{ display: "grid", gap: "24px" }}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))", gap: "24px" }}>
-                
+
                 {/* CSAT overall gauge */}
                 <div style={{ background: "var(--card)", padding: "30px", borderRadius: "14px", border: "1px solid var(--border-gold)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
                   <div style={{ position: "relative", width: "130px", height: "130px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "14px" }}>
@@ -1575,7 +1741,7 @@ export default function AdminDashboard() {
                   <h3 style={{ fontSize: "14px", fontWeight: 800 }}>📬 Customer Feedback Registry</h3>
                   <span style={{ fontSize: "11px", color: "var(--muted)" }}>{feedbacks.length} submitted suggestions</span>
                 </div>
-                
+
                 {feedbacks.length === 0 ? (
                   <div style={{ textAlign: "center", padding: "60px 20px", color: "var(--muted)", fontSize: "13px" }}>
                     No customer feedbacks submitted yet. Share the link <b style={{ color: "var(--gold)" }}>/feedback</b> with your clients to start collecting suggestions!
@@ -1585,7 +1751,7 @@ export default function AdminDashboard() {
                     {feedbacks.map((f, i) => {
                       const dateStr = f.created_at ? new Date(f.created_at).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : "N/A";
                       const isUnread = f.status === 'unread';
-                      
+
                       // WhatsApp contact link
                       const hasPhone = f.phone && f.phone !== "Not provided" && f.phone.trim() !== "";
                       const cleanedPhone = hasPhone ? f.phone.replace(/[^\d]/g, "") : "";
@@ -1594,11 +1760,11 @@ export default function AdminDashboard() {
                       const waUrl = `https://wa.me/${formattedPhoneForWhatsApp}?text=${waText}`;
 
                       return (
-                        <div 
-                          key={f.id || i} 
-                          style={{ 
-                            padding: "20px", 
-                            borderBottom: "1px solid var(--border)", 
+                        <div
+                          key={f.id || i}
+                          style={{
+                            padding: "20px",
+                            borderBottom: "1px solid var(--border)",
                             background: isUnread ? "rgba(255, 215, 0, 0.01)" : "transparent",
                             transition: "background 0.2s"
                           }}
@@ -1633,25 +1799,25 @@ export default function AdminDashboard() {
                               <button
                                 onClick={() => toggleFeedbackStatus(f.id, f.status)}
                                 className="btn btn-outline"
-                                style={{ 
-                                  padding: "6px 12px", 
-                                  fontSize: "11px", 
-                                  borderColor: isUnread ? "var(--green)" : "var(--muted)", 
-                                  color: isUnread ? "var(--green)" : "var(--muted)" 
+                                style={{
+                                  padding: "6px 12px",
+                                  fontSize: "11px",
+                                  borderColor: isUnread ? "var(--green)" : "var(--muted)",
+                                  color: isUnread ? "var(--green)" : "var(--muted)"
                                 }}
                               >
                                 {isUnread ? "Mark Read" : "Mark Unread"}
                               </button>
-                              
+
                               {hasPhone && (
                                 <a
                                   href={waUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="btn btn-gold"
-                                  style={{ 
-                                    padding: "6px 12px", 
-                                    fontSize: "11px", 
+                                  style={{
+                                    padding: "6px 12px",
+                                    fontSize: "11px",
                                     fontWeight: 700,
                                     textDecoration: "none",
                                     display: "inline-flex",
@@ -1734,7 +1900,7 @@ export default function AdminDashboard() {
         {tab === "admin_controls" && (() => {
           return (
             <div style={{ display: "grid", gap: "24px" }} className="admin-grid">
-              
+
               {/* Add Admin Form */}
               <div className="admin-form-side">
                 <h3 className="form-title" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -1745,22 +1911,22 @@ export default function AdminDashboard() {
                     <label style={sl}>Admin Email Address</label>
                     <div style={{ position: "relative" }}>
                       <UserIcon size={14} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--gold)" }} />
-                      <input 
-                        type="email" 
-                        required 
-                        placeholder="e.g. sethu@mbsx.store" 
-                        className="input" 
-                        style={{ paddingLeft: "36px" }} 
-                        value={newAdminEmail} 
-                        onChange={e => setNewAdminEmail(e.target.value)} 
+                      <input
+                        type="email"
+                        required
+                        placeholder="e.g. sethu@mbsx.store"
+                        className="input"
+                        style={{ paddingLeft: "36px" }}
+                        value={newAdminEmail}
+                        onChange={e => setNewAdminEmail(e.target.value)}
                       />
                     </div>
                   </div>
-                  
-                  <button 
-                    type="submit" 
-                    disabled={addingAdmin} 
-                    className="btn btn-gold" 
+
+                  <button
+                    type="submit"
+                    disabled={addingAdmin}
+                    className="btn btn-gold"
                     style={{ width: "100%", justifyContent: "center", padding: "12px" }}
                   >
                     {addingAdmin ? "Creating..." : "Authorize Admin"}
@@ -1779,10 +1945,10 @@ export default function AdminDashboard() {
                   <h3 style={{ fontSize: "15px", fontWeight: 700, margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
                     <ShieldCheck size={18} style={{ color: "var(--gold)" }} /> Active Administrators
                   </h3>
-                  <button 
-                    onClick={loadAdmins} 
-                    disabled={loadingAdmins} 
-                    className="btn btn-outline" 
+                  <button
+                    onClick={loadAdmins}
+                    disabled={loadingAdmins}
+                    className="btn btn-outline"
                     style={{ padding: "6px 12px", fontSize: "11px", borderColor: "var(--border-gold)", color: "var(--gold)" }}
                   >
                     Refresh List

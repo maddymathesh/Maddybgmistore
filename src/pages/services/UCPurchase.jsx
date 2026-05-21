@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import { MessageCircle, Send, Loader2, Clock, Shield, LogIn, Gamepad2, AlertTriangle, CheckCircle } from "lucide-react";
+import { MessageCircle, Send, Loader2, Clock, Shield, LogIn, Gamepad2, AlertTriangle, CheckCircle, Zap, Banknote, Lock } from "lucide-react";
 import { supabase } from "../../utils/supabase";
 
 // ── UC Image Icon ────────────────────────────────────────────
@@ -262,7 +262,7 @@ export default function UCPurchase() {
               {!isViewLogin && (
                 <div style={{ margin: "0 28px 24px", padding: "12px 16px", background: `${accentColor}0d`, borderRadius: "10px", border: `1px solid ${accentColor}22` }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: accentColor, fontWeight: 700 }}>
-                    <CheckCircle size={13} /> No credentials needed — just your in-game Character ID. Fastest & safest option! ⚡
+                    <CheckCircle size={13} /> No credentials needed — just your in-game Character ID. Fastest & safest option! <Zap size={13} style={{ color: "var(--orange)", display: "inline-block", verticalAlign: "middle", marginLeft: "4px" }} />
                   </div>
                 </div>
               )}
@@ -274,8 +274,16 @@ export default function UCPurchase() {
         <section style={{ padding: "32px 5% 60px" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "24px" }}>
-              <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 800, fontFamily: "var(--font-h)" }}>
-                {isViewLogin ? "🔑 View Login UC Packs" : "🎮 Character ID UC Packs"}
+              <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 800, fontFamily: "var(--font-h)", display: "flex", alignItems: "center", gap: "8px" }}>
+                {isViewLogin ? (
+                  <>
+                    <LogIn size={18} style={{ color: accentColor }} /> View Login UC Packs
+                  </>
+                ) : (
+                  <>
+                    <Gamepad2 size={18} style={{ color: accentColor }} /> Character ID UC Packs
+                  </>
+                )}
               </h3>
               <span style={{ fontSize: "12px", color: "var(--muted)", background: "var(--card)", padding: "3px 10px", borderRadius: "20px", border: "1px solid var(--border)" }}>
                 {activePacks.filter(p => p.status !== 'sold_out').length} Available
@@ -320,13 +328,13 @@ export default function UCPurchase() {
             <h3 style={{ marginBottom: "28px", fontFamily: "var(--font-h)", fontSize: "22px" }}>Why choose MBS UC Service?</h3>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "28px" }}>
               {[
-                ["🛡️", "100% Safe", "No risk of ban. Official methods only."],
-                ["⚡", "Fast Delivery", "UC added within 6–24 hours."],
-                ["💰", "Cheapest Price", "Lower than the official in-game store."],
-                ["🔒", "Data Privacy", "Credentials deleted immediately after use."],
-              ].map(([emoji, title, desc]) => (
+                { icon: <Shield size={28} style={{ color: "var(--gold)" }} />, title: "100% Safe", desc: "No risk of ban. Official methods only." },
+                { icon: <Zap size={28} style={{ color: "var(--gold)" }} />, title: "Fast Delivery", desc: "UC added within 6–24 hours." },
+                { icon: <Banknote size={28} style={{ color: "var(--gold)" }} />, title: "Cheapest Price", desc: "Lower than the official in-game store." },
+                { icon: <Lock size={28} style={{ color: "var(--gold)" }} />, title: "Data Privacy", desc: "Credentials deleted immediately after use." },
+              ].map(({ icon, title, desc }) => (
                 <div key={title}>
-                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>{emoji}</div>
+                  <div style={{ display: "flex", justifyContent: "center", marginBottom: "8px" }}>{icon}</div>
                   <div style={{ color: "var(--gold)", fontWeight: 800, fontSize: "16px", marginBottom: "4px" }}>{title}</div>
                   <div style={{ fontSize: "13px", color: "var(--muted)", lineHeight: 1.6 }}>{desc}</div>
                 </div>

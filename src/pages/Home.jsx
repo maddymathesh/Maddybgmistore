@@ -3,7 +3,7 @@ import { supabase } from "../utils/supabase";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { Gamepad2, ShoppingCart, Banknote, CheckCircle, Zap, Shield, Star, Trophy, Lock, Smartphone, CircleDollarSign, Car, Coins, Sparkles, ArrowRight, RefreshCw } from "lucide-react";
+import { Gamepad2, ShoppingCart, Banknote, CheckCircle, Zap, Shield, Star, Trophy, Lock, Smartphone, CircleDollarSign, Car, Coins, Sparkles, ArrowRight, RefreshCw, Volume2, Users, Flame, Award, Info, Clock } from "lucide-react";
 import CountUp from "../components/CountUp";
 import LightRays from "../components/LightRays";
 
@@ -61,6 +61,28 @@ const connectChannels = [
     ),
   },
 ];
+
+const StepBadge = ({ num, color }) => (
+  <div style={{
+    width: "24px",
+    height: "24px",
+    borderRadius: "50%",
+    background: `${color}15`,
+    border: `1px solid ${color}40`,
+    color: color,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "11px",
+    fontWeight: "bold",
+    fontFamily: "var(--font-h)",
+    boxShadow: `0 0 8px ${color}15`,
+    flexShrink: 0,
+    marginTop: "2px"
+  }}>
+    {num}
+  </div>
+);
 
 export default function Home() {
   const [avgRating, setAvgRating] = useState(4.8);
@@ -214,13 +236,13 @@ export default function Home() {
               </p>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 28px", display: "grid", gap: "10px" }}>
                 {[
-                  { emoji: "🎮", title: "Ready-to-Play Accounts", desc: "Verified and secure accounts available with instant delivery." },
-                  { emoji: "📢", title: "Market Available Accounts", desc: "Daily account listings ranging from ₹5K to ₹500K shared through our official channels." },
-                  { emoji: "⚡", title: "Custom Requirement Accounts", desc: "Personalized account sourcing based on your exact budget, skins, and preferences within 24–48 hours." },
-                  { emoji: "🤝", title: "Online & Face-to-Face Deal Modes", desc: "Secure online transactions and face-to-face deals available for high-value trades (₹100K+)." }
+                  { icon: <Gamepad2 size={15} style={{ color: "var(--gold)" }} />, title: "Ready-to-Play Accounts", desc: "Verified and secure accounts available with instant delivery." },
+                  { icon: <Volume2 size={15} style={{ color: "var(--gold)" }} />, title: "Market Available Accounts", desc: "Daily account listings ranging from ₹5K to ₹500K shared through our official channels." },
+                  { icon: <Zap size={15} style={{ color: "var(--gold)" }} />, title: "Custom Requirement Accounts", desc: "Personalized account sourcing based on your exact budget, skins, and preferences within 24–48 hours." },
+                  { icon: <Users size={15} style={{ color: "var(--gold)" }} />, title: "Online & Face-to-Face Deal Modes", desc: "Secure online transactions and face-to-face deals available for high-value trades (₹100K+)." }
                 ].map(item => (
                   <li key={item.title} style={{ fontSize: "12.5px", color: "var(--text)", display: "flex", alignItems: "flex-start", gap: "10px", fontWeight: 600, lineHeight: 1.5 }}>
-                    <span style={{ flexShrink: 0, fontSize: "14px" }}>{item.emoji}</span>
+                    <span style={{ flexShrink: 0, display: "inline-flex", marginTop: "3px" }}>{item.icon}</span>
                     <span>
                       <strong style={{ color: "#fff" }}>{item.title}</strong> — <span style={{ color: "var(--muted)", fontWeight: 500 }}>{item.desc}</span>
                     </span>
@@ -244,13 +266,13 @@ export default function Home() {
               </p>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 28px", display: "grid", gap: "10px" }}>
                 {[
-                  { emoji: "💰", title: "Top Market Valuation", desc: "Fair and transparent pricing based on current market demand." },
-                  { emoji: "⚡", title: "Instant Cashouts", desc: "Payments processed quickly via UPI, bank transfer, or other supported methods." },
-                  { emoji: "🛡️", title: "100% Secure Escrow Protection", desc: "Fully secured transactions with transparent handling." },
-                  { emoji: "🤝", title: "Online & Face-to-Face Deal Modes", desc: "Safe online transactions and in-person deals available for high-value accounts (₹100K+)." }
+                  { icon: <Banknote size={15} style={{ color: "#10b981" }} />, title: "Top Market Valuation", desc: "Fair and transparent pricing based on current market demand." },
+                  { icon: <Zap size={15} style={{ color: "#10b981" }} />, title: "Instant Cashouts", desc: "Payments processed quickly via UPI, bank transfer, or other supported methods." },
+                  { icon: <Shield size={15} style={{ color: "#10b981" }} />, title: "100% Secure Escrow Protection", desc: "Fully secured transactions with transparent handling." },
+                  { icon: <Users size={15} style={{ color: "#10b981" }} />, title: "Online & Face-to-Face Deal Modes", desc: "Safe online transactions and in-person deals available for high-value accounts (₹100K+)." }
                 ].map(item => (
                   <li key={item.title} style={{ fontSize: "12.5px", color: "var(--text)", display: "flex", alignItems: "flex-start", gap: "10px", fontWeight: 600, lineHeight: 1.5 }}>
-                    <span style={{ flexShrink: 0, fontSize: "14px" }}>{item.emoji}</span>
+                    <span style={{ flexShrink: 0, display: "inline-flex", marginTop: "3px" }}>{item.icon}</span>
                     <span>
                       <strong style={{ color: "#fff" }}>{item.title}</strong> — <span style={{ color: "var(--muted)", fontWeight: 500 }}>{item.desc}</span>
                     </span>
@@ -274,13 +296,13 @@ export default function Home() {
               </p>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 28px", display: "grid", gap: "10px" }}>
                 {[
-                  { emoji: "🔄", title: "Tier Upgrade & Downgrade Options", desc: "Swap your account for premium or budget-friendly inventory." },
-                  { emoji: "🛡️", title: "Escrow Trade Protection", desc: "Secure dual-handover process for safer exchanges." },
-                  { emoji: "🤝", title: "Fair Valuation System", desc: "Instant appraisal and transparent adjustment pricing." },
-                  { emoji: "⚡", title: "Online & Face-to-Face Deal Modes", desc: "Trusted online and offline exchange options available for premium-value trades (₹100K+)." }
+                  { icon: <RefreshCw size={15} style={{ color: "#a855f7" }} />, title: "Tier Upgrade & Downgrade Options", desc: "Swap your account for premium or budget-friendly inventory." },
+                  { icon: <Shield size={15} style={{ color: "#a855f7" }} />, title: "Escrow Trade Protection", desc: "Secure dual-handover process for safer exchanges." },
+                  { icon: <Users size={15} style={{ color: "#a855f7" }} />, title: "Fair Valuation System", desc: "Instant appraisal and transparent adjustment pricing." },
+                  { icon: <Zap size={15} style={{ color: "#a855f7" }} />, title: "Online & Face-to-Face Deal Modes", desc: "Trusted online and offline exchange options available for premium-value trades (₹100K+)." }
                 ].map(item => (
                   <li key={item.title} style={{ fontSize: "12.5px", color: "var(--text)", display: "flex", alignItems: "flex-start", gap: "10px", fontWeight: 600, lineHeight: 1.5 }}>
-                    <span style={{ flexShrink: 0, fontSize: "14px" }}>{item.emoji}</span>
+                    <span style={{ flexShrink: 0, display: "inline-flex", marginTop: "3px" }}>{item.icon}</span>
                     <span>
                       <strong style={{ color: "#fff" }}>{item.title}</strong> — <span style={{ color: "var(--muted)", fontWeight: 500 }}>{item.desc}</span>
                     </span>
@@ -296,17 +318,17 @@ export default function Home() {
 
         {/* Tier 2: Expanded Catalog (UC, X-Suit, Supercar) */}
         <div style={{ textAlign: "center", marginTop: "54px", marginBottom: "28px" }}>
-          <div style={{ fontSize: "11px", fontWeight: 800, color: "var(--gold)", letterSpacing: "2px", textTransform: "uppercase" }}>
-            ⚡ ADDITIONAL CATALOG & ELITE SERVICES
+          <div style={{ fontSize: "11px", fontWeight: 800, color: "var(--gold)", letterSpacing: "2px", textTransform: "uppercase", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+            <Zap size={14} style={{ color: "var(--gold)" }} /> ADDITIONAL CATALOG & ELITE SERVICES
           </div>
         </div>
 
         {/* Tab Buttons */}
         <div style={{ display: "flex", justifyContent: "center", gap: "10px", flexWrap: "wrap", marginBottom: "32px", maxWidth: "800px", margin: "0 auto 32px" }}>
           {[
-            { id: "uc", label: "💎 UC Purchase", activeColor: "#3b82f6", bg: "rgba(59,130,246,0.12)" },
-            { id: "xsuit", label: "✨ X-Suit Gifting", activeColor: "#a855f7", bg: "rgba(168,85,247,0.12)" },
-            { id: "supercar", label: "🏎️ Supercar Gifting", activeColor: "#fb923c", bg: "rgba(249,115,22,0.12)" }
+            { id: "uc", label: "UC Purchase", icon: <Coins size={14} style={{ marginRight: "6px" }} />, activeColor: "#3b82f6", bg: "rgba(59,130,246,0.12)" },
+            { id: "xsuit", label: "X-Suit Gifting", icon: <Sparkles size={14} style={{ marginRight: "6px" }} />, activeColor: "#a855f7", bg: "rgba(168,85,247,0.12)" },
+            { id: "supercar", label: "Supercar Gifting", icon: <Car size={14} style={{ marginRight: "6px" }} />, activeColor: "#fb923c", bg: "rgba(249,115,22,0.12)" }
           ].map(tab => {
             const isActive = activeCatalogTab === tab.id;
             return (
@@ -324,9 +346,12 @@ export default function Home() {
                   color: isActive ? "#fff" : "var(--muted)",
                   cursor: "pointer",
                   transition: "all 0.2s ease",
-                  boxShadow: isActive ? `0 4px 20px ${tab.activeColor}15` : "none"
+                  boxShadow: isActive ? `0 4px 20px ${tab.activeColor}15` : "none",
+                  display: "inline-flex",
+                  alignItems: "center"
                 }}
               >
+                {tab.icon}
                 {tab.label}
               </button>
             );
@@ -344,7 +369,9 @@ export default function Home() {
                   <div style={{ display: "flex", flexDirection: "column", height: "100%", justifyContent: "space-between" }}>
                     <div>
                       <span className="badge badge-blue-outline" style={{ fontSize: "10px", background: "rgba(59,130,246,0.1)", color: "#3b82f6", border: "1px solid rgba(59,130,246,0.25)", padding: "4px 10px", borderRadius: "100px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", display: "inline-block" }}>Premium Service</span>
-                      <h3 style={{ fontFamily: "var(--font-h)", fontSize: "26px", fontWeight: 800, marginTop: "12px", marginBottom: "12px", color: "#fff" }}>💎 UC Purchase</h3>
+                      <h3 style={{ fontFamily: "var(--font-h)", fontSize: "26px", fontWeight: 800, marginTop: "12px", marginBottom: "12px", color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
+                        <Coins size={24} style={{ color: "#3b82f6" }} /> UC Purchase
+                      </h3>
                       <p style={{ color: "var(--muted)", fontSize: "13.5px", lineHeight: 1.6, marginBottom: "28px" }}>
                         Purchase BGMI UC safely through secure login methods or direct Character ID top-up options with fast delivery and trusted handling.
                       </p>
@@ -352,8 +379,8 @@ export default function Home() {
                       {/* Sub-toggle for UC Methods */}
                       <div style={{ display: "flex", gap: "8px", background: "rgba(0,0,0,0.2)", padding: "4px", borderRadius: "10px", marginBottom: "24px", border: "1px solid rgba(255,255,255,0.03)" }}>
                         {[
-                          { id: "view_login", label: "🔐 View Login" },
-                          { id: "character_id", label: "⚡ Character ID" }
+                          { id: "view_login", label: "View Login", icon: <Lock size={12} style={{ marginRight: "6px" }} /> },
+                          { id: "character_id", label: "Character ID", icon: <Zap size={12} style={{ marginRight: "6px" }} /> }
                         ].map(method => {
                           const isUcActive = activeUcMethod === method.id;
                           return (
@@ -371,9 +398,13 @@ export default function Home() {
                                 background: isUcActive ? "#3b82f6" : "transparent",
                                 color: isUcActive ? "#fff" : "var(--muted)",
                                 cursor: "pointer",
-                                transition: "all 0.2s"
+                                transition: "all 0.2s",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center"
                               }}
                             >
+                              {method.icon}
                               {method.label}
                             </button>
                           );
@@ -392,20 +423,22 @@ export default function Home() {
                   {activeUcMethod === "view_login" ? (
                     <div className="fade-in">
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border)", paddingBottom: "14px", marginBottom: "18px", flexWrap: "wrap", gap: "10px" }}>
-                        <h4 style={{ fontFamily: "var(--font-h)", fontSize: "16px", fontWeight: 800, margin: 0, color: "#fff" }}>🔐 View Login UC Procedure</h4>
+                        <h4 style={{ fontFamily: "var(--font-h)", fontSize: "16px", fontWeight: 800, margin: 0, color: "#fff", display: "flex", alignItems: "center", gap: "6px" }}>
+                          <Lock size={18} style={{ color: "#3b82f6" }} /> View Login UC Procedure
+                        </h4>
                         <span style={{ fontSize: "11px", fontWeight: 800, color: "#3b82f6", background: "rgba(59,130,246,0.12)", padding: "4px 10px", borderRadius: "100px" }}>Estimated Delivery: 6–24 Hours</span>
                       </div>
                       
                       <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
                         {[
-                          { step: "1️⃣", title: "Contact Us", text: "Message us on WhatsApp or Telegram and tell us which UC pack you want to purchase." },
-                          { step: "2️⃣", title: "Make Payment", text: "Complete your payment securely using UPI, Bank Transfer, or any accepted payment method." },
-                          { step: "3️⃣", title: "Share Login Credentials", text: "Provide your Facebook or X (Twitter) login credentials securely. Your information is kept fully confidential and deleted immediately after the purchase process." },
-                          { step: "4️⃣", title: "UC Purchase Process", text: "We log into your account, purchase the UC, and safely log out without changing any account settings or personal information." },
-                          { step: "5️⃣", title: "Confirmation", text: "Once the UC has been added successfully, we will notify you immediately. Delivery usually takes between 6 to 24 hours." }
+                          { step: "01", title: "Contact Us", text: "Message us on WhatsApp or Telegram and tell us which UC pack you want to purchase." },
+                          { step: "02", title: "Make Payment", text: "Complete your payment securely using UPI, Bank Transfer, or any accepted payment method." },
+                          { step: "03", title: "Share Login Credentials", text: "Provide your Facebook or X (Twitter) login credentials securely. Your information is kept fully confidential and deleted immediately after the purchase process." },
+                          { step: "04", title: "UC Purchase Process", text: "We log into your account, purchase the UC, and safely log out without changing any account settings or personal information." },
+                          { step: "05", title: "Confirmation", text: "Once the UC has been added successfully, we will notify you immediately. Delivery usually takes between 6 to 24 hours." }
                         ].map(item => (
                           <div key={item.title} style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
-                            <div style={{ fontSize: "16px", flexShrink: 0, marginTop: "2px" }}>{item.step}</div>
+                            <StepBadge num={item.step} color="#3b82f6" />
                             <div>
                               <strong style={{ color: "#fff", fontSize: "13.5px" }}>{item.title}</strong>
                               <p style={{ color: "var(--muted)", fontSize: "12.5px", margin: "2px 0 0", lineHeight: 1.5 }}>{item.text}</p>
@@ -415,7 +448,9 @@ export default function Home() {
                       </div>
 
                       <div style={{ marginTop: "20px", padding: "12px 16px", background: "rgba(59,130,246,0.06)", borderRadius: "10px", border: "1px solid rgba(59,130,246,0.15)" }}>
-                        <span style={{ fontSize: "11px", fontWeight: 800, color: "#3b82f6", display: "block", marginBottom: "6px" }}>✅ Accepted Login Methods</span>
+                        <span style={{ fontSize: "11px", fontWeight: 800, color: "#3b82f6", display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
+                          <CheckCircle size={13} /> Accepted Login Methods
+                        </span>
                         <div style={{ display: "flex", gap: "8px" }}>
                           <span style={{ fontSize: "11px", fontWeight: 700, color: "#93c5fd", background: "rgba(59,130,246,0.12)", padding: "4px 12px", borderRadius: "20px", border: "1px solid rgba(59,130,246,0.2)" }}>Facebook Login</span>
                           <span style={{ fontSize: "11px", fontWeight: 700, color: "#93c5fd", background: "rgba(59,130,246,0.12)", padding: "4px 12px", borderRadius: "20px", border: "1px solid rgba(59,130,246,0.2)" }}>X (Twitter) Login</span>
@@ -425,20 +460,22 @@ export default function Home() {
                   ) : (
                     <div className="fade-in">
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border)", paddingBottom: "14px", marginBottom: "18px", flexWrap: "wrap", gap: "10px" }}>
-                        <h4 style={{ fontFamily: "var(--font-h)", fontSize: "16px", fontWeight: 800, margin: 0, color: "#fff" }}>⚡ Character ID UC Procedure</h4>
+                        <h4 style={{ fontFamily: "var(--font-h)", fontSize: "16px", fontWeight: 800, margin: 0, color: "#fff", display: "flex", alignItems: "center", gap: "6px" }}>
+                          <Zap size={18} style={{ color: "#fb923c" }} /> Character ID UC Procedure
+                        </h4>
                         <span style={{ fontSize: "11px", fontWeight: 800, color: "#fb923c", background: "rgba(249,115,22,0.12)", padding: "4px 10px", borderRadius: "100px" }}>Estimated Delivery: 6–12 Hours</span>
                       </div>
 
                       <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
                         {[
-                          { step: "1️⃣", title: "Contact Us", text: "Reach out to us on WhatsApp or Telegram and mention the UC pack you want." },
-                          { step: "2️⃣", title: "Make Payment", text: "Complete payment through UPI, Bank Transfer, or other supported payment methods." },
-                          { step: "3️⃣", title: "Share Your Character ID", text: "Send us your BGMI Character ID. No login credentials are required, making this the safest top-up method." },
-                          { step: "4️⃣", title: "Verification & UC Delivery", text: "We verify your Character ID and send UC directly to your account. In many cases, delivery is completed even faster than the estimated time." },
-                          { step: "5️⃣", title: "Confirmation", text: "We will notify you once the UC has been successfully delivered." }
+                          { step: "01", title: "Contact Us", text: "Reach out to us on WhatsApp or Telegram and mention the UC pack you want." },
+                          { step: "02", title: "Make Payment", text: "Complete payment through UPI, Bank Transfer, or other supported payment methods." },
+                          { step: "03", title: "Share Your Character ID", text: "Send us your BGMI Character ID. No login credentials are required, making this the safest top-up method." },
+                          { step: "04", title: "Verification & UC Delivery", text: "We verify your Character ID and send UC directly to your account. In many cases, delivery is completed even faster than the estimated time." },
+                          { step: "05", title: "Confirmation", text: "We will notify you once the UC has been successfully delivered." }
                         ].map(item => (
                           <div key={item.title} style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
-                            <div style={{ fontSize: "16px", flexShrink: 0, marginTop: "2px" }}>{item.step}</div>
+                            <StepBadge num={item.step} color="#fb923c" />
                             <div>
                               <strong style={{ color: "#fff", fontSize: "13.5px" }}>{item.title}</strong>
                               <p style={{ color: "var(--muted)", fontSize: "12.5px", margin: "2px 0 0", lineHeight: 1.5 }}>{item.text}</p>
@@ -448,8 +485,8 @@ export default function Home() {
                       </div>
 
                       <div style={{ marginTop: "20px", padding: "12px 16px", background: "rgba(249,115,22,0.06)", borderRadius: "10px", border: "1px solid rgba(249,115,22,0.15)" }}>
-                        <span style={{ fontSize: "12px", fontWeight: 700, color: "#fb923c", display: "block", lineHeight: 1.5 }}>
-                          ⚡ No login credentials required — only your Character ID. Fastest and safest UC purchase method.
+                        <span style={{ fontSize: "12px", fontWeight: 700, color: "#fb923c", display: "flex", alignItems: "center", gap: "6px", lineHeight: 1.5 }}>
+                          <Zap size={14} /> No login credentials required — only your Character ID. Fastest and safest UC purchase method.
                         </span>
                       </div>
                     </div>
@@ -468,7 +505,9 @@ export default function Home() {
                   <div style={{ display: "flex", flexDirection: "column", height: "100%", justifyContent: "space-between" }}>
                     <div>
                       <span className="badge badge-purple-outline" style={{ fontSize: "10px", background: "rgba(168,85,247,0.1)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.25)", padding: "4px 10px", borderRadius: "100px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", display: "inline-block" }}>Elite Gear</span>
-                      <h3 style={{ fontFamily: "var(--font-h)", fontSize: "26px", fontWeight: 800, marginTop: "12px", marginBottom: "12px", color: "#fff" }}>✨ X-Suit Gifting Deals</h3>
+                      <h3 style={{ fontFamily: "var(--font-h)", fontSize: "26px", fontWeight: 800, marginTop: "12px", marginBottom: "12px", color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
+                        <Sparkles size={24} style={{ color: "#c084fc" }} /> X-Suit Gifting Deals
+                      </h3>
                       <p style={{ color: "var(--muted)", fontSize: "13.5px", lineHeight: 1.6, marginBottom: "28px" }}>
                         Get premium BGMI X-Suits safely through the official gifting system at competitive pricing.
                       </p>
@@ -484,8 +523,12 @@ export default function Home() {
                 <div className="catalog-proc-card border-purple-glow">
                   <div className="fade-in">
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border)", paddingBottom: "14px", marginBottom: "18px", flexWrap: "wrap", gap: "10px" }}>
-                      <h4 style={{ fontFamily: "var(--font-h)", fontSize: "16px", fontWeight: 800, margin: 0, color: "#fff" }}>🎁 Gifting Procedure & Conditions</h4>
-                      <span style={{ fontSize: "11px", fontWeight: 800, color: "#c084fc", background: "rgba(168,85,247,0.12)", padding: "4px 10px", borderRadius: "100px" }}>🕒 72-Hour Friendship Rule</span>
+                      <h4 style={{ fontFamily: "var(--font-h)", fontSize: "16px", fontWeight: 800, margin: 0, color: "#fff", display: "flex", alignItems: "center", gap: "6px" }}>
+                        <Award size={18} style={{ color: "#c084fc" }} /> Gifting Procedure & Conditions
+                      </h4>
+                      <span style={{ fontSize: "11px", fontWeight: 800, color: "#c084fc", background: "rgba(168,85,247,0.12)", padding: "4px 10px", borderRadius: "100px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                        <Clock size={12} /> 72-Hour Friendship Rule
+                      </span>
                     </div>
 
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "24px" }}>
@@ -493,15 +536,15 @@ export default function Home() {
                         <span style={{ fontSize: "12px", fontWeight: 800, color: "#c084fc", display: "block", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Step-by-Step Process</span>
                         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                           {[
-                            { step: "1️⃣", title: "Choose Your X-Suit", text: "Select the X-Suit you want to purchase and confirm availability with us." },
-                            { step: "2️⃣", title: "Complete Payment", text: "Make payment securely using any supported payment method." },
-                            { step: "3️⃣", title: "Share Your In-Game ID", text: "Send us your BGMI Character ID after payment confirmation." },
-                            { step: "4️⃣", title: "Accept Friend Request", text: "Accept our in-game friend request to begin the gifting process." },
-                            { step: "5️⃣", title: "Wait for Official Gift Eligibility", text: "BGMI requires a 72-hour friendship period before gifting becomes available." },
-                            { step: "6️⃣", title: "Receive Your X-Suit", text: "Once eligible, your selected X-Suit will be gifted directly to your account." }
+                            { step: "01", title: "Choose Your X-Suit", text: "Select the X-Suit you want to purchase and confirm availability with us." },
+                            { step: "02", title: "Complete Payment", text: "Make payment securely using any supported payment method." },
+                            { step: "03", title: "Share Your In-Game ID", text: "Send us your BGMI Character ID after payment confirmation." },
+                            { step: "04", title: "Accept Friend Request", text: "Accept our in-game friend request to begin the gifting process." },
+                            { step: "05", title: "Wait for Official Gift Eligibility", text: "BGMI requires a 72-hour friendship period before gifting becomes available." },
+                            { step: "06", title: "Receive Your X-Suit", text: "Once eligible, your selected X-Suit will be gifted directly to your account." }
                           ].map(item => (
                             <div key={item.title} style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-                              <div style={{ fontSize: "14px", flexShrink: 0, marginTop: "1px" }}>{item.step}</div>
+                              <StepBadge num={item.step} color="#c084fc" />
                               <div>
                                 <strong style={{ color: "#fff", fontSize: "12.5px" }}>{item.title}</strong>
                                 <p style={{ color: "var(--muted)", fontSize: "11.5px", margin: "1px 0 0", lineHeight: 1.4 }}>{item.text}</p>
@@ -512,14 +555,19 @@ export default function Home() {
                       </div>
 
                       <div style={{ background: "rgba(168,85,247,0.04)", padding: "18px", borderRadius: "12px", border: "1px solid rgba(168,85,247,0.12)", height: "fit-content" }}>
-                        <span style={{ fontSize: "12px", fontWeight: 800, color: "#c084fc", display: "block", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.5px" }}>📌 Official BGMI Requirements</span>
-                        <ul style={{ listStyle: "none", padding: 0, margin: "0 0 14px", display: "grid", gap: "8px" }}>
+                        <span style={{ fontSize: "12px", fontWeight: 800, color: "#c084fc", display: "flex", alignItems: "center", gap: "6px", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                          <Info size={14} /> Official BGMI Requirements
+                        </span>
+                        <ul style={{ listStyle: "none", padding: 0, margin: "0 0 14px", display: "grid", gap: "10px" }}>
                           {[
-                            "👥 Must be friends for at least 72 hours",
-                            "🔥 Synergy level must be 50 or above",
-                            "🎖️ Account level must be 10 or higher"
-                          ].map(req => (
-                            <li key={req} style={{ fontSize: "12px", color: "var(--text)", fontWeight: 600 }}>{req}</li>
+                            { icon: <Users size={14} style={{ color: "#c084fc" }} />, text: "Must be friends for at least 72 hours" },
+                            { icon: <Flame size={14} style={{ color: "#c084fc" }} />, text: "Synergy level must be 50 or above" },
+                            { icon: <Award size={14} style={{ color: "#c084fc" }} />, text: "Account level must be 10 or higher" }
+                          ].map((req, i) => (
+                            <li key={i} style={{ fontSize: "12.5px", color: "var(--text)", fontWeight: 600, display: "flex", alignItems: "center", gap: "8px" }}>
+                              {req.icon}
+                              <span>{req.text}</span>
+                            </li>
                           ))}
                         </ul>
                         <span style={{ fontSize: "11px", color: "var(--muted)", fontStyle: "italic", display: "block" }}>
@@ -542,7 +590,9 @@ export default function Home() {
                   <div style={{ display: "flex", flexDirection: "column", height: "100%", justifyContent: "space-between" }}>
                     <div>
                       <span className="badge badge-orange-outline" style={{ fontSize: "10px", background: "rgba(249,115,22,0.1)", color: "#fb923c", border: "1px solid rgba(249,115,22,0.25)", padding: "4px 10px", borderRadius: "100px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", display: "inline-block" }}>Exotic Luxury</span>
-                      <h3 style={{ fontFamily: "var(--font-h)", fontSize: "26px", fontWeight: 800, marginTop: "12px", marginBottom: "12px", color: "#fff" }}>🏎️ Supercar Gifting Events</h3>
+                      <h3 style={{ fontFamily: "var(--font-h)", fontSize: "26px", fontWeight: 800, marginTop: "12px", marginBottom: "12px", color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
+                        <Car size={24} style={{ color: "#fb923c" }} /> Supercar Gifting Events
+                      </h3>
                       <p style={{ color: "var(--muted)", fontSize: "13.5px", lineHeight: 1.6, marginBottom: "28px" }}>
                         Unlock premium BGMI supercars through secure gifting events with multiple card options available.
                       </p>
@@ -558,8 +608,12 @@ export default function Home() {
                 <div className="catalog-proc-card border-orange-glow">
                   <div className="fade-in">
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border)", paddingBottom: "14px", marginBottom: "18px", flexWrap: "wrap", gap: "10px" }}>
-                      <h4 style={{ fontFamily: "var(--font-h)", fontSize: "16px", fontWeight: 800, margin: 0, color: "#fff" }}>🎁 Gifting Procedure & Conditions</h4>
-                      <span style={{ fontSize: "11px", fontWeight: 800, color: "#fb923c", background: "rgba(249,115,22,0.12)", padding: "4px 10px", borderRadius: "100px" }}>🕒 72-Hour Friendship Rule</span>
+                      <h4 style={{ fontFamily: "var(--font-h)", fontSize: "16px", fontWeight: 800, margin: 0, color: "#fff", display: "flex", alignItems: "center", gap: "6px" }}>
+                        <Award size={18} style={{ color: "#fb923c" }} /> Gifting Procedure & Conditions
+                      </h4>
+                      <span style={{ fontSize: "11px", fontWeight: 800, color: "#fb923c", background: "rgba(249,115,22,0.12)", padding: "4px 10px", borderRadius: "100px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                        <Clock size={12} /> 72-Hour Friendship Rule
+                      </span>
                     </div>
 
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "24px" }}>
@@ -567,15 +621,15 @@ export default function Home() {
                         <span style={{ fontSize: "12px", fontWeight: 800, color: "#fb923c", display: "block", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Step-by-Step Process</span>
                         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                           {[
-                            { step: "1️⃣", title: "Choose Your Supercar Package", text: "Select your preferred Supercar and choose between 1-Card, 2-Card, or 3-Card variants." },
-                            { step: "2️⃣", title: "Complete Payment", text: "Confirm your order by making payment through any supported method." },
-                            { step: "3️⃣", title: "Share Your In-Game ID", text: "Send your BGMI Character ID after payment confirmation." },
-                            { step: "4️⃣", title: "Accept Friend Request", text: "Accept our official in-game friend request." },
-                            { step: "5️⃣", title: "Wait for Official Gifting Eligibility", text: "A mandatory 72-hour friendship period is required by BGMI before gifting can be completed." },
-                            { step: "6️⃣", title: "Receive Your Supercar Gift", text: "Once eligible, the selected Supercar package will be gifted directly to your account." }
+                            { step: "01", title: "Choose Your Supercar Package", text: "Select your preferred Supercar and choose between 1-Card, 2-Card, or 3-Card variants." },
+                            { step: "02", title: "Complete Payment", text: "Confirm your order by making payment through any supported method." },
+                            { step: "03", title: "Share Your In-Game ID", text: "Send your BGMI Character ID after payment confirmation." },
+                            { step: "04", title: "Accept Friend Request", text: "Accept our official in-game friend request." },
+                            { step: "05", title: "Wait for Official Gifting Eligibility", text: "A mandatory 72-hour friendship period is required by BGMI before gifting can be completed." },
+                            { step: "06", title: "Receive Your Supercar Gift", text: "Once eligible, the selected Supercar package will be gifted directly to your account." }
                           ].map(item => (
                             <div key={item.title} style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-                              <div style={{ fontSize: "14px", flexShrink: 0, marginTop: "1px" }}>{item.step}</div>
+                              <StepBadge num={item.step} color="#fb923c" />
                               <div>
                                 <strong style={{ color: "#fff", fontSize: "12.5px" }}>{item.title}</strong>
                                 <p style={{ color: "var(--muted)", fontSize: "11.5px", margin: "1px 0 0", lineHeight: 1.4 }}>{item.text}</p>
@@ -586,14 +640,19 @@ export default function Home() {
                       </div>
 
                       <div style={{ background: "rgba(249,115,22,0.04)", padding: "18px", borderRadius: "12px", border: "1px solid rgba(249,115,22,0.12)", height: "fit-content" }}>
-                        <span style={{ fontSize: "12px", fontWeight: 800, color: "#fb923c", display: "block", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.5px" }}>📌 Official BGMI Requirements</span>
-                        <ul style={{ listStyle: "none", padding: 0, margin: "0 0 14px", display: "grid", gap: "8px" }}>
+                        <span style={{ fontSize: "12px", fontWeight: 800, color: "#fb923c", display: "flex", alignItems: "center", gap: "6px", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                          <Info size={14} /> Official BGMI Requirements
+                        </span>
+                        <ul style={{ listStyle: "none", padding: 0, margin: "0 0 14px", display: "grid", gap: "10px" }}>
                           {[
-                            "👥 Must be friends for at least 72 hours",
-                            "🔥 Synergy level must be 50 or above",
-                            "🎖️ Account level must be 10 or higher"
-                          ].map(req => (
-                            <li key={req} style={{ fontSize: "12px", color: "var(--text)", fontWeight: 600 }}>{req}</li>
+                            { icon: <Users size={14} style={{ color: "#fb923c" }} />, text: "Must be friends for at least 72 hours" },
+                            { icon: <Flame size={14} style={{ color: "#fb923c" }} />, text: "Synergy level must be 50 or above" },
+                            { icon: <Award size={14} style={{ color: "#fb923c" }} />, text: "Account level must be 10 or higher" }
+                          ].map((req, i) => (
+                            <li key={i} style={{ fontSize: "12.5px", color: "var(--text)", fontWeight: 600, display: "flex", alignItems: "center", gap: "8px" }}>
+                              {req.icon}
+                              <span>{req.text}</span>
+                            </li>
                           ))}
                         </ul>
                         <span style={{ fontSize: "11px", color: "var(--muted)", fontStyle: "italic", display: "block" }}>
@@ -710,7 +769,7 @@ export default function Home() {
               ["2023", "Crossed 1,000+ successful account handovers and ₹60L in lifetime sales volume, adding premium X-Suits and Supercars to our portfolio."],
               ["2024", "Refined our buyer guarantees and expanded our services to character ID top-ups and safe UC/X-Suit gifting catalog streams."],
               ["2025", "Built an automated secure customer database, providing secure exchanges and professional invoices for high-end players."],
-              ["2026", "Fully launched our premium high-speed website, offering instant transfer, fair market pricing, and multiple secure payment modes. 🎉"]
+              ["2026", "Fully launched our premium high-speed website, offering instant transfer, fair market pricing, and multiple secure payment modes."]
             ].map(([yr,desc]) => (
               <li key={yr} style={{ position:"relative", marginBottom:"22px" }}>
                 <div style={{ position:"absolute", left:"-20px", top:"7px", width:"10px", height:"10px", borderRadius:"50%", background:"var(--gold)", border:"2px solid var(--bg)" }} />

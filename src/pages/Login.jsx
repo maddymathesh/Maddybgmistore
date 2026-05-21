@@ -4,7 +4,7 @@ import { GoogleAuthProvider, signInWithPopup, getRedirectResult } from "firebase
 import { auth } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
-import { Lock } from "lucide-react";
+import { Lock, Shield, User } from "lucide-react";
 
 export default function Login() {
   const { user, isAdmin } = useAuth();
@@ -115,12 +115,12 @@ export default function Login() {
           {/* Info */}
           <div style={{ display: "grid", gap: "10px" }}>
             {[
-              ["🛡️", "Admin accounts get full dashboard access"],
-              ["👤", "Users can view prices & buy accounts"],
-              ["🔒", "Your data is safe with Firebase Auth"],
-            ].map(([icon, text]) => (
-              <div key={text} style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "12px", color: "var(--muted)" }}>
-                <span>{icon}</span><span>{text}</span>
+              [<Shield size={14} style={{ color: "var(--gold)" }} />, "Admin accounts get full dashboard access"],
+              [<User size={14} style={{ color: "var(--gold)" }} />, "Users can view prices & buy accounts"],
+              [<Lock size={14} style={{ color: "var(--gold)" }} />, "Your data is safe with Firebase Auth"],
+            ].map(([Icon, text], idx) => (
+              <div key={idx} style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "12px", color: "var(--muted)" }}>
+                <span style={{ display: "flex", alignItems: "center" }}>{Icon}</span><span>{text}</span>
               </div>
             ))}
           </div>

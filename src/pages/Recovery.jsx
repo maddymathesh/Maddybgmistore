@@ -59,9 +59,13 @@ export default function Recovery() {
           </p>
 
           <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))", gap:"20px", maxWidth:"700px", margin:"60px auto 0" }}>
-            {[["🛡️","Safe Process","Secure and verified recovery method"],["⚡","Fast Recovery","Quick turnaround time on all cases"],["✅","High Success Rate","2000+ accounts recovered since 2019"]].map(([icon,h,p]) => (
+            {[
+              [<Shield size={40} style={{ color: "var(--gold)" }} />, "Safe Process", "Secure and verified recovery method"],
+              [<Zap size={40} style={{ color: "var(--orange)" }} />, "Fast Recovery", "Quick turnaround time on all cases"],
+              [<CheckCircle size={40} style={{ color: "#22c55e" }} />, "High Success Rate", "2000+ accounts recovered since 2019"]
+            ].map(([Icon,h,p]) => (
               <div key={h} className="card" style={{ textAlign:"center" }}>
-                <div style={{ fontSize:"40px", marginBottom:"12px" }}>{icon}</div>
+                <div style={{ display: "flex", justifyContent: "center", marginBottom:"12px" }}>{Icon}</div>
                 <h3 style={{ fontFamily:"var(--font-h)", fontSize:"18px", fontWeight:700, marginBottom:"6px" }}>{h}</h3>
                 <p style={{ color:"var(--muted)", fontSize:"13px" }}>{p}</p>
               </div>

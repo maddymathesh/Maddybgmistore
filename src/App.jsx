@@ -6,6 +6,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollDownIndicator from "./components/ScrollDownIndicator";
 import WhatsAppFloat from "./components/WhatsAppFloat";
 import { supabase } from "./utils/supabase";
+import { Trophy, Sparkles } from "lucide-react";
 
 let hasIncremented = false;
 
@@ -480,7 +481,9 @@ export default function App() {
             <div style={{ position: "absolute", width: "300px", height: "300px", background: "radial-gradient(circle, rgba(255,215,0,0.08) 0%, transparent 70%)", top: "-100px", left: "90px", zIndex: 0, pointerEvents: "none" }} />
 
             <div style={{ position: "relative", zIndex: 1 }}>
-              <div style={{ fontSize: "52px", marginBottom: "15px", animation: "bounce 1s infinite alternate" }}>🏆</div>
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: "15px", animation: "bounce 1s infinite alternate" }}>
+                <Trophy size={56} style={{ color: "var(--gold)", filter: "drop-shadow(0 0 10px rgba(255,215,0,0.4))" }} />
+              </div>
               <h2 style={{ fontFamily: "var(--font-h)", fontSize: "28px", fontWeight: 900, color: "var(--gold)", letterSpacing: "1px", marginBottom: "12px", textTransform: "uppercase" }}>
                 Congratulations!
               </h2>
@@ -488,7 +491,7 @@ export default function App() {
                 You are visitor number <span style={{ color: "var(--gold)", fontWeight: 800, fontSize: "22px", textShadow: "0 0 8px rgba(255,215,0,0.4)" }}>{celebrationUser.toLocaleString()}</span> to the Maddy BGMI Store!
               </p>
               <p style={{ color: "var(--muted)", fontSize: "13px", lineHeight: 1.6, marginBottom: "30px", maxWidth: "380px", margin: "0 auto 30px" }}>
-                South India's most trusted BGMI marketplace since 2019. Thank you for celebrating this milestone with us! 🚀
+                South India's most trusted BGMI marketplace since 2019. Thank you for celebrating this milestone with us! <Sparkles size={14} style={{ display: "inline-block", verticalAlign: "middle", color: "var(--gold)", marginLeft: "4px" }} />
               </p>
 
               <button

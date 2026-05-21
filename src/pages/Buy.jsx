@@ -244,7 +244,7 @@ export default function Buy() {
                 <span className="badge-tag-custom tag-blue">
                   <Star size={11} fill="currentColor" /> Ready to Play
                 </span>
-                <h3 className="buy-option-title">Ready-to-Play Stocks</h3>
+                <h3 className="buy-option-title">Ready To Play Accounts</h3>
               </div>
               <p className="buy-option-desc">
                 Choose from a pre-listed catalog of fully secured, instant-delivery accounts. Includes complete inventory listings, preview videos, and set transparent pricing.
@@ -293,7 +293,7 @@ export default function Buy() {
                 <span className="badge-tag-custom tag-purple">
                   <Sparkles size={11} fill="currentColor" /> Daily Listings
                 </span>
-                <h3 className="buy-option-title">Market-Available Feeds</h3>
+                <h3 className="buy-option-title">Available Accounts in Market</h3>
               </div>
               <p className="buy-option-desc">
                 Join our premium community channels. We post daily verified account listings ranging from ₹5,000 to ₹500,000 direct from individual sellers.
@@ -328,10 +328,10 @@ export default function Buy() {
 
               <div className="cta-container" style={{ display: "flex", gap: "10px" }}>
                 <a href="https://wa.me/+919025391516?text=Hi%20Maddy!%20I%20want%20to%20join%20the%20MBS%20WhatsApp%20Account%20Buying%20feed." target="_blank" rel="noreferrer" className="btn btn-green" style={{ flex: 1, height: "52px", justifyContent: "center", fontSize: "11px", padding: "10px", gap: "6px" }}>
-                  <MessageCircle size={15} /> WhatsApp Feed
+                  <MessageCircle size={15} /> WhatsApp Channel
                 </a>
                 <a href="https://t.me/MBSxMADDY17" target="_blank" rel="noreferrer" className="btn btn-tg" style={{ flex: 1, height: "52px", justifyContent: "center", fontSize: "11px", padding: "10px", gap: "6px" }}>
-                  <Send size={15} /> Telegram Feed
+                  <Send size={15} /> Telegram Channel
                 </a>
               </div>
             </div>
@@ -345,7 +345,7 @@ export default function Buy() {
                 <span className="badge-tag-custom tag-orange">
                   <Target size={11} fill="currentColor" /> Customized Sourcing
                 </span>
-                <h3 className="buy-option-title">Custom Requirement sourcing</h3>
+                <h3 className="buy-option-title">Customized Requirement Account</h3>
               </div>
               <p className="buy-option-desc">
                 Have specific demands? Give us your budget and skin preferences. We search our extensive nationwide network to find you the best matching deals.
@@ -380,10 +380,10 @@ export default function Buy() {
 
               <div className="cta-container" style={{ display: "flex", gap: "10px" }}>
                 <a href="https://wa.me/+919025391516?text=Hi%20Maddy!%20I%20have%20a%20custom%20BGMI%20account%20requirement%20for%20a%20budget%20of%20" target="_blank" rel="noreferrer" className="btn btn-green" style={{ flex: 1, height: "52px", justifyContent: "center", fontSize: "11px", padding: "10px", gap: "6px" }}>
-                  <MessageCircle size={15} /> WhatsApp Custom
+                  <MessageCircle size={15} /> WhatsApp
                 </a>
                 <a href="https://t.me/MBSxMADDY17" target="_blank" rel="noreferrer" className="btn btn-tg" style={{ flex: 1, height: "52px", justifyContent: "center", fontSize: "11px", padding: "10px", gap: "6px" }}>
-                  <Send size={15} /> Telegram Custom
+                  <Send size={15} /> Telegram
                 </a>
               </div>
             </div>
@@ -418,11 +418,6 @@ export default function Buy() {
             ))}
           </div>
 
-          <div style={{ textAlign: "center" }}>
-            <a href="https://wa.me/+919025391516?text=Hi%20Maddy!%20I%20have%20questions%20about%20buying%20an%20account." target="_blank" rel="noreferrer" className="btn btn-green" style={{ display: "inline-flex", alignItems: "center", gap: "8px", justifyContent: "center" }}>
-              <MessageCircle size={15} /> Talk directly to Maddy
-            </a>
-          </div>
         </section>
 
         {/* ── UNLINK SYSTEM EDUCATION HUB ─────────────────── */}
@@ -659,24 +654,36 @@ export default function Buy() {
                 a: "No. All 15% booking deposits are strictly non-refundable once an account is locked or custom sourcing commences. This deposit secures the exclusive lock on the account, removing it from active market availability. The only exception is the immediate return of any accidental excess amounts paid over the 15% threshold."
               },
               {
+                q: "Can my purchased BGMI account be retrieved or pulled back by the seller later?",
+                a: "At Maddy Store, this is strictly prevented. Every account goes through our severe verification protocol, including ID checks of the seller, complete secondary login unlink, and setting your recovery email and phone. Our Invoice includes a specific Unlink Guarantee; in the extremely rare event of a pull-back during this period, you get a full refund or an equivalent premium replacement. Once the guarantee expires, your account is fully bulletproof."
+              },
+              {
+                q: "What is the difference between 'Single Login' and 'Dual Login' accounts, and which is safer?",
+                a: "A 'Single Login' account has only one login method active (e.g. only Twitter/X is linked). A 'Dual Login' account has two social logins bound (e.g. both Facebook and Twitter/X). Single login accounts are generally safer and easier to secure because there is no secondary entry point. For Dual Login accounts, we always submit an unlink request for the secondary social account to make it a secure Single Login for you."
+              },
+              {
+                q: "What is a '30 Days Unlink' and why does it take so long?",
+                a: "BGMI's security engine forces a strict restriction: you cannot unlink a social network unless the other linked social network has been active on that account for at least 30 consecutive days. If a seller recently bound a recovery login, this cooldown must lapse. Once it does, the 7-day unlink countdown can be submitted safely."
+              },
+              {
+                q: "Will my in-game rank, popularity, friends list, or inventory be affected during the handover?",
+                a: "Absolutely not. Handing over the account only changes the login credentials (your social media/email login binds). Everything inside your BGMI dashboard—including your level, tier rank, classic skins, weapon finishes, supercars, achievement titles, and popularities—will remain 100% intact and untouched."
+              },
+              {
+                q: "How should I secure the credentials immediately upon receiving the login?",
+                a: "To ensure complete safety, you must immediately: (1) change the password of the primary social login, (2) enable 2-Factor Authentication (2FA) and update recovery details on that social account, (3) log into BGMI and link your own active email and phone number inside the in-game settings, and (4) do not attempt to log in using the unlinking social network as it will cancel the unlink process."
+              },
+              {
+                q: "Can I change the in-game player name and linking region?",
+                a: "Yes. You can change your character's name using a Rename Card (often pre-stocked in your inventory or bought with UC). The game region can also be changed from the settings page, though BGMI enforces a region lock cooldown (60 to 180 days). We strongly advise against changing the region during the active 7-day unlink process to avoid flagging security alerts."
+              },
+              {
                 q: "How do Face-to-Face (F2F) deals work?",
                 a: "F2F transactions are exclusively offered for high-tier accounts valued at ₹80,000 or above. You must pay the 15% booking deposit in advance to arrange the deal. In addition, all travel, lodging, and transport costs incurred by Maddy Store agents during the meetup must be covered completely by the buyer."
               },
               {
                 q: "How does the secondary social network unlink process work?",
                 a: "Unlinking in BGMI allows removing one of two linked social logins (e.g. removing Twitter/X but keeping Facebook). Once submitted, BGMI begins a 7-day waiting period. If anyone logs in using the unlinking social network during this waiting period, the request is automatically cancelled. To prevent issues, avoid logging in with the unlinking social network, logging in from multiple devices, or using a VPN."
-              },
-              {
-                q: "What is the difference between the Unlink Date and the Guarantee Expiry Date?",
-                a: "The Unlink Date is the exact date when the unlinking social network is fully detached from the game account. The Guarantee Expiry Date is a support buffer period (usually 7 days after the unlink completes) shown on your invoice. Our support and unlink guarantee are valid until this expiry date, after which ownership is fully secure and support ends."
-              },
-              {
-                q: "Can you guarantee a 100% exact match for custom sourcing?",
-                a: "While we tap into an extensive trusted seller network to secure high-quality choices based on your preferences, we cannot guarantee a 100% 'factory-exact' match since accounts are pre-owned. We will source and present the closest premium options matching your budget and core preferences for your final review and approval."
-              },
-              {
-                q: "What is the timeline for account delivery?",
-                a: "Ready-to-Play accounts are usually delivered within 1 to 2 hours after full payment. Market-Available and Custom Sourced accounts generally require 6 to 24 hours depending on the account binding methods (e.g. Facebook, Twitter/X, Game Center, Google Play) and standard secure cooldown protocols."
               },
               {
                 q: "Is it safe to buy through Maddy Store?",

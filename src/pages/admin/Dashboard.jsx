@@ -12,7 +12,7 @@ import { useTransactionStore } from "../../store/useTransactionStore";
 import { useRef } from "react";
 import toast from "react-hot-toast";
 import Navbar from "../../components/Navbar";
-import { LogOut, Plus, Trash2, Pencil, Star, Copy, Users, TrendingUp, DollarSign, Camera, Coins, Zap, Car, Clock, ShieldCheck, User as UserIcon, Tag, Hash, ArrowRightLeft, MessageSquare, History, Key, Download, FileText, CheckCircle2, ThumbsUp, AlertCircle, Calendar } from "lucide-react";
+import { LogOut, Sparkles, Plus, Trash2, Pencil, Star, Copy, Users, TrendingUp, DollarSign, Camera, Coins, Zap, Car, Clock, ShieldCheck, User as UserIcon, Tag, Hash, ArrowRightLeft, MessageSquare, History, Key, Download, FileText, CheckCircle2, ThumbsUp, AlertCircle, Calendar } from "lucide-react";
 import { generateNextTransactionId, generateNextXsuitId, generateNextSupercarId, generateNextUcId } from "../../services/transactionService";
 import { db, functions } from "../../firebase";
 import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, orderBy, setDoc, getDoc } from "firebase/firestore";
@@ -441,7 +441,9 @@ export default function AdminDashboard() {
         const formData = new FormData();
         formData.append("file", proofImage);
         formData.append("upload_preset", uploadPreset);
-        formData.append("folder", `mbs_proofs/${proofForm.month.replace(" ", "_")}`);
+        // Store proofs in designated folder
+        const folder = "maddy_bgmi_store/Proofs";
+        formData.append("folder", folder);
         const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
           method: "POST",
           body: formData,
@@ -468,11 +470,120 @@ export default function AdminDashboard() {
     finally { setSavingProof(false); }
   };
 
+  // Helper to delete image from Cloudinary if needed
+  async function deleteFromCloudinary(imageUrl) {
+    if (!imageUrl || !imageUrl.includes("cloudinary.com")) return;
+
+    try {
+      const cloudName =
+        import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+
+      const apiKey =
+        import.meta.env.VITE_CLOUDINARY_API_KEY;
+
+      const apiSecret =
+        import.meta.env.VITE_CLOUDINARY_API_SECRET;
+
+      if (!cloudName || !apiKey || !apiSecret) {
+        console.warn("Missing Cloudinary ENV");
+        return;
+      }
+
+      // Extract public_id correctly
+      const url = new URL(imageUrl);
+
+      const pathParts = url.pathname.split("/");
+
+      console.log("pathParts", pathParts);
+
+      // Find upload index
+      const uploadIndex = pathParts.indexOf("upload");
+
+      if (uploadIndex === -1) {
+        console.warn("Invalid Cloudinary URL");
+        return;
+      }
+
+      // Remove:
+      // /upload/
+      // version
+      const publicIdWithExt = pathParts
+        .slice(uploadIndex + 2)
+        .join("/");
+
+      console.log(
+        "publicIdWithExt",
+        publicIdWithExt
+      );
+
+      // Remove extension
+      const publicId = publicIdWithExt.replace(
+        /\.[^/.]+$/,
+        ""
+      );
+
+      console.log("publicId", publicId);
+
+      // Signature
+      const timestamp = Math.round(Date.now() / 1000);
+
+      const sigString =
+        `public_id=${publicId}&timestamp=${timestamp}${apiSecret}`;
+
+      const sha1Buffer =
+        await crypto.subtle.digest(
+          "SHA-1",
+          new TextEncoder().encode(sigString)
+        );
+
+      const signature = Array.from(
+        new Uint8Array(sha1Buffer)
+      )
+        .map((b) =>
+          b.toString(16).padStart(2, "0")
+        )
+        .join("");
+
+      // FormData
+      const form = new FormData();
+
+      form.append("public_id", publicId);
+      form.append("api_key", apiKey);
+      form.append("timestamp", timestamp);
+      form.append("signature", signature);
+
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudName}/image/destroy`,
+        {
+          method: "POST",
+          body: form,
+        }
+      );
+
+      const data = await res.json();
+
+      console.log(
+        "Cloudinary delete result",
+        data
+      );
+
+    } catch (e) {
+      console.warn(
+        "Cloudinary delete failed",
+        e
+      );
+    }
+  }
+
   const deleteProof = async (id) => {
     if (!confirm("Delete proof?")) return;
     try {
+      // fetch current record to get its image URL before deletion
+      const { data: proof } = await supabase.from('proofs').select('image_url').eq('id', id).single();
       const { error } = await supabase.from('proofs').delete().eq('id', id);
       if (error) throw error;
+      // delete image from Cloudinary if it was uploaded there
+      if (proof?.image_url) await deleteFromCloudinary(proof.image_url);
       fetchData();
     } catch (e) { toast.error(e.message); }
   };
@@ -529,8 +640,9 @@ export default function AdminDashboard() {
         const formData = new FormData();
         formData.append("file", xsuitImage);
         formData.append("upload_preset", uploadPreset);
-        formData.append("folder", "mbs_xsuits");
-
+        // Store xsuits in designated folder
+        const folder = "maddy_bgmi_store/Xsuite";
+        formData.append("folder", folder);
         const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
           method: "POST",
           body: formData,
@@ -563,8 +675,11 @@ export default function AdminDashboard() {
   const deleteXsuit = async (id) => {
     if (!confirm("Delete this Xsuit gift?")) return;
     try {
+      // get image URL before deletion
+      const { data: xsuit } = await supabase.from('xsuit_gifts').select('image_url').eq('id', id).single();
       const { error } = await supabase.from('xsuit_gifts').delete().eq('id', id);
       if (error) throw error;
+      if (xsuit?.image_url) await deleteFromCloudinary(xsuit.image_url);
       fetchData();
     } catch (e) { toast.error(e.message); }
   };
@@ -584,8 +699,9 @@ export default function AdminDashboard() {
         const formData = new FormData();
         formData.append("file", carImage);
         formData.append("upload_preset", uploadPreset);
-        formData.append("folder", "maddy_bgmi_store/Proofs/Supercars");
-
+        // Store supercar images in designated folder
+        const folder = "maddy_bgmi_store/Supercar";
+        formData.append("folder", folder);
         const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
           method: "POST",
           body: formData,
@@ -593,6 +709,7 @@ export default function AdminDashboard() {
         const json = await res.json();
         if (json.error) throw new Error(json.error.message);
         url = json.secure_url;
+
       }
 
       const data = {
@@ -626,8 +743,11 @@ export default function AdminDashboard() {
   const deleteCar = async (id) => {
     if (!confirm("Delete this Supercar gift?")) return;
     try {
+      // get image URL before deletion
+      const { data: car } = await supabase.from('supercar_gifts').select('image_url').eq('id', id).single();
       const { error } = await supabase.from('supercar_gifts').delete().eq('id', id);
       if (error) throw error;
+      if (car?.image_url) await deleteFromCloudinary(car.image_url);
       toast.success("Deleted from Supabase");
       fetchData();
     } catch (e) { toast.error(e.message); }

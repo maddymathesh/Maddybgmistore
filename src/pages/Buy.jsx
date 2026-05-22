@@ -176,10 +176,10 @@ export default function Buy() {
                 </div>
                 <div>
                   <strong style={{ color: "#fff", display: "block", fontSize: "15px", marginBottom: "6px", fontFamily: "var(--font-h)", letterSpacing: "0.5px" }}>
-                    15% Non-Refundable Booking
+                    10% Non-Refundable Booking
                   </strong>
                   <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.6", display: "block" }}>
-                    A **15% booking deposit** applies to all transactions. Booking deposits are strictly **non-refundable** under all circumstances, except for the return of any accidental excess amounts paid.
+                    A **10% booking deposit** applies to all transactions. Booking deposits are strictly **non-refundable once booked** under all circumstances, except for the return of any accidental excess amounts paid. For verification, we accept only government IDs with an address mentioned on it (Aadhaar Card / Driving License).
                   </span>
                 </div>
               </div>
@@ -200,7 +200,7 @@ export default function Buy() {
                     Full Payment Transfer
                   </strong>
                   <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.6", display: "block" }}>
-                    Accounts are secured and credentials completely handed over to the buyer **only** after the remaining 85% balance payment is cleared in full. No partial payments cover ownership delivery.
+                    Accounts are secured and credentials completely handed over to the buyer **only** after the remaining 90% balance payment is cleared in full. No partial payments cover ownership delivery.
                   </span>
                 </div>
               </div>
@@ -221,7 +221,7 @@ export default function Buy() {
                     F2F Meetup Guidelines
                   </strong>
                   <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.6", display: "block" }}>
-                    Face-to-Face (F2F) deals are strictly reserved for high-tier accounts valued at **₹80,000+**. Booking is required in advance, and **all travel/transport costs must be covered entirely by the buyer**.
+                    Face-to-Face (F2F) deals are strictly reserved for high-tier accounts valued at **₹80,000+**. Booking is required in advance, and **the buyer should pay the extra charges for Travel, Stay, and Food for the seller/Maddy Store agents**.
                   </span>
                 </div>
               </div>
@@ -262,7 +262,7 @@ export default function Buy() {
                     "Browse & Review: View pre-listed accounts complete with inventory videos, specifications, pricing, and unlink guarantees.",
                     "Contact Support: Message us directly on WhatsApp or Telegram with the specific account details you wish to buy.",
                     "Choose Deal Mode: Choose your transaction mode (secure Online transfer or Face-to-Face meetup for high-tier ₹80K+ deals) before final booking.",
-                    "Flexible Booking: Pay either a 15% non-refundable deposit to hold the account for 24 hours, or complete full payment directly.",
+                    "Flexible Booking: Pay either a 10% non-refundable deposit (once booked) to hold the account for 24 hours, or complete full payment directly. For KYC, we only accept government ID with address mentioned (Aadhaar Card / Driving License).",
                     "Binding & Handover: We link your recovery details immediately after full payment and deliver credentials with an unlink guarantee invoice.",
                     "Unlink Protection: Enjoy absolute safety. If any issues occur within the guarantee period, we provide a replacement or full refund.",
                     "Lobby & Chat Feedback: Send a lobby screenshot and chat feedback directly to our support team upon login.",
@@ -311,7 +311,7 @@ export default function Buy() {
                     "Join Official Feeds: Click both the WhatsApp and Telegram buttons below to join our active daily feeds.",
                     "Review Daily Listings: Browse through our daily posted verified accounts, ranging from ₹5,000 to several lakh.",
                     "Choose Deal Mode: Select either secure Online transfer or Face-to-Face meetup (for high-tier ₹80K+ deals) before finalizing.",
-                    "15% Booking or Full Pay: Pay a 15% non-refundable booking deposit to hold the account for 24 hours, or pay in full.",
+                    "10% Booking or Full Pay: Pay a 10% non-refundable booking deposit (once booked) to hold the account for 24 hours, or pay in full. A government ID with address (Aadhaar Card / Driving License) is mandatory for KYC.",
                     "Secure Account Binding: Once full payment is received, we bind your active recovery email and phone number to secure ownership.",
                     "Invoice & Dates: We issue an official invoice detailing your transaction, specific unlink date, and guarantee expiration.",
                     "Lobby & Chat Feedback: Send a lobby screenshot and chat feedback directly to our support team upon receiving the credentials.",
@@ -362,10 +362,10 @@ export default function Buy() {
                   {[
                     "Contact & Share Details: Reach out on WhatsApp/Telegram and share your budget and specific account demands (skins, supercar garage, gun labs).",
                     "Discuss Match Scope: We discuss and align on a realistic budget and feasible in-game requirements.",
-                    "15% Security Deposit: Pay a 15% refundable security deposit to initiate the personalized 24-48 hour sourcing sweep.",
-                    "Sourcing & Cooldown: We find the closest matching accounts (Note: exact 100% factory match cannot be guaranteed; full refund if no match).",
+                    "10% Security Deposit: Pay a 10% security deposit (strictly non-refundable once sourcing commences) to initiate the personalized 24-48 hour sourcing sweep. For KYC, a government ID with address mentioned (Aadhaar Card / Driving License) is required.",
+                    "Sourcing & Cooldown: We find the closest matching accounts (Note: exact 100% factory match cannot be guaranteed; full refund if no match found prior to selection).",
                     "Choose Deal Mode: Select secure Online transfer or Face-to-Face meetup (for ₹80K+ deals) before confirming the account.",
-                    "Final Booking & Handover: Sourced account approval turns deposit non-refundable; full payment secures ownership and delivery.",
+                    "Final Booking & Handover: Sourced account approval turns deposit towards the purchase; full payment secures ownership and delivery.",
                     "Lobby & Chat Feedback: Share a login lobby screenshot and your feedback directly in our support chat upon login.",
                     "Submit Website Review: Share your official sourcing experience and rating on our website's reviews page."
                   ].map((step, idx) => {
@@ -655,8 +655,8 @@ export default function Buy() {
           <div style={{ maxWidth: "800px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "16px" }}>
             {[
               {
-                q: "Is the 15% booking deposit refundable?",
-                a: "No. All 15% booking deposits are strictly non-refundable once an account is locked or custom sourcing commences. This deposit secures the exclusive lock on the account, removing it from active market availability. The only exception is the immediate return of any accidental excess amounts paid over the 15% threshold."
+                q: "Is the 10% booking deposit refundable?",
+                a: "No. All 10% booking deposits are strictly non-refundable once booked. This deposit secures the exclusive lock on the account, removing it from active market availability. The only exception is the immediate return of any accidental excess amounts paid over the 10% threshold."
               },
               {
                 q: "Can my purchased BGMI account be retrieved or pulled back by the seller later?",
@@ -684,7 +684,7 @@ export default function Buy() {
               },
               {
                 q: "How do Face-to-Face (F2F) deals work?",
-                a: "F2F transactions are exclusively offered for high-tier accounts valued at ₹80,000 or above. You must pay the 15% booking deposit in advance to arrange the deal. In addition, all travel, lodging, and transport costs incurred by Maddy Store agents during the meetup must be covered completely by the buyer."
+                a: "F2F transactions are exclusively offered for high-tier accounts valued at ₹80,000 or above. You must pay the 10% booking deposit in advance to arrange the deal (which is strictly non-refundable once booked). In addition, the buyer should pay the extra charges for Travel, Stay, and Food for the seller/Maddy Store agents. For verification, we accept only government IDs with an address mentioned on it (Aadhaar Card / Driving License)."
               },
               {
                 q: "How does the secondary social network unlink process work?",

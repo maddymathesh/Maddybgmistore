@@ -53,7 +53,7 @@ export default function Sell() {
     },
     {
       title: "Owner Government ID KYC Proof",
-      body: "Before releasing the final payment, we collect the owner's valid government ID proof (Aadhaar or PAN Card) for future reference and keep it secure.",
+      body: "Before releasing the final payment, we collect the owner's valid government ID proof with address mentioned (Aadhaar Card or Driving License) for future reference and keep it secure.",
       icon: <FileText size={18} />,
     },
     {
@@ -82,7 +82,7 @@ export default function Sell() {
     },
     {
       title: "KYC & Identity Verification",
-      body: "Submit government-issued ID proof (Aadhaar or PAN Card) to verify ownership and authorize buyout.",
+      body: "Submit government-issued ID proof with address mentioned (Aadhaar Card or Driving License) to verify ownership and authorize buyout.",
       icon: <FileText size={18} />,
     },
     {
@@ -279,7 +279,7 @@ export default function Sell() {
                     Strict KYC & ID Audits
                   </strong>
                   <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.6", display: "block" }}>
-                    To prevent disputes, we securely collect the owner's valid government ID proof (Aadhaar or PAN Card) before final payment for future reference and keep it 100% secure.
+                    To prevent disputes, we securely collect the owner's valid government ID proof containing an address (Aadhaar Card or Driving License) before final payment for future reference and keep it 100% secure.
                   </span>
                 </div>
               </div>
@@ -300,7 +300,7 @@ export default function Sell() {
                     Flexible Deal Modes & F2F
                   </strong>
                   <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.6", display: "block" }}>
-                    Choose secure online escrow transfer or a Face-to-Face meetup. Cash meetups are strictly reserved for premium account valuations above <strong>₹80,000+</strong> (travel expenses covered by the buyer).
+                    Choose secure online escrow transfer or a Face-to-Face meetup. Cash meetups are strictly reserved for premium account valuations above <strong>₹80,000+</strong> (where the Owner should pay the extra charges for Travel, Stay, and Food for the Maddy Store deal agent).
                   </span>
                 </div>
               </div>
@@ -600,7 +600,7 @@ export default function Sell() {
                       marginTop: "12px",
                       flexWrap: "wrap"
                     }}>
-                      <span className="pill-deal-mode green-border"><Check size={11} /> Government Aadhaar/PAN Proof Secured</span>
+                      <span className="pill-deal-mode green-border"><Check size={11} /> Government Aadhaar/Driving License Proof Secured</span>
                     </div>
                   )}
 
@@ -624,7 +624,7 @@ export default function Sell() {
                       flexWrap: "wrap"
                     }}>
                       <span className="pill-deal-mode"><MapPin size={11} /> Online Transfer (Instant & Escrowed)</span>
-                      <span className="pill-deal-mode gold-border"><Users size={11} /> Face-to-Face Meetup (Available strictly for ₹80,000+ valuations)</span>
+                      <span className="pill-deal-mode gold-border"><Users size={11} /> Face-to-Face Meetup (Available strictly for ₹80,000+ valuations; Owner pays Travel, Stay, Food for deal agent)</span>
                     </div>
                   )}
 
@@ -635,7 +635,7 @@ export default function Sell() {
                       marginTop: "12px",
                       flexWrap: "wrap"
                     }}>
-                      <span className="pill-deal-mode green-border"><Check size={11} /> PAN Card Validated</span>
+                      <span className="pill-deal-mode green-border"><Check size={11} /> Driving License Validated</span>
                       <span className="pill-deal-mode green-border"><Check size={11} /> Aadhaar Card Verified</span>
                     </div>
                   )}
@@ -887,7 +887,7 @@ export default function Sell() {
                   We prioritize seller trust just as much as buyer security. Review how we protect you and execute secure payouts:
                 </p>
                 <ul style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.8", paddingLeft: "20px", marginBottom: "20px" }}>
-                  <li style={{ marginBottom: "8px" }}><strong style={{ color: "#fff" }}>Secure KYC Encrypted Storage:</strong> Your government ID (Aadhaar or PAN Card) is saved on fully secure, encrypted servers, and is only accessed in the event of an account dispute.</li>
+                  <li style={{ marginBottom: "8px" }}><strong style={{ color: "#fff" }}>Secure KYC Encrypted Storage:</strong> Your government ID with address mentioned on it (Aadhaar Card or Driving License) is saved on fully secure, encrypted servers, and is only accessed in the event of an account dispute.</li>
                   <li style={{ marginBottom: "8px" }}><strong style={{ color: "#fff" }}>100% Guarded Payments:</strong> We hold buyer funds in a secure bank escrow, eliminating any risk of chargebacks or fraudulent reversals once your account is delivered.</li>
                   <li style={{ marginBottom: "8px" }}><strong style={{ color: "#fff" }}>Direct Payout Release:</strong> 100% of your payout is transferred directly via UPI, Bank Transfer, USDT, BTC, or Cash within 1-2 hours of credential validation.</li>
                 </ul>
@@ -932,7 +932,7 @@ export default function Sell() {
               },
               {
                 q: "Why is there a ₹80,000+ threshold for Face-to-Face deals?",
-                a: "Face-to-Face cash meetups require significant travel coordination, local safety setup, and escrow monitoring. To ensure it is mutually viable, F2F dealing is strictly reserved for premium BGMI accounts with valuations exceeding ₹80,000. All accounts below ₹80K are handled securely through our verified Online Escrow systems."
+                a: "Face-to-Face cash meetups require significant travel coordination, local safety setup, and escrow monitoring. To ensure it is mutually viable, F2F dealing is strictly reserved for premium BGMI accounts with valuations exceeding ₹80,000. In addition, the Owner must cover all extra charges for Travel, Stay, and Food for the Maddy Store deal agent. All accounts below ₹80K are handled securely through our verified Online Escrow systems."
               },
               {
                 q: "What are the exact unlinking rules and cooldown timelines?",
@@ -944,7 +944,7 @@ export default function Sell() {
               },
               {
                 q: "What KYC documents do I need to provide and how is my data secured?",
-                a: "We require a valid government-issued ID (such as an Aadhaar Card or PAN Card) to verify ownership and deter recovery fraud. All KYC data is stored on heavily encrypted offline servers and is only used to cooperate with official cybercrime departments in the event of retrieval attempts."
+                a: "We require a valid government-issued ID with address mentioned on it (specifically Aadhaar Card or Driving License) to verify ownership and deter recovery fraud. All KYC data is stored on heavily encrypted offline servers and is only used to cooperate with official cybercrime departments in the event of retrieval attempts."
               },
               {
                 q: "Can I still log in and play on my account during a Hold & Sell listing?",

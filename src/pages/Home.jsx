@@ -371,7 +371,7 @@ export default function Home() {
                 {/* Info Card */}
                 <div className="catalog-info-card border-blue">
                   <div style={{ position: "absolute", top: "24px", right: "24px", opacity: 0.1, color: "#3b82f6" }}><Coins size={68} /></div>
-                  <div style={{ display: "flex", flexDirection: "column", height: "100%", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
                     <div>
                       <span className="badge badge-blue-outline" style={{ fontSize: "10px", background: "rgba(59,130,246,0.1)", color: "#3b82f6", border: "1px solid rgba(59,130,246,0.25)", padding: "4px 10px", borderRadius: "100px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", display: "inline-block" }}>Premium Service</span>
                       <h3 style={{ fontFamily: "var(--font-h)", fontSize: "26px", fontWeight: 800, marginTop: "12px", marginBottom: "12px", color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
@@ -416,10 +416,6 @@ export default function Home() {
                         })}
                       </div>
                     </div>
-
-                    <Link to="/services/uc" className="btn btn-blue" style={{ alignSelf: "stretch", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "7px", padding: "14px 24px", fontSize: "13px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.5px", textDecoration: "none" }}>
-                      CLICK HERE TO PURCHASE UC →
-                    </Link>
                   </div>
                 </div>
 
@@ -495,8 +491,12 @@ export default function Home() {
                         </span>
                       </div>
                     </div>
-                  )}
                 </div>
+              </div>
+              <div style={{ display: "flex", justifyContent: "center", marginTop: "32px" }}>
+                <Link to="/services/uc" className="btn btn-blue" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "7px", padding: "14px 32px", fontSize: "13px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.5px", textDecoration: "none" }}>
+                  CLICK HERE TO PURCHASE UC →
+                </Link>
               </div>
             </div>
           )}
@@ -507,7 +507,7 @@ export default function Home() {
                 {/* Info Card */}
                 <div className="catalog-info-card border-purple">
                   <div style={{ position: "absolute", top: "24px", right: "24px", opacity: 0.1, color: "#a855f7" }}><Sparkles size={68} /></div>
-                  <div style={{ display: "flex", flexDirection: "column", height: "100%", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
                     <div>
                       <span className="badge badge-purple-outline" style={{ fontSize: "10px", background: "rgba(168,85,247,0.1)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.25)", padding: "4px 10px", borderRadius: "100px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", display: "inline-block" }}>Elite Gear</span>
                       <h3 style={{ fontFamily: "var(--font-h)", fontSize: "26px", fontWeight: 800, marginTop: "12px", marginBottom: "12px", color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
@@ -517,10 +517,6 @@ export default function Home() {
                         Get premium BGMI X-Suits safely through the official gifting system at competitive pricing.
                       </p>
                     </div>
-
-                    <Link to="/services/xsuit" className="btn btn-purple" style={{ alignSelf: "stretch", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "7px", padding: "14px 24px", fontSize: "13px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.5px", textDecoration: "none" }}>
-                      CLICK HERE TO PURCHASE X-SUIT →
-                    </Link>
                   </div>
                 </div>
 
@@ -583,6 +579,11 @@ export default function Home() {
                   </div>
                 </div>
               </div>
+              <div style={{ display: "flex", justifyContent: "center", marginTop: "32px" }}>
+                <Link to="/services/xsuit" className="btn btn-purple" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "7px", padding: "14px 32px", fontSize: "13px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.5px", textDecoration: "none" }}>
+                  CLICK HERE TO PURCHASE X-SUIT →
+                </Link>
+              </div>
             </div>
           )}
 
@@ -592,7 +593,7 @@ export default function Home() {
                 {/* Info Card */}
                 <div className="catalog-info-card border-orange">
                   <div style={{ position: "absolute", top: "24px", right: "24px", opacity: 0.1, color: "#fb923c" }}><Car size={68} /></div>
-                  <div style={{ display: "flex", flexDirection: "column", height: "100%", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
                     <div>
                       <span className="badge badge-orange-outline" style={{ fontSize: "10px", background: "rgba(249,115,22,0.1)", color: "#fb923c", border: "1px solid rgba(249,115,22,0.25)", padding: "4px 10px", borderRadius: "100px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", display: "inline-block" }}>Exotic Luxury</span>
                       <h3 style={{ fontFamily: "var(--font-h)", fontSize: "26px", fontWeight: 800, marginTop: "12px", marginBottom: "12px", color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
@@ -602,10 +603,6 @@ export default function Home() {
                         Unlock premium BGMI supercars through secure gifting events with multiple card options available.
                       </p>
                     </div>
-
-                    <Link to="/services/supercar" className="btn btn-orange" style={{ alignSelf: "stretch", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "7px", padding: "14px 24px", fontSize: "13px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.5px", textDecoration: "none" }}>
-                      CLICK HERE TO PURCHASE SUPERCAR →
-                    </Link>
                   </div>
                 </div>
 
@@ -667,6 +664,11 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
+              </div>
+              <div style={{ display: "flex", justifyContent: "center", marginTop: "32px" }}>
+                <Link to="/services/supercar" className="btn btn-orange" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "7px", padding: "14px 32px", fontSize: "13px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.5px", textDecoration: "none" }}>
+                  CLICK HERE TO PURCHASE SUPERCAR →
+                </Link>
               </div>
             </div>
           )}

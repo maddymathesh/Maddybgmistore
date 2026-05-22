@@ -39,7 +39,7 @@ export default function Exchange() {
     },
     {
       title: "Advance Sourcing Booking Lock",
-      body: "Deposit a 15% booking/advance lock to secure our dedicated sourcing support and hold potential matches.",
+      body: "Deposit a 10% booking/advance lock (strictly non-refundable once booked) to secure our dedicated sourcing support and hold potential matches.",
       icon: <Lock size={18} />,
     },
     {
@@ -54,7 +54,7 @@ export default function Exchange() {
     },
     {
       title: "Government ID & KYC Proof",
-      body: "Before finalizing, we collect the owner's valid government ID proof (Aadhaar or PAN Card) for future reference and keep it secure.",
+      body: "Before finalizing, we collect the owner's valid government ID proof with address mentioned (Aadhaar Card or Driving License) for future reference and keep it secure.",
       icon: <FileText size={18} />,
     },
     {
@@ -98,7 +98,7 @@ export default function Exchange() {
     },
     {
       title: "Government ID & KYC Proof",
-      body: "Before payout, we collect your valid government ID proof (Aadhaar or PAN Card) for future reference records and keep it secure.",
+      body: "Before payout, we collect your valid government ID proof with address mentioned (Aadhaar Card or Driving License) for future reference records and keep it secure.",
       icon: <FileText size={18} />,
     },
     {
@@ -301,7 +301,7 @@ export default function Exchange() {
                     Mandatory ID & KYC Security
                   </strong>
                   <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.6", display: "block" }}>
-                    Before final balance releases or handovers, we collect valid government-issued ID proofs (Aadhaar or PAN Card) from both parties for future reference records and store them securely.
+                    Before final balance releases or handovers, we collect valid government-issued ID proofs with address mentioned on it (Aadhaar Card or Driving License) from both parties for future reference records and store them securely.
                   </span>
                 </div>
               </div>
@@ -573,7 +573,7 @@ export default function Exchange() {
                   {/* Custom conditional timeline badges */}
                   {idx === 3 && activeOption === 0 && (
                     <div style={{ display: "flex", gap: "10px", marginTop: "12px", flexWrap: "wrap" }}>
-                      <span className="pill-deal-mode yellow-border"><Lock size={11} /> 15% Booking lock deposit required</span>
+                      <span className="pill-deal-mode yellow-border"><Lock size={11} /> 10% Booking lock deposit required</span>
                       <span className="pill-deal-mode"><CreditCard size={11} /> Adjusted with final payments</span>
                     </div>
                   )}
@@ -586,7 +586,7 @@ export default function Exchange() {
 
                   {idx === 6 && (
                     <div style={{ display: "flex", gap: "10px", marginTop: "12px", flexWrap: "wrap" }}>
-                      <span className="pill-deal-mode green-border"><Check size={11} /> Government Aadhaar/PAN KYC secured</span>
+                      <span className="pill-deal-mode green-border"><Check size={11} /> Aadhaar or Driving License Verified</span>
                     </div>
                   )}
 
@@ -832,7 +832,7 @@ export default function Exchange() {
                   We prioritize seller trust just as much as buyer security. Review how we protect you and execute secure payouts:
                 </p>
                 <ul style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.8", paddingLeft: "20px", marginBottom: "20px" }}>
-                  <li style={{ marginBottom: "8px" }}><strong style={{ color: "#fff" }}>Secure KYC Encrypted Storage:</strong> Your government ID (Aadhaar or PAN Card) is saved on fully secure, encrypted servers, and is only accessed in the event of an account dispute.</li>
+                  <li style={{ marginBottom: "8px" }}><strong style={{ color: "#fff" }}>Secure KYC Encrypted Storage:</strong> Your government ID with address mentioned on it (specifically Aadhaar Card or Driving License) is saved on fully secure, encrypted servers, and is only accessed in the event of an account dispute.</li>
                   <li style={{ marginBottom: "8px" }}><strong style={{ color: "#fff" }}>100% Guarded Payments:</strong> We hold buyer funds in a secure bank escrow, eliminating any risk of chargebacks or fraudulent reversals once your account is delivered.</li>
                   <li style={{ marginBottom: "8px" }}><strong style={{ color: "#fff" }}>Direct Payout Release:</strong> 100% of your payout is transferred directly via UPI, Bank Transfer, or Cash within 1-2 hours of credential validation.</li>
                 </ul>
@@ -877,7 +877,7 @@ export default function Exchange() {
               },
               {
                 q: "Can I adjust payments with advance bookings or direct cash?",
-                a: "Absolutely. Trades can be adjusted through 15% booking/advance deposits (to search for custom specs under Upgrades) or direct cash. Final balances or cash differences are fully settled before delivering new account structures."
+                a: "Absolutely. Trades can be adjusted through 10% booking/advance deposits (which are strictly non-refundable once booked, to search for custom specs under Upgrades) or direct cash. Final balances or cash differences are fully settled before delivering new account structures."
               },
               {
                 q: "What happens if there is a price difference between the two accounts?",
@@ -885,11 +885,11 @@ export default function Exchange() {
               },
               {
                 q: "Why is the collection of valid ID proof mandatory?",
-                a: "To prevent recovery fraud (cyber pull-backs), we collect valid government ID proof (Aadhaar or PAN Card) from both exchange participants. All KYC records are stored securely on offline encrypted servers."
+                a: "To prevent recovery fraud (cyber pull-backs), we collect valid government ID proof with address mentioned on it (specifically Aadhaar Card or Driving License) from both exchange participants. All KYC records are stored securely on offline encrypted servers."
               },
               {
                 q: "Can we execute an account exchange Face-to-Face?",
-                a: "Yes. Face-to-Face cash exchange meetups are strictly reserved for premium trades valued above ₹80,000. All trades below ₹80K are handled securely through our encrypted online escrow system."
+                a: "Yes. Face-to-Face cash exchange meetups are strictly reserved for premium trades valued above ₹80,000. For Face-to-Face exchanges, the Owner / Buyer should pay the extra charges for Travel, Stay, and Food for the Maddy Store deal agent. All trades below ₹80K are handled securely through our encrypted online escrow system."
               },
               {
                 q: "When is the account exchange officially complete?",

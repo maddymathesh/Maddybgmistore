@@ -17,7 +17,8 @@ export default function Sell() {
     "Instantly cash out your high-tier BGMI account or list it across our Telegram & WhatsApp channels using Hold & Sell."
   );
 
-  const [activeOption, setActiveOption] = useState(0);
+  const [activeOption, setActiveOption] = useState(null);
+  const [hoveredOption, setHoveredOption] = useState(null);
   const [activeTrustCard, setActiveTrustCard] = useState(null);
   const [activeFaq, setActiveFaq] = useState(null);
   const [activeUnlinkTab, setActiveUnlinkTab] = useState(0);
@@ -245,66 +246,12 @@ export default function Sell() {
 
           <div className="options-grid-two">
 
-            {/* HOLD & SELL */}
+            {/* INSTANT SELL — first */}
             <div
-              className={`sell-option-card ${activeOption === 0 ? "active-blue" : ""}`}
-              onClick={() => setActiveOption(0)}
-            >
-              <div className="sell-option-header">
-                <span className="badge-tag-custom tag-blue">
-                  <Clock size={11} fill="currentColor" /> Maximum Payout
-                </span>
-                <h3 className="sell-option-title">Hold & Sell</h3>
-              </div>
-              <p className="sell-option-desc">
-                Get 100% maximum market value for your account. We list it, record an HD video, write the description, market it across our VIP communities, and handle secure double-login transfer. Average sale time: 3–7 days.
-              </p>
-
-              <div className="steps-container">
-                <h4 className="steps-heading">Secure Hold & Sell Steps:</h4>
-                <ul className="steps-list-custom">
-                  {holdAndSellSteps.map((step, idx) => (
-                    <li key={idx} className="step-item-custom">
-                      <span className="step-num step-num-blue">{idx + 1}</span>
-                      <div>
-                        <strong className="step-title">{step.title}</strong>
-                        <span className="step-body">{step.body}</span>
-                        {step.idx_chip === "kyc" && idx === 5 && (
-                          <div style={{ marginTop: "8px" }}>
-                            <button onClick={(e) => { e.stopPropagation(); setKycExpanded(true); setTimeout(() => scrollTo(kycRef), 100); }}
-                              style={{ ...chipStyle("#22c55e"), fontSize: "10px", padding: "4px 10px" }}>
-                              <FileText size={10} /> KYC Details
-                            </button>
-                          </div>
-                        )}
-                        {step.idx_chip === "payout" && (
-                          <div style={{ marginTop: "8px" }}>
-                            <button onClick={(e) => { e.stopPropagation(); setPayoutExpanded(true); setTimeout(() => scrollTo(payoutRef), 100); }}
-                              style={{ ...chipStyle("var(--gold)"), fontSize: "10px", padding: "4px 10px" }}>
-                              <Coins size={10} /> Payout Methods
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="cta-container">
-                <a href="https://wa.me/+919025391516?text=Hi%20Maddy!%20I%20want%20to%20list%20my%20BGMI%20account%20via%20Hold%20%26%20Sell."
-                  target="_blank" rel="noreferrer" className="btn btn-gold"
-                  style={{ width: "100%", height: "52px", justifyContent: "center", gap: "8px" }}
-                  onClick={(e) => e.stopPropagation()}>
-                  <MessageCircle size={18} /> Start Hold & Sell →
-                </a>
-              </div>
-            </div>
-
-            {/* INSTANT SELL */}
-            <div
-              className={`sell-option-card ${activeOption === 1 ? "active-green" : ""}`}
+              className={`sell-option-card ${activeOption === 1 || hoveredOption === 1 ? "active-green" : ""}`}
               onClick={() => setActiveOption(1)}
+              onMouseEnter={() => setHoveredOption(1)}
+              onMouseLeave={() => setHoveredOption(null)}
             >
               <div className="sell-option-header">
                 <span className="badge-tag-custom tag-green">
@@ -361,6 +308,64 @@ export default function Sell() {
                   style={{ width: "100%", height: "52px", justifyContent: "center", gap: "8px" }}
                   onClick={(e) => e.stopPropagation()}>
                   <Zap size={18} /> Sell Instantly Now →
+                </a>
+              </div>
+            </div>
+
+            {/* HOLD & SELL — second */}
+            <div
+              className={`sell-option-card ${activeOption === 0 || hoveredOption === 0 ? "active-blue" : ""}`}
+              onClick={() => setActiveOption(0)}
+              onMouseEnter={() => setHoveredOption(0)}
+              onMouseLeave={() => setHoveredOption(null)}
+            >
+              <div className="sell-option-header">
+                <span className="badge-tag-custom tag-blue">
+                  <Clock size={11} fill="currentColor" /> Maximum Payout
+                </span>
+                <h3 className="sell-option-title">Hold & Sell</h3>
+              </div>
+              <p className="sell-option-desc">
+                Get 100% maximum market value for your account. We list it, record an HD video, write the description, market it across our VIP communities, and handle secure double-login transfer. Average sale time: 3–7 days.
+              </p>
+
+              <div className="steps-container">
+                <h4 className="steps-heading">Secure Hold & Sell Steps:</h4>
+                <ul className="steps-list-custom">
+                  {holdAndSellSteps.map((step, idx) => (
+                    <li key={idx} className="step-item-custom">
+                      <span className="step-num step-num-blue">{idx + 1}</span>
+                      <div>
+                        <strong className="step-title">{step.title}</strong>
+                        <span className="step-body">{step.body}</span>
+                        {step.idx_chip === "kyc" && idx === 5 && (
+                          <div style={{ marginTop: "8px" }}>
+                            <button onClick={(e) => { e.stopPropagation(); setKycExpanded(true); setTimeout(() => scrollTo(kycRef), 100); }}
+                              style={{ ...chipStyle("#22c55e"), fontSize: "10px", padding: "4px 10px" }}>
+                              <FileText size={10} /> KYC Details
+                            </button>
+                          </div>
+                        )}
+                        {step.idx_chip === "payout" && (
+                          <div style={{ marginTop: "8px" }}>
+                            <button onClick={(e) => { e.stopPropagation(); setPayoutExpanded(true); setTimeout(() => scrollTo(payoutRef), 100); }}
+                              style={{ ...chipStyle("var(--gold)"), fontSize: "10px", padding: "4px 10px" }}>
+                              <Coins size={10} /> Payout Methods
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="cta-container">
+                <a href="https://wa.me/+919025391516?text=Hi%20Maddy!%20I%20want%20to%20list%20my%20BGMI%20account%20via%20Hold%20%26%20Sell."
+                  target="_blank" rel="noreferrer" className="btn btn-gold"
+                  style={{ width: "100%", height: "52px", justifyContent: "center", gap: "8px" }}
+                  onClick={(e) => e.stopPropagation()}>
+                  <MessageCircle size={18} /> Start Hold & Sell →
                 </a>
               </div>
             </div>

@@ -88,13 +88,13 @@ export default function Navbar() {
   const doubled = [...tickerItems, ...tickerItems];
 
   return (
-    <header ref={navRef} style={{
+    <header ref={navRef} className="glass-premium" style={{
       position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000,
-      background: scrolled ? "rgba(8,10,15,0.97)" : "rgba(8,10,15,0.80)",
-      backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
-      borderBottom: "1px solid rgba(255,215,0,0.12)",
-      boxShadow: scrolled ? "0 8px 32px rgba(0,0,0,0.4)" : "none",
-      transition: "background 0.3s, box-shadow 0.3s",
+      background: scrolled ? "rgba(8, 10, 15, 0.92)" : "rgba(8, 10, 15, 0.65)",
+      backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)",
+      borderBottom: scrolled ? "1px solid rgba(255, 215, 0, 0.22)" : "1px solid rgba(255, 255, 255, 0.05)",
+      boxShadow: scrolled ? "0 10px 30px rgba(0, 0, 0, 0.5)" : "none",
+      transition: "background 0.3s, border-color 0.3s, box-shadow 0.3s",
     }}>
 
       {/* ── Main Nav Bar ─────────────────────────────────────── */}
@@ -209,14 +209,15 @@ export default function Navbar() {
       )}
 
       {/* ── Mobile Slide-Down Menu ────────────────────────────── */}
-      <div className="nav-mobile-menu" style={{
+      <div className="nav-mobile-menu glass-premium" style={{
         position: "fixed", top: "102px", left: 0, right: 0, zIndex: 998,
-        background: "rgba(8,10,15,0.99)", backdropFilter: "blur(24px)",
-        borderBottom: "1px solid rgba(255,215,0,0.18)",
+        background: "rgba(8, 10, 15, 0.94)", backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        borderBottom: "1px solid rgba(255, 215, 0, 0.22)",
         maxHeight: mobileOpen ? "calc(100dvh - 102px)" : "0",
         overflowY: mobileOpen ? "auto" : "hidden",
         overflowX: "hidden",
-        transition: "max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+        transition: "max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
         WebkitOverflowScrolling: "touch",
       }}>
         <div style={{ padding: "12px 16px 24px" }}>

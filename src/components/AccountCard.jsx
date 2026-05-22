@@ -21,106 +21,41 @@ export default memo(function AccountCard({ stock }) {
   const loginBadges = (stock.loginType || "").split(",").map(l => l.trim()).filter(Boolean);
 
   return (
-    <div style={{
-      background: "var(--card)",
-      border: "1px solid rgba(255,215,0,0.2)",
-      borderRadius: "14px",
-      overflow: "hidden",
-      marginBottom: "24px",
-    }}>
+    <div className="account-card">
       {/* Header */}
-      <div style={{
-        padding: "20px 24px 16px",
-        borderBottom: "1px solid rgba(255,255,255,0.07)",
-      }}>
+      <div className="account-card-header">
         {/* Title */}
-        <div style={{
-          fontFamily: "var(--font-h)",
-          fontSize: "14px",
-          fontWeight: 700,
-          color: "var(--text)",
-          lineHeight: 1.5,
-          marginBottom: "14px",
-        }}>
+        <div className="account-title">
           {stock.title}
         </div>
 
         {/* Login type badges */}
-        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "0" }}>
+        <div className="login-badges">
           {loginBadges.map((b, i) => {
             const isX = b.toLowerCase().includes("twitter") || b.toLowerCase().includes("x");
             const isFb = b.toLowerCase().includes("facebook") || b.toLowerCase().includes("fb");
             const isGoogle = b.toLowerCase().includes("google");
             return (
-              <span key={i} style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "5px",
-                padding: "5px 12px",
-                borderRadius: "20px",
-                fontSize: "12px",
-                fontWeight: 600,
-                background: isX ? "rgba(0,0,0,0.4)" : isFb ? "rgba(24,119,242,0.15)" : "rgba(66,133,244,0.15)",
-                border: isX ? "1px solid rgba(255,255,255,0.2)" : isFb ? "1px solid rgba(24,119,242,0.4)" : "1px solid rgba(66,133,244,0.4)",
-                color: isX ? "#fff" : isFb ? "#4267B2" : "#4285F4",
-              }}>
+              <span key={i} className={`login-badge ${isX ? 'twitter' : isFb ? 'fb' : 'google'}`}>
                 {isX ? "𝕏" : isFb ? "f" : "G"} {b}
               </span>
             );
           })}
-          <span style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "5px",
-            padding: "5px 12px",
-            borderRadius: "20px",
-            fontSize: "12px",
-            fontWeight: 600,
-            background: "rgba(34,197,94,0.12)",
-            border: "1px solid rgba(34,197,94,0.35)",
-            color: "#22C55E",
-          }}>
+          <span className="login-badge secured">
             🔐 Secured
           </span>
         </div>
       </div>
 
       {/* Scrollable Details Body */}
-      <div style={{
-        padding: "16px 24px",
-        maxHeight: "220px",
-        overflowY: "auto",
-        fontSize: "13px",
-        color: "var(--muted)",
-        lineHeight: 1.9,
-        whiteSpace: "pre-line",
-        borderBottom: "1px solid rgba(255,255,255,0.07)",
-        scrollbarWidth: "thin",
-        scrollbarColor: "rgba(255,215,0,0.2) transparent",
-      }}>
+      <div className="account-card-body">
         {stock.details}
       </div>
 
       {/* Price + Buttons */}
-      <div style={{
-        padding: "18px 24px",
-        display: "flex",
-        alignItems: "center",
-        gap: "14px",
-        flexWrap: "wrap",
-      }}>
+      <div className="account-card-footer">
         {/* Price */}
-        <div style={{
-          fontFamily: "var(--font-h)",
-          fontSize: "22px",
-          fontWeight: 800,
-          color: "var(--gold)",
-          background: "rgba(255,215,0,0.1)",
-          border: "1px solid rgba(255,215,0,0.3)",
-          borderRadius: "10px",
-          padding: "8px 18px",
-          letterSpacing: "0.5px",
-        }}>
+        <div className="account-price-badge">
           ₹{Number(stock.price).toLocaleString("en-IN")} INR
         </div>
 
@@ -129,23 +64,7 @@ export default memo(function AccountCard({ stock }) {
           href={wa}
           target="_blank"
           rel="noreferrer"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "10px 22px",
-            borderRadius: "8px",
-            background: "#22C55E",
-            color: "#fff",
-            fontFamily: "var(--font-h)",
-            fontWeight: 700,
-            fontSize: "13px",
-            textDecoration: "none",
-            letterSpacing: "0.5px",
-            transition: "opacity 0.2s",
-          }}
-          onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
-          onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+          className="account-cta-btn whatsapp"
         >
           <WaIcon /> BUY NOW
         </a>
@@ -155,23 +74,7 @@ export default memo(function AccountCard({ stock }) {
           href={tg}
           target="_blank"
           rel="noreferrer"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "10px 22px",
-            borderRadius: "8px",
-            background: "#229ED9",
-            color: "#fff",
-            fontFamily: "var(--font-h)",
-            fontWeight: 700,
-            fontSize: "13px",
-            textDecoration: "none",
-            letterSpacing: "0.5px",
-            transition: "opacity 0.2s",
-          }}
-          onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
-          onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+          className="account-cta-btn telegram"
         >
           <TgIcon /> BUY NOW
         </a>

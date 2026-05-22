@@ -149,7 +149,7 @@ export default function Home() {
           style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"cover", objectPosition:"center top", zIndex:0 }}
         />
         {/* Dark gradient overlay so text is readable */}
-        <div style={{ position:"absolute", inset:0, zIndex:1, background:"linear-gradient(to bottom, rgba(8,10,15,0.55) 0%, rgba(8,10,15,0.72) 60%, rgba(8,10,15,0.97) 100%)" }} />
+        <div style={{ position:"absolute", inset:0, zIndex:1, background:"linear-gradient(to bottom, rgba(8, 10, 15, 0.45) 0%, rgba(8, 10, 15, 0.70) 50%, rgba(8, 10, 15, 0.98) 100%)" }} />
 
         {/* Light Rays Effect */}
         <div style={{ position: "absolute", inset: 0, zIndex: 1 }}>
@@ -167,11 +167,11 @@ export default function Home() {
         </div>
 
         <div style={{ position:"relative", zIndex:2, maxWidth:"820px", margin:"0 auto" }} className="fade-up">
-          <div className="badge">South India's #1 Trusted BGMI Account Marketplace</div>
-          <h1 style={{ fontFamily:"var(--font-h)", fontSize:"clamp(42px,8vw,92px)", fontWeight:700, lineHeight:1, letterSpacing:"2px", marginBottom:"22px" }}>
-            Your Dream<br /><span className="g">BGMI Account</span><br />Awaits
+          <div className="badge" style={{ border: "1px solid rgba(255,215,0,0.3)", color: "var(--gold)" }}>South India's #1 Trusted BGMI Account Marketplace</div>
+          <h1 style={{ fontFamily:"var(--font-h)", fontSize:"clamp(42px,8vw,92px)", fontWeight:700, lineHeight:1.05, letterSpacing:"2px", marginBottom:"22px", textShadow: "0 4px 15px rgba(0,0,0,0.85)" }}>
+            Your Dream<br /><span className="g" style={{ filter: "drop-shadow(0 0 15px rgba(255,215,0,0.25))" }}>BGMI Account</span><br />Awaits
           </h1>
-          <p style={{ color:"var(--muted)", fontSize:"clamp(14px,2vw,17px)", maxWidth:"560px", margin:"0 auto 40px" }}>
+          <p style={{ color:"var(--muted)", fontSize:"clamp(14px,2vw,17px)", maxWidth:"560px", margin:"0 auto 40px", textShadow: "0 2px 5px rgba(0,0,0,0.7)" }}>
             Buy and sell verified BGMI accounts safely — budget to premium. Trusted by 2000+ players since 2019.
           </p>
           <div style={{ display:"flex", gap:"14px", justifyContent:"center", flexWrap:"wrap" }}>
@@ -833,14 +833,17 @@ export default function Home() {
             margin: "0 auto 40px"
           }}>
             {buyerReviews.map(r => (
-              <div key={r.id} className="card" style={{ padding: "24px", background: "var(--card)", border: "1px solid var(--border)", borderRadius: "var(--radius)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+              <div key={r.id} className="card glass-premium-green" style={{ padding: "24px", borderRadius: "var(--radius)", display: "flex", flexDirection: "column", justifyContent: "space-between", border: "1px solid var(--neon-green-border)", boxShadow: "0 4px 20px rgba(0, 255, 136, 0.02)" }}>
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-                    <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--gold)", color: "#000", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "16px" }}>
+                    <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--neon-green)", color: "#000", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "16px" }}>
                       {(r.name || "?")[0]}
                     </div>
                     <div>
-                      <div style={{ fontWeight: 700, color: "#fff" }}>{r.name}</div>
+                      <div style={{ fontWeight: 700, color: "#fff", display: "flex", alignItems: "center", gap: "6px" }}>
+                        {r.name}
+                        <span style={{ fontSize: "10px", color: "var(--neon-green)", background: "rgba(0, 255, 136, 0.1)", border: "1px solid rgba(0, 255, 136, 0.2)", padding: "2px 8px", borderRadius: "100px", fontWeight: 800 }}>✓ VERIFIED</span>
+                      </div>
                       {r.tracking_id && <div style={{ fontSize: "11px", color: "var(--gold)", fontWeight: 600 }}>ID: {r.tracking_id}</div>}
                       <div style={{ fontSize: "12px", color: "var(--muted)" }}>{new Date(r.created_at).toLocaleDateString()}</div>
                     </div>
@@ -1154,23 +1157,23 @@ export default function Home() {
           box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
         }
         .why-us-card.highlighted {
-          border-color: rgba(255, 215, 0, 0.25);
-          box-shadow: 0 15px 35px rgba(255, 215, 0, 0.06), inset 0 0 15px rgba(255, 215, 0, 0.01);
+          border-color: var(--neon-green-border);
+          box-shadow: 0 15px 35px rgba(0, 255, 136, 0.06), inset 0 0 15px rgba(0, 255, 136, 0.01);
           background: rgba(17, 21, 32, 0.65);
         }
         .why-us-card:hover {
           transform: translateY(-5px);
-          border-color: rgba(255, 215, 0, 0.35);
-          box-shadow: 0 20px 40px rgba(255, 215, 0, 0.1), inset 0 0 20px rgba(255, 215, 0, 0.02);
+          border-color: rgba(0, 255, 136, 0.35);
+          box-shadow: 0 20px 40px rgba(0, 255, 136, 0.1), inset 0 0 20px rgba(0, 255, 136, 0.02);
           background: rgba(17, 21, 32, 0.65);
         }
         .why-us-icon-wrap {
           width: 48px;
           height: 48px;
           border-radius: 10px;
-          background: rgba(255, 215, 0, 0.04);
-          border: 1px solid rgba(255, 215, 0, 0.15);
-          color: var(--gold);
+          background: var(--neon-green-dim);
+          border: 1px solid var(--neon-green-border);
+          color: var(--neon-green);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -1179,9 +1182,9 @@ export default function Home() {
         }
         .why-us-card.highlighted .why-us-icon-wrap,
         .why-us-card:hover .why-us-icon-wrap {
-          background: rgba(255, 215, 0, 0.1);
-          border-color: rgba(255, 215, 0, 0.35);
-          box-shadow: 0 0 12px rgba(255, 215, 0, 0.12);
+          background: rgba(0, 255, 136, 0.12);
+          border-color: rgba(0, 255, 136, 0.45);
+          box-shadow: 0 0 12px rgba(0, 255, 136, 0.18);
         }
         .why-us-card h3 {
           font-family: var(--font-h);

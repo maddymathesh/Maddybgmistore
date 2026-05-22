@@ -4,7 +4,7 @@ import { Toaster } from "react-hot-toast";
 import { ReactLenis } from "lenis/react";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollDownIndicator from "./components/ScrollDownIndicator";
-import WhatsAppFloat from "./components/WhatsAppFloat";
+import SocialFloat from "./components/SocialFloat";
 import { supabase } from "./utils/supabase";
 import { Trophy, Sparkles } from "lucide-react";
 
@@ -291,7 +291,7 @@ export default function App() {
         }}
       />
 
-      <WhatsAppFloat />
+      <SocialFloat />
 
       <Routes>
         <Route element={<DefaultLayout />}>

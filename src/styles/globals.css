@@ -88,6 +88,10 @@ html.lenis body {
   --text: #EAEAEA;
   --muted: #7A8499;
   --green: #22C55E;
+  --neon-green: #00FF88;
+  --neon-green-dim: rgba(0, 255, 136, 0.08);
+  --neon-green-border: rgba(0, 255, 136, 0.22);
+  --glass-bg: rgba(14, 17, 24, 0.6);
   --red: #EF4444;
   --radius: 14px;
   --font-h: 'Rajdhani', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -292,6 +296,28 @@ img {
   background-clip: text;
 }
 
+/* ===== GLASS UTILITIES ===== */
+.glass-premium {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-premium-gold {
+  background: rgba(14, 17, 24, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 215, 0, 0.15);
+}
+
+.glass-premium-green {
+  background: rgba(14, 17, 24, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 255, 136, 0.15);
+}
+
 /* ===== CARDS ===== */
 .card {
   background: var(--card);
@@ -300,7 +326,7 @@ img {
   padding: 28px 24px;
   position: relative;
   overflow: hidden;
-  transition: transform .25s, border-color .25s, box-shadow .25s;
+  transition: transform .3s cubic-bezier(0.16, 1, 0.3, 1), border-color .3s, box-shadow .3s;
 }
 
 .card::before {
@@ -316,9 +342,9 @@ img {
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(255, 215, 0, .4);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, .4);
+  transform: translateY(-5px);
+  border-color: rgba(255, 215, 0, .45);
+  box-shadow: 0 12px 30px rgba(255, 215, 0, 0.06), 0 20px 40px rgba(0, 0, 0, 0.5);
 }
 
 .card:hover::before {
@@ -975,90 +1001,177 @@ select.input {
   font-size: 13px;
 }
 
-/* ===== ACCOUNT CARD ===== */
+/* ===== PREMIUM ACCOUNT COLLECTIBLE CARDS ===== */
 .account-card {
-  background: var(--bg2);
-  border: 1px solid var(--border-gold);
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--neon-green-border);
   border-radius: 16px;
   overflow: hidden;
   margin-bottom: 24px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.account-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at top right, rgba(0, 255, 136, 0.08), transparent 60%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.account-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  border-color: var(--neon-green);
+  box-shadow: 0 16px 40px rgba(0, 255, 136, 0.12), 0 0 0 1px rgba(0, 255, 136, 0.2);
 }
 
 .account-card-header {
   padding: 20px 24px 16px;
-  background: linear-gradient(135deg, rgba(255, 107, 53, .12), rgba(255, 215, 0, .07));
-  border-bottom: 1px solid var(--border-gold);
-}
-
-.account-price-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: linear-gradient(135deg, var(--gold), var(--orange));
-  color: #000;
-  font-family: var(--font-h);
-  font-size: 18px;
-  font-weight: 700;
-  padding: 8px 22px;
-  border-radius: 100px;
-  margin-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  position: relative;
+  z-index: 2;
 }
 
 .account-title {
   font-family: var(--font-h);
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text);
   line-height: 1.5;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
+  letter-spacing: 0.3px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .login-badges {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  margin-top: 10px;
+  align-items: center;
 }
 
 .login-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 14px;
-  border-radius: 100px;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 20px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
+  transition: all 0.2s ease;
 }
 
 .login-badge.twitter {
-  background: rgba(0, 0, 0, .6);
-  border: 1px solid rgba(255, 255, 255, .2);
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: #fff;
 }
 
 .login-badge.fb {
-  background: rgba(24, 119, 242, .15);
-  border: 1px solid rgba(24, 119, 242, .4);
+  background: rgba(24, 119, 242, 0.12);
+  border: 1px solid rgba(24, 119, 242, 0.3);
   color: #4A9FFF;
 }
 
 .login-badge.google {
-  background: rgba(234, 67, 53, .15);
-  border: 1px solid rgba(234, 67, 53, .4);
+  background: rgba(234, 67, 53, 0.12);
+  border: 1px solid rgba(234, 67, 53, 0.3);
   color: #EA4335;
 }
 
-.account-card-body {
-  padding: 20px 24px 24px;
+.login-badge.secured {
+  background: var(--neon-green-dim);
+  border: 1px solid var(--neon-green-border);
+  color: var(--neon-green);
+  text-shadow: 0 0 8px rgba(0, 255, 136, 0.3);
 }
 
-.account-details {
+.account-card-body {
+  padding: 16px 24px;
+  max-height: 220px;
+  overflow-y: auto;
   font-size: 13px;
   color: var(--muted);
   line-height: 1.9;
-  max-height: 280px;
-  overflow-y: auto;
   white-space: pre-line;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  scrollbar-width: thin;
+  scrollbar-color: var(--neon-green-border) transparent;
+}
+
+.account-card-footer {
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 2;
+}
+
+.account-price-badge {
+  font-family: var(--font-h);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--gold);
+  background: rgba(255, 215, 0, 0.08);
+  border: 1px solid var(--border-gold);
+  border-radius: 10px;
+  padding: 8px 18px;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.05);
+}
+
+.account-card:hover .account-price-badge {
+  border-color: var(--gold);
+  background: rgba(255, 215, 0, 0.12);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.15), inset 0 0 10px rgba(255, 215, 0, 0.1);
+}
+
+.account-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 8px;
+  color: #fff;
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 13px;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.account-cta-btn.whatsapp {
+  background: #25D366;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);
+}
+
+.account-cta-btn.whatsapp:hover {
+  transform: translateY(-2px) scale(1.04);
+  background: #20ba59;
+  box-shadow: 0 8px 20px rgba(37, 211, 102, 0.4);
+}
+
+.account-cta-btn.telegram {
+  background: #229ED9;
+  box-shadow: 0 4px 12px rgba(34, 158, 217, 0.2);
+}
+
+.account-cta-btn.telegram:hover {
+  transform: translateY(-2px) scale(1.04);
+  background: #1d8ec4;
+  box-shadow: 0 8px 20px rgba(34, 158, 217, 0.4);
 }
 
 /* ===== SCROLL DOWN INDICATOR ===== */
@@ -1320,60 +1433,87 @@ select.input {
   color: #f87171;
 }
 
-/* ===== WHATSAPP FLOAT ===== */
-.whatsapp-float {
+/* ===== SOCIAL CONTACTS FLOAT SYSTEM ===== */
+.social-float-container {
   position: fixed;
   bottom: 30px;
   right: 30px;
-  width: 60px;
-  height: 60px;
-  background: #25D366;
-  color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  z-index: 2000;
+}
+
+.social-float-btn {
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0px 0px 25px rgba(37, 211, 102, 0.4);
-  z-index: 2000;
+  color: #fff;
+  position: relative;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   cursor: pointer;
 }
 
-.whatsapp-float:hover {
-  transform: scale(1.1) rotate(5deg);
-  box-shadow: 0 15px 30px rgba(37, 211, 102, 0.5);
+.social-float-btn.whatsapp {
+  background: #25D366;
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.3);
 }
 
-.whatsapp-tooltip {
+.social-float-btn.telegram {
+  background: #229ED9;
+  box-shadow: 0 6px 20px rgba(34, 158, 217, 0.35);
+}
+
+.social-float-btn:hover {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.social-float-btn.whatsapp:hover {
+  box-shadow: 0 12px 28px rgba(37, 211, 102, 0.5);
+}
+
+.social-float-btn.telegram:hover {
+  box-shadow: 0 12px 28px rgba(34, 158, 217, 0.5);
+}
+
+.social-tooltip {
   position: absolute;
-  right: 80px;
-  background: #fff;
-  color: #075E54;
-  padding: 8px 16px;
+  right: 68px;
+  background: rgba(8, 10, 15, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-gold);
+  color: #fff;
+  padding: 6px 14px;
   border-radius: 8px;
   font-family: var(--font-h);
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
   transform: translateX(10px);
-  transition: all 0.3s;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   pointer-events: none;
 }
 
-.whatsapp-tooltip::after {
+.social-tooltip::after {
   content: '';
   position: absolute;
   left: 100%;
   top: 50%;
   transform: translateY(-50%);
   border: 6px solid transparent;
-  border-left-color: #fff;
+  border-left-color: rgba(8, 10, 15, 0.95);
 }
 
-.whatsapp-float:hover .whatsapp-tooltip {
+.social-float-btn:hover .social-tooltip {
   opacity: 1;
   visibility: visible;
   transform: translateX(0);
@@ -1447,23 +1587,23 @@ select.input {
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
 }
 .why-us-card.highlighted {
-  border-color: rgba(255, 215, 0, 0.25);
-  box-shadow: 0 15px 35px rgba(255, 215, 0, 0.06), inset 0 0 15px rgba(255, 215, 0, 0.01);
+  border-color: var(--neon-green-border);
+  box-shadow: 0 15px 35px rgba(0, 255, 136, 0.06), inset 0 0 15px rgba(0, 255, 136, 0.01);
   background: rgba(17, 21, 32, 0.65);
 }
 .why-us-card:hover {
   transform: translateY(-5px);
-  border-color: rgba(255, 215, 0, 0.35);
-  box-shadow: 0 20px 40px rgba(255, 215, 0, 0.1), inset 0 0 20px rgba(255, 215, 0, 0.02);
+  border-color: rgba(0, 255, 136, 0.35);
+  box-shadow: 0 20px 40px rgba(0, 255, 136, 0.1), inset 0 0 20px rgba(0, 255, 136, 0.02);
   background: rgba(17, 21, 32, 0.65);
 }
 .why-us-icon-wrap {
   width: 48px;
   height: 48px;
   border-radius: 10px;
-  background: rgba(255, 215, 0, 0.04);
-  border: 1px solid rgba(255, 215, 0, 0.15);
-  color: var(--gold);
+  background: var(--neon-green-dim);
+  border: 1px solid var(--neon-green-border);
+  color: var(--neon-green);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1472,9 +1612,9 @@ select.input {
 }
 .why-us-card.highlighted .why-us-icon-wrap,
 .why-us-card:hover .why-us-icon-wrap {
-  background: rgba(255, 215, 0, 0.1);
-  border-color: rgba(255, 215, 0, 0.35);
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.12);
+  background: rgba(0, 255, 136, 0.12);
+  border-color: rgba(0, 255, 136, 0.45);
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.18);
 }
 .why-us-card h3 {
   font-family: var(--font-h);

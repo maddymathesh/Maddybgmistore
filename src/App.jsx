@@ -7,6 +7,7 @@ import ScrollDownIndicator from "./components/ScrollDownIndicator";
 import SocialFloat from "./components/SocialFloat";
 import { supabase } from "./utils/supabase";
 import { Trophy, Sparkles } from "lucide-react";
+import InitialPageLoader from "./components/InitialPageLoader";
 
 let hasIncremented = false;
 
@@ -154,27 +155,97 @@ function PageLoader() {
       style={{
         minHeight: "100vh",
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        background: "#0a0c14",
+        background: "#080A0F",
+        fontFamily: "var(--font-h)",
+        position: "relative",
+        overflow: "hidden"
       }}
     >
+      {/* Top running cinematic indicator */}
       <div
         style={{
-          width: "40px",
-          height: "40px",
-          borderRadius: "50%",
-          border: "3px solid rgba(255,215,0,0.15)",
-          borderTopColor: "#FFD700",
-          animation: "spin 0.7s linear infinite",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "3px",
+          background: "linear-gradient(90deg, transparent, var(--gold), var(--orange), transparent)",
+          boxShadow: "0 0 15px rgba(255, 215, 0, 0.8)",
+          zIndex: 999999,
+          animation: "pageBarSweep 1.8s infinite ease-in-out"
         }}
       />
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+
+      {/* Grid overlay */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage: "linear-gradient(rgba(255, 215, 0, 0.005) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 215, 0, 0.005) 1px, transparent 1px)",
+          backgroundSize: "30px 30px",
+          backgroundPosition: "center",
+          opacity: 0.6,
+          pointerEvents: "none"
+        }}
+      />
+
+      {/* Central HUD elements */}
+      <div style={{ position: "relative", textAlign: "center", zIndex: 2 }}>
+        {/* Pulsing micro emblem */}
+        <div
+          style={{
+            width: "50px",
+            height: "50px",
+            borderRadius: "50%",
+            background: "rgba(255, 215, 0, 0.04)",
+            border: "1px solid rgba(255, 215, 0, 0.2)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto 16px",
+            boxShadow: "inset 0 0 10px rgba(255, 215, 0, 0.1)",
+            animation: "microPulse 1.2s infinite alternate"
+          }}
+        >
+          <Trophy size={18} style={{ color: "var(--gold)", opacity: 0.8 }} />
+        </div>
+
+        <div
+          style={{
+            fontSize: "11px",
+            fontWeight: 700,
+            letterSpacing: "3px",
+            color: "rgba(255,255,255,0.7)",
+            textTransform: "uppercase"
+          }}
+        >
+          LOADING CONTENT...
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes pageBarSweep {
+          0% { transform: translateX(-100%); }
+          50% { transform: translateX(0); }
+          100% { transform: translateX(100%); }
+        }
+        @keyframes microPulse {
+          0% { transform: scale(0.95); opacity: 0.7; box-shadow: 0 0 10px rgba(255, 215, 0, 0.1); }
+          100% { transform: scale(1.05); opacity: 1; box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+        }
+      `}</style>
     </div>
   );
 }
 
 export default function App() {
+  const [showIntro, setShowIntro] = useState(() => {
+    return !sessionStorage.getItem("mbs_intro_loaded");
+  });
+
   // Delay Lenis to avoid blocking initial render
   const [enableSmooth, setEnableSmooth] = useState(false);
   const [celebrationUser, setCelebrationUser] = useState(null);
@@ -627,7 +698,7 @@ export default function App() {
   );
 
   // Apply Lenis only after initial render
-  return enableSmooth ? (
+  const mainApp = enableSmooth ? (
     <ReactLenis
       root
       options={{
@@ -641,5 +712,19 @@ export default function App() {
     </ReactLenis>
   ) : (
     AppContent
+  );
+
+  return (
+    <>
+      {mainApp}
+      {showIntro && (
+        <InitialPageLoader
+          onComplete={() => {
+            sessionStorage.setItem("mbs_intro_loaded", "true");
+            setShowIntro(false);
+          }}
+        />
+      )}
+    </>
   );
 }

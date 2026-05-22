@@ -21,10 +21,16 @@ INSERT INTO public.admin_payment_settings (id, payee_name, payee_upi_id)
 VALUES (1, 'Maddy BGMI Store', 'maddy@upi')
 ON CONFLICT (id) DO NOTHING;
 
--- 2. Update payment_links table to include more details
+-- 2. Update payment_links table and admin_payment_settings to include missing details
 -- We use ALTER TABLE to add missing columns if they don't exist
 DO $$ 
 BEGIN
+  -- Add account_type to admin_payment_settings if missing
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='admin_payment_settings' AND column_name='account_type') THEN
+    ALTER TABLE public.admin_payment_settings ADD COLUMN account_type TEXT DEFAULT 'SAVINGS ACCOUNT';
+  END IF;
+
+  -- Add columns to payment_links if missing
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='payment_links' AND column_name='payee_name') THEN
     ALTER TABLE public.payment_links ADD COLUMN payee_name TEXT;
   END IF;

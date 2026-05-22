@@ -90,6 +90,20 @@ export default function AdminDashboard() {
 
   // ── States ────────────────────────────────────────
   const [adminList, setAdminList] = useState([]);
+
+  const validateImageFile = (file) => {
+    if (!file) return false;
+    const allowedMimeTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+    if (!allowedMimeTypes.includes(file.type)) {
+      toast.error("Only PNG, JPEG, JPG, and WEBP image formats are allowed.");
+      return false;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Max file size allowed is 10MB.");
+      return false;
+    }
+    return true;
+  };
   const [loadingAdmins, setLoadingAdmins] = useState(false);
   const [newAdminEmail, setNewAdminEmail] = useState("");
   const [addingAdmin, setAddingAdmin] = useState(false);
@@ -1131,7 +1145,10 @@ export default function AdminDashboard() {
                         ) : (
                           <label style={{ cursor: "pointer" }}>
                             <div style={{ fontSize: "12px", color: "var(--muted)" }}>Click to choose file</div>
-                            <input type="file" accept="image/*" hidden onChange={e => setProofImage(e.target.files[0])} />
+                            <input type="file" accept="image/*" hidden onChange={e => {
+                              const file = e.target.files[0];
+                              if (file && validateImageFile(file)) setProofImage(file);
+                            }} />
                           </label>
                         )}
                       </div>
@@ -1341,7 +1358,10 @@ export default function AdminDashboard() {
                       ) : (
                         <label style={{ cursor: "pointer" }}>
                           <div style={{ fontSize: "12px" }}>{xsuitForm.image_url ? "Change Image" : "Click to Upload Xsuit Image"}</div>
-                          <input type="file" hidden onChange={e => setXsuitImage(e.target.files[0])} />
+                          <input type="file" accept="image/*" hidden onChange={e => {
+                            const file = e.target.files[0];
+                            if (file && validateImageFile(file)) setXsuitImage(file);
+                          }} />
                         </label>
                       )}
                     </div>
@@ -1457,7 +1477,10 @@ export default function AdminDashboard() {
                       ) : (
                         <label style={{ cursor: "pointer" }}>
                           <div style={{ fontSize: "12px" }}>{carForm.image_url ? "Change Image" : "Click to Upload Supercar Image"}</div>
-                          <input type="file" hidden onChange={e => setCarImage(e.target.files[0])} />
+                          <input type="file" accept="image/*" hidden onChange={e => {
+                            const file = e.target.files[0];
+                            if (file && validateImageFile(file)) setCarImage(file);
+                          }} />
                         </label>
                       )}
                     </div>

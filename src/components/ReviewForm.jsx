@@ -64,7 +64,13 @@ export default function ReviewForm({ onReviewAdded }) {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) return toast.error("Max file size is 10MB");
+    const allowedMimeTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+    if (!allowedMimeTypes.includes(file.type)) {
+      return toast.error("Only PNG, JPEG, JPG, and WEBP images are allowed.");
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      return toast.error("Max file size is 10MB");
+    }
     setImage(file);
     setImagePreview(URL.createObjectURL(file));
   };

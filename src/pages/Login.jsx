@@ -31,9 +31,29 @@ export default function Login() {
 
 
   const googleLogin = async () => {
+    if (loading) return;
+
+    // Rate limit: max 3 popup attempts per minute to prevent automation/popups flooding
+    const now = Date.now();
+    const attempts = JSON.parse(sessionStorage.getItem("mbs_login_attempts") || "[]");
+    const activeAttempts = attempts.filter((timestamp) => now - timestamp < 60000);
+
+    if (activeAttempts.length >= 3) {
+      toast.error("Too many login requests. Please wait a minute before trying again.", {
+        style: {
+          background: '#ef4444',
+          color: '#fff',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+        },
+      });
+      return;
+    }
+
+    activeAttempts.push(now);
+    sessionStorage.setItem("mbs_login_attempts", JSON.stringify(activeAttempts));
+
     setLoading(true);
     const provider = new GoogleAuthProvider();
-    // Add custom parameters to provider if needed
     provider.setCustomParameters({ prompt: 'select_account' });
     
     try {

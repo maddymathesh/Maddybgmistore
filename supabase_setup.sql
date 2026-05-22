@@ -51,9 +51,17 @@ CREATE TABLE public.account_transactions (
   created_at                      TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 3. Disable RLS for admin panel access
-ALTER TABLE public.transactions DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.account_transactions DISABLE ROW LEVEL SECURITY;
+-- 3. Enable RLS and configure policies for admin access
+ALTER TABLE public.transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.account_transactions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow admin access on transactions" ON public.transactions
+  FOR ALL USING ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz')
+  WITH CHECK ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz');
+
+CREATE POLICY "Allow admin access on account_transactions" ON public.account_transactions
+  FOR ALL USING ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz')
+  WITH CHECK ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz');
 
 -- =====================================================================
 -- XSUIT TRANSACTIONS TABLE
@@ -73,7 +81,11 @@ CREATE TABLE IF NOT EXISTS public.xsuit_transactions (
   created_at        TIMESTAMPTZ DEFAULT NOW()
 );
 
-ALTER TABLE public.xsuit_transactions DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.xsuit_transactions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow admin access on xsuit_transactions" ON public.xsuit_transactions
+  FOR ALL USING ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz')
+  WITH CHECK ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz');
 
 -- =====================================================================
 -- SUPERCAR TRANSACTIONS TABLE
@@ -94,4 +106,8 @@ CREATE TABLE IF NOT EXISTS public.supercar_transactions (
   created_at          TIMESTAMPTZ DEFAULT NOW()
 );
 
-ALTER TABLE public.supercar_transactions DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.supercar_transactions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow admin access on supercar_transactions" ON public.supercar_transactions
+  FOR ALL USING ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz')
+  WITH CHECK ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz');

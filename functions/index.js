@@ -34,17 +34,43 @@ function getAdminUids() {
   return values.map((uid) => uid && uid.trim()).filter(Boolean);
 }
 
-function requireAdmin(request) {
+async function requireAdmin(request) {
   if (!request.auth?.uid) {
     throw new HttpsError("unauthenticated", "Admin sign-in is required.");
   }
+
+  // 1. Check custom user claims
+  if (request.auth.token?.admin === true) {
+    return;
+  }
+
+  // 2. Check environment variables
   const adminUids = getAdminUids();
-  if (adminUids.length === 0) {
-    throw new HttpsError("failed-precondition", "Admin UID environment variables are not configured.");
+  if (adminUids.includes(request.auth.uid)) {
+    return;
   }
-  if (!adminUids.includes(request.auth.uid)) {
-    throw new HttpsError("permission-denied", "You are not allowed to manage payment links.");
+
+  // 3. Asynchronously verify dynamic admins list in Firestore
+  try {
+    const docRefUid = db.collection("admins").doc(request.auth.uid);
+    const snapUid = await docRefUid.get();
+    if (snapUid.exists) {
+      return;
+    }
+
+    const email = request.auth.token?.email;
+    if (email) {
+      const docRefEmail = db.collection("admins").doc(email.trim().toLowerCase());
+      const snapEmail = await docRefEmail.get();
+      if (snapEmail.exists) {
+        return;
+      }
+    }
+  } catch (error) {
+    console.error("Error looking up dynamic admin state in Firestore:", error);
   }
+
+  throw new HttpsError("permission-denied", "You are not allowed to manage administrative resources.");
 }
 
 function cleanText(value, fallback = "") {
@@ -72,7 +98,7 @@ function resolveLinkToken(accessToken) {
   if (!raw) return null;
   if (raw.includes(".")) {
     try {
-      const payload = jwt.verify(raw, getJwtSecret());
+      const payload = jwt.verify(raw, getJwtSecret(), { algorithms: ["HS256"] });
       return typeof payload.t === "string" ? payload.t : null;
     } catch {
       return null;
@@ -124,13 +150,13 @@ function serializePublicLink(data) {
 }
 
 exports.getPaymentSettings = onCall(async (request) => {
-  requireAdmin(request);
+  await requireAdmin(request);
   const settings = await getPaymentSettings();
   return { settings };
 });
 
 exports.updatePaymentSettings = onCall(async (request) => {
-  requireAdmin(request);
+  await requireAdmin(request);
   const upiId = cleanText(request.data?.upiId);
   const payeeName = cleanText(request.data?.payeeName);
   const defaultTimerMinutes = Number(request.data?.defaultTimerMinutes);
@@ -157,7 +183,7 @@ exports.updatePaymentSettings = onCall(async (request) => {
 });
 
 exports.createPaymentLink = onCall(async (request) => {
-  requireAdmin(request);
+  await requireAdmin(request);
 
   const settings = await getPaymentSettings();
   const customerName = cleanText(request.data?.customerName, "Customer");
@@ -228,15 +254,37 @@ exports.verifyPaymentPin = onCall(async (request) => {
     throw new HttpsError("invalid-argument", "Valid token and PIN are required.");
   }
 
-  const { data } = await loadActiveLink(token);
+  const { docRef, data } = await loadActiveLink(token);
   if (!data || data.status === "revoked") {
     return { valid: false, reason: "invalid" };
   }
   if (data.status !== "active") {
     return { valid: false, reason: "expired" };
   }
+
+  // Persistent brute-force lockout:
+  const failedAttempts = data.failedAttempts || 0;
+  if (failedAttempts >= 5) {
+    if (data.status !== "revoked") {
+      await docRef.update({ status: "revoked", revokedReason: "too_many_failed_attempts", revokedAt: Timestamp.now() });
+    }
+    return { valid: false, reason: "revoked" };
+  }
+
   if (data.pin !== pin) {
-    return { valid: false, reason: "pin" };
+    const newFailedAttempts = failedAttempts + 1;
+    if (newFailedAttempts >= 5) {
+      await docRef.update({
+        failedAttempts: newFailedAttempts,
+        status: "revoked",
+        revokedReason: "too_many_failed_attempts",
+        revokedAt: Timestamp.now()
+      });
+      return { valid: false, reason: "revoked" };
+    } else {
+      await docRef.update({ failedAttempts: newFailedAttempts });
+      return { valid: false, reason: "pin" };
+    }
   }
 
   return {
@@ -250,7 +298,7 @@ exports.verifyPaymentPin = onCall(async (request) => {
 });
 
 exports.revokePaymentLink = onCall(async (request) => {
-  requireAdmin(request);
+  await requireAdmin(request);
   const token = cleanText(request.data?.token);
   if (!token) throw new HttpsError("invalid-argument", "Token is required.");
 
@@ -263,7 +311,7 @@ exports.revokePaymentLink = onCall(async (request) => {
 });
 
 exports.deletePaymentLink = onCall(async (request) => {
-  requireAdmin(request);
+  await requireAdmin(request);
   const token = cleanText(request.data?.token);
   if (!token) throw new HttpsError("invalid-argument", "Token is required.");
 
@@ -276,7 +324,7 @@ exports.deletePaymentLink = onCall(async (request) => {
 });
 
 exports.addAdminUser = onCall(async (request) => {
-  requireAdmin(request);
+  await requireAdmin(request);
   const email = cleanText(request.data?.email);
   if (!email || !/^[\w.\-]+@[\w.\-]+\.[\w]{2,8}$/.test(email)) {
     throw new HttpsError("invalid-argument", "A valid email address is required.");
@@ -310,7 +358,7 @@ exports.addAdminUser = onCall(async (request) => {
 });
 
 exports.removeAdminUser = onCall(async (request) => {
-  requireAdmin(request);
+  await requireAdmin(request);
   const uid = cleanText(request.data?.uid);
   if (!uid) {
     throw new HttpsError("invalid-argument", "Admin User ID is required.");
@@ -327,7 +375,7 @@ exports.removeAdminUser = onCall(async (request) => {
 });
 
 exports.listAdminUsers = onCall(async (request) => {
-  requireAdmin(request);
+  await requireAdmin(request);
   const snap = await db.collection("admins").get();
   const list = [];
   snap.forEach(doc => {

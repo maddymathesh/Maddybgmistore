@@ -82,6 +82,7 @@ CREATE TABLE IF NOT EXISTS public.admin_payment_settings (
   payee_name      TEXT,
   payee_upi_id    TEXT,
   bank_name       TEXT,
+  account_type    TEXT DEFAULT 'SAVINGS ACCOUNT',
   account_holder  TEXT,
   account_number  TEXT,
   ifsc_code       TEXT,
@@ -110,15 +111,84 @@ CREATE TABLE IF NOT EXISTS public.payment_links (
   created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
--- DISABLE ROW LEVEL SECURITY (RLS) FOR ADMIN ACCESS
-ALTER TABLE public.products DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.uc_prices DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.xsuit_gifts DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.supercar_gifts DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.reviews DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.proofs DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.admin_payment_settings DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.payment_links DISABLE ROW LEVEL SECURITY;
+-- =====================================================================
+-- ROW LEVEL SECURITY (RLS) ENFORCEMENT & POLICIES
+-- =====================================================================
+
+-- Enable RLS across all tables
+ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.uc_prices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.xsuit_gifts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.supercar_gifts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.proofs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.admin_payment_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.payment_links ENABLE ROW LEVEL SECURITY;
+
+-- Helper macro description:
+-- we verify the custom header token matches the admin secret:
+-- (current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz'
+
+-- 1. PRODUCTS
+CREATE POLICY "Allow public read access on products" ON public.products
+  FOR SELECT USING (true);
+CREATE POLICY "Allow admin write access on products" ON public.products
+  FOR ALL USING ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz')
+  WITH CHECK ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz');
+
+-- 2. UC PRICES
+CREATE POLICY "Allow public read access on uc_prices" ON public.uc_prices
+  FOR SELECT USING (true);
+CREATE POLICY "Allow admin write access on uc_prices" ON public.uc_prices
+  FOR ALL USING ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz')
+  WITH CHECK ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz');
+
+-- 3. XSUIT GIFTS
+CREATE POLICY "Allow public read access on xsuit_gifts" ON public.xsuit_gifts
+  FOR SELECT USING (true);
+CREATE POLICY "Allow admin write access on xsuit_gifts" ON public.xsuit_gifts
+  FOR ALL USING ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz')
+  WITH CHECK ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz');
+
+-- 4. SUPERCAR GIFTS
+CREATE POLICY "Allow public read access on supercar_gifts" ON public.supercar_gifts
+  FOR SELECT USING (true);
+CREATE POLICY "Allow admin write access on supercar_gifts" ON public.supercar_gifts
+  FOR ALL USING ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz')
+  WITH CHECK ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz');
+
+-- 5. REVIEWS
+-- Public can read approved reviews, admin can read all reviews
+CREATE POLICY "Allow public read approved reviews" ON public.reviews
+  FOR SELECT USING (status = 'approved' OR (current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz');
+-- Public can submit new reviews, but they are forced to start as 'pending'
+CREATE POLICY "Allow public insert pending reviews" ON public.reviews
+  FOR INSERT WITH CHECK (status = 'pending' OR (current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz');
+-- Admin has full access to update/delete/approve reviews
+CREATE POLICY "Allow admin write access on reviews" ON public.reviews
+  FOR ALL USING ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz')
+  WITH CHECK ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz');
+
+-- 6. PROOFS
+CREATE POLICY "Allow public read access on proofs" ON public.proofs
+  FOR SELECT USING (true);
+CREATE POLICY "Allow admin write access on proofs" ON public.proofs
+  FOR ALL USING ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz')
+  WITH CHECK ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz');
+
+-- 7. ADMIN PAYMENT SETTINGS
+CREATE POLICY "Allow public read access on admin_payment_settings" ON public.admin_payment_settings
+  FOR SELECT USING (true);
+CREATE POLICY "Allow admin write access on admin_payment_settings" ON public.admin_payment_settings
+  FOR ALL USING ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz')
+  WITH CHECK ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz');
+
+-- 8. PAYMENT LINKS
+CREATE POLICY "Allow public read access on payment_links" ON public.payment_links
+  FOR SELECT USING (true);
+CREATE POLICY "Allow admin write access on payment_links" ON public.payment_links
+  FOR ALL USING ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz')
+  WITH CHECK ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz');
 
 -- =====================================================================
 -- 9. SITE VIEWS COUNTER (Global Analytics)
@@ -134,8 +204,10 @@ INSERT INTO public.site_views (id, count)
 VALUES ('total_views', 14852)
 ON CONFLICT (id) DO NOTHING;
 
--- Disable RLS so public users can increment it
-ALTER TABLE public.site_views DISABLE ROW LEVEL SECURITY;
+-- Enable RLS on site views
+ALTER TABLE public.site_views ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read on site_views" ON public.site_views FOR SELECT USING (true);
+CREATE POLICY "Allow admin write on site_views" ON public.site_views FOR ALL USING ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz') WITH CHECK ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz');
 
 -- Database function to atomically increment views and return the updated count
 CREATE OR REPLACE FUNCTION increment_views()
@@ -170,8 +242,28 @@ CREATE TABLE IF NOT EXISTS public.customer_feedback (
   created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Disable RLS so public visitors can submit constructive feedback
-ALTER TABLE public.customer_feedback DISABLE ROW LEVEL SECURITY;
+-- Enable RLS on customer feedback
+ALTER TABLE public.customer_feedback ENABLE ROW LEVEL SECURITY;
+-- Public can only insert feedback (prevents listing and accessing feedback details of other users)
+CREATE POLICY "Allow public insert customer_feedback" ON public.customer_feedback
+  FOR INSERT WITH CHECK (status = 'unread' OR (current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz');
+-- Admins have full access
+CREATE POLICY "Allow admin all access on customer_feedback" ON public.customer_feedback
+  FOR ALL USING ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz')
+  WITH CHECK ((current_setting('request.headers', true)::json->>'x-maddy-admin-token') = 'mbs_admin_supabase_token_2026_xyz');
+
+-- ═════════════════════════════════════════════════════════════════════════
+-- 11. SCHEMA SELF-HEALING (Dynamic Migrations for Existing Databases)
+-- ═════════════════════════════════════════════════════════════════════════
+DO $$ 
+BEGIN
+  -- Add account_type to admin_payment_settings if missing
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='admin_payment_settings' AND column_name='account_type') THEN
+    ALTER TABLE public.admin_payment_settings ADD COLUMN account_type TEXT DEFAULT 'SAVINGS ACCOUNT';
+  END IF;
+END $$;
+
+
 
 
 

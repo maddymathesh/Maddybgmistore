@@ -30,23 +30,10 @@ export default function InitialPageLoader({ onComplete }) {
   useEffect(() => {
     let currentProgress = 0;
     
-    // Non-linear organic progress timer (fast at first, hesitates on database load, final burst)
+    // Smooth deterministic count up taking ~3.5 seconds to complete.
+    // Perfectly timed to be engaging without being tedious.
     const interval = setInterval(() => {
-      let increment = 1;
-      
-      if (currentProgress < 20) {
-        increment = Math.floor(Math.random() * 4) + 2; // Fast start
-      } else if (currentProgress >= 20 && currentProgress < 50) {
-        increment = Math.floor(Math.random() * 2) + 1; // Heavy loading (Supabase sync)
-      } else if (currentProgress >= 50 && currentProgress < 85) {
-        increment = Math.floor(Math.random() * 3) + 1; // Standard asset loading
-      } else if (currentProgress >= 85 && currentProgress < 99) {
-        increment = 1; // Fine-tuning assets
-      } else if (currentProgress >= 99) {
-        increment = 1;
-      }
-
-      currentProgress = Math.min(currentProgress + increment, 100);
+      currentProgress = Math.min(currentProgress + 1, 100);
       setProgress(currentProgress);
 
       // Check if we should advance the tactical message log
@@ -54,10 +41,15 @@ export default function InitialPageLoader({ onComplete }) {
         (m, idx) => currentProgress <= m.speed && (idx === 0 || currentProgress > statusMessages[idx - 1].speed)
       );
 
-      if (matchedMessageIndex !== -1 && matchedMessageIndex !== statusIndex) {
+      if (matchedMessageIndex !== -1) {
         setStatusIndex(matchedMessageIndex);
         const prefix = matchedMessageIndex === statusMessages.length - 1 ? "[ READY ] " : "[ SYNC ] ";
-        setTerminalLogs(prev => [...prev.slice(-3), prefix + statusMessages[matchedMessageIndex].text]);
+        const messageText = statusMessages[matchedMessageIndex].text;
+        setTerminalLogs(prev => {
+          const logText = prefix + messageText;
+          if (prev.includes(logText)) return prev;
+          return [...prev.slice(-3), logText];
+        });
       }
 
       if (currentProgress >= 100) {
@@ -72,10 +64,10 @@ export default function InitialPageLoader({ onComplete }) {
           }, 600);
         }, 500);
       }
-    }, 45);
+    }, 35);
 
     return () => clearInterval(interval);
-  }, [statusIndex]);
+  }, []);
 
   const handleSkip = () => {
     setIsFadingOut(true);
@@ -248,21 +240,31 @@ export default function InitialPageLoader({ onComplete }) {
             }}
           />
 
-          {/* Inner core badge */}
+          {/* Inner core badge with brand logo */}
           <div
             style={{
-              width: "60px",
-              height: "60px",
+              width: "66px",
+              height: "66px",
               borderRadius: "50%",
-              background: "linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 107, 53, 0.05) 100%)",
+              background: "linear-gradient(135deg, rgba(8, 10, 15, 0.9) 0%, rgba(14, 17, 24, 0.95) 100%)",
               border: "1px solid rgba(255, 215, 0, 0.35)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "inset 0 0 15px rgba(255, 215, 0, 0.2), 0 0 25px rgba(255, 215, 0, 0.15)"
+              boxShadow: "inset 0 0 12px rgba(255, 215, 0, 0.25), 0 0 25px rgba(255, 215, 0, 0.2)",
+              overflow: "hidden"
             }}
           >
-            <Trophy size={28} style={{ color: "var(--gold)", filter: "drop-shadow(0 0 8px rgba(255, 215, 0, 0.5))" }} />
+            <img 
+              src="/logo.png" 
+              alt="MBS Logo" 
+              style={{ 
+                width: "44px", 
+                height: "auto", 
+                objectFit: "contain", 
+                filter: "drop-shadow(0 0 8px rgba(255, 215, 0, 0.45))" 
+              }} 
+            />
           </div>
 
           {/* Floating tiny spark */}

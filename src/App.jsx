@@ -119,6 +119,11 @@ const FAQ = lazy(() => import("./pages/FAQ"));
 const F2FDeal = lazy(() => import("./pages/F2FDeal"));
 const EscrowDeal = lazy(() => import("./pages/EscrowDeal"));
 const BookingSystem = lazy(() => import("./pages/BookingSystem"));
+const F2FSellGuide = lazy(() => import("./pages/F2FSellGuide"));
+const NoReturnsPolicy = lazy(() => import("./pages/NoReturnsPolicy"));
+const KYCGuide = lazy(() => import("./pages/KYCGuide"));
+const PayoutGuide = lazy(() => import("./pages/PayoutGuide"));
+const UnlinkingGuide = lazy(() => import("./pages/UnlinkingGuide"));
 
 
 
@@ -447,6 +452,46 @@ export default function App() {
             element={
               <Suspense fallback={<PageLoader />}>
                 <BookingSystem />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/f2f-sell-guide"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <F2FSellGuide />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/no-returns-policy"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <NoReturnsPolicy />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/kyc-guide"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <KYCGuide />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/payout-guide"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <PayoutGuide />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/unlinking-guide"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <UnlinkingGuide />
               </Suspense>
             }
           />

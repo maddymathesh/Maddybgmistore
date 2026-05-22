@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -7,7 +7,8 @@ import {
   ShieldCheck, Users, MapPin, CreditCard, Info, AlertTriangle, 
   HelpCircle, ChevronDown, MessageCircle, Send, Gamepad2, 
   Coins, TrendingUp, Clock, FileText, Check, Award, 
-  Calendar, Utensils, Plane, Hotel, ChevronRight, Eye, ShieldAlert
+  Calendar, Utensils, Plane, Hotel, ChevronRight, Eye, ShieldAlert,
+  Navigation, Search, CheckCircle
 } from "lucide-react";
 
 export default function F2FDeal() {
@@ -15,6 +16,108 @@ export default function F2FDeal() {
     "Secure Face-to-Face BGMI Deals",
     "Comprehensive guide to Maddy BGMI Store's premium Face-to-Face in-person transaction system designed exclusively for high-value accounts above ₹80,000."
   );
+
+  // Midpoint Calculation Cities Database
+  const cities = [
+    { 
+      name: "Vellore", 
+      midpoint: "Kanchipuram", 
+      distance: "~140 km Total (~70 km each)", 
+      travelEach: "70 km",
+      safeLocation: "GRT Regency, Gandhi Road / Kanchi Shopping Mall (CCTV Secure)", 
+      transitCoords: { customer: { x: 25, y: 75, name: "Vellore" }, midpoint: { x: 50, y: 55, name: "Kanchipuram (Midpoint)" }, base: { x: 80, y: 35, name: "Maddy Store Depot" } } 
+    },
+    { 
+      name: "Bangalore", 
+      midpoint: "Vellore", 
+      distance: "~300 km Total (~150 km each)", 
+      travelEach: "150 km",
+      safeLocation: "MGB Felicity Mall, NH-48 / SGR Highway Cafe (CCTV Secure)", 
+      transitCoords: { customer: { x: 12, y: 85, name: "Bangalore" }, midpoint: { x: 45, y: 65, name: "Vellore (Midpoint)" }, base: { x: 80, y: 35, name: "Maddy Store Depot" } } 
+    },
+    { 
+      name: "Coimbatore", 
+      midpoint: "Salem", 
+      distance: "~500 km Total (~250 km each)", 
+      travelEach: "250 km",
+      safeLocation: "ARRS Megamall, NH-44 / Sathyas Highway Inn (CCTV Secure)", 
+      transitCoords: { customer: { x: 15, y: 92, name: "Coimbatore" }, midpoint: { x: 48, y: 68, name: "Salem (Midpoint)" }, base: { x: 80, y: 35, name: "Maddy Store Depot" } } 
+    },
+    { 
+      name: "Madurai", 
+      midpoint: "Trichy", 
+      distance: "~460 km Total (~230 km each)", 
+      travelEach: "230 km",
+      safeLocation: "Feminina Shopping Mall, Cantonment / Sangam Restaurant (CCTV Secure)", 
+      transitCoords: { customer: { x: 25, y: 95, name: "Madurai" }, midpoint: { x: 52, y: 72, name: "Trichy (Midpoint)" }, base: { x: 80, y: 35, name: "Maddy Store Depot" } } 
+    },
+    { 
+      name: "Trichy", 
+      midpoint: "Villupuram", 
+      distance: "~330 km Total (~165 km each)", 
+      travelEach: "165 km",
+      safeLocation: "V-Mall, NH-45 / Highway Treat Rest House (CCTV Secure)", 
+      transitCoords: { customer: { x: 38, y: 82, name: "Trichy" }, midpoint: { x: 60, y: 60, name: "Villupuram (Midpoint)" }, base: { x: 80, y: 35, name: "Maddy Store Depot" } } 
+    },
+    { 
+      name: "Pondicherry", 
+      midpoint: "Mahabalipuram", 
+      distance: "~160 km Total (~80 km each)", 
+      travelEach: "80 km",
+      safeLocation: "Grande Cafe ECR / Radisson Blu Shoreline Checkpoint (CCTV Secure)", 
+      transitCoords: { customer: { x: 62, y: 72, name: "Pondicherry" }, midpoint: { x: 70, y: 55, name: "Mahabalipuram (Midpoint)" }, base: { x: 80, y: 35, name: "Maddy Store Depot" } } 
+    },
+    { 
+      name: "Hyderabad", 
+      midpoint: "Nellore", 
+      distance: "~630 km Total (~315 km each)", 
+      travelEach: "315 km",
+      safeLocation: "MVR Mall, NH-16 / Highway Food Plaza Junction (CCTV Secure)", 
+      transitCoords: { customer: { x: 45, y: 15, name: "Hyderabad" }, midpoint: { x: 68, y: 48, name: "Nellore (Midpoint)" }, base: { x: 80, y: 35, name: "Maddy Store Depot" } } 
+    },
+  ];
+
+  // Midpoint Map States
+  const [selectedCity, setSelectedCity] = useState(cities[0]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredCities = cities.filter(city => 
+    city.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const cardStyle = {
+    background: "rgba(17, 21, 32, 0.45)",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    borderRadius: "20px",
+    padding: "30px",
+    boxShadow: "0 15px 35px rgba(0,0,0,0.4)",
+    backdropFilter: "blur(12px)",
+    position: "relative",
+    overflow: "hidden"
+  };
+
+  const glowStyle = {
+    position: "absolute",
+    width: "150px",
+    height: "150px",
+    background: "radial-gradient(circle, rgba(255,107,53,0.1) 0%, transparent 70%)",
+    top: "-50px",
+    right: "-50px",
+    pointerEvents: "none"
+  };
 
   // FAQ Accordion State
   const [expandedIndex, setExpandedIndex] = useState(null);
@@ -533,95 +636,292 @@ export default function F2FDeal() {
         {/* ========================================
             SECTION 5 — MEETUP LOCATION SYSTEM
            ======================================== */}
-        <section style={{ padding: "80px 20px", background: "var(--bg2)", borderBottom: "1px solid rgba(255, 255, 255, 0.05)" }}>
-          <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+        <section id="midpoint-portal" style={{ padding: "80px 20px", background: "var(--bg2)", borderBottom: "1px solid rgba(255, 255, 255, 0.05)" }}>
+          <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
             <div style={{ textAlign: "center", marginBottom: "40px" }}>
-              <div className="slabel">Location Coordination</div>
-              <h2 className="stitle">Midpoint Meetup Coordinates</h2>
-              <p style={{ color: "var(--muted)", fontSize: "14px", marginTop: "10px" }}>
-                We determine optimized, pre-vetted public checkpoints to guarantee equal safety and comfortable transit parameters for both parties.
+              <div className="slabel">South India Equal Transit Protocol</div>
+              <h2 className="stitle">Balanced Midpoint Meetup Coordinates</h2>
+              <p style={{ color: "var(--muted)", fontSize: "14px", marginTop: "10px", maxWidth: "700px", margin: "10px auto 0", lineHeight: "1.6" }}>
+                All face-to-face deals are conducted in South India (Tamil Nadu, Kerala, Andhra Pradesh, Karnataka). With Maddy Store representatives based in **Chennai**, enter your city below to automatically calculate a balanced midpoint checkpoint ensuring **100% equal travel distances** for both parties. No one travels further!
               </p>
             </div>
 
-            {/* Common Midpoint Explanation */}
-            <div style={{ 
-              background: "rgba(17, 21, 32, 0.45)", 
-              border: "1px solid rgba(255, 255, 255, 0.05)", 
-              borderRadius: "20px", 
-              padding: "35px",
-              marginBottom: "35px"
-            }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: "30px", alignItems: "center" }} className="midpoint-grid">
-                <div>
-                  <h3 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "12px", fontFamily: "var(--font-h)", color: "#fff" }}>Fair Coordinate Mapping</h3>
-                  <p style={{ color: "var(--muted)", fontSize: "13.5px", lineHeight: 1.6, marginBottom: "18px" }}>
-                    "If the seller coordinates from Chennai and the buyer coordinates from Bangalore, an optimized midpoint coordinate such as a premium mall in **Vellore** is selected for safety."
-                  </p>
-                  <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
-                    <li style={{ ...bulletStyle, fontSize: "13px" }}><Check size={12} style={{ color: "var(--gold)" }} /> Public landmarks only</li>
-                    <li style={{ ...bulletStyle, fontSize: "13px" }}><Check size={12} style={{ color: "var(--gold)" }} /> Established Mall Food Courts, Premium Cafés, or Restaurants</li>
-                    <li style={{ ...bulletStyle, fontSize: "13px" }}><Check size={12} style={{ color: "var(--gold)" }} /> Mutually agreed coordination areas prior to locking travel tickets</li>
-                  </ul>
-                </div>
-
-                {/* Midpoint roadmap UI */}
-                <div style={{ 
-                  background: "rgba(8, 10, 15, 0.6)", 
-                  border: "1px dashed var(--border-gold)", 
-                  borderRadius: "15px", 
-                  padding: "24px 18px", 
-                  display: "flex", 
-                  flexDirection: "column",
-                  alignItems: "center"
-                }}>
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--gold)", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "20px", fontFamily: "var(--font-h)" }}>Transit Roadmap Simulation</span>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "30px" }} className="portal-grid">
+              
+              {/* COLUMN 1: City Search & Safe Checkpoints */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                <div style={cardStyle}>
+                  <div style={glowStyle} />
                   
-                  <div style={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%", position: "relative" }}>
-                    {/* Roadmap line */}
-                    <div style={{ position: "absolute", left: "19px", top: "20px", bottom: "20px", width: "2px", background: "dashed rgba(255, 215, 0, 0.25)" }} />
+                  <h3 style={{ fontFamily: "var(--font-h)", fontSize: "18px", fontWeight: 800, marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px", color: "#fff" }}>
+                    <Navigation size={18} style={{ color: "var(--gold)" }} /> Midpoint Map Portal
+                  </h3>
+                  <p style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.6", marginBottom: "22px" }}>
+                    Select or search your city to view the pre-calculated safe meetup coordinates. Our Chennai agent's base coordinates are kept secure and classified.
+                  </p>
 
-                    <div style={roadmapStepStyle}>
-                      <div style={roadmapBulletStyle}>BLR</div>
-                      <div style={{ display: "flex", flexDirection: "column" }}>
-                        <span style={{ fontSize: "13px", fontWeight: 700, color: "#fff" }}>Buyer City</span>
-                        <span style={{ fontSize: "11px", color: "var(--muted)" }}>Bangalore Coordinates</span>
+                  {/* Dropdown Input Area */}
+                  <div style={{ position: "relative", zIndex: 10 }} ref={dropdownRef}>
+                    <label style={{ display: "block", color: "var(--muted)", fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>
+                      Enter Your Customer City
+                    </label>
+                    <div style={{ position: "relative" }}>
+                      <input
+                        type="text"
+                        placeholder="Search city (e.g. Bangalore, Vellore...)"
+                        value={searchQuery}
+                        onChange={(e) => {
+                          setSearchQuery(e.target.value);
+                          setShowDropdown(true);
+                        }}
+                        onFocus={() => setShowDropdown(true)}
+                        style={{
+                          width: "100%", padding: "14px 16px 14px 44px",
+                          background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.12)",
+                          borderRadius: "10px", color: "#fff", fontSize: "14px",
+                          outline: "none", transition: "border-color 0.2s",
+                          boxSizing: "border-box"
+                        }}
+                      />
+                      <Search size={16} style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", color: "var(--muted)" }} />
+                      <ChevronDown size={16} style={{ position: "absolute", right: "16px", top: "50%", transform: "translateY(-50%)", color: "var(--muted)", cursor: "pointer" }} onClick={() => setShowDropdown(!showDropdown)} />
+                    </div>
+
+                    {showDropdown && (
+                      <div style={{
+                        position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0,
+                        background: "#111520", border: "1px solid rgba(255,255,255,0.15)",
+                        borderRadius: "10px", overflow: "hidden", boxShadow: "0 10px 30px rgba(0,0,0,0.6)"
+                      }}>
+                        {filteredCities.length > 0 ? (
+                          filteredCities.map((city) => (
+                            <div
+                              key={city.name}
+                              onClick={() => {
+                                setSelectedCity(city);
+                                setSearchQuery(city.name);
+                                setShowDropdown(false);
+                              }}
+                              style={{
+                                padding: "12px 16px", cursor: "pointer",
+                                background: selectedCity.name === city.name ? "rgba(255,215,0,0.1)" : "transparent",
+                                color: selectedCity.name === city.name ? "var(--gold)" : "#fff",
+                                fontSize: "13.5px", fontWeight: selectedCity.name === city.name ? 700 : 500,
+                                borderBottom: "1px solid rgba(255,255,255,0.03)",
+                                display: "flex", justifyContent: "space-between", alignItems: "center"
+                              }}
+                              onMouseEnter={(e) => {
+                                if (selectedCity.name !== city.name) e.currentTarget.style.background = "rgba(255,255,255,0.03)";
+                              }}
+                              onMouseLeave={(e) => {
+                                if (selectedCity.name !== city.name) e.currentTarget.style.background = "transparent";
+                              }}
+                            >
+                              <span>{city.name}</span>
+                              <span style={{ fontSize: "11px", color: "var(--muted)" }}>Midpoint: {city.midpoint}</span>
+                            </div>
+                          ))
+                        ) : (
+                          <div style={{ padding: "12px 16px", color: "var(--muted)", fontSize: "13px" }}>
+                            No vended cities found. Meetup coordinates will be calculated manually upon booking.
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Selected City Metadata Panel */}
+                  <div style={{ marginTop: "24px", padding: "16px", background: "rgba(255,215,0,0.04)", border: "1px dashed rgba(255,215,0,0.3)", borderRadius: "12px" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "12px" }}>
+                      <div>
+                        <span style={{ display: "block", fontSize: "10px", color: "var(--muted)", textTransform: "uppercase", fontWeight: 700 }}>Computed Midpoint</span>
+                        <strong style={{ fontSize: "15px", color: "#fff", display: "block", marginTop: "2px" }}>{selectedCity.midpoint}</strong>
+                      </div>
+                      <div>
+                        <span style={{ display: "block", fontSize: "10px", color: "var(--muted)", textTransform: "uppercase", fontWeight: 700 }}>Total Transit Distance</span>
+                        <strong style={{ fontSize: "15px", color: "#fff", display: "block", marginTop: "2px" }}>{selectedCity.distance}</strong>
                       </div>
                     </div>
 
-                    <div style={{ ...roadmapStepStyle, margin: "14px 0" }}>
-                      <div style={{ ...roadmapBulletStyle, background: "linear-gradient(135deg, var(--gold), var(--orange))", color: "#000", border: "2px solid var(--gold)", boxShadow: "0 0 10px rgba(255,215,0,0.3)" }}>MID</div>
-                      <div style={{ display: "flex", flexDirection: "column" }}>
-                        <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--gold)" }}>Vellore Meetup</span>
-                        <span style={{ fontSize: "11px", color: "var(--muted)" }}>Pre-approved Mall/Cafe</span>
+                    {/* Equal Travel Split Breakdown */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", padding: "10px", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "8px", marginBottom: "12px" }}>
+                      <div style={{ textAlign: "center" }}>
+                        <span style={{ display: "block", fontSize: "9px", color: "var(--muted)", textTransform: "uppercase", fontWeight: 700 }}>Buyer Travel</span>
+                        <strong style={{ fontSize: "13px", color: "var(--gold)", display: "block", marginTop: "2px" }}>~{selectedCity.travelEach}</strong>
+                      </div>
+                      <div style={{ textAlign: "center", borderLeft: "1px dashed rgba(255,255,255,0.1)" }}>
+                        <span style={{ display: "block", fontSize: "9px", color: "var(--muted)", textTransform: "uppercase", fontWeight: 700 }}>Seller Travel</span>
+                        <strong style={{ fontSize: "13px", color: "var(--gold)", display: "block", marginTop: "2px" }}>~{selectedCity.travelEach}</strong>
                       </div>
                     </div>
 
-                    <div style={roadmapStepStyle}>
-                      <div style={roadmapBulletStyle}>MAA</div>
-                      <div style={{ display: "flex", flexDirection: "column" }}>
-                        <span style={{ fontSize: "13px", fontWeight: 700, color: "#fff" }}>Seller City</span>
-                        <span style={{ fontSize: "11px", color: "var(--muted)" }}>Chennai Coordinates</span>
-                      </div>
+                    <div style={{ marginBottom: "10px" }}>
+                      <span style={{ display: "block", fontSize: "10px", color: "var(--muted)", textTransform: "uppercase", fontWeight: 700, marginBottom: "4px" }}>Pre-Vetted CCTV Checkpoint</span>
+                      <span style={{ fontSize: "12.5px", color: "var(--gold)", fontWeight: 600 }}>{selectedCity.safeLocation}</span>
+                    </div>
+
+                    <div style={{ fontSize: "11px", color: "#22c55e", fontWeight: 600, display: "flex", alignItems: "center", gap: "6px", borderTop: "1px dashed rgba(255,255,255,0.06)", paddingTop: "8px" }}>
+                      <CheckCircle size={12} /> Balanced Transit: 100% Equal travel distance for both parties!
                     </div>
                   </div>
+
+                </div>
+
+                {/* Safety Protocol Note */}
+                <div style={{ 
+                  background: "rgba(255, 107, 53, 0.05)", 
+                  border: "1px solid rgba(255, 107, 53, 0.2)", 
+                  borderRadius: "12px", 
+                  padding: "16px 20px", 
+                  display: "flex", 
+                  alignItems: "center", 
+                  gap: "12px"
+                }}>
+                  <AlertTriangle size={20} style={{ color: "var(--orange)", flexShrink: 0 }} />
+                  <span style={{ fontSize: "13px", color: "rgba(255,255,255,0.9)", fontWeight: 500 }}>
+                    Safety First Coordinate Protocol: <strong style={{ color: "var(--orange)" }}>“Private, dark, or isolated meetup coordinates are strictly avoided.”</strong> Only premium, CCTV-secured open public spots are eligible.
+                  </span>
                 </div>
               </div>
-            </div>
 
-            {/* Warning Note */}
-            <div style={{ 
-              background: "rgba(255, 107, 53, 0.05)", 
-              border: "1px solid rgba(255, 107, 53, 0.2)", 
-              borderRadius: "12px", 
-              padding: "16px 20px", 
-              display: "flex", 
-              alignItems: "center", 
-              gap: "12px"
-            }}>
-              <AlertTriangle size={20} style={{ color: "var(--orange)", flexShrink: 0 }} />
-              <span style={{ fontSize: "13px", color: "rgba(255,255,255,0.9)", fontWeight: 500 }}>
-                Safety First Coordinate Protocol: <strong style={{ color: "var(--orange)" }}>“Private, dark, or isolated meetup coordinates are strictly avoided.”</strong> Only premium, CCTV-secured open public spots are eligible.
-              </span>
+              {/* COLUMN 2: Live Routing Vector Map & Transit Details */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                
+                {/* Dynamic Animated Route Map */}
+                <div style={{ ...cardStyle, padding: "20px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
+                    <span style={{ fontFamily: "var(--font-h)", fontSize: "14px", fontWeight: 700, textTransform: "uppercase", color: "#fff", display: "flex", alignItems: "center", gap: "6px" }}>
+                      <Navigation size={14} style={{ color: "var(--gold)" }} /> Live Routing Vector Map
+                    </span>
+                    <span style={{ fontSize: "11px", background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)", color: "#4ade80", padding: "2px 10px", borderRadius: "100px", fontWeight: 700 }}>
+                      Active Route
+                    </span>
+                  </div>
+
+                  {/* SVG Visual Map */}
+                  <div style={{ position: "relative", background: "#0a0c14", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "14px", overflow: "hidden", height: "240px" }}>
+                    
+                    {/* Glowing Radar Scans */}
+                    <div className="radar-circle animate-ping" style={{ position: "absolute", left: `${selectedCity.transitCoords.midpoint.x}%`, top: `${selectedCity.transitCoords.midpoint.y}%`, transform: "translate(-50%,-50%)", width: "40px", height: "40px", borderRadius: "50%", background: "rgba(255,215,0,0.15)", pointerEvents: "none" }} />
+                    
+                    {/* Grid Lines Overlay */}
+                    <svg width="100%" height="100%" style={{ position: "absolute", inset: 0, zIndex: 1 }}>
+                      <defs>
+                        <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
+                        </pattern>
+                      </defs>
+                      <rect width="100%" height="100%" fill="url(#grid)" />
+                      
+                      {/* Animated Line Connection */}
+                      {/* Customer City -> Midpoint */}
+                      <line 
+                        x1={`${selectedCity.transitCoords.customer.x}%`} 
+                        y1={`${selectedCity.transitCoords.customer.y}%`}
+                        x2={`${selectedCity.transitCoords.midpoint.x}%`} 
+                        y2={`${selectedCity.transitCoords.midpoint.y}%`}
+                        stroke="var(--orange)" 
+                        strokeWidth="2.5" 
+                        strokeDasharray="6,4"
+                        className="animated-transit-path"
+                      />
+
+                      {/* Midpoint -> Confidential Agent Depot */}
+                      <line 
+                        x1={`${selectedCity.transitCoords.midpoint.x}%`} 
+                        y1={`${selectedCity.transitCoords.midpoint.y}%`}
+                        x2={`${selectedCity.transitCoords.base.x}%`} 
+                        y2={`${selectedCity.transitCoords.base.y}%`}
+                        stroke="var(--gold)" 
+                        strokeWidth="2.5" 
+                        strokeDasharray="6,4"
+                        className="animated-transit-path"
+                      />
+
+                      {/* Nodes Connection Drawing */}
+                      {/* Client Node */}
+                      <circle 
+                        cx={`${selectedCity.transitCoords.customer.x}%`} 
+                        cy={`${selectedCity.transitCoords.customer.y}%`} 
+                        r="7" 
+                        fill="#3b82f6" 
+                        stroke="#fff" 
+                        strokeWidth="1.5"
+                      />
+                      
+                      {/* Midpoint Node */}
+                      <circle 
+                        cx={`${selectedCity.transitCoords.midpoint.x}%`} 
+                        cy={`${selectedCity.transitCoords.midpoint.y}%`} 
+                        r="9" 
+                        fill="var(--orange)" 
+                        stroke="#fff" 
+                        strokeWidth="2"
+                      />
+
+                      {/* Base Node */}
+                      <circle 
+                        cx={`${selectedCity.transitCoords.base.x}%`} 
+                        cy={`${selectedCity.transitCoords.base.y}%`} 
+                        r="7" 
+                        fill="var(--gold)" 
+                        stroke="#fff" 
+                        strokeWidth="1.5"
+                      />
+                    </svg>
+
+                    {/* SVG Labels */}
+                    <div style={{ position: "absolute", left: `${selectedCity.transitCoords.customer.x}%`, top: `${selectedCity.transitCoords.customer.y - 12}%`, transform: "translateX(-50%)", zIndex: 2, background: "rgba(17,21,32,0.8)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "4px", padding: "2px 6px", fontSize: "10px", fontWeight: 700, color: "#fff", whiteSpace: "nowrap" }}>
+                      👤 Buyer: {selectedCity.transitCoords.customer.name}
+                    </div>
+
+                    <div style={{ position: "absolute", left: `${selectedCity.transitCoords.midpoint.x}%`, top: `${selectedCity.transitCoords.midpoint.y - 14}%`, transform: "translateX(-50%)", zIndex: 2, background: "rgba(255,215,0,0.9)", border: "1px solid #fff", borderRadius: "4px", padding: "3px 8px", fontSize: "10px", fontWeight: 900, color: "#000", whiteSpace: "nowrap" }}>
+                      📍 Midpoint: {selectedCity.transitCoords.midpoint.name}
+                    </div>
+
+                    <div style={{ position: "absolute", left: `${selectedCity.transitCoords.base.x}%`, top: `${selectedCity.transitCoords.base.y - 12}%`, transform: "translateX(-50%)", zIndex: 2, background: "rgba(17,21,32,0.8)", border: "1px solid rgba(255,215,0,0.3)", borderRadius: "4px", padding: "2px 6px", fontSize: "10px", fontWeight: 700, color: "var(--gold)", whiteSpace: "nowrap" }}>
+                      🔒 Maddy Agent Depot
+                    </div>
+                  </div>
+
+                  <style>{`
+                    .animated-transit-path {
+                      animation: dashTransit 20s linear infinite;
+                      stroke-dashoffset: 100;
+                    }
+                    @keyframes dashTransit {
+                      to {
+                        stroke-dashoffset: -1000;
+                      }
+                    }
+                  `}</style>
+                </div>
+
+                {/* Pre-Vetted CCTV Checkpoint Details Card */}
+                <div style={{ ...cardStyle, border: "1px solid rgba(255, 215, 0, 0.25)", background: "rgba(255, 215, 0, 0.03)" }}>
+                  <h4 style={{ fontFamily: "var(--font-h)", fontSize: "15px", fontWeight: 800, color: "var(--gold)", margin: "0 0 10px", display: "flex", alignItems: "center", gap: "8px" }}>
+                    <ShieldCheck size={16} /> Pre-Vetted CCTV Checkpoint Standard
+                  </h4>
+                  <p style={{ color: "rgba(255, 255, 255, 0.8)", fontSize: "12.5px", lineHeight: "1.6", margin: "0 0 16px" }}>
+                    Our transaction coordinators only meet at pre-vetted checkpoints satisfying strict safety standards:
+                  </p>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "10px" }}>
+                    {[
+                      "Active CCTV Surveillance: Full high-definition recording coverage of the meetup area.",
+                      "High-Footfall Public Spaces: Malls, coffee shops, or star hotels are used exclusively.",
+                      "Immediate Transport Connectivity: Located within 15 minutes of major railway hubs or national highways."
+                    ].map((exp, idx) => (
+                      <div key={idx} style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
+                        <CheckCircle size={14} style={{ color: "var(--gold)", flexShrink: 0, marginTop: "2px" }} />
+                        <span style={{ fontSize: "12px", color: "var(--muted)", lineHeight: 1.5 }}>{exp}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+
             </div>
           </div>
         </section>

@@ -46,25 +46,39 @@ export default function Sell() {
   });
 
   const holdAndSellSteps = [
-    { title: "Contact & Share Account", body: "Reach out via WhatsApp or Telegram and securely share your account video, inventory description, or temporary login details for evaluation.", idx_chip: null },
-    { title: "Market Price Evaluation", body: "We evaluate the true market price based on your inventory — upgrading labs, classic skins, X-suits, weapon finishes, and rank badges — and inform you of the exact value.", idx_chip: null },
-    { title: "Verification & Login Lock", body: "Once we agree on the market price, we add our official login or secure one login method for complete ownership verification and control during listing.", idx_chip: null },
-    { title: "Professional Listing & Channel Broadcast", body: "We record a professional preview video, write a comprehensive description, and broadcast your listing across our VIP Telegram and WhatsApp channels.", idx_chip: null },
-    { title: "3–7 Days Typical Listing Cycle", body: "Listings typically sell within 3 to 7 days. If the account does not sell in this window, we adjust the price and re-list it for maximum exposure.", idx_chip: null },
-    { title: "Double-Login Securing for Buyer", body: "Once a buyer is secured, we take over custody and secure both logins for the buyer to ensure a safe, permanent transfer.", idx_chip: "kyc" },
-    { title: "Owner Government ID KYC Proof", body: "Before releasing the final payment, we collect the owner's valid government ID (Aadhaar Card or Driving License) for future legal reference, kept 100% secure.", idx_chip: "kyc" },
-    { title: "Payout Release & Delivery Confirmation", body: "We pay the original owner after the buyer confirms successful delivery. Cleared via UPI, Bank Transfer, USDT, BTC, or F2F Cash for large accounts.", idx_chip: "payout" },
+    {
+      title: "Phase 1: Contact, Audit & Listing Setup",
+      body: "Reach out to us with a screen-recorded inventory video and description. Our expert team audits your account to provide both a direct wholesale Instant Buyout offer and a premium Hold & Sell valuation. We discuss whether you prefer online listings or an in-person midpoint meetup (for accounts valued above ₹80,000 requiring a deposit). We then create a professional preview video and broadcast your listing across our high-traffic VIP Telegram and WhatsApp channels to secure maximum market value.",
+      idx_chip: "f2f"
+    },
+    {
+      title: "Phase 2: KYC, Buyer Secured & Binding",
+      body: "Listings typically sell within 3–7 days (price adjusted if unsold). Once a buyer is secured, we collect your government-issued ID (Aadhaar or Driving License) for our encrypted database to trace future freezes. We then proceed with full secure binding transfer (changing recovery phone, email, etc.). Single login bindings trigger payouts immediately upon buyer delivery confirmation, while multiple login methods require a 7-15 days unlinking cooldown quarantine to ensure permanent detachment.",
+      idx_chip: "kyc"
+    },
+    {
+      title: "Phase 3: Irreversible Finality & Payout",
+      body: "Once credentials are handed over to the buyer and locked, the sale is 100% final and non-refundable. The account is permanently transferred and cannot be recalled or adjusted. Payment is securely released to you via UPI, Bank Transfer, or liquid Cash (for F2F deals) after all buyer verification checks are complete, adhering to login security timelines (instant for single login, 7-15 days for multiple logins).",
+      idx_chip: "payout"
+    }
   ];
 
   const instantSellSteps = [
-    { title: "Support Connection & Logins", body: "Message us on WhatsApp or Telegram and securely share temporary credentials for audit access. We begin immediately upon receiving your details.", idx_chip: null },
-    { title: "Live Inventory Scan", body: "Our analysts perform an immediate valuation and present a solid, direct wholesale cash buyout offer within hours of your submission.", idx_chip: null },
-    { title: "Select Mode of Dealing", body: "Choose secure Online Transfer or Face-to-Face meetup (strictly reserved for premium ₹80,000+ accounts).", idx_chip: "f2f" },
-    { title: "KYC & Identity Verification", body: "Submit government-issued ID proof with address (Aadhaar Card or Driving License) to verify ownership and authorize the buyout legally.", idx_chip: "kyc" },
-    { title: "Single/Dual Login Security", body: "We audit all login bindings. For dual logins, we secure the primary login and submit the secondary unlink request immediately.", idx_chip: null },
-    { title: "Quarantine Cooldown Timelines", body: "If unlinks require a 7-day wait or links require 30 days, the account is held in secure quarantine. Your payout is confirmed and held safely.", idx_chip: null },
-    { title: "Irreversible Handover Clause", body: "Seller signs terms for complete credential detachment. Once locked, the account cannot be returned under any circumstances.", idx_chip: null },
-    { title: "Immediate Wholesale Payout", body: "Funds are instantly released via UPI, Bank Transfer, or liquid Cash (for F2F deals) within 1–2 hours of binding confirmation.", idx_chip: "payout" },
+    {
+      title: "Phase 1: Contact, Audit & Deal Options",
+      body: "Submit your account details along with a screen-recorded inventory video and description. Our analysts securely audit your credentials to provide direct wholesale Instant Buyout and Hold & Sell quotes. We then discuss your deal preference: secure Online Transfer (immediate credential transfer and instant payout once logins are secured) or premium Face-to-Face Meetup (strictly reserved for accounts valued above ₹80,000 with a security deposit).",
+      idx_chip: "f2f"
+    },
+    {
+      title: "Phase 2: KYC & Full Secure Binding",
+      body: "Upon deal agreement, we collect official government-issued ID proof (Aadhaar Card or Driving License). These documents are stored securely in our encrypted offline tracing database to protect against login locks or future recovery attempts. Once ID verification is cleared, we perform comprehensive binding changes (recovery phone, email, and security questions). Note: Single active login methods receive immediate payout once secured, whereas multiple login bindings undergo a 7-15 days cooldown quarantine phase for absolute unlinking security.",
+      idx_chip: "kyc"
+    },
+    {
+      title: "Phase 3: Irreversible Finality & Payout",
+      body: "Once credentials are handed over and locked, the transaction is 100% final and non-reversible. The account cannot be returned or repurchased at a later price, and is immediately prepared for market listing. Payout is released via liquid Cash, instant UPI, or Bank Transfer ONLY after all login pathways are fully secured (within 1–2 hours for single logins, or after the 7-15 days quarantine cooldown for multiple login methods).",
+      idx_chip: "payout"
+    }
   ];
 
   const currentSteps = activeOption === 0 ? holdAndSellSteps : instantSellSteps;
@@ -155,10 +169,10 @@ export default function Sell() {
 
             {/* Quick panel nav chips */}
             <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginTop: "28px" }}>
-              <button onClick={() => { setF2fExpanded(true); setTimeout(() => scrollTo(f2fRef), 100); }}
+              <Link to="/f2f-sell-guide"
                 style={chipStyle("var(--orange)")}>
-                <MapPin size={12} /> F2F Sell Rules
-              </button>
+                <MapPin size={12} /> F2F Sell Guide
+              </Link>
               <button onClick={() => { setKycExpanded(true); setTimeout(() => scrollTo(kycRef), 100); }}
                 style={chipStyle("#22c55e")}>
                 <FileText size={12} /> KYC & ID Proof
@@ -197,19 +211,34 @@ export default function Sell() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(290px,1fr))", gap: "20px" }}>
               {[
                 {
-                  num: "01", title: "Strict KYC & ID Audit", color: "#22c55e",
-                  body: "We securely collect the owner's valid government ID with address (Aadhaar Card or Driving License) before final payment for legal reference.",
-                  chip: "KYC Details", ref: kycRef, set: setKycExpanded, chipColor: "#22c55e"
+                  num: "01", title: "Face-to-Face Selling", color: "var(--orange)",
+                  body: "Contact us via WhatsApp/Telegram for valuation. If F2F is chosen, meet at a midpoint location (e.g., Kanchipuram for Vellore-Chennai) after paying a 10% booking fee. Payout is released instantly via cash/UPI upon full verification.",
+                  chip: "F2F Sell Guide", path: "/f2f-sell-guide", chipColor: "var(--orange)"
                 },
                 {
-                  num: "02", title: "Flexible Deal Modes & F2F", color: "#22c55e",
-                  body: "Choose online escrow transfer or Face-to-Face meetup. F2F is strictly for accounts above ₹80,000. The Owner covers Travel, Stay & Food for the deal agent.",
-                  chip: "F2F Sell Guide", ref: f2fRef, set: setF2fExpanded, chipColor: "var(--orange)"
+                  num: "02", title: "Escrow Method", color: "#60a5fa",
+                  body: "Trade safely through a trusted streamer, YouTuber, or mutual middleman who holds login credentials during the audit and releases payment directly once full control is verified by Maddy Store.",
+                  chip: "Escrow Guide", path: "/escrow-deal", chipColor: "#60a5fa"
                 },
                 {
-                  num: "03", title: "Irrevocable Handover Policy", color: "#ef4444",
-                  body: "Once our security team detaches bindings and transfers ownership to the buyer, the account cannot be returned under any circumstances. Payout is 100% locked & guaranteed.",
-                  chip: "Payout Methods", ref: payoutRef, set: setPayoutExpanded, chipColor: "var(--gold)"
+                  num: "03", title: "No Returns After Handover", color: "#ef4444",
+                  body: "Once credentials have been successfully transferred and payment is released, the deal is 100% final. Accounts cannot be returned or resold back to us at a later price to protect profit margins.",
+                  chip: "Finality Policy", path: "/no-returns-policy", chipColor: "#ef4444"
+                },
+                {
+                  num: "04", title: "ID Proof (KYC)", color: "#4ade80",
+                  body: "We collect government-issued ID (Aadhaar, PAN, DL) and live location. This keeps our marketplace fraud-free and assists our team in resolving security freezes or recovery locks.",
+                  chip: "KYC Guide", path: "/kyc-guide", chipColor: "#4ade80"
+                },
+                {
+                  num: "05", title: "Payment Methods", color: "var(--gold)",
+                  body: "Immediate cash/UPI on verification for F2F, or secure middleman disburser for Escrow. Features Scenario A (dual linkage unlinks take 7-15 days) and Scenario B (single login immediate payout).",
+                  chip: "Payout Guide", path: "/payout-guide", chipColor: "var(--gold)"
+                },
+                {
+                  num: "06", title: "Personal Logins", color: "#e2e2e2",
+                  body: "Primary game logins go to Maddy Store, while personal connections (Facebook, personal Gmail) remain strictly yours. A guaranteed unlinking window ensures safe detachment.",
+                  chip: "Unlinking Guide", path: "/unlinking-guide", chipColor: "#e2e2e2"
                 },
               ].map((rule) => (
                 <div key={rule.num} style={{ display: "flex", gap: "14px" }}>
@@ -222,11 +251,19 @@ export default function Sell() {
                   <div>
                     <strong style={{ color: "#fff", display: "block", fontSize: "15px", marginBottom: "6px", fontFamily: "var(--font-h)", letterSpacing: "0.5px" }}>{rule.title}</strong>
                     <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.6", display: "block", marginBottom: "10px" }}>{rule.body}</span>
-                    <button
-                      onClick={() => { rule.set(true); setTimeout(() => scrollTo(rule.ref), 150); }}
-                      style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: 700, color: rule.chipColor, background: "transparent", border: "none", cursor: "pointer", fontFamily: "var(--font-h)", letterSpacing: "0.5px", textTransform: "uppercase", padding: 0 }}>
-                      <BookOpen size={12} /> {rule.chip} →
-                    </button>
+                    {rule.path ? (
+                      <Link
+                        to={rule.path}
+                        style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: 700, color: rule.chipColor, background: "transparent", border: "none", cursor: "pointer", fontFamily: "var(--font-h)", letterSpacing: "0.5px", textTransform: "uppercase", padding: 0, textDecoration: "none" }}>
+                        <BookOpen size={12} /> {rule.chip} →
+                      </Link>
+                    ) : (
+                      <button
+                        onClick={() => { rule.set(true); setTimeout(() => scrollTo(rule.ref), 150); }}
+                        style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: 700, color: rule.chipColor, background: "transparent", border: "none", cursor: "pointer", fontFamily: "var(--font-h)", letterSpacing: "0.5px", textTransform: "uppercase", padding: 0 }}>
+                        <BookOpen size={12} /> {rule.chip} →
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -274,10 +311,10 @@ export default function Sell() {
                         <span className="step-body">{step.body}</span>
                         {step.idx_chip === "f2f" && (
                           <div style={{ marginTop: "8px" }}>
-                            <button onClick={(e) => { e.stopPropagation(); setF2fExpanded(true); setTimeout(() => scrollTo(f2fRef), 100); }}
-                              style={{ ...chipStyle("var(--orange)"), fontSize: "10px", padding: "4px 10px" }}>
-                              <MapPin size={10} /> F2F Sell Rules
-                            </button>
+                            <Link to="/f2f-sell-guide" onClick={(e) => e.stopPropagation()}
+                              style={{ ...chipStyle("var(--orange)"), fontSize: "10px", padding: "4px 10px", textDecoration: "none" }}>
+                              <MapPin size={10} /> F2F Sell Guide
+                            </Link>
                           </div>
                         )}
                         {step.idx_chip === "kyc" && (
@@ -338,7 +375,15 @@ export default function Sell() {
                       <div>
                         <strong className="step-title">{step.title}</strong>
                         <span className="step-body">{step.body}</span>
-                        {step.idx_chip === "kyc" && idx === 5 && (
+                        {step.idx_chip === "f2f" && (
+                          <div style={{ marginTop: "8px" }}>
+                            <Link to="/f2f-sell-guide" onClick={(e) => e.stopPropagation()}
+                              style={{ ...chipStyle("var(--orange)"), fontSize: "10px", padding: "4px 10px", textDecoration: "none" }}>
+                              <MapPin size={10} /> F2F Sell Guide
+                            </Link>
+                          </div>
+                        )}
+                        {step.idx_chip === "kyc" && (
                           <div style={{ marginTop: "8px" }}>
                             <button onClick={(e) => { e.stopPropagation(); setKycExpanded(true); setTimeout(() => scrollTo(kycRef), 100); }}
                               style={{ ...chipStyle("#22c55e"), fontSize: "10px", padding: "4px 10px" }}>
@@ -392,8 +437,8 @@ export default function Sell() {
                 </div>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <Link to="/f2f-deal" onClick={(e) => e.stopPropagation()} style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 700, color: "var(--orange)", fontFamily: "var(--font-h)", textTransform: "uppercase", letterSpacing: "0.5px", background: "rgba(255,107,53,0.08)", border: "1px solid rgba(255,107,53,0.25)", padding: "6px 12px", borderRadius: "20px", textDecoration: "none" }}>
-                  <ExternalLink size={11} /> Full Page
+                <Link to="/f2f-sell-guide" onClick={(e) => e.stopPropagation()} style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 700, color: "var(--orange)", fontFamily: "var(--font-h)", textTransform: "uppercase", letterSpacing: "0.5px", background: "rgba(255,107,53,0.08)", border: "1px solid rgba(255,107,53,0.25)", padding: "6px 12px", borderRadius: "20px", textDecoration: "none" }}>
+                  <ExternalLink size={11} /> Sell Guide
                 </Link>
                 {f2fExpanded ? <ChevronUp size={22} style={{ color: "var(--orange)" }} /> : <ChevronDown size={22} style={{ color: "var(--muted)" }} />}
               </div>
@@ -413,12 +458,12 @@ export default function Sell() {
                     { icon: <Lock size={16} style={{ color: "var(--gold)" }} />, title: "Cash Payout at Meetup", desc: "For ₹80K+ accounts, cash payout can be arranged at the meetup location after credential verification." },
                   ].map((item, i) => (
                     <div key={i} style={{ background: "rgba(255,107,53,0.03)", border: "1px solid rgba(255,107,53,0.12)", borderRadius: "12px", padding: "16px", display: "flex", alignItems: "flex-start", gap: "12px" }}>
-                      <div style={{ flexShrink: 0, marginTop: "2px" }}>{item.icon}</div>
-                      <div>
-                        <strong style={{ display: "block", color: "#fff", fontSize: "13px", marginBottom: "4px" }}>{item.title}</strong>
-                        <span style={{ fontSize: "12px", color: "var(--muted)" }}>{item.desc}</span>
-                      </div>
-                    </div>
+                       <div style={{ flexShrink: 0, marginTop: "2px" }}>{item.icon}</div>
+                       <div>
+                         <strong style={{ display: "block", color: "#fff", fontSize: "13px", marginBottom: "4px" }}>{item.title}</strong>
+                         <span style={{ fontSize: "12px", color: "var(--muted)" }}>{item.desc}</span>
+                       </div>
+                     </div>
                   ))}
                 </div>
 
@@ -430,8 +475,8 @@ export default function Sell() {
                 </div>
 
                 <div style={{ marginTop: "16px", display: "flex", justifyContent: "flex-end" }}>
-                  <Link to="/f2f-deal" style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "12px 24px", background: "linear-gradient(135deg,var(--orange),#ef4444)", borderRadius: "10px", color: "#fff", fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px", textDecoration: "none" }}>
-                    <ExternalLink size={14} /> Full F2F Deal System →
+                  <Link to="/f2f-sell-guide" style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "12px 24px", background: "linear-gradient(135deg,var(--orange),#ef4444)", borderRadius: "10px", color: "#fff", fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px", textDecoration: "none" }}>
+                    <ExternalLink size={14} /> Full F2F Sell Guide →
                   </Link>
                 </div>
               </div>
@@ -575,17 +620,9 @@ export default function Sell() {
               {currentSteps.map((step, idx) => (
                 <div key={idx} className="timeline-node-card fade-in" style={{ position: "relative", marginBottom: "35px", background: "rgba(17,21,32,0.35)", border: "1px solid rgba(255,255,255,0.04)", borderRadius: "14px", padding: "20px 24px", boxShadow: "0 10px 30px rgba(0,0,0,0.15)" }}>
                   <div style={{ position: "absolute", left: "-66px", top: "18px", width: "40px", height: "40px", borderRadius: "50%", background: "#080a0f", border: `2px solid ${activeOption === 0 ? "#3b82f6" : "#22c55e"}`, boxShadow: `0 0 12px ${activeOption === 0 ? "rgba(59,130,246,0.4)" : "rgba(34,197,94,0.4)"}`, display: "flex", alignItems: "center", justifyContent: "center", color: activeOption === 0 ? "#60a5fa" : "#4ade80", zIndex: 2, transition: "all 0.3s ease" }}>
-                    {step.title === "Contact & Share Account" || step.title === "Support Connection & Logins" ? <MessageCircle size={18} /> :
-                      step.title === "Market Price Evaluation" || step.title === "Live Inventory Scan" ? <BarChart size={18} /> :
-                      step.title === "Verification & Login Lock" ? <ShieldCheck size={18} /> :
-                      step.title === "Professional Listing & Channel Broadcast" ? <Megaphone size={18} /> :
-                      step.title === "3–7 Days Typical Listing Cycle" ? <Clock size={18} /> :
-                      step.title === "Select Mode of Dealing" ? <MapPin size={18} /> :
-                      step.title === "KYC & Identity Verification" || step.title === "Owner Government ID KYC Proof" ? <FileText size={18} /> :
-                      step.title === "Double-Login Securing for Buyer" || step.title === "Single/Dual Login Security" ? <ShieldCheck size={18} /> :
-                      step.title === "Quarantine Cooldown Timelines" ? <Clock size={18} /> :
-                      step.title === "Irreversible Handover Clause" ? <Lock size={18} /> :
-                      <CreditCard size={18} />}
+                    {idx === 0 ? <MessageCircle size={18} /> :
+                     idx === 1 ? <FileText size={18} /> :
+                     <ShieldCheck size={18} />}
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px", marginBottom: "8px" }}>
                     <h3 style={{ fontFamily: "var(--font-h)", fontSize: "16px", color: "#fff", margin: 0, fontWeight: 700, letterSpacing: "0.5px" }}>{step.title}</h3>

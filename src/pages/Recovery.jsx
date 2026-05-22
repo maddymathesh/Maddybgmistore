@@ -21,7 +21,7 @@ export default function Recovery() {
           alignItems: "center", justifyContent: "center",
         }}>
           <img
-            src="/recovery-banner.webp"
+            src="/recovery-banner.jpg"
             alt="BGMI motorbike desert scene" loading="lazy" decoding="async"
             style={{
               position: "absolute", inset: 0, width: "100%", height: "100%",

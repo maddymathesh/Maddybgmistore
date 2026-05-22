@@ -857,7 +857,7 @@ export default function Home() {
                 </div>
                 {r.image_url && (
                   <div style={{ marginTop: "16px", overflow: "hidden", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
-                    <img src={r.image_url} alt="Proof" loading="lazy" style={{ width: "100%", maxHeight: "200px", objectFit: "cover" }} />
+                    <img src={r.image_url} alt="Proof" loading="lazy" decoding="async" style={{ width: "100%", maxHeight: "200px", objectFit: "cover" }} />
                   </div>
                 )}
               </div>

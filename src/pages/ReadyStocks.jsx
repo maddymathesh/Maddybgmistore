@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import useSEO from "../hooks/useSEO";
+import SkeletonLoader from "../components/SkeletonLoader";
 import { Search, Lock, Link2, MessageCircle, CheckCircle, ShoppingBag, Banknote, ShoppingCart, Loader2, Play, ChevronRight, Send } from "lucide-react";
 
 // ── YouTube embed helper ──────────────────────────────────────
@@ -125,7 +126,7 @@ export default function ReadyStocks() {
       <Navbar />
       <div className="rs-page">
         <section className="rs-hero">
-          <img src="/readystocks-banner.jpg" alt="" className="hero-bg" />
+          <img src="/readystocks-banner.jpg" alt="BGMI Ready Stocks Account Listings" decoding="async" className="hero-bg" />
           <div className="hero-content">
             <h1 className="stitle">Ready To Play <br/><span className="g">Accounts</span></h1>
             <p className="ssub">Explore Premium BGMI IDs handpicked for elite gamers.</p>
@@ -156,7 +157,7 @@ export default function ReadyStocks() {
 
           <div className="stocks-grid">
             {loading ? (
-              <div className="loading-state"><Loader2 className="animate-spin" size={40} /></div>
+              Array(6).fill(0).map((_, idx) => <SkeletonLoader key={idx} />)
             ) : filtered.length > 0 ? (
               filtered.map(stock => <StockCard key={stock.id} stock={stock} />)
             ) : (
@@ -225,12 +226,12 @@ export default function ReadyStocks() {
           .loading-state { grid-column: 1/-1; text-align: center; padding: 100px; color: var(--gold); }
           .no-results { grid-column: 1/-1; text-align: center; padding: 50px; color: var(--muted); font-size: 18px; }
 
-          // @media (max-width: 768px) {
-          //   .filter-bar { position: static; }
-          //   .select-group { width: 100%; }
-          //   .select-group select { flex: 1; }
-          //   .rs-hero { height: 40vh; }
-          // }
+          @media (max-width: 768px) {
+            .filter-bar { position: static; }
+            .select-group { width: 100%; }
+            .select-group select { flex: 1; }
+            .rs-hero { height: 40vh; }
+          }
         `}</style>
       </div>
       <Footer />

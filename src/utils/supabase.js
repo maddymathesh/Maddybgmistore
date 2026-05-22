@@ -7,4 +7,12 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error('Supabase URL and Key must be provided in .env');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabaseAdminToken = import.meta.env.VITE_SUPABASE_ADMIN_TOKEN || 'mbs_admin_supabase_token_2026_xyz';
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  global: {
+    headers: {
+      'x-maddy-admin-token': supabaseAdminToken
+    }
+  }
+});

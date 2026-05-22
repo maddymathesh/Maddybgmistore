@@ -70,7 +70,7 @@ export default function Reviews() {
       <div style={{ paddingTop: "102px" }}>
 
         <section style={{ position: "relative", width: "100%", minHeight: "80vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <img src="/reviews-banner.webp" alt="Banner" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.5)" }} />
+          <img src="/reviews-banner.webp" alt="Maddy BGMI Store Customer Reviews Banner" decoding="async" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.5)" }} />
           <div style={{ position: "relative", zIndex: 2, textAlign: "center" }}>
             <h1 style={{ fontFamily: "var(--font-h)", fontSize: "clamp(30px,5.5vw,66px)", fontWeight: 900 }}>What Our<br /><span style={{ color: "var(--gold)" }}>Buyers Say</span></h1>
           </div>
@@ -107,7 +107,7 @@ export default function Reviews() {
                   {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={14} fill={i < (r.stars || 5) ? "var(--gold)" : "transparent"} color="var(--gold)" />)}
                 </div>
                 <p style={{ fontSize: "14px", lineHeight: 1.6 }}>{r.text}</p>
-                {r.image_url && <img src={r.image_url} alt="Proof" loading="lazy" style={{ width: "100%", borderRadius: "8px", marginTop: "12px" }} />}
+                {r.image_url && <img src={r.image_url} alt="Proof" loading="lazy" decoding="async" style={{ width: "100%", borderRadius: "8px", marginTop: "12px" }} />}
               </div>
             ))}
           </div>

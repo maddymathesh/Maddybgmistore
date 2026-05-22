@@ -140,7 +140,7 @@ const grouped = MONTHS_ORDER.reduce((acc, m) => {
         e.currentTarget.style.boxShadow = ""; 
       }}>
       <div style={{ position: "relative", aspectRatio: "3/4", overflow: "hidden" }}>
-        <img src={p.image_url} alt={p.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        <img src={p.image_url} alt={p.title} loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         <a href={p.image_url} target="_blank" rel="noreferrer"
           style={{ 
             position: "absolute", 

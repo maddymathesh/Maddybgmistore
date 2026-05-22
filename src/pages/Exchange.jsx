@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import useSEO from "../hooks/useSEO";
@@ -7,7 +8,7 @@ import {
   Megaphone, Clock, Handshake, CheckCircle, MessageCircle, 
   ChevronDown, ChevronUp, AlertTriangle, Shield, Award, Sparkles, Info,
   Smartphone, Key, Users, QrCode, MapPin, CreditCard, HelpCircle, Check,
-  ArrowUpRight, ArrowDownRight, RefreshCw
+  ArrowUpRight, ArrowDownRight, RefreshCw, Navigation, Search, BookOpen, Coins
 } from "lucide-react";
 
 export default function Exchange() {
@@ -20,91 +21,160 @@ export default function Exchange() {
   const [activeFaq, setActiveFaq] = useState(null);
   const [activeUnlinkTab, setActiveUnlinkTab] = useState(0); // 0 = Prep Checklist, 1 = Secure Rules, 2 = Guarantee
 
+  // Midpoint Map States
+  const [selectedCity, setSelectedCity] = useState({ 
+    name: "Vellore", 
+    midpoint: "Kanchipuram", 
+    distance: "~140 km Total (~70 km each)", 
+    travelEach: "70 km",
+    safeLocation: "GRT Regency, Gandhi Road / Kanchi Shopping Mall (CCTV Secure)", 
+    transitCoords: { customer: { x: 25, y: 75, name: "Vellore" }, midpoint: { x: 50, y: 55, name: "Kanchipuram (Midpoint)" }, base: { x: 80, y: 35, name: "Maddy Store Depot" } } 
+  });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Midpoint Calculation Cities Database
+  const cities = [
+    { 
+      name: "Vellore", 
+      midpoint: "Kanchipuram", 
+      distance: "~140 km Total (~70 km each)", 
+      travelEach: "70 km",
+      safeLocation: "GRT Regency, Gandhi Road / Kanchi Shopping Mall (CCTV Secure)", 
+      transitCoords: { customer: { x: 25, y: 75, name: "Vellore" }, midpoint: { x: 50, y: 55, name: "Kanchipuram (Midpoint)" }, base: { x: 80, y: 35, name: "Maddy Store Depot" } } 
+    },
+    { 
+      name: "Bangalore", 
+      midpoint: "Vellore", 
+      distance: "~300 km Total (~150 km each)", 
+      travelEach: "150 km",
+      safeLocation: "MGB Felicity Mall, NH-48 / SGR Highway Cafe (CCTV Secure)", 
+      transitCoords: { customer: { x: 12, y: 85, name: "Bangalore" }, midpoint: { x: 45, y: 65, name: "Vellore (Midpoint)" }, base: { x: 80, y: 35, name: "Maddy Store Depot" } } 
+    },
+    { 
+      name: "Coimbatore", 
+      midpoint: "Salem", 
+      distance: "~500 km Total (~250 km each)", 
+      travelEach: "250 km",
+      safeLocation: "ARRS Megamall, NH-44 / Sathyas Highway Inn (CCTV Secure)", 
+      transitCoords: { customer: { x: 15, y: 92, name: "Coimbatore" }, midpoint: { x: 48, y: 68, name: "Salem (Midpoint)" }, base: { x: 80, y: 35, name: "Maddy Store Depot" } } 
+    },
+    { 
+      name: "Madurai", 
+      midpoint: "Trichy", 
+      distance: "~460 km Total (~230 km each)", 
+      travelEach: "230 km",
+      safeLocation: "Feminina Shopping Mall, Cantonment / Sangam Restaurant (CCTV Secure)", 
+      transitCoords: { customer: { x: 25, y: 95, name: "Madurai" }, midpoint: { x: 52, y: 72, name: "Trichy (Midpoint)" }, base: { x: 80, y: 35, name: "Maddy Store Depot" } } 
+    },
+    { 
+      name: "Trichy", 
+      midpoint: "Villupuram", 
+      distance: "~330 km Total (~165 km each)", 
+      travelEach: "165 km",
+      safeLocation: "V-Mall, NH-45 / Highway Treat Rest House (CCTV Secure)", 
+      transitCoords: { customer: { x: 38, y: 82, name: "Trichy" }, midpoint: { x: 60, y: 60, name: "Villupuram (Midpoint)" }, base: { x: 80, y: 35, name: "Maddy Store Depot" } } 
+    },
+    { 
+      name: "Pondicherry", 
+      midpoint: "Mahabalipuram", 
+      distance: "~160 km Total (~80 km each)", 
+      travelEach: "80 km",
+      safeLocation: "Grande Cafe ECR / Radisson Blu Shoreline Checkpoint (CCTV Secure)", 
+      transitCoords: { customer: { x: 62, y: 72, name: "Pondicherry" }, midpoint: { x: 70, y: 55, name: "Mahabalipuram (Midpoint)" }, base: { x: 80, y: 35, name: "Maddy Store Depot" } } 
+    },
+    { 
+      name: "Hyderabad", 
+      midpoint: "Nellore", 
+      distance: "~630 km Total (~315 km each)", 
+      travelEach: "315 km",
+      safeLocation: "MVR Mall, NH-16 / Highway Food Plaza Junction (CCTV Secure)", 
+      transitCoords: { customer: { x: 45, y: 15, name: "Hyderabad" }, midpoint: { x: 68, y: 48, name: "Nellore (Midpoint)" }, base: { x: 80, y: 35, name: "Maddy Store Depot" } } 
+    },
+  ];
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredCities = cities.filter(city => 
+    city.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const cardStyle = {
+    background: "rgba(17, 21, 32, 0.45)",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    borderRadius: "20px",
+    padding: "30px",
+    boxShadow: "0 15px 35px rgba(0,0,0,0.4)",
+    backdropFilter: "blur(12px)",
+    position: "relative",
+    overflow: "hidden"
+  };
+
+  const glowStyle = {
+    position: "absolute",
+    width: "150px",
+    height: "150px",
+    background: "radial-gradient(circle, rgba(255,107,53,0.1) 0%, transparent 70%)",
+    top: "-50px",
+    right: "-50px",
+    pointerEvents: "none"
+  };
+
+  const chipStyle = (color) => ({
+    display: "inline-flex", alignItems: "center", gap: "6px",
+    padding: "6px 14px", borderRadius: "30px",
+    fontSize: "12px", fontWeight: 700, fontFamily: "var(--font-h)",
+    textTransform: "uppercase", letterSpacing: "0.5px",
+    cursor: "pointer", border: `1px solid ${color}`,
+    color: color, background: `${color}14`,
+    transition: "all 0.2s", textDecoration: "none"
+  });
+
   // Steps data for Exchange Upgrade (Lower Value Trade-In)
   const exchangeUpgradeSteps = [
     {
-      title: "Contact & Share Traded Account",
-      body: "Contact us via WhatsApp or Telegram to initiate exchange and share your current account's video walkthrough, description, or logins.",
-      icon: <MessageCircle size={18} />,
+      title: "Phase 1: Sourcing, Valuation & Deal Options",
+      body: "Submit your current account walkthrough video and description for a formal evaluation. Our pricing specialists provide a transparent trade-in value quote. We then align on your deal mode preference: secure Online Transfer (immediate credentials handover and instant balance adjustment once logins are secured) or premium Face-to-Face Meetup (strictly reserved for trades valued above ₹80,000, requiring a 10% security deposit with all travel, stay, and food expenses borne by the customer).",
+      idx_chip: "f2f"
     },
     {
-      title: "True Market Price Quotation",
-      body: "Our pricing specialists run a live evaluation of classic skins and upgradable weapons to provide a formal trade-in value quote.",
-      icon: <BarChart size={18} />,
+      title: "Phase 2: KYC & Pre-Securing Custody",
+      body: "Upon deal agreement, we collect valid government-issued ID proof (Aadhaar Card or Driving License) for our encrypted offline tracing database to guarantee zero cyber pullback or recovery issues. To ensure transaction integrity, Maddy Store always takes custody and secures the credentials of your old traded-in account first before target handover. Single active logins receive immediate handover, while dual/multiple logins require a 7-15 days unlinking cooldown window.",
+      idx_chip: "kyc"
     },
     {
-      title: "Target Sourcing & Budget Range",
-      body: "Define your required target account type, features (Conqueror frames, X-Suits, supercars), and additional budget range.",
-      icon: <MapPin size={18} />,
-    },
-    {
-      title: "Advance Sourcing Booking Lock",
-      body: "Deposit a 10% booking/advance lock (strictly non-refundable once booked) to secure our dedicated sourcing support and hold potential matches.",
-      icon: <Lock size={18} />,
-    },
-    {
-      title: "Verification Login Lock",
-      body: "Once a matching target account is found, we add our official login or secure one login method of both accounts for ownership validation.",
-      icon: <ShieldCheck size={18} />,
-    },
-    {
-      title: "Old Account Custody Lock First",
-      body: "We secure and completely bind the logins of your old traded-in account. We always secure the old account first.",
-      icon: <Lock size={18} />,
-    },
-    {
-      title: "Government ID & KYC Proof",
-      body: "Before finalizing, we collect the owner's valid government ID proof with address mentioned (Aadhaar Card or Driving License) for future reference and keep it secure.",
-      icon: <FileText size={18} />,
-    },
-    {
-      title: "Balance Payment & Satisfied Handover",
-      body: "Pay the remaining balance (adjusted with booking deposit). We deliver the new account, completing once both sides are fully satisfied.",
-      icon: <CheckCircle size={18} />,
+      title: "Phase 3: Finality & Balance Adjustment",
+      body: "Once both accounts are fully bound and verified under new recovery options, the exchange is 100% final, irreversible, and non-refundable. Accounts cannot be returned or repurchased at a later price. The remaining balance (adjusted with your 10% booking deposit) is paid to complete the trade. Handovers are finalized strictly after all login verification cooldowns clear, ensuring both sides are fully satisfied.",
+      idx_chip: "payout"
     }
   ];
 
   // Steps data for Exchange Downgrade (Higher Value Trade-In)
   const exchangeDowngradeSteps = [
     {
-      title: "Contact & Share Premium Account",
-      body: "Contact us via WhatsApp or Telegram and securely share your premium account's walkthrough video, description, or logins.",
-      icon: <MessageCircle size={18} />,
+      title: "Phase 1: Valuation, Catalog & Deal Options",
+      body: "Share your high-tier premium account details and a screen-recorded video walkthrough for a premium valuation. Select your lower-tier target account from our active catalog, and we calculate the exact surplus cash difference due to you. Choose online processing (immediate credential audit and surplus release once secured) or face-to-face meetups (strictly reserved for premium trades above ₹80,000, requiring a 10% security deposit with travel and stay expenses borne by the customer).",
+      idx_chip: "f2f"
     },
     {
-      title: "True Market Price Quotation",
-      body: "Our pricing specialists run a live evaluation of upgraded weapon labs and skins to provide a formal exchange value quote.",
-      icon: <BarChart size={18} />,
+      title: "Phase 2: KYC & Old Custody Binding First",
+      body: "We collect government-issued ID proof with address (Aadhaar Card or Driving License) along with live location for secure verification. Maddy BGMI Store always takes complete control and binds the credentials of your high-tier premium traded-in account first to guarantee absolute security. Single active login methods trigger immediate target account binding, while multiple active logins require a 7-15 days unlinking cooldown quarantine.",
+      idx_chip: "kyc"
     },
     {
-      title: "Lower-Tier Target Selection",
-      body: "Select your target lower-tier account from our active catalog, and we calculate the surplus cash difference due to you.",
-      icon: <RefreshCw size={18} />,
-    },
-    {
-      title: "Verification & Login Lock",
-      body: "We add our official login or secure one login method of your traded-in higher-tier account to verify inventory ownership.",
-      icon: <ShieldCheck size={18} />,
-    },
-    {
-      title: "Old Account Custody Lock First",
-      body: "We take complete custody and secure both logins of your old traded-in premium account first before finalizing the exchange.",
-      icon: <Lock size={18} />,
-    },
-    {
-      title: "New Target Account Handover",
-      body: "We transfer and securely bind the new target lower-tier account to your personal recovery credentials.",
-      icon: <Smartphone size={18} />,
-    },
-    {
-      title: "Government ID & KYC Proof",
-      body: "Before payout, we collect your valid government ID proof with address mentioned (Aadhaar Card or Driving License) for future reference records and keep it secure.",
-      icon: <FileText size={18} />,
-    },
-    {
-      title: "Difference Payout & Satisfied Trade",
-      body: "We release your surplus cash difference via UPI, Bank Transfer, USDT, BTC, or F2F Cash. Complete once both sides are satisfied.",
-      icon: <CreditCard size={18} />,
+      title: "Phase 3: Target Handover & Surplus Cash Payout",
+      body: "Once logins are fully secured, the target lower-spec account is securely bound to your personal recovery credentials, and the trade is 100% final, non-returnable, and permanent. We instantly release your surplus cash difference via instant UPI, Bank Transfer, or liquid Cash (for F2F deals) strictly after secure binding confirmation, completing the exchange only when both sides are 100% satisfied.",
+      idx_chip: "payout"
     }
   ];
 
@@ -243,10 +313,10 @@ export default function Exchange() {
               display: "flex",
               alignItems: "center",
               gap: "12px",
-              marginBottom: "20px",
+              marginBottom: "8px",
             }}>
               <ShieldCheck size={24} style={{ color: "#22c55e", filter: "drop-shadow(0 0 8px rgba(34,197,94,0.4))" }} />
-              <h3 style={{
+              <h2 style={{
                 fontFamily: "var(--font-h)",
                 fontSize: "clamp(20px, 3vw, 24px)",
                 fontWeight: 700,
@@ -256,76 +326,67 @@ export default function Exchange() {
                 color: "#fff"
               }}>
                 Essential Exchange Handover Protocols
-              </h3>
+              </h2>
             </div>
+            <p style={{ color: "var(--muted)", fontSize: "13px", marginBottom: "28px", paddingLeft: "36px" }}>
+              Every exchange transaction — Upgrade Sourcing or Downgrade Cashout — follows these strict safety protocols. Click any rule to learn more.
+            </p>
 
             <div style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))",
               gap: "28px"
             }}>
-              {/* Rule 1 */}
-              <div style={{ display: "flex", gap: "14px" }}>
-                <div style={{
-                  width: "32px", height: "32px", borderRadius: "50%",
-                  background: "rgba(34, 197, 94, 0.12)", border: "1px solid rgba(34, 197, 94, 0.3)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  color: "#4ade80", fontWeight: 700, flexShrink: 0,
-                  fontSize: "14px", fontFamily: "var(--font-h)"
-                }}>
-                  01
+              {[
+                {
+                  num: "01", title: "Old Account Pre-Securing", color: "var(--orange)",
+                  body: "Maddy BGMI Store always takes custody and secures the logins of your traded-in account first before finalizing the target account handover to guarantee absolute credential integrity.",
+                  chip: "F2F Sell Guide", path: "/f2f-sell-guide", chipColor: "var(--orange)"
+                },
+                {
+                  num: "02", title: "Mutual Escrow Middleman", color: "#60a5fa",
+                  body: "Trade safely through a trusted streamer, YouTuber, or mutual middleman who holds logins during the audit and releases credentials and cash directly once full control is verified.",
+                  chip: "Escrow Guide", path: "/escrow-deal", chipColor: "#60a5fa"
+                },
+                {
+                  num: "03", title: "Mandatory ID & KYC", color: "#4ade80",
+                  body: "Before final balance releases or handovers, we collect valid government-issued ID proofs with address (Aadhaar Card or DL) and live location. Stored in secure offline databases.",
+                  chip: "KYC Guide", path: "/kyc-guide", chipColor: "#4ade80"
+                },
+                {
+                  num: "04", title: "Dual Satisfaction", color: "var(--gold)",
+                  body: "Our premium account trade transition is officially complete only once both sides are fully satisfied with the new credentials, recovery links, and adjusted payout balances.",
+                  chip: "Payout Guide", path: "/payout-guide", chipColor: "var(--gold)"
+                },
+                {
+                  num: "05", title: "No Returns After Handover", color: "#ef4444",
+                  body: "Once credentials have been successfully transferred and payment or target account is delivered, the deal is 100% final. Accounts cannot be returned or resold back to us.",
+                  chip: "Finality Policy", path: "/no-returns-policy", chipColor: "#ef4444"
+                },
+                {
+                  num: "06", title: "Personal Logins", color: "#e2e2e2",
+                  body: "Primary game logins go to Maddy Store, while personal connections (Facebook, personal Gmail) remain yours. A strict 7-to-15 day unlinking cooldown guarantees safe detachment.",
+                  chip: "Unlinking Guide", path: "/unlinking-guide", chipColor: "#e2e2e2"
+                },
+              ].map((rule) => (
+                <div key={rule.num} style={{ display: "flex", gap: "14px" }}>
+                  <div style={{
+                    width: "32px", height: "32px", borderRadius: "50%",
+                    background: `${rule.color}1a`, border: `1px solid ${rule.color}4d`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: rule.color, fontWeight: 700, flexShrink: 0, fontSize: "13px", fontFamily: "var(--font-h)"
+                  }}>{rule.num}</div>
+                  <div>
+                    <strong style={{ color: "#fff", display: "block", fontSize: "15px", marginBottom: "6px", fontFamily: "var(--font-h)", letterSpacing: "0.5px" }}>{rule.title}</strong>
+                    <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.6", display: "block", marginBottom: "10px" }}>{rule.body}</span>
+                    <Link
+                      to={rule.path}
+                      style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: 700, color: rule.chipColor, background: "transparent", border: "none", cursor: "pointer", fontFamily: "var(--font-h)", letterSpacing: "0.5px", textTransform: "uppercase", padding: 0, textDecoration: "none" }}>
+                      <BookOpen size={12} /> {rule.chip} →
+                    </Link>
+                  </div>
                 </div>
-                <div>
-                  <strong style={{ color: "#fff", display: "block", fontSize: "15px", marginBottom: "6px", fontFamily: "var(--font-h)", letterSpacing: "0.5px" }}>
-                    Old Account Secured First
-                  </strong>
-                  <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.6", display: "block" }}>
-                    To ensure complete credential integrity, Maddy BGMI Store always takes custody and secures the logins of your traded-in account before finalizing the target account handover.
-                  </span>
-                </div>
-              </div>
-
-              {/* Rule 2 */}
-              <div style={{ display: "flex", gap: "14px" }}>
-                <div style={{
-                  width: "32px", height: "32px", borderRadius: "50%",
-                  background: "rgba(34, 197, 94, 0.12)", border: "1px solid rgba(34, 197, 94, 0.3)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  color: "#4ade80", fontWeight: 700, flexShrink: 0,
-                  fontSize: "14px", fontFamily: "var(--font-h)"
-                }}>
-                  02
-                </div>
-                <div>
-                  <strong style={{ color: "#fff", display: "block", fontSize: "15px", marginBottom: "6px", fontFamily: "var(--font-h)", letterSpacing: "0.5px" }}>
-                    Mandatory ID & KYC Security
-                  </strong>
-                  <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.6", display: "block" }}>
-                    Before final balance releases or handovers, we collect valid government-issued ID proofs with address mentioned on it (Aadhaar Card or Driving License) from both parties for future reference records and store them securely.
-                  </span>
-                </div>
-              </div>
-
-              {/* Rule 3 */}
-              <div style={{ display: "flex", gap: "14px" }}>
-                <div style={{
-                  width: "32px", height: "32px", borderRadius: "50%",
-                  background: "rgba(34, 197, 94, 0.12)", border: "1px solid rgba(34, 197, 94, 0.3)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  color: "#4ade80", fontWeight: 700, flexShrink: 0,
-                  fontSize: "14px", fontFamily: "var(--font-h)"
-                }}>
-                  03
-                </div>
-                <div>
-                  <strong style={{ color: "#fff", display: "block", fontSize: "15px", marginBottom: "6px", fontFamily: "var(--font-h)", letterSpacing: "0.5px" }}>
-                    Dual Satisfaction Guarantee
-                  </strong>
-                  <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.6", display: "block" }}>
-                    Our premium account trade transition is officially complete only once both sides are fully satisfied with the new credentials, links, and payout balances.
-                  </span>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </section>
@@ -359,12 +420,36 @@ export default function Exchange() {
               <div className="steps-container">
                 <h4 className="steps-heading">Upgrade Sourcing Steps:</h4>
                 <ul className="steps-list-custom">
-                  {exchangeUpgradeSteps.slice(0, 8).map((step, idx) => (
+                  {exchangeUpgradeSteps.map((step, idx) => (
                     <li key={idx} className="step-item-custom">
                       <span className="step-num step-num-blue">{idx + 1}</span>
                       <div>
                         <strong className="step-title">{step.title}</strong>
                         <span className="step-body">{step.body}</span>
+                        {step.idx_chip === "f2f" && (
+                          <div style={{ marginTop: "8px" }}>
+                            <button onClick={(e) => { e.stopPropagation(); document.getElementById("midpoint-map-portal")?.scrollIntoView({ behavior: "smooth" }); }}
+                              style={{ ...chipStyle("var(--orange)"), fontSize: "10px", padding: "4px 10px" }}>
+                              <MapPin size={10} /> Midpoint Map Portal
+                            </button>
+                          </div>
+                        )}
+                        {step.idx_chip === "kyc" && (
+                          <div style={{ marginTop: "8px" }}>
+                            <button onClick={(e) => { e.stopPropagation(); document.getElementById("education-hub")?.scrollIntoView({ behavior: "smooth" }); }}
+                              style={{ ...chipStyle("#22c55e"), fontSize: "10px", padding: "4px 10px" }}>
+                              <FileText size={10} /> KYC & Unlink Hub
+                            </button>
+                          </div>
+                        )}
+                        {step.idx_chip === "payout" && (
+                          <div style={{ marginTop: "8px" }}>
+                            <Link to="/payout-guide" onClick={(e) => e.stopPropagation()}
+                              style={{ ...chipStyle("var(--gold)"), fontSize: "10px", padding: "4px 10px", textDecoration: "none" }}>
+                              <Coins size={10} /> Payout Guide
+                            </Link>
+                          </div>
+                        )}
                       </div>
                     </li>
                   ))}
@@ -372,7 +457,7 @@ export default function Exchange() {
               </div>
 
               <div className="cta-container">
-                <a href="https://wa.me/+919025391516?text=Hi%20Maddy!%20I%20want%20to%20do%20an%20Exchange%20Upgrade%20of%20my%20BGMI%20account." target="_blank" rel="noreferrer" className="btn btn-gold" style={{ width: "100%", height: "52px", justifyContent: "center", gap: "8px" }}>
+                <a href="https://wa.me/+919025391516?text=Hi%20Maddy!%20I%20want%20to%20do%20an%20Exchange%20Upgrade%20of%20my%20BGMI%20account." target="_blank" rel="noreferrer" className="btn btn-gold" style={{ width: "100%", height: "52px", justifyContent: "center", gap: "8px" }} onClick={(e) => e.stopPropagation()}>
                   <MessageCircle size={18} /> Request Upgrade →
                 </a>
               </div>
@@ -396,12 +481,36 @@ export default function Exchange() {
               <div className="steps-container">
                 <h4 className="steps-heading">Downgrade Cashout Steps:</h4>
                 <ul className="steps-list-custom">
-                  {exchangeDowngradeSteps.slice(0, 8).map((step, idx) => (
+                  {exchangeDowngradeSteps.map((step, idx) => (
                     <li key={idx} className="step-item-custom">
                       <span className="step-num step-num-green">{idx + 1}</span>
                       <div>
                         <strong className="step-title">{step.title}</strong>
                         <span className="step-body">{step.body}</span>
+                        {step.idx_chip === "f2f" && (
+                          <div style={{ marginTop: "8px" }}>
+                            <button onClick={(e) => { e.stopPropagation(); document.getElementById("midpoint-map-portal")?.scrollIntoView({ behavior: "smooth" }); }}
+                              style={{ ...chipStyle("var(--orange)"), fontSize: "10px", padding: "4px 10px" }}>
+                              <MapPin size={10} /> Midpoint Map Portal
+                            </button>
+                          </div>
+                        )}
+                        {step.idx_chip === "kyc" && (
+                          <div style={{ marginTop: "8px" }}>
+                            <button onClick={(e) => { e.stopPropagation(); document.getElementById("education-hub")?.scrollIntoView({ behavior: "smooth" }); }}
+                              style={{ ...chipStyle("#22c55e"), fontSize: "10px", padding: "4px 10px" }}>
+                              <FileText size={10} /> KYC & Unlink Hub
+                            </button>
+                          </div>
+                        )}
+                        {step.idx_chip === "payout" && (
+                          <div style={{ marginTop: "8px" }}>
+                            <Link to="/payout-guide" onClick={(e) => e.stopPropagation()}
+                              style={{ ...chipStyle("var(--gold)"), fontSize: "10px", padding: "4px 10px", textDecoration: "none" }}>
+                              <Coins size={10} /> Payout Guide
+                            </Link>
+                          </div>
+                        )}
                       </div>
                     </li>
                   ))}
@@ -409,7 +518,7 @@ export default function Exchange() {
               </div>
 
               <div className="cta-container">
-                <a href="https://wa.me/+919025391516?text=Hi%20Maddy!%20I%20want%20to%20do%20an%20Exchange%20Downgrade%20of%20my%20BGMI%20account." target="_blank" rel="noreferrer" className="btn btn-green" style={{ width: "100%", height: "52px", justifyContent: "center", gap: "8px" }}>
+                <a href="https://wa.me/+919025391516?text=Hi%20Maddy!%20I%20want%20to%20do%20an%20Exchange%20Downgrade%20of%20my%20BGMI%20account." target="_blank" rel="noreferrer" className="btn btn-green" style={{ width: "100%", height: "52px", justifyContent: "center", gap: "8px" }} onClick={(e) => e.stopPropagation()}>
                   <MessageCircle size={18} /> Request Downgrade →
                 </a>
               </div>
@@ -525,7 +634,7 @@ export default function Exchange() {
                     zIndex: 2,
                     transition: "all 0.3s ease"
                   }}>
-                    {step.icon}
+                    {idx === 0 ? <MessageCircle size={18} /> : idx === 1 ? <FileText size={18} /> : <ShieldCheck size={18} />}
                   </div>
 
                   <div style={{
@@ -571,33 +680,361 @@ export default function Exchange() {
                   </p>
 
                   {/* Custom conditional timeline badges */}
-                  {idx === 3 && activeOption === 0 && (
+                  {idx === 0 && (
                     <div style={{ display: "flex", gap: "10px", marginTop: "12px", flexWrap: "wrap" }}>
-                      <span className="pill-deal-mode yellow-border"><Lock size={11} /> 10% Booking lock deposit required</span>
-                      <span className="pill-deal-mode"><CreditCard size={11} /> Adjusted with final payments</span>
+                      <span className="pill-deal-mode yellow-border"><Lock size={11} /> 10% Booking deposit (Upgrades)</span>
+                      <span className="pill-deal-mode"><MapPin size={11} /> Face-to-Face or Online options</span>
                     </div>
                   )}
 
-                  {idx === 5 && (
+                  {idx === 1 && (
                     <div style={{ display: "flex", gap: "10px", marginTop: "12px", flexWrap: "wrap" }}>
-                      <span className="pill-deal-mode red-border"><AlertTriangle size={11} /> Pre-Securing: Traded-in account secured first</span>
+                      <span className="pill-deal-mode red-border"><AlertTriangle size={11} /> Pre-Securing: Old account secured first</span>
+                      <span className="pill-deal-mode green-border"><Check size={11} /> Aadhaar or Driving License KYC</span>
                     </div>
                   )}
 
-                  {idx === 6 && (
+                  {idx === 2 && (
                     <div style={{ display: "flex", gap: "10px", marginTop: "12px", flexWrap: "wrap" }}>
-                      <span className="pill-deal-mode green-border"><Check size={11} /> Aadhaar or Driving License Verified</span>
-                    </div>
-                  )}
-
-                  {idx === 7 && (
-                    <div style={{ display: "flex", gap: "10px", marginTop: "12px", flexWrap: "wrap" }}>
-                      <span className="pill-deal-mode green-border"><CheckCircle size={11} /> Process complete only once both sides are satisfied</span>
-                      <span className="pill-deal-mode gold-border"><CreditCard size={11} /> UPI, Bank, USDT, BTC, or F2F Cash</span>
+                      <span className="pill-deal-mode green-border"><CheckCircle size={11} /> 100% Satisfied Trade Guarantee</span>
+                      <span className="pill-deal-mode gold-border"><CreditCard size={11} /> UPI, Bank, or Cash Payouts</span>
                     </div>
                   )}
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── MIDPOINT MAP PORTAL ──────────────────────── */}
+        <section id="midpoint-map-portal" className="section" style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "70px 5% 80px" }}>
+          <div style={{ textAlign: "center", marginBottom: "50px" }}>
+            <span className="slabel">Face-to-Face Portal</span>
+            <h2 className="stitle">F2F Coordinate <span className="g">Midpoint Map</span></h2>
+            <p className="ssub" style={{ margin: "0 auto", maxWidth: "600px" }}>
+              Calculate the perfect equal-distance midpoint for your in-person trade. Meet securely at pre-vetted, CCTV-monitored public mall hubs in South India.
+            </p>
+          </div>
+
+          <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+              gap: "30px",
+              alignItems: "start"
+            }}>
+              
+              {/* COLUMN 1: City Search & Safe Checkpoints */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                <div style={cardStyle}>
+                  <div style={glowStyle} />
+                  
+                  <h3 style={{ fontFamily: "var(--font-h)", fontSize: "18px", fontWeight: 800, marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px", color: "#fff" }}>
+                    <Navigation size={18} style={{ color: "var(--gold)" }} /> Midpoint Map Portal
+                  </h3>
+                  <p style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.6", marginBottom: "22px" }}>
+                    All face-to-face exchanges are conducted strictly in South India (Tamil Nadu, Kerala, Andhra Pradesh, Karnataka). The seller/depot location is always Chennai. Enter your location below to compute the equal-travel midpoint.
+                  </p>
+
+                  {/* Dropdown Input Area */}
+                  <div style={{ position: "relative", zIndex: 10 }} ref={dropdownRef}>
+                    <label style={{ display: "block", color: "var(--muted)", fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>
+                      Enter Your City Location
+                    </label>
+                    <div style={{ position: "relative" }}>
+                      <input
+                        type="text"
+                        placeholder="Search city (e.g. Bangalore, Vellore...)"
+                        value={searchQuery}
+                        onChange={(e) => {
+                          setSearchQuery(e.target.value);
+                          setShowDropdown(true);
+                        }}
+                        onFocus={() => setShowDropdown(true)}
+                        style={{
+                          width: "100%", padding: "14px 16px 14px 44px",
+                          background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.12)",
+                          borderRadius: "10px", color: "#fff", fontSize: "14px",
+                          outline: "none", transition: "border-color 0.2s",
+                          boxSizing: "border-box"
+                        }}
+                      />
+                      <Search size={16} style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", color: "var(--muted)" }} />
+                      <ChevronDown size={16} style={{ position: "absolute", right: "16px", top: "50%", transform: "translateY(-50%)", color: "var(--muted)", cursor: "pointer" }} onClick={() => setShowDropdown(!showDropdown)} />
+                    </div>
+
+                    {showDropdown && (
+                      <div style={{
+                        position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0,
+                        background: "#111520", border: "1px solid rgba(255,255,255,0.15)",
+                        borderRadius: "10px", overflow: "hidden", boxShadow: "0 10px 30px rgba(0,0,0,0.6)"
+                      }}>
+                        {filteredCities.length > 0 ? (
+                          filteredCities.map((city) => (
+                            <div
+                              key={city.name}
+                              onClick={() => {
+                                setSelectedCity(city);
+                                setSearchQuery(city.name);
+                                setShowDropdown(false);
+                              }}
+                              style={{
+                                padding: "12px 16px", cursor: "pointer",
+                                background: selectedCity.name === city.name ? "rgba(255,215,0,0.1)" : "transparent",
+                                color: selectedCity.name === city.name ? "var(--gold)" : "#fff",
+                                fontSize: "13.5px", fontWeight: selectedCity.name === city.name ? 700 : 500,
+                                borderBottom: "1px solid rgba(255,255,255,0.03)",
+                                display: "flex", justifyContent: "space-between", alignItems: "center"
+                              }}
+                              onMouseEnter={(e) => {
+                                if (selectedCity.name !== city.name) e.currentTarget.style.background = "rgba(255,255,255,0.03)";
+                              }}
+                              onMouseLeave={(e) => {
+                                if (selectedCity.name !== city.name) e.currentTarget.style.background = "transparent";
+                              }}
+                            >
+                              <span>{city.name}</span>
+                              <span style={{ fontSize: "11px", color: "var(--muted)" }}>Midpoint: {city.midpoint}</span>
+                            </div>
+                          ))
+                        ) : (
+                          <div style={{ padding: "12px 16px", color: "var(--muted)", fontSize: "13px" }}>
+                            No vended cities found. Midpoint coordinates calculated manually upon custom booking.
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Selected City Metadata Panel */}
+                  <div style={{ marginTop: "24px", padding: "16px", background: "rgba(255,215,0,0.04)", border: "1px dashed rgba(255,215,0,0.3)", borderRadius: "12px" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "12px" }}>
+                      <div>
+                        <span style={{ display: "block", fontSize: "10px", color: "var(--muted)", textTransform: "uppercase", fontWeight: 700 }}>Computed Midpoint</span>
+                        <strong style={{ fontSize: "15px", color: "#fff", display: "block", marginTop: "2px" }}>{selectedCity.midpoint}</strong>
+                      </div>
+                      <div>
+                        <span style={{ display: "block", fontSize: "10px", color: "var(--muted)", textTransform: "uppercase", fontWeight: 700 }}>Total Transit Distance</span>
+                        <strong style={{ fontSize: "15px", color: "#fff", display: "block", marginTop: "2px" }}>{selectedCity.distance}</strong>
+                      </div>
+                    </div>
+
+                    {/* Equal Travel Split Breakdown */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", padding: "10px", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "8px", marginBottom: "12px" }}>
+                      <div style={{ textAlign: "center" }}>
+                        <span style={{ display: "block", fontSize: "9px", color: "var(--muted)", textTransform: "uppercase", fontWeight: 700 }}>Client Travel</span>
+                        <strong style={{ fontSize: "13px", color: "var(--gold)", display: "block", marginTop: "2px" }}>~{selectedCity.travelEach}</strong>
+                      </div>
+                      <div style={{ textAlign: "center", borderLeft: "1px dashed rgba(255,255,255,0.1)" }}>
+                        <span style={{ display: "block", fontSize: "9px", color: "var(--muted)", textTransform: "uppercase", fontWeight: 700 }}>Maddy Agent Travel</span>
+                        <strong style={{ fontSize: "13px", color: "var(--gold)", display: "block", marginTop: "2px" }}>~{selectedCity.travelEach}</strong>
+                      </div>
+                    </div>
+
+                    <div style={{ marginBottom: "10px" }}>
+                      <span style={{ display: "block", fontSize: "10px", color: "var(--muted)", textTransform: "uppercase", fontWeight: 700, marginBottom: "4px" }}>Pre-Vetted CCTV Checkpoint</span>
+                      <span style={{ fontSize: "12.5px", color: "var(--gold)", fontWeight: 600 }}>{selectedCity.safeLocation}</span>
+                    </div>
+
+                    <div style={{ fontSize: "11px", color: "#22c55e", fontWeight: 600, display: "flex", alignItems: "center", gap: "6px", borderTop: "1px dashed rgba(255,255,255,0.06)", paddingTop: "8px" }}>
+                      <CheckCircle size={12} /> Balanced Transit Guarantee: 100% Equal travel distance for both parties!
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Safety Protocol Note */}
+                <div style={{ 
+                  background: "rgba(255, 107, 53, 0.05)", 
+                  border: "1px solid rgba(255, 107, 53, 0.2)", 
+                  borderRadius: "12px", 
+                  padding: "16px 20px", 
+                  display: "flex", 
+                  alignItems: "center", 
+                  gap: "12px"
+                }}>
+                  <AlertTriangle size={20} style={{ color: "var(--orange)", flexShrink: 0 }} />
+                  <span style={{ fontSize: "13px", color: "rgba(255,255,255,0.9)", fontWeight: 500 }}>
+                    Safety First Coordinate Protocol: <strong style={{ color: "var(--orange)" }}>“Private, dark, or isolated coordinates are strictly avoided.”</strong> Only premium, highly public CCTV-secured spots are eligible.
+                  </span>
+                </div>
+              </div>
+
+              {/* COLUMN 2: Live Routing Vector Map & Transit Details */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                
+                {/* Dynamic Animated Route Map */}
+                <div style={{ ...cardStyle, padding: "20px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
+                    <span style={{ fontFamily: "var(--font-h)", fontSize: "14px", fontWeight: 700, textTransform: "uppercase", color: "#fff", display: "flex", alignItems: "center", gap: "6px" }}>
+                      <Navigation size={14} style={{ color: "var(--gold)" }} /> Live Routing Vector Map
+                    </span>
+                    <span style={{ fontSize: "11px", background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)", color: "#4ade80", padding: "2px 10px", borderRadius: "100px", fontWeight: 700 }}>
+                      Active Route
+                    </span>
+                  </div>
+
+                  {/* SVG Visual Map */}
+                  <div style={{ position: "relative", background: "#0a0c14", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "14px", overflow: "hidden", height: "240px" }}>
+                    
+                    {/* Glowing Radar Scans */}
+                    <div className="radar-circle animate-ping" style={{ position: "absolute", left: `${selectedCity.transitCoords.midpoint.x}%`, top: `${selectedCity.transitCoords.midpoint.y}%`, transform: "translate(-50%,-50%)", width: "40px", height: "40px", borderRadius: "50%", background: "rgba(255,215,0,0.15)", pointerEvents: "none" }} />
+                    
+                    {/* Grid Lines Overlay */}
+                    <svg width="100%" height="100%" style={{ position: "absolute", inset: 0, zIndex: 1 }}>
+                      <defs>
+                        <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
+                        </pattern>
+                      </defs>
+                      <rect width="100%" height="100%" fill="url(#grid)" />
+                      
+                      {/* Animated Line Connection */}
+                      {/* Client Node -> Midpoint */}
+                      <line 
+                        x1={`${selectedCity.transitCoords.customer.x}%`} 
+                        y1={`${selectedCity.transitCoords.customer.y}%`}
+                        x2={`${selectedCity.transitCoords.midpoint.x}%`} 
+                        y2={`${selectedCity.transitCoords.midpoint.y}%`}
+                        stroke="var(--orange)" 
+                        strokeWidth="2.5" 
+                        strokeDasharray="6,4"
+                        className="animated-transit-path"
+                      />
+
+                      {/* Midpoint -> Confidential Agent Depot */}
+                      <line 
+                        x1={`${selectedCity.transitCoords.midpoint.x}%`} 
+                        y1={`${selectedCity.transitCoords.midpoint.y}%`}
+                        x2={`${selectedCity.transitCoords.base.x}%`} 
+                        y2={`${selectedCity.transitCoords.base.y}%`}
+                        stroke="var(--gold)" 
+                        strokeWidth="2.5" 
+                        strokeDasharray="6,4"
+                        className="animated-transit-path"
+                      />
+
+                      {/* Nodes Connection Drawing */}
+                      {/* Client Node */}
+                      <circle 
+                        cx={`${selectedCity.transitCoords.customer.x}%`} 
+                        cy={`${selectedCity.transitCoords.customer.y}%`} 
+                        r="7" 
+                        fill="#3b82f6" 
+                        stroke="#fff" 
+                        strokeWidth="1.5"
+                      />
+                      
+                      {/* Midpoint Node */}
+                      <circle 
+                        cx={`${selectedCity.transitCoords.midpoint.x}%`} 
+                        cy={`${selectedCity.transitCoords.midpoint.y}%`} 
+                        r="9" 
+                        fill="var(--orange)" 
+                        stroke="#fff" 
+                        strokeWidth="2"
+                      />
+
+                      {/* Base Node */}
+                      <circle 
+                        cx={`${selectedCity.transitCoords.base.x}%`} 
+                        cy={`${selectedCity.transitCoords.base.y}%`} 
+                        r="7" 
+                        fill="var(--gold)" 
+                        stroke="#fff" 
+                        strokeWidth="1.5"
+                      />
+                    </svg>
+
+                    {/* SVG Labels */}
+                    <div style={{ position: "absolute", left: `${selectedCity.transitCoords.customer.x}%`, top: `${selectedCity.transitCoords.customer.y - 12}%`, transform: "translateX(-50%)", zIndex: 2, background: "rgba(17,21,32,0.8)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "4px", padding: "2px 6px", fontSize: "10px", fontWeight: 700, color: "#fff", whiteSpace: "nowrap" }}>
+                      👤 Client: {selectedCity.transitCoords.customer.name}
+                    </div>
+
+                    <div style={{ position: "absolute", left: `${selectedCity.transitCoords.midpoint.x}%`, top: `${selectedCity.transitCoords.midpoint.y - 14}%`, transform: "translateX(-50%)", zIndex: 2, background: "rgba(255,215,0,0.9)", border: "1px solid #fff", borderRadius: "4px", padding: "3px 8px", fontSize: "10px", fontWeight: 900, color: "#000", whiteSpace: "nowrap" }}>
+                      📍 Midpoint: {selectedCity.transitCoords.midpoint.name}
+                    </div>
+
+                    <div style={{ position: "absolute", left: `${selectedCity.transitCoords.base.x}%`, top: `${selectedCity.transitCoords.base.y - 12}%`, transform: "translateX(-50%)", zIndex: 2, background: "rgba(17,21,32,0.8)", border: "1px solid rgba(255,215,0,0.3)", borderRadius: "4px", padding: "2px 6px", fontSize: "10px", fontWeight: 700, color: "var(--gold)", whiteSpace: "nowrap" }}>
+                      🔒 Chennai base Depot
+                    </div>
+                  </div>
+
+                  <style>{`
+                    .animated-transit-path {
+                      animation: dashTransit 20s linear infinite;
+                      stroke-dashoffset: 100;
+                    }
+                    @keyframes dashTransit {
+                      to {
+                        stroke-dashoffset: -1000;
+                      }
+                    }
+                  `}</style>
+                </div>
+
+                {/* Pre-Vetted CCTV Checkpoint Details Card */}
+                <div style={{ ...cardStyle, border: "1px solid rgba(255, 215, 0, 0.25)", background: "rgba(255, 215, 0, 0.03)" }}>
+                  <h4 style={{ fontFamily: "var(--font-h)", fontSize: "15px", fontWeight: 800, color: "var(--gold)", margin: "0 0 10px", display: "flex", alignItems: "center", gap: "8px" }}>
+                    <ShieldCheck size={16} /> Pre-Vetted CCTV Checkpoint Standard
+                  </h4>
+                  <p style={{ color: "rgba(255, 255, 255, 0.8)", fontSize: "12.5px", lineHeight: "1.6", margin: "0 0 16px" }}>
+                    Our transaction coordinators only meet at pre-vetted checkpoints satisfying strict safety standards:
+                  </p>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "10px" }}>
+                    {[
+                      "Active CCTV Surveillance: Full high-definition recording coverage of the meetup area.",
+                      "High-Footfall Public Spaces: Premium shopping malls, airport cafes, or star hotels are used exclusively.",
+                      "Immediate Transport Connectivity: Located within 15 minutes of major railway hubs or national highways."
+                    ].map((exp, idx) => (
+                      <div key={idx} style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
+                        <CheckCircle size={14} style={{ color: "var(--gold)", flexShrink: 0, marginTop: "2px" }} />
+                        <span style={{ fontSize: "12px", color: "var(--muted)", lineHeight: 1.5 }}>{exp}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* ── EXPENSE RESPONSIBILITY & VALUATION RULES ─────────────────── */}
+        <section style={{ padding: "60px 5% 80px", borderTop: "1px solid rgba(255, 255, 255, 0.05)", borderBottom: "1px solid rgba(255, 255, 255, 0.05)" }}>
+          <div style={{ maxWidth: "800px", margin: "0 auto" }}>
+            <div style={{ textAlign: "center", marginBottom: "40px" }}>
+              <div className="slabel">Financial Overhead</div>
+              <h2 className="stitle">Travel Expenses & F2F Rules</h2>
+              <div style={{ width: "60px", height: "3px", background: "linear-gradient(90deg, var(--gold), var(--orange))", margin: "12px auto" }} />
+            </div>
+
+            <div style={{ 
+              background: "radial-gradient(circle at 10% 10%, rgba(255, 215, 0, 0.03) 0%, transparent 60%), var(--card)",
+              border: "1px solid var(--border-gold)",
+              borderRadius: "20px",
+              padding: "35px",
+              boxShadow: "0 15px 45px rgba(0,0,0,0.3)"
+            }}>
+              <p style={{ color: "rgba(255, 255, 255, 0.9)", fontSize: "14.5px", lineHeight: 1.7, marginBottom: "20px" }}>
+                Face-to-Face transactions mandate travel logistics and physical deployment of our verification coordinators. Because this premium service is tailored strictly to buyer/seller preference, **all associated meetup expenses (travel, stay, and food) are borne entirely by the customer.**
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px" }}>
+                <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
+                  <CheckCircle size={16} style={{ color: "var(--gold)", flexShrink: 0, marginTop: "2px" }} />
+                  <span style={{ fontSize: "13px", color: "var(--muted)", lineHeight: 1.5 }}>
+                    <strong>₹80,000 Minimum Value Limit:</strong> In-person meetings are strictly reserved for premium high-value account trades exceeding ₹80,000. All trades below this value are processed securely through our verified digital escrow system.
+                  </span>
+                </div>
+                <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
+                  <CheckCircle size={16} style={{ color: "var(--gold)", flexShrink: 0, marginTop: "2px" }} />
+                  <span style={{ fontSize: "13px", color: "var(--muted)", lineHeight: 1.5 }}>
+                    <strong>10% Security Deposit:</strong> A mandatory booking deposit (10% of the account value) is required before deploying agents to the calculated midpoint to prevent no-shows or last-minute cancellations.
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </section>

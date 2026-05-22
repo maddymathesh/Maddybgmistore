@@ -44,41 +44,88 @@ export default function XsuitGift() {
         <section style={{
           position: "relative",
           width: "100%",
-          padding: "80px 5% 45px",
-          textAlign: "center",
+          minHeight: "88vh",
+          display: "flex", alignItems: "center", justifyContent: "center",
           overflow: "hidden"
         }}>
-          {/* Neon radial glows */}
+          {/* Background hero image */}
+          <img
+            src="/xsuit-banner-1.jpg"
+            alt="BGMI X-Suit Gifting" loading="lazy" decoding="async"
+            style={{
+              position: "absolute", inset: 0, width: "100%", height: "100%",
+              objectFit: "cover", objectPosition: "center 30%",
+              filter: "brightness(0.55)",
+            }}
+          />
+          {/* Gradient overlays */}
           <div style={{
             position: "absolute", inset: 0,
-            background: "radial-gradient(ellipse at center, rgba(255, 215, 0, 0.04) 0%, transparent 65%)",
-            pointerEvents: "none"
+            background: "linear-gradient(to bottom, rgba(8,10,15,0.5) 0%, transparent 30%, transparent 50%, rgba(8,10,15,0.97) 100%)",
           }} />
           <div style={{
-            position: "absolute", width: "400px", height: "400px",
-            background: "radial-gradient(circle, rgba(255, 215, 0, 0.05) 0%, transparent 70%)",
-            top: "-150px", left: "calc(50% - 200px)", pointerEvents: "none"
+            position: "absolute", inset: 0,
+            background: "radial-gradient(ellipse at center, rgba(255,215,0,0.06) 0%, transparent 60%)",
           }} />
 
-          <div style={{ position: "relative", zIndex: 2 }}>
+          <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "0 5%", maxWidth: "860px" }}>
             <div className="badge animate-pulse" style={{ marginBottom: "20px" }}>
               <ShieldCheck size={14} style={{ marginRight: "6px" }} /> Authorized Gifting Corridors
             </div>
             <h1 style={{
               fontFamily: "var(--font-h)", fontSize: "clamp(34px,6vw,68px)",
-              fontWeight: 900, lineHeight: 1.1, marginBottom: "18px"
+              fontWeight: 900, lineHeight: 1.1, marginBottom: "18px",
+              textShadow: "0 2px 25px rgba(0,0,0,0.7)",
             }}>
               Legendary X-Suit <br />
               <span className="g">Gifting Service</span>
             </h1>
             <p style={{
-              color: "var(--muted)", fontSize: "clamp(14px,1.8vw,17px)",
-              maxWidth: "680px", margin: "0 auto", lineHeight: 1.6
+              color: "rgba(234,234,234,0.85)", fontSize: "clamp(14px,1.8vw,17px)",
+              maxWidth: "680px", margin: "0 auto", lineHeight: 1.6,
+              textShadow: "0 1px 8px rgba(0,0,0,0.5)",
             }}>
               Direct X-Suit delivery to your BGMI account. Transmitted safely via official in-game gifting corridors using verified merchant accounts.
             </p>
           </div>
         </section>
+
+        {/* ── SECONDARY VISUAL BANNER ─────────────────────── */}
+        <div style={{ position: "relative", width: "100%", height: "260px", overflow: "hidden" }}>
+          <img
+            src="/xsuit-banner-2.jpg"
+            alt="BGMI Squad" loading="lazy" decoding="async"
+            style={{
+              width: "100%", height: "100%",
+              objectFit: "cover", objectPosition: "center 40%",
+              filter: "brightness(0.38)",
+            }}
+          />
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "linear-gradient(to right, rgba(8,10,15,0.9) 0%, transparent 40%, transparent 60%, rgba(8,10,15,0.9) 100%)",
+          }} />
+          <div style={{
+            position: "absolute", inset: 0,
+            display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column",
+            gap: "10px", textAlign: "center", padding: "0 5%"
+          }}>
+            <span style={{
+              fontFamily: "var(--font-h)", fontSize: "clamp(12px,1.4vw,14px)",
+              fontWeight: 700, letterSpacing: "3px", textTransform: "uppercase",
+              color: "var(--gold)", opacity: 0.9
+            }}>Certified Gifting Squad</span>
+            <h2 style={{
+              fontFamily: "var(--font-h)", fontSize: "clamp(22px,4vw,42px)",
+              fontWeight: 900, color: "#fff", margin: 0,
+              textShadow: "0 2px 20px rgba(0,0,0,0.8)"
+            }}>Premium Mythic Armory</h2>
+            <p style={{ color: "rgba(234,234,234,0.7)", fontSize: "clamp(13px,1.4vw,16px)", margin: 0 }}>
+              Sourced. Secured. Delivered.
+            </p>
+          </div>
+        </div>
+
 
         {/* ── INTERACTIVE TIMELINE & REQUIREMENTS DASHBOARD ── */}
         <section style={{ padding: "0 5% 50px" }}>

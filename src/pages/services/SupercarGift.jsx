@@ -60,41 +60,52 @@ export default function SupercarGift() {
         <section style={{
           position: "relative",
           width: "100%",
-          padding: "80px 5% 45px",
-          textAlign: "center",
+          minHeight: "88vh",
+          display: "flex", alignItems: "center", justifyContent: "center",
           overflow: "hidden"
         }}>
-          {/* Neon radial glows */}
+          {/* Background hero image */}
+          <img
+            src="/supercar-banner.jpg"
+            alt="BGMI Supercar Gifting" loading="lazy" decoding="async"
+            style={{
+              position: "absolute", inset: 0, width: "100%", height: "100%",
+              objectFit: "cover", objectPosition: "center 40%",
+              filter: "brightness(0.5)",
+            }}
+          />
+          {/* Gradient overlays */}
           <div style={{
             position: "absolute", inset: 0,
-            background: "radial-gradient(ellipse at center, rgba(255, 215, 0, 0.04) 0%, transparent 65%)",
-            pointerEvents: "none"
+            background: "linear-gradient(to bottom, rgba(8,10,15,0.5) 0%, transparent 30%, transparent 50%, rgba(8,10,15,0.97) 100%)",
           }} />
           <div style={{
-            position: "absolute", width: "400px", height: "400px",
-            background: "radial-gradient(circle, rgba(255, 215, 0, 0.05) 0%, transparent 70%)",
-            top: "-150px", left: "calc(50% - 200px)", pointerEvents: "none"
+            position: "absolute", inset: 0,
+            background: "radial-gradient(ellipse at center, rgba(255,215,0,0.06) 0%, transparent 60%)",
           }} />
 
-          <div style={{ position: "relative", zIndex: 2 }}>
+          <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "0 5%", maxWidth: "860px" }}>
             <div className="badge animate-pulse" style={{ marginBottom: "20px" }}>
               <Car size={14} style={{ marginRight: "6px" }} /> Luxury Sourcing Showroom
             </div>
             <h1 style={{
               fontFamily: "var(--font-h)", fontSize: "clamp(34px,6vw,68px)",
-              fontWeight: 900, lineHeight: 1.1, marginBottom: "18px"
+              fontWeight: 900, lineHeight: 1.1, marginBottom: "18px",
+              textShadow: "0 2px 25px rgba(0,0,0,0.7)",
             }}>
               Supercar Showcase <br />
               <span className="g">Gifting Service</span>
             </h1>
             <p style={{
-              color: "var(--muted)", fontSize: "clamp(14px,1.8vw,17px)",
-              maxWidth: "680px", margin: "0 auto", lineHeight: 1.6
+              color: "rgba(234,234,234,0.85)", fontSize: "clamp(14px,1.8vw,17px)",
+              maxWidth: "680px", margin: "0 auto", lineHeight: 1.6,
+              textShadow: "0 1px 8px rgba(0,0,0,0.5)",
             }}>
               Drive the ultimate supercars in BGMI. Fully authorized direct transmission to your account via secure in-game gifting logs.
             </p>
           </div>
         </section>
+
 
         {/* ── INTERACTIVE TIMELINE & REQUIREMENTS DASHBOARD ── */}
         <section style={{ padding: "0 5% 45px" }}>

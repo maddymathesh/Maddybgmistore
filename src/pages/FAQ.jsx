@@ -101,39 +101,24 @@ export default function FAQ() {
       <div style={{ paddingTop: "102px", background: "var(--bg)", minHeight: "100vh" }}>
         
         {/* Hero Section */}
-        <section 
-          style={{ 
-            position: "relative", 
-            width: "100%", 
-            padding: "80px 20px 60px", 
-            textAlign: "center",
-            background: "radial-gradient(circle at center, rgba(255,215,0,0.06) 0%, transparent 70%)",
-            borderBottom: "1px solid rgba(255, 215, 0, 0.08)"
-          }}
-        >
-          <div className="badge" style={{ marginBottom: "16px", letterSpacing: "2px" }}>HELP CENTER</div>
-          <h1 
-            style={{ 
-              fontFamily: "var(--font-h)", 
-              fontSize: "clamp(32px, 5vw, 56px)", 
-              fontWeight: 900, 
-              color: "#fff",
-              lineHeight: 1.2
-            }}
-          >
-            Frequently Asked <span style={{ color: "var(--gold)" }}>Questions</span>
-          </h1>
-          <p 
-            style={{ 
-              color: "var(--muted)", 
-              maxWidth: "600px", 
-              margin: "12px auto 0", 
-              fontSize: "14px", 
-              lineHeight: 1.6 
-            }}
-          >
-            Preempting common queries about account handovers, customized requirements, payments, and trade conditions.
-          </p>
+        <section style={{
+          position: "relative", width: "100%", minHeight: "68vh",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          overflow: "hidden", textAlign: "center",
+        }}>
+          <img src="/faq-banner.jpg" alt="FAQ Help Center" loading="lazy" decoding="async"
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 30%", filter: "brightness(0.45)" }} />
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(8,10,15,0.5) 0%, transparent 35%, transparent 55%, rgba(8,10,15,0.97) 100%)" }} />
+          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, rgba(255,215,0,0.06) 0%, transparent 65%)" }} />
+          <div style={{ position: "relative", zIndex: 2, padding: "0 5%", maxWidth: "760px" }}>
+            <div className="badge" style={{ marginBottom: "16px", letterSpacing: "2px" }}>HELP CENTER</div>
+            <h1 style={{ fontFamily: "var(--font-h)", fontSize: "clamp(32px, 5vw, 56px)", fontWeight: 900, color: "#fff", lineHeight: 1.2, textShadow: "0 2px 25px rgba(0,0,0,0.7)" }}>
+              Frequently Asked <span style={{ color: "var(--gold)" }}>Questions</span>
+            </h1>
+            <p style={{ color: "rgba(234,234,234,0.85)", maxWidth: "600px", margin: "12px auto 0", fontSize: "14px", lineHeight: 1.6, textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}>
+              Preempting common queries about account handovers, customized requirements, payments, and trade conditions.
+            </p>
+          </div>
         </section>
 
         {/* Content Section */}

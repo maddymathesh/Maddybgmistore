@@ -125,7 +125,7 @@ export default function ReadyStocks() {
       <Navbar />
       <div className="rs-page">
         <section className="rs-hero">
-          <img src="/ready-stocks-banner.png" alt="" className="hero-bg" />
+          <img src="/readystocks-banner.jpg" alt="" className="hero-bg" />
           <div className="hero-content">
             <h1 className="stitle">Ready To Play <br/><span className="g">Accounts</span></h1>
             <p className="ssub">Explore Premium BGMI IDs handpicked for elite gamers.</p>

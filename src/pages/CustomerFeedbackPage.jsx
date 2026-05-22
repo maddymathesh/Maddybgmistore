@@ -75,39 +75,24 @@ export default function CustomerFeedbackPage() {
       <div style={{ paddingTop: "102px", background: "var(--bg)", minHeight: "100vh" }}>
         
         {/* Banner */}
-        <section 
-          style={{ 
-            position: "relative", 
-            width: "100%", 
-            padding: "80px 20px 40px", 
-            textAlign: "center",
-            background: "radial-gradient(circle at center, rgba(255,215,0,0.06) 0%, transparent 70%)",
-            borderBottom: "1px solid rgba(255, 215, 0, 0.08)"
-          }}
-        >
-          <div className="badge" style={{ marginBottom: "16px", letterSpacing: "2px" }}>STORE IMPROVEMENT</div>
-          <h1 
-            style={{ 
-              fontFamily: "var(--font-h)", 
-              fontSize: "clamp(30px, 5vw, 52px)", 
-              fontWeight: 900, 
-              color: "#fff",
-              lineHeight: 1.2
-            }}
-          >
-            Customer <span style={{ color: "var(--gold)" }}>Feedback</span>
-          </h1>
-          <p 
-            style={{ 
-              color: "var(--muted)", 
-              maxWidth: "600px", 
-              margin: "12px auto 0", 
-              fontSize: "14px", 
-              lineHeight: 1.6 
-            }}
-          >
-            Your ideas and suggestions help us grow. Tell us what accounts, in-game items, or features you want us to add!
-          </p>
+        <section style={{
+          position: "relative", width: "100%", minHeight: "72vh",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          overflow: "hidden", textAlign: "center",
+        }}>
+          <img src="/customer-feedback-banner.jpg" alt="Customer Feedback" loading="lazy" decoding="async"
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 30%", filter: "brightness(0.48)" }} />
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(8,10,15,0.5) 0%, transparent 35%, transparent 55%, rgba(8,10,15,0.97) 100%)" }} />
+          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, rgba(255,215,0,0.05) 0%, transparent 65%)" }} />
+          <div style={{ position: "relative", zIndex: 2, padding: "0 5%", maxWidth: "760px" }}>
+            <div className="badge" style={{ marginBottom: "16px", letterSpacing: "2px" }}>STORE IMPROVEMENT</div>
+            <h1 style={{ fontFamily: "var(--font-h)", fontSize: "clamp(30px, 5vw, 52px)", fontWeight: 900, color: "#fff", lineHeight: 1.2, textShadow: "0 2px 25px rgba(0,0,0,0.7)" }}>
+              Customer <span style={{ color: "var(--gold)" }}>Feedback</span>
+            </h1>
+            <p style={{ color: "rgba(234,234,234,0.85)", maxWidth: "600px", margin: "12px auto 0", fontSize: "14px", lineHeight: 1.6, textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}>
+              Your ideas and suggestions help us grow. Tell us what accounts, in-game items, or features you want us to add!
+            </p>
+          </div>
         </section>
 
         {/* Content Section */}

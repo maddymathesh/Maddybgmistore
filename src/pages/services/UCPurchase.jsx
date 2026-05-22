@@ -320,20 +320,30 @@ export default function UCPurchase() {
         <section style={{
           position: "relative",
           width: "100%",
-          padding: "70px 5% 50px",
+          minHeight: "88vh",
+          display: "flex", alignItems: "center", justifyContent: "center",
           textAlign: "center",
           overflow: "hidden"
         }}>
-          {/* Radial visual glows */}
+          {/* Background hero image */}
+          <img
+            src="/uc-banner.jpg"
+            alt="BGMI UC Season" loading="lazy" decoding="async"
+            style={{
+              position: "absolute", inset: 0, width: "100%", height: "100%",
+              objectFit: "cover", objectPosition: "center 30%",
+              filter: "brightness(0.5)",
+            }}
+          />
+          {/* Gradient overlays */}
           <div style={{
             position: "absolute", inset: 0,
-            background: "radial-gradient(ellipse at center, rgba(255,215,0,0.035) 0%, transparent 65%)",
-            pointerEvents: "none"
+            background: "linear-gradient(to bottom, rgba(8,10,15,0.5) 0%, transparent 30%, transparent 50%, rgba(8,10,15,0.97) 100%)",
           }} />
           <div style={{
-            position: "absolute", width: "400px", height: "400px",
-            background: `radial-gradient(circle, ${isViewLogin ? "rgba(59,130,246,0.06)" : "rgba(249,115,22,0.06)"} 0%, transparent 70%)`,
-            top: "-150px", left: "calc(50% - 200px)", pointerEvents: "none"
+            position: "absolute", inset: 0,
+            background: `radial-gradient(ellipse at center, ${isViewLogin ? "rgba(59,130,246,0.07)" : "rgba(249,115,22,0.07)"} 0%, transparent 65%)`,
+            pointerEvents: "none"
           }} />
 
           <div style={{ position: "relative", zIndex: 2 }}>
@@ -342,14 +352,16 @@ export default function UCPurchase() {
             </div>
             <h1 style={{
               fontFamily: "var(--font-h)", fontSize: "clamp(34px,5.5vw,68px)",
-              fontWeight: 900, lineHeight: 1.1, marginBottom: "16px"
+              fontWeight: 900, lineHeight: 1.1, marginBottom: "16px",
+              textShadow: "0 2px 25px rgba(0,0,0,0.7)",
             }}>
               Premium UC Sourcing <br />
-              <span className="g">Cheaper & Faster</span>
+              <span className="g">Cheaper &amp; Faster</span>
             </h1>
             <p style={{
-              color: "var(--muted)", fontSize: "clamp(14px,1.8vw,17px)",
-              maxWidth: "640px", margin: "0 auto 35px", lineHeight: 1.6
+              color: "rgba(234,234,234,0.85)", fontSize: "clamp(14px,1.8vw,17px)",
+              maxWidth: "640px", margin: "0 auto 35px", lineHeight: 1.6,
+              textShadow: "0 1px 8px rgba(0,0,0,0.5)",
             }}>
               South India's most trusted premium BGMI UC outlet. Choose your preferred safe transaction method below to see live sourcing stock packs.
             </p>

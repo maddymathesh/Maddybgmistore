@@ -95,7 +95,7 @@ export default function Buy() {
           display: "flex", alignItems: "center", justifyContent: "center",
         }}>
           <img
-            src="/buy-banner.webp"
+            src="/buy-banner.jpg"
             alt="BGMI Battlefield" loading="lazy" decoding="async"
             style={{
               position: "absolute", inset: 0, width: "100%", height: "100%",

@@ -194,7 +194,7 @@ export default function Exchange() {
         }}>
           {/* Background image */}
           <img
-            src="/sell-banner.webp"
+            src="/exchange-banner.jpg"
             alt="BGMI Soldiers in visual exchange" loading="lazy" decoding="async"
             style={{
               position: "absolute", inset: 0,

@@ -70,14 +70,24 @@ const grouped = MONTHS_ORDER.reduce((acc, m) => {
       <Navbar />
       <div style={{ paddingTop: "102px", minHeight: "100vh", background: "var(--bg)" }}>
 
-        <section style={{ padding: "80px 5%", textAlign: "center", background: "linear-gradient(to bottom, rgba(255,215,0,0.06) 0%, transparent 100%)" }}>
-          <div className="badge" style={{ marginBottom: "20px" }}><Camera size={14} /> Trust & Transparency</div>
-          <h1 className="stitle" style={{ fontSize: "clamp(34px, 6vw, 60px)", fontWeight: 900, marginBottom: "16px" }}>
-            Proof & <span style={{ color: "var(--gold)" }}>Feedback</span>
-          </h1>
-          <p style={{ color: "var(--muted)", maxWidth: "620px", margin: "0 auto", lineHeight: 1.7, fontSize: "16px" }}>
-            Browse real payment proofs and customer feedback from our successful deals — organized by month for complete transparency.
-          </p>
+        <section style={{
+          position: "relative", width: "100%", minHeight: "72vh",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          overflow: "hidden", textAlign: "center",
+        }}>
+          <img src="/proof-feedback-banner.jpg" alt="BGMI Proof & Feedback" loading="lazy" decoding="async"
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 30%", filter: "brightness(0.5)" }} />
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(8,10,15,0.5) 0%, transparent 35%, transparent 55%, rgba(8,10,15,0.97) 100%)" }} />
+          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, rgba(255,215,0,0.06) 0%, transparent 65%)" }} />
+          <div style={{ position: "relative", zIndex: 2, padding: "0 5%", maxWidth: "800px" }}>
+            <div className="badge" style={{ marginBottom: "20px" }}><Camera size={14} /> Trust &amp; Transparency</div>
+            <h1 className="stitle" style={{ fontSize: "clamp(34px, 6vw, 60px)", fontWeight: 900, marginBottom: "16px", textShadow: "0 2px 25px rgba(0,0,0,0.7)" }}>
+              Proof &amp; <span style={{ color: "var(--gold)" }}>Feedback</span>
+            </h1>
+            <p style={{ color: "rgba(234,234,234,0.85)", maxWidth: "620px", margin: "0 auto", lineHeight: 1.7, fontSize: "16px", textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}>
+              Browse real payment proofs and customer feedback from our successful deals — organized by month for complete transparency.
+            </p>
+          </div>
         </section>
 
         <section className="section" style={{ paddingTop: "20px" }}>

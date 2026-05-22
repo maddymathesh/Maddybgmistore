@@ -95,7 +95,7 @@ export default function Sell() {
           display: "flex", alignItems: "center", justifyContent: "center",
         }}>
           <img
-            src="/sell-banner.webp"
+            src="/sell-banner.jpg"
             alt="BGMI Sell Account" loading="lazy" decoding="async"
             style={{
               position: "absolute", inset: 0, width: "100%", height: "100%",

@@ -116,6 +116,8 @@ const CustomerFeedbackPage = lazy(() => import("./pages/CustomerFeedbackPage"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
 const FAQ = lazy(() => import("./pages/FAQ"));
+const F2FDeal = lazy(() => import("./pages/F2FDeal"));
+const EscrowDeal = lazy(() => import("./pages/EscrowDeal"));
 
 
 
@@ -420,6 +422,22 @@ export default function App() {
             element={
               <Suspense fallback={<PageLoader />}>
                 <CustomerFeedbackPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/f2f-deal"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <F2FDeal />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/escrow-deal"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <EscrowDeal />
               </Suspense>
             }
           />

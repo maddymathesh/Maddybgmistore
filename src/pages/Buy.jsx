@@ -176,10 +176,10 @@ export default function Buy() {
                 </div>
                 <div>
                   <strong style={{ color: "#fff", display: "block", fontSize: "15px", marginBottom: "6px", fontFamily: "var(--font-h)", letterSpacing: "0.5px" }}>
-                    10% Non-Refundable Booking
+                    10% Upfront Booking Fee
                   </strong>
                   <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.6", display: "block" }}>
-                    A **10% booking deposit** applies to all transactions. Booking deposits are strictly **non-refundable once booked** under all circumstances, except for the return of any accidental excess amounts paid. For verification, we accept only government IDs with an address mentioned on it (Aadhaar Card / Driving License).
+                    A <strong>10% non-refundable booking fee</strong> applies upfront to all deals (accounts, X-suits, and supercars). For example, a ₹100K account transaction requires a ₹10K deposit to secure the booking. Non-payment of the remaining balance will cancel the booking with no refund of this deposit.
                   </span>
                 </div>
               </div>
@@ -200,7 +200,7 @@ export default function Buy() {
                     Full Payment Transfer
                   </strong>
                   <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.6", display: "block" }}>
-                    Accounts are secured and credentials completely handed over to the buyer **only** after the remaining 90% balance payment is cleared in full. No partial payments cover ownership delivery.
+                    <strong>Full payment clearance</strong> is strictly required before the account credentials, secure bindings, or login methods are handed over to the buyer. No partial payment guarantees immediate delivery.
                   </span>
                 </div>
               </div>
@@ -221,7 +221,49 @@ export default function Buy() {
                     F2F Meetup Guidelines
                   </strong>
                   <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.6", display: "block" }}>
-                    Face-to-Face (F2F) deals are strictly reserved for high-tier accounts valued at **₹80,000+**. Booking is required in advance, and **the buyer should pay the extra charges for Travel, Stay, and Food for the seller/Maddy Store agents**.
+                    Face-to-Face (F2F) meetups are reserved <strong>only for accounts valued above ₹80,000</strong>. The buyer must pay the 10% booking fee upfront to confirm. The meetup location must be a common midpoint between the buyer's and seller's cities (e.g., Vellore for Chennai & Bangalore). The <strong>buyer covers all travel, stay, and food expenses</strong> for the seller or agent attending the meetup.
+                  </span>
+                </div>
+              </div>
+
+              {/* Rule 4 */}
+              <div style={{ display: "flex", gap: "14px" }}>
+                <div style={{
+                  width: "32px", height: "32px", borderRadius: "50%",
+                  background: "rgba(249, 115, 22, 0.12)", border: "1px solid rgba(249, 115, 22, 0.3)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: "var(--orange)", fontWeight: 700, flexShrink: 0,
+                  fontSize: "14px", fontFamily: "var(--font-h)"
+                }}>
+                  04
+                </div>
+                <div>
+                  <strong style={{ color: "#fff", display: "block", fontSize: "15px", marginBottom: "6px", fontFamily: "var(--font-h)", letterSpacing: "0.5px" }}>
+                    ID Verification
+                  </strong>
+                  <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.6", display: "block" }}>
+                    To maintain maximum security, <strong>government ID verification</strong> (such as Aadhaar, PAN, or DL) may be requested in rare cases. All shared identification documents are handled securely and kept strictly confidential.
+                  </span>
+                </div>
+              </div>
+
+              {/* Rule 5 */}
+              <div style={{ display: "flex", gap: "14px" }}>
+                <div style={{
+                  width: "32px", height: "32px", borderRadius: "50%",
+                  background: "rgba(249, 115, 22, 0.12)", border: "1px solid rgba(249, 115, 22, 0.3)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: "var(--orange)", fontWeight: 700, flexShrink: 0,
+                  fontSize: "14px", fontFamily: "var(--font-h)"
+                }}>
+                  05
+                </div>
+                <div>
+                  <strong style={{ color: "#fff", display: "block", fontSize: "15px", marginBottom: "6px", fontFamily: "var(--font-h)", letterSpacing: "0.5px" }}>
+                    Escrow Sourcing Option
+                  </strong>
+                  <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.6", display: "block" }}>
+                    Escrow method transactions are only permitted through <strong>trusted YouTubers, streamers, or dealers</strong> mutually recognized by both sides. The <strong>buyer is responsible for the escrow fee</strong>. A separate detailed page on "How Escrow Works" will be linked in the future.
                   </span>
                 </div>
               </div>
@@ -252,21 +294,21 @@ export default function Buy() {
                 <h3 className="buy-option-title">Ready To Play Accounts</h3>
               </div>
               <p className="buy-option-desc">
-                Choose from a pre-listed catalog of fully secured, instant-delivery accounts. Includes complete inventory listings, preview videos, and set transparent pricing.
+                Ready-to-Play accounts are pre-secured, verified accounts listed directly on our website or channels. They are fully safe with the unlinking process completed, letting you inspect inventory, specifications, pricing, and login structures before purchasing.
               </p>
 
               <div className="steps-container">
                 <h4 className="steps-heading">Secure Ready-to-Play Steps:</h4>
                 <ul className="steps-list-custom">
                   {[
-                    "Browse & Review: View pre-listed accounts complete with inventory videos, specifications, pricing, and unlink guarantees.",
-                    "Contact Support: Message us directly on WhatsApp or Telegram with the specific account details you wish to buy.",
-                    "Choose Deal Mode: Choose your transaction mode (secure Online transfer or Face-to-Face meetup for high-tier ₹80K+ deals) before final booking.",
-                    "Flexible Booking: Pay either a 10% non-refundable deposit (once booked) to hold the account for 24 hours, or complete full payment directly. For KYC, we only accept government ID with address mentioned (Aadhaar Card / Driving License).",
-                    "Binding & Handover: We link your recovery details immediately after full payment and deliver credentials with an unlink guarantee invoice.",
-                    "Unlink Protection: Enjoy absolute safety. If any issues occur within the guarantee period, we provide a replacement or full refund.",
-                    "Lobby & Chat Feedback: Send a lobby screenshot and chat feedback directly to our support team upon login.",
-                    "Submit Website Review: Share your official buying experience and rating on our website's reviews page."
+                    "Browse & Review: Ready-to-Play accounts are pre-secured accounts listed on our website or channels. They are fully safe with unlinking completely done. Customers can review the inventory, specs, pricing, and login info before choosing.",
+                    "Contact Support: After reviewing, the buyer contacts us either directly through the website or via our official WhatsApp or Telegram support channels to confirm the availability of their chosen account.",
+                    "Choose Deal Mode: The buyer selects their transaction method: secure online transfer or Face-to-Face (F2F) meetup. Please note that face-to-face meetups are strictly reserved only for accounts valued above ₹80K.",
+                    "Upfront Booking: Booking is handled separately. Whether online or F2F, the buyer must pay a 10% non-refundable booking fee upfront to hold the account. For online deals, they can pay in full at once or pay the booking fee and settle the remaining balance within 24 hours. For F2F, the 10% booking is mandatory, and the buyer covers all travel, food, and stay costs.",
+                    "Processing Handover: Once the full payment is cleared (in either online or F2F mode), only then is the account ownership transition officially processed.",
+                    "Rare Legal Verification: In rare cases of transaction verification (such as to prevent or address bank freezes), a government-issued ID (like Aadhaar Card) might be requested securely for legal and tracking purposes.",
+                    "Secure Binding: After full payment is cleared, the account is bound to the buyer's recovery email and phone, secured, and delivered. An official invoice showing clear timelines and active guarantees is provided.",
+                    "Feedback & Lobby Screenshot: The buyer logs in, shares a lobby screenshot and deal feedback with our support team, and submits a website review of their buying experience."
                   ].map((step, idx) => {
                     const [title, body] = step.split(":");
                     return (
@@ -284,7 +326,7 @@ export default function Buy() {
 
               <div className="cta-container">
                 <Link to="/readystocks" className="btn btn-gold" style={{ width: "100%", height: "52px", justifyContent: "center", gap: "8px" }}>
-                  <Gamepad2 size={18} /> View Ready Stocks →
+                  <Gamepad2 size={18} /> View Ready-to-Play Accounts →
                 </Link>
               </div>
             </div>
@@ -301,21 +343,22 @@ export default function Buy() {
                 <h3 className="buy-option-title">Available Accounts in Market</h3>
               </div>
               <p className="buy-option-desc">
-                Join our premium community channels. We post daily verified account listings ranging from ₹5,000 to ₹500,000 direct from individual sellers.
+                Access a massive, fast-moving daily catalog of verified accounts by joining our premium communities. We post listings ranging from budget-friendly options to premium high-end accounts.
               </p>
 
               <div className="steps-container">
                 <h4 className="steps-heading">Feed Booking Steps:</h4>
                 <ul className="steps-list-custom">
                   {[
-                    "Join Official Feeds: Click both the WhatsApp and Telegram buttons below to join our active daily feeds.",
-                    "Review Daily Listings: Browse through our daily posted verified accounts, ranging from ₹5,000 to several lakh.",
-                    "Choose Deal Mode: Select either secure Online transfer or Face-to-Face meetup (for high-tier ₹80K+ deals) before finalizing.",
-                    "10% Booking or Full Pay: Pay a 10% non-refundable booking deposit (once booked) to hold the account for 24 hours, or pay in full. A government ID with address (Aadhaar Card / Driving License) is mandatory for KYC.",
-                    "Secure Account Binding: Once full payment is received, we bind your active recovery email and phone number to secure ownership.",
-                    "Invoice & Dates: We issue an official invoice detailing your transaction, specific unlink date, and guarantee expiration.",
-                    "Lobby & Chat Feedback: Send a lobby screenshot and chat feedback directly to our support team upon receiving the credentials.",
-                    "Submit Website Review: Share your official buying experience and rating on our website's reviews page."
+                    "Join Community Channels: Customers must join our official WhatsApp or Telegram channels using the provided buttons below to access our daily verified listings.",
+                    "Browse Daily Listings: We post a wide range of verified accounts daily—from ₹5K up to several lakhs. Buyers can review all active listings and choose an account that perfectly matches their preferences.",
+                    "Choose Deal Mode: Once you select an account, choose your preferred transaction mode: secure online transfer or Face-to-Face (F2F) meetup. Please note that F2F is only allowed for high-tier accounts valued above ₹80K and requires upfront booking.",
+                    "Upfront Booking Deposit: The 10% non-refundable booking deposit applies to lock your account regardless of the chosen mode (online or F2F). Alternatively, full payment can also be made directly online without booking if preferred.",
+                    "Payment Security Check: In rare cases of transaction verification (specifically due to potential bank freezes), a government-issued ID (like Aadhaar Card) may be requested securely for legal and verification purposes, though this is not common.",
+                    "Ownership Secure Binding: The account credentials will only be handed over after the full payment is received. Upon clearance, the account is bound to the buyer's recovery email and phone number and fully secured.",
+                    "Transaction Invoice: We provide an official transaction invoice detailing the exact unlink dates, active guarantee timelines, and account specifications.",
+                    "Lobby Verification & Feedback: Once logged in, the buyer sends a verification lobby screenshot and feedback to our team via WhatsApp or Telegram support.",
+                    "Submit Website Review: Finally, the buyer submits an official review on our website, sharing their overall buying experience along with their in-game lobby screenshot."
                   ].map((step, idx) => {
                     const [title, body] = step.split(":");
                     return (
@@ -353,21 +396,22 @@ export default function Buy() {
                 <h3 className="buy-option-title">Customized Requirement Account</h3>
               </div>
               <p className="buy-option-desc">
-                Have specific demands? Give us your budget and skin preferences. We search our extensive nationwide network to find you the best matching deals.
+                Have highly specific demands? Let us search our extensive nationwide network of individual sellers to find you the best matching accounts within your custom budget.
               </p>
 
               <div className="steps-container">
                 <h4 className="steps-heading">Custom Sourcing Steps:</h4>
                 <ul className="steps-list-custom">
                   {[
-                    "Contact & Share Details: Reach out on WhatsApp/Telegram and share your budget and specific account demands (skins, supercar garage, gun labs).",
-                    "Discuss Match Scope: We discuss and align on a realistic budget and feasible in-game requirements.",
-                    "10% Security Deposit: Pay a 10% security deposit (strictly non-refundable once sourcing commences) to initiate the personalized 24-48 hour sourcing sweep. For KYC, a government ID with address mentioned (Aadhaar Card / Driving License) is required.",
-                    "Sourcing & Cooldown: We find the closest matching accounts (Note: exact 100% factory match cannot be guaranteed; full refund if no match found prior to selection).",
-                    "Choose Deal Mode: Select secure Online transfer or Face-to-Face meetup (for ₹80K+ deals) before confirming the account.",
-                    "Final Booking & Handover: Sourced account approval turns deposit towards the purchase; full payment secures ownership and delivery.",
-                    "Lobby & Chat Feedback: Share a login lobby screenshot and your feedback directly in our support chat upon login.",
-                    "Submit Website Review: Share your official sourcing experience and rating on our website's reviews page."
+                    "Contact & Requirements: Customers initiate the process by reaching out to us via WhatsApp or Telegram, specifying their exact custom requirements (such as specific gun skins, X-suits, outfits) and their maximum budget.",
+                    "Feasibility Discussion: Once we receive this information, we discuss the feasibility with the seller and network partners, adjusting the requirements or maximum budget if necessary, based on current market availability.",
+                    "10% Security Deposit: After final requirements and budget are agreed upon, the customer pays a 10% security deposit upfront to begin sourcing (e.g., for a ₹100K account, the deposit is ₹10K).",
+                    "Sourcing Search: Once the security deposit is paid, we immediately search our nationwide seller network, delivering all matching options within 24 to 48 hours. If no matching account is found in this timeframe, the full deposit is refunded immediately.",
+                    "Deposit to Booking: If matching accounts are found, the security deposit converts into a booking amount, which then becomes non-refundable. At this stage, the customer reviews the matching options and finalizes their preferred deal mode (online or face-to-face).",
+                    "F2F Deal Conditions: Face-to-face meetups apply only to premium accounts valued above ₹80K and must be secured by the 10% booking deposit. Once the meetup is decided, the booking deposit secures the account hold while meetup logistics are set.",
+                    "Ownership Secure Binding: After full payment is received in full (whether via online transfer or at the F2F meetup), only then is the account bound to the buyer’s phone number and recovery email, ensuring complete security. Note that in rare verification scenarios, a government ID (like Aadhaar Card) may be securely requested for transaction safety.",
+                    "Transaction Invoice: We provide a detailed official transaction invoice outlining the guarantee period, secondary unlink dates, and all transaction specifics.",
+                    "Feedback & Website Review: After account delivery, the buyer shares an in-game lobby screenshot and feedback via support chat, and submits a review on our website detailing their sourcing experience along with the screenshot."
                   ].map((step, idx) => {
                     const [title, body] = step.split(":");
                     return (

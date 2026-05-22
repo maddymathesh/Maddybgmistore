@@ -12,6 +12,8 @@ const navLinks = [
       { to: "/buy", label: "Buy" },
       { to: "/sell", label: "Sell" },
       { to: "/exchange", label: "Exchange" },
+      { to: "/f2f-deal", label: "F2F Deals" },
+      { to: "/escrow-deal", label: "Escrow Deals" },
     ],
   },
   {

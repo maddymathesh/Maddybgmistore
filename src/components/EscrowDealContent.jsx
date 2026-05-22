@@ -7,7 +7,8 @@ import {
   ShieldCheck, Users, MapPin, CreditCard, Info, AlertTriangle, 
   HelpCircle, ChevronDown, MessageCircle, Send, Gamepad2, 
   Coins, TrendingUp, Clock, FileText, Check, Award, 
-  ChevronRight, ShieldAlert, Sparkles, UserCheck, RefreshCw, Landmark
+  ChevronRight, ShieldAlert, Sparkles, UserCheck, RefreshCw, Landmark,
+  X, BookOpen, Lock
 } from "lucide-react";
 
 export default function EscrowDeal() {
@@ -18,6 +19,9 @@ export default function EscrowDeal() {
 
   // FAQ Accordion State
   const [expandedIndex, setExpandedIndex] = useState(null);
+
+  // Booking Modal State
+  const [showBookingModal, setShowBookingModal] = useState(false);
 
   // Calculator State
   const [accountValue, setAccountValue] = useState(250000);
@@ -432,13 +436,31 @@ export default function EscrowDeal() {
                 <div style={timelineStepStyle}>
                   <div style={timelineDotStyle}>3</div>
                   <div>
+                    <h4 style={timelineHeaderStyle}>Pay 10% Booking Advance</h4>
+                    <p style={timelineDescStyle}>Secure the listing and activate the escrow process by transmitting the mandatory non-refundable booking deposit.</p>
+                    <button 
+                      onClick={() => setShowBookingModal(true)}
+                      style={{
+                        marginTop: "12px", background: "linear-gradient(135deg, var(--gold), var(--orange))",
+                        color: "#000", border: "none", padding: "8px 16px", borderRadius: "8px",
+                        fontSize: "13px", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "6px",
+                        cursor: "pointer", fontFamily: "var(--font-h)", textTransform: "uppercase", letterSpacing: "0.5px"
+                      }}>
+                      <BookOpen size={14} /> View Booking Rules
+                    </button>
+                  </div>
+                </div>
+
+                <div style={timelineStepStyle}>
+                  <div style={timelineDotStyle}>4</div>
+                  <div>
                     <h4 style={timelineHeaderStyle}>Escrow Communication Group Created</h4>
                     <p style={timelineDescStyle}>A secured three-party chat group (WhatsApp/Telegram) is established containing the buyer, seller, and selected middleman.</p>
                   </div>
                 </div>
 
                 <div style={timelineStepStyle}>
-                  <div style={timelineDotStyle}>4</div>
+                  <div style={timelineDotStyle}>5</div>
                   <div>
                     <h4 style={timelineHeaderStyle}>Buyer Sends Payment</h4>
                     <p style={timelineDescStyle}>Buyer transfers the full agreed account price plus escrow fee coordinates directly to the middleman's bank account.</p>
@@ -446,7 +468,7 @@ export default function EscrowDeal() {
                 </div>
 
                 <div style={timelineStepStyle}>
-                  <div style={timelineDotStyle}>5</div>
+                  <div style={timelineDotStyle}>6</div>
                   <div>
                     <h4 style={timelineHeaderStyle}>Seller Shares Coordinates</h4>
                     <p style={timelineDescStyle}>Upon receiving payment deposit confirmation, the seller submits all social linking and active passwords to the group.</p>
@@ -454,7 +476,7 @@ export default function EscrowDeal() {
                 </div>
 
                 <div style={timelineStepStyle}>
-                  <div style={timelineDotStyle}>6</div>
+                  <div style={timelineDotStyle}>7</div>
                   <div>
                     <h4 style={timelineHeaderStyle}>Buyer Verifies Credentials</h4>
                     <p style={timelineDescStyle}>Buyer logs in, reviews level achievements, verifies gun skins, and checks matches against original listings.</p>
@@ -462,7 +484,7 @@ export default function EscrowDeal() {
                 </div>
 
                 <div style={timelineStepStyle}>
-                  <div style={timelineDotStyle}>7</div>
+                  <div style={timelineDotStyle}>8</div>
                   <div>
                     <h4 style={timelineHeaderStyle}>Recovery Bindings Updated</h4>
                     <p style={timelineDescStyle}>Buyer bind-swaps their recovery mobile number, locks two-factor security codes, and registers their primary recovery email.</p>
@@ -470,7 +492,7 @@ export default function EscrowDeal() {
                 </div>
 
                 <div style={timelineStepStyle}>
-                  <div style={timelineDotStyle}>8</div>
+                  <div style={timelineDotStyle}>9</div>
                   <div>
                     <h4 style={timelineHeaderStyle}>Buyer Confirms Deal Completion</h4>
                     <p style={timelineDescStyle}>Once the account is fully secured under buyer credentials, the buyer posts deal confirmation in the escrow coordinates group.</p>
@@ -478,7 +500,7 @@ export default function EscrowDeal() {
                 </div>
 
                 <div style={{ ...timelineStepStyle, background: "rgba(255,215,0,0.02)", border: "1px solid var(--border-gold)", borderRadius: "12px", padding: "16px 20px" }}>
-                  <div style={{ ...timelineDotStyle, background: "linear-gradient(135deg, var(--gold), var(--orange))", color: "#000", border: "2px solid var(--gold)" }}>9</div>
+                  <div style={{ ...timelineDotStyle, background: "linear-gradient(135deg, var(--gold), var(--orange))", color: "#000", border: "2px solid var(--gold)" }}>10</div>
                   <div>
                     <h4 style={{ ...timelineHeaderStyle, color: "var(--gold)" }}>Escrow Releases Payout</h4>
                     <p style={timelineDescStyle}>The middleman releases the held payment directly to the seller's bank coordinates (deducting middleman commissions).</p>
@@ -486,7 +508,7 @@ export default function EscrowDeal() {
                 </div>
 
                 <div style={timelineStepStyle}>
-                  <div style={timelineDotStyle}>10</div>
+                  <div style={timelineDotStyle}>11</div>
                   <div>
                     <h4 style={timelineHeaderStyle}>Deal Successfully Completed</h4>
                     <p style={timelineDescStyle}>Ownership fully transferred. Lifetime links signed off under warranty safeguards.</p>
@@ -1160,6 +1182,97 @@ export default function EscrowDeal() {
       </div>
 
       <Footer />
+
+      {/* 10% Booking Pop-up Modal */}
+      {showBookingModal && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(8, 10, 15, 0.85)", backdropFilter: "blur(8px)",
+          zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center",
+          padding: "20px"
+        }}>
+          <div style={{
+            background: "var(--card)", border: "1px solid var(--border-gold)",
+            borderRadius: "20px", width: "100%", maxWidth: "550px",
+            boxShadow: "0 20px 50px rgba(0,0,0,0.5)", position: "relative",
+            overflow: "hidden", animation: "modalFadeIn 0.3s ease"
+          }}>
+            {/* Header */}
+            <div style={{
+              background: "rgba(255, 215, 0, 0.05)", borderBottom: "1px solid rgba(255, 215, 0, 0.1)",
+              padding: "20px 24px", display: "flex", justifyContent: "space-between", alignItems: "center"
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <Lock size={20} style={{ color: "var(--gold)" }} />
+                <h3 style={{ margin: 0, color: "#fff", fontSize: "18px", fontFamily: "var(--font-h)", textTransform: "uppercase", letterSpacing: "1px" }}>Booking Protocol</h3>
+              </div>
+              <button 
+                onClick={() => setShowBookingModal(false)}
+                style={{ background: "transparent", border: "none", color: "var(--muted)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <X size={20} />
+              </button>
+            </div>
+            
+            {/* Content */}
+            <div style={{ padding: "24px" }}>
+              <p style={{ color: "var(--muted)", fontSize: "14px", lineHeight: 1.6, marginBottom: "20px" }}>
+                To secure any premium account and filter out non-serious queries, we enforce a strict booking policy.
+              </p>
+              
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "16px" }}>
+                <li style={{ display: "flex", gap: "12px", alignItems: "flex-start", background: "rgba(255,255,255,0.02)", padding: "12px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.04)" }}>
+                  <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "rgba(255,215,0,0.1)", color: "var(--gold)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 700, flexShrink: 0 }}>1</div>
+                  <div>
+                    <strong style={{ display: "block", color: "#fff", fontSize: "14px", marginBottom: "4px" }}>10% Total Price</strong>
+                    <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: 1.5 }}>The booking amount is exactly calculated as 10% of the finalized deal value.</span>
+                  </div>
+                </li>
+                
+                <li style={{ display: "flex", gap: "12px", alignItems: "flex-start", background: "rgba(239,68,68,0.05)", padding: "12px", borderRadius: "10px", border: "1px solid rgba(239,68,68,0.2)" }}>
+                  <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "rgba(239,68,68,0.1)", color: "var(--red)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 700, flexShrink: 0 }}>2</div>
+                  <div>
+                    <strong style={{ display: "block", color: "#ff8888", fontSize: "14px", marginBottom: "4px" }}>Strictly Non-Refundable</strong>
+                    <span style={{ color: "rgba(255,255,255,0.7)", fontSize: "13px", lineHeight: 1.5 }}>If you cancel the deal or fail to pay the balance, the deposit is completely forfeited.</span>
+                  </div>
+                </li>
+                
+                <li style={{ display: "flex", gap: "12px", alignItems: "flex-start", background: "rgba(255,255,255,0.02)", padding: "12px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.04)" }}>
+                  <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "rgba(255,215,0,0.1)", color: "var(--gold)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 700, flexShrink: 0 }}>3</div>
+                  <div>
+                    <strong style={{ display: "block", color: "#fff", fontSize: "14px", marginBottom: "4px" }}>No Early Access</strong>
+                    <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: 1.5 }}>Booking secures the item, but account credentials are NEVER handed over until full payment is made.</span>
+                  </div>
+                </li>
+                
+                <li style={{ display: "flex", gap: "12px", alignItems: "flex-start", background: "rgba(255,255,255,0.02)", padding: "12px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.04)" }}>
+                  <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "rgba(255,215,0,0.1)", color: "var(--gold)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 700, flexShrink: 0 }}>4</div>
+                  <div>
+                    <strong style={{ display: "block", color: "#fff", fontSize: "14px", marginBottom: "4px" }}>Limited Window</strong>
+                    <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: 1.5 }}>The booking temporarily locks the listing, typically valid for only 24 hours.</span>
+                  </div>
+                </li>
+              </ul>
+              
+              <button 
+                onClick={() => setShowBookingModal(false)}
+                style={{
+                  width: "100%", marginTop: "24px", padding: "14px", borderRadius: "10px",
+                  background: "rgba(255, 215, 0, 0.1)", border: "1px solid var(--gold)", color: "var(--gold)",
+                  fontSize: "14px", fontWeight: 700, cursor: "pointer", textTransform: "uppercase", letterSpacing: "1px"
+                }}>
+                I Understand
+              </button>
+            </div>
+            
+            <style>{`
+              @keyframes modalFadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+              }
+            `}</style>
+          </div>
+        </div>
+      )}
 
       {/* Media styling overrides */}
       <style>{`

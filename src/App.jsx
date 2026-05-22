@@ -118,6 +118,7 @@ const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
 const FAQ = lazy(() => import("./pages/FAQ"));
 const F2FDeal = lazy(() => import("./pages/F2FDeal"));
 const EscrowDeal = lazy(() => import("./pages/EscrowDeal"));
+const BookingSystem = lazy(() => import("./pages/BookingSystem"));
 
 
 
@@ -438,6 +439,14 @@ export default function App() {
             element={
               <Suspense fallback={<PageLoader />}>
                 <EscrowDeal />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/booking-system"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <BookingSystem />
               </Suspense>
             }
           />

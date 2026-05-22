@@ -6,6 +6,7 @@ import useSEO from "../hooks/useSEO";
 import { 
   ShieldCheck, Users, MapPin, CreditCard, Info, AlertTriangle, 
   HelpCircle, ChevronDown, MessageCircle, Send, Gamepad2, 
+  X, BookOpen, Lock,
   Coins, TrendingUp, Clock, FileText, Check, Award, 
   Calendar, Utensils, Plane, Hotel, ChevronRight, Eye, ShieldAlert
 } from "lucide-react";
@@ -18,6 +19,9 @@ export default function F2FDeal() {
 
   // FAQ Accordion State
   const [expandedIndex, setExpandedIndex] = useState(null);
+
+  // Booking Modal State
+  const [showBookingModal, setShowBookingModal] = useState(false);
 
   // Booking Calculator State
   const [accountValue, setAccountValue] = useState(100000);
@@ -732,6 +736,16 @@ export default function F2FDeal() {
                   <div>
                     <h4 style={timelineHeaderStyle}>Pay 10% Booking Advance</h4>
                     <p style={timelineDescStyle}>Transmit the 10% security deposit (e.g., ₹10,000 for a ₹100,000 account) to lock the listing and activate travel bookings.</p>
+                    <button 
+                      onClick={() => setShowBookingModal(true)}
+                      style={{
+                        marginTop: "12px", background: "linear-gradient(135deg, var(--gold), var(--orange))",
+                        color: "#000", border: "none", padding: "8px 16px", borderRadius: "8px",
+                        fontSize: "13px", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "6px",
+                        cursor: "pointer", fontFamily: "var(--font-h)", textTransform: "uppercase", letterSpacing: "0.5px"
+                      }}>
+                      <BookOpen size={14} /> View Booking Rules
+                    </button>
                   </div>
                 </div>
 
@@ -1127,6 +1141,97 @@ export default function F2FDeal() {
       </div>
 
       <Footer />
+
+      {/* 10% Booking Pop-up Modal */}
+      {showBookingModal && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(8, 10, 15, 0.85)", backdropFilter: "blur(8px)",
+          zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center",
+          padding: "20px"
+        }}>
+          <div style={{
+            background: "var(--card)", border: "1px solid var(--border-gold)",
+            borderRadius: "20px", width: "100%", maxWidth: "550px",
+            boxShadow: "0 20px 50px rgba(0,0,0,0.5)", position: "relative",
+            overflow: "hidden", animation: "modalFadeIn 0.3s ease"
+          }}>
+            {/* Header */}
+            <div style={{
+              background: "rgba(255, 215, 0, 0.05)", borderBottom: "1px solid rgba(255, 215, 0, 0.1)",
+              padding: "20px 24px", display: "flex", justifyContent: "space-between", alignItems: "center"
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <Lock size={20} style={{ color: "var(--gold)" }} />
+                <h3 style={{ margin: 0, color: "#fff", fontSize: "18px", fontFamily: "var(--font-h)", textTransform: "uppercase", letterSpacing: "1px" }}>Booking Protocol</h3>
+              </div>
+              <button 
+                onClick={() => setShowBookingModal(false)}
+                style={{ background: "transparent", border: "none", color: "var(--muted)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <X size={20} />
+              </button>
+            </div>
+            
+            {/* Content */}
+            <div style={{ padding: "24px" }}>
+              <p style={{ color: "var(--muted)", fontSize: "14px", lineHeight: 1.6, marginBottom: "20px" }}>
+                To secure any premium account and filter out non-serious queries, we enforce a strict booking policy.
+              </p>
+              
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "16px" }}>
+                <li style={{ display: "flex", gap: "12px", alignItems: "flex-start", background: "rgba(255,255,255,0.02)", padding: "12px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.04)" }}>
+                  <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "rgba(255,215,0,0.1)", color: "var(--gold)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 700, flexShrink: 0 }}>1</div>
+                  <div>
+                    <strong style={{ display: "block", color: "#fff", fontSize: "14px", marginBottom: "4px" }}>10% Total Price</strong>
+                    <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: 1.5 }}>The booking amount is exactly calculated as 10% of the finalized deal value.</span>
+                  </div>
+                </li>
+                
+                <li style={{ display: "flex", gap: "12px", alignItems: "flex-start", background: "rgba(239,68,68,0.05)", padding: "12px", borderRadius: "10px", border: "1px solid rgba(239,68,68,0.2)" }}>
+                  <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "rgba(239,68,68,0.1)", color: "var(--red)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 700, flexShrink: 0 }}>2</div>
+                  <div>
+                    <strong style={{ display: "block", color: "#ff8888", fontSize: "14px", marginBottom: "4px" }}>Strictly Non-Refundable</strong>
+                    <span style={{ color: "rgba(255,255,255,0.7)", fontSize: "13px", lineHeight: 1.5 }}>If you cancel the deal or fail to pay the balance, the deposit is completely forfeited.</span>
+                  </div>
+                </li>
+                
+                <li style={{ display: "flex", gap: "12px", alignItems: "flex-start", background: "rgba(255,255,255,0.02)", padding: "12px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.04)" }}>
+                  <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "rgba(255,215,0,0.1)", color: "var(--gold)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 700, flexShrink: 0 }}>3</div>
+                  <div>
+                    <strong style={{ display: "block", color: "#fff", fontSize: "14px", marginBottom: "4px" }}>No Early Access</strong>
+                    <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: 1.5 }}>Booking secures the item, but account credentials are NEVER handed over until full payment is made.</span>
+                  </div>
+                </li>
+                
+                <li style={{ display: "flex", gap: "12px", alignItems: "flex-start", background: "rgba(255,255,255,0.02)", padding: "12px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.04)" }}>
+                  <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "rgba(255,215,0,0.1)", color: "var(--gold)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 700, flexShrink: 0 }}>4</div>
+                  <div>
+                    <strong style={{ display: "block", color: "#fff", fontSize: "14px", marginBottom: "4px" }}>Limited Window</strong>
+                    <span style={{ color: "var(--muted)", fontSize: "13px", lineHeight: 1.5 }}>The booking temporarily locks the listing, typically valid for only 24 hours.</span>
+                  </div>
+                </li>
+              </ul>
+              
+              <button 
+                onClick={() => setShowBookingModal(false)}
+                style={{
+                  width: "100%", marginTop: "24px", padding: "14px", borderRadius: "10px",
+                  background: "rgba(255, 215, 0, 0.1)", border: "1px solid var(--gold)", color: "var(--gold)",
+                  fontSize: "14px", fontWeight: 700, cursor: "pointer", textTransform: "uppercase", letterSpacing: "1px"
+                }}>
+                I Understand
+              </button>
+            </div>
+            
+            <style>{`
+              @keyframes modalFadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+              }
+            `}</style>
+          </div>
+        </div>
+      )}
 
       {/* Embedded CSS rules for layout queries and animations */}
       <style>{`

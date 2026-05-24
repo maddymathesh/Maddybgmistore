@@ -110,6 +110,7 @@ const ReadyStocks = lazy(() => import("./pages/ReadyStocks"));
 const Login = lazy(() => import("./pages/Login"));
 const PaymentPage = lazy(() => import("./pages/PaymentPage"));
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
+const DescriptionMaker = lazy(() => import("./pages/admin/DescriptionMaker"));
 const Transactions = lazy(() => import("./pages/Transactions"));
 const PageNotFound = lazy(() => import("./pages/PageNotFound"));
 const TermsConditions = lazy(() => import("./pages/TermsConditions"));
@@ -584,6 +585,16 @@ export default function App() {
               <Suspense fallback={<PageLoader />}>
                 <ProtectedRoute>
                   <AdminDashboard />
+                </ProtectedRoute>
+              </Suspense>
+            }
+          />
+          <Route
+            path="/admin/description-maker"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <ProtectedRoute>
+                  <DescriptionMaker />
                 </ProtectedRoute>
               </Suspense>
             }

@@ -43,12 +43,15 @@ export default function PaymentPage() {
       try {
         const [linkRes, settingsRes] = await Promise.all([
           supabase.from('payment_links').select('*').eq('id', paymentId).single(),
-          supabase.from('admin_payment_settings').select('*').eq('id', 1).single()
+          supabase.from('admin_payment_settings')
+            .select('payee_upi_id, payee_name, bank_name, account_holder, account_number, ifsc_code, branch')
+            .eq('id', 1).single()
         ]);
 
         if (settingsRes.data) {
           setAdminSettings(settingsRes.data);
-          if (!settingsRes.data.payment_pin) setBankUnlocked(true);
+          // No payment_pin column — bank details are always accessible
+          setBankUnlocked(true);
         }
 
         const data = linkRes.data;
@@ -105,14 +108,9 @@ export default function PaymentPage() {
 
   const handleBankUnlock = (e) => {
     e.preventDefault();
-    const globalPin = adminSettings?.payment_pin;
-    if (!globalPin || bankPin === globalPin) {
-      setBankUnlocked(true);
-      setBankError("");
-    } else {
-      setBankError("Incorrect PIN.");
-      setBankPin("");
-    }
+    // payment_pin column not present — always unlock
+    setBankUnlocked(true);
+    setBankError("");
   };
 
   const handleCopyUpi = () => {

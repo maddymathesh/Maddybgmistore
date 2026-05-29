@@ -6,95 +6,126 @@ This repository hosts a full-stack, enterprise-ready web application utilizing a
 
 ---
 
-## 🚀 Key Modules & Customer Experience
+## 🏗️ Working Architecture
 
-The platform is designed to provide gamers with an elite, friction-free journey across multiple dedicated pages:
+To secure operations and maintain high performance, the system decouples client-side presentation, database storage, and secure serverless transaction flows. Here is the operational architecture of the platform:
 
-*   **Ready Stocks Marketplace (`/readystocks`)**: A real-time inventory engine featuring filtered lists of premium accounts. Every listing includes a YouTube video showcase link, rich account parameters, and a sleek checkout CTA.
-*   **Comprehensive Direct Services**:
-    *   **UC Purchase (`/services/uc`)**: Seamless ordering for in-game UC packages at discounted rates.
-    *   **X-Suit gifting (`/services/xsuit`)**: Request and coordinate gifts for rare X-Suits.
-    *   **Supercars gifting (`/services/supercar`)**: Catalog listing for high-tier sportscar and SUV gifting.
-*   **Booking System & Face-to-Face Escrows**:
-    *   **F2F Deal Room (`/f2f-deal`)** & **F2F Guide (`/f2f-sell-guide`)**: Support for physical/in-person localized transitions.
-    *   **Escrow System (`/escrow-deal`)**: Secure middleman-assisted trades preventing buyer/seller scams.
-    *   **Booking System (`/booking-system`)**: Booking queue for customized orders or personal admin consultations.
-*   **Tactical Safety & Operational Guides**:
-    *   **KYC Portal (`/kyc-guide`)**: Outlining safe compliance rules to verify users.
-    *   **Payout Guide (`/payout-guide`)**: Step-by-step documentation on how sellers receive payouts.
-    *   **Unlinking Guide (`/unlinking-guide`)**: Tactical guide on how to safely unlink game credentials (Twitter, Facebook, Google Play, Apple ID) without leaving recovery backdoors.
-    *   **No Returns & Policies (`/no-returns-policy`, `/terms`, `/privacy`, `/refunds`)**: Legal safeguards protecting the digital store from fraudulent chargebacks.
-*   **Authentic Reviews & Proofs (`/reviews`, `/proofs`)**: A verified feedback timeline powered by approved transactions, user rating distributions, and admin-approved transaction screenshot cards.
+```mermaid
+graph TD
+    %% Styling Definitions
+    classDef client fill:#0d1117,stroke:#FFD700,stroke-width:2px,color:#fff;
+    classDef firebase fill:#1a1510,stroke:#FF9100,stroke-width:2px,color:#fff;
+    classDef supabase fill:#0c1c15,stroke:#3ECF8E,stroke-width:2px,color:#fff;
+    classDef external fill:#171b22,stroke:#8b949e,stroke-width:1px,color:#fff;
+
+    %% Nodes
+    subgraph Client ["Client Layer (Vite 7 + React 18 + Tailwind v4)"]
+        UI["Cinematic UI/UX (GSAP / Lenis / Motion)"]
+        Router["React Router v6 Gates"]
+        Store["State (Zustand + AuthContext)"]
+    end
+    class Client,UI,Router,Store client;
+
+    subgraph AuthSecurity ["Identity & Security Gateway"]
+        FBAuth["Firebase Auth (Custom JWT Claims)"]
+        SecRules["Firestore Security Rules"]
+        RLS["Supabase Row Level Security (RLS)"]
+    end
+    class AuthSecurity,FBAuth,SecRules,RLS client;
+
+    subgraph FirebaseServices ["Firebase Backend Services"]
+        Functions["Cloud Functions V2 (NodeJS)"]
+        JWT["HS256 JWT Token Signer"]
+        Lockout["5-Try PIN Brute-Force Lockout"]
+        Firestore["Firestore DB (Payment Settings & Admin Lists)"]
+    end
+    class FirebaseServices,Functions,JWT,Lockout,Firestore firebase;
+
+    subgraph SupabaseServices ["Supabase Backend Services"]
+        Postgres["PostgreSQL Database"]
+        RPC["site_views Increment RPC"]
+        Tables["Catalog, Reviews, Proofs, Feedback tables"]
+    end
+    class SupabaseServices,Postgres,RPC,Tables supabase;
+
+    subgraph Integrations ["External APIs & Integrations"]
+        Cloudinary["Cloudinary (Asset CDN)"]
+        GoogleSheets["Google Apps Script (Sales Logging)"]
+        Vercel["Vercel Analytics & Edge Hosting"]
+    end
+    class Integrations,Cloudinary,GoogleSheets,Vercel external;
+
+    %% Relations
+    UI --> Router
+    Router -->|Gated by Admin Claims| Store
+    Store --> FBAuth
+    
+    %% Database routing
+    Store -->|Public Reads / Pending Reviews| Tables
+    Store -->|Admin Token Header| RLS
+    RLS --> Tables
+    
+    %% Functions transactional routing
+    Store -->|Call Secure Functions| Functions
+    Functions -->|Sign / Validate Checkout| JWT
+    Functions -->|Enforce Lockout State| Lockout
+    Functions -->|Read/Write Admin Config| Firestore
+    SecRules --> Firestore
+    
+    %% Atomic Views
+    Store -->|RPC views update| RPC
+    RPC --> Postgres
+    
+    %% Integrations
+    UI -->|Image Uploads| Cloudinary
+    Functions -->|Sync Orders/Feedback| GoogleSheets
+    UI -->|Metrics| Vercel
+```
+
+### Architectural Flows
+1.  **Storefront Content**: Public listings (BGMI accounts, UC bundles, gifting catalogs) are stored in **Supabase Postgres** tables. The client performs direct SELECT queries under public RLS permission models.
+2.  **Payment Processing**: When an admin triggers checkout generation, **Firebase Cloud Functions (V2)** builds an immutable token signed with `HS256` JWT. The client uses this token to access the `/pay/:id` route, where the transaction details are verified.
+3.  **Brute-Force Lockout Gateway**: During PIN validation on the checkout page, the input PIN is validated serverless. If a user inputs 5 wrong PINs, the Cloud Function writes a `revoked` state to Firestore, locking the payment link.
+4.  **View Counts & Celebrations**: On first load, the client executes a secure **Supabase RPC** (`increment_views`) that atomically increments site views in Postgres and returns the updated milestone, triggering high-fidelity golden confetti canvas animations on the client when milestones (multiples of 10) are achieved.
 
 ---
 
-## 🔒 Enterprise-Grade Admin Dashboards
+## 🛠️ Current Tech Stack
 
-Access to our administration panels is strictly gated behind Firebase Authentication and backed by automated, serverless authorization flows.
+The application employs a curated, cutting-edge tech stack designed to optimize load times, maintain data consistency, and defend transactional boundaries.
 
-### 1. Dynamic Stock Admin Panel (`/admin`)
-An advanced command center enabling store managers to control the storefront dynamically:
-*   **Manage Stock**: Direct additions, edits, and deletions of BGMI accounts (complete with Cloudinary image arrays, YouTube showcase URLs, and login types).
-*   **Order Tracking**: View and triage incoming orders, services requests, and recovery applications.
-*   **Review Moderation**: Admin interface to approve, archive, or reject incoming customer reviews before they are made public.
-*   **Description Maker**: Integrated text template generator designed to output standard, eye-catching copy for social media and Telegram broadcasts.
+### 1. Frontend Presentation Layer
+*   **Core Framework**: **React 18.3.1** (declarative component rendering, Suspense-driven lazy chunks)
+*   **Build Bundler**: **Vite 7.3.3** (fast ES-module hot reloading, optimized vendor splitting assets)
+*   **Styling Engine**: **Tailwind CSS v4.2.4** (efficient design tokens, utility classes, and optimized PostCSS preprocessing)
+*   **Transitions & Animations**: 
+    *   **GSAP 3.15.0**: Cinema-style loading grids, custom loaders, and vector timelines.
+    *   **Framer Motion 12.38.0**: Responsive UI components, micro-animations, and fluid model transitions.
+    *   **Lenis 1.3.23**: Smooth, GPU-accelerated scroll synchronization.
+*   **State Managers**: **Zustand 5.0.13** (global UI, filters, and transaction states) + **React Context** (Firebase Auth state)
 
-### 2. Advanced Transactions Hub (`/transactions`)
-A financial and logistics command dashboard designed for live operations:
-*   **Financial Overview**: Interactive cash flow charts, revenue trends, and dynamic transaction summaries (categorized by UC, Supercar, X-Suit, and Account Sales).
-*   **Real-time Transactions Manager**: Instantly generate PIN-secured single-use payment checkouts, modify transaction states (`active`, `paid`, `expired`, `revoked`), and view customer details.
-*   **Admin Activity Log**: Auditing logs tracking administrative changes (e.g., product updates, payment configurations, or newly registered support staff).
-*   **Customer & Guarantees Catalog**: Centralized directories detailing active customer profiles and warranties.
-*   **Tasks & Alerts Panel**: Sticky notes and system-level alerts indicating pending orders or failed payment checkouts.
-*   **Settings Control**: Instantly customize the default store-wide UPI ID, bank details, and payment link expiration timers.
+### 2. Dual Database & Storage Layer
+*   **Supabase (PostgreSQL 15+)**: Handles relational operational schemas:
+    *   `products`: Stores BGMI listings, metadata, Cloudinary image arrays, and YouTube embeds.
+    *   `reviews` & `proofs`: Verified reviews with approval states and screenshot deliveries.
+    *   `customer_feedback`: Star ratings and structured customer feedback.
+    *   `site_views`: Atomic views counting table.
+*   **Firebase Firestore**: Handles configuration metadata and operational state:
+    *   `payment_links`: Secure checkout state, validation credentials, and lockout counters.
+    *   `payment_settings`: UPI configs, bank details, and active link timers.
+    *   `admins`: Real-time active manager UIDs.
 
----
+### 3. Serverless Services & Security Layer
+*   **Firebase Authentication**: Dynamic client sign-ins, managing admin user groups via custom administrative token claims `{ admin: true }`.
+*   **Firebase Cloud Functions (V2 / Node.js 20)**: Secure backend runtime executing core endpoints (link creation, PIN verification, admin privilege allocation, lockout execution).
+*   **JSONWebToken (`jose` / `jwt`)**: Cryptographic signature validation ensuring payment URLs remain tamper-proof.
+*   **Row-Level Security (RLS)**: PostgreSQL-level access policies allowing direct client queries while gating database modifications under admin tokens.
 
-## 🛡️ Hardened Security & Anti-Brute Defenses
-
-Our transactional backend runs strictly isolated inside **Firebase Cloud Functions (V2)** to guarantee total payment flow integrity:
-
-*   **JWT-Signed Payment Tokens**: When an admin generates a payment link, the server constructs an immutable `accessToken` signed with a secure, 32-character `HS256` token key (`PAYMENT_JWT_SECRET`). The client cannot modify payment amounts, customer names, or destination UPI details.
-*   **Brute-Force Lockout Defense**: Each checkout link requires a unique, administrator-defined **4 to 6-digit PIN**. To prevent automated dictionary attacks:
-    *   Every failed attempt increments a `failedAttempts` counter directly in the Firebase transactional doc.
-    *   Upon reaching **5 failed PIN attempts**, the cloud function permanently transitions the payment status to `revoked`, sets a `revokedReason` of `too_many_failed_attempts`, and locks out the user.
-*   **Strict Firestore Security Rules**: Database integrity is enforced at the network boundaries. Writing or changing products, settings, or admin roles is restricted to accounts possessing custom JWT `{ admin: true }` claims or explicitly whitelisted UIDs inside `.env` configurations.
-
----
-
-## 📊 Dual-Database Architecture
-
-To benefit from the best properties of both technologies, the system implements a high-performance hybrid storage layout:
-
-| Database | Managed Datasets & Responsibilities | Security Enforcement |
-|:---|:---|:---|
-| **Firebase / Firestore** | • Dynamic Admin Users & Role Claims<br>• Temporary Payment Links & Settings<br>• Serverless Cloud Functions (Auth validation, lockout) | **Firestore Security Rules (`firestore.rules`)** gates direct writes; custom JWT claims block unauthenticated access. |
-| **Supabase (PostgreSQL)** | • Store Catalog (Products, UC prices, Gifts)<br>• Feedback & Star Ratings<br>• Approved reviews & month-by-month Proof image URLs<br>• Global view analytics (`site_views` table) | **Row Level Security (RLS)**. Public can perform reads & inserts (reviews default to `status = 'pending'`). Writes require a custom `x-maddy-admin-token` header. |
-
----
-
-## ⚡ Performance, Build & PWA Stack
-
-Built using **Vite 7** and **Tailwind CSS v4**, the application is optimized for sub-second load times on mobile connections:
-
-*   **Brotli & Gzip Compression**: Build pipeline generates dual Brotli (`.br`) and Gzip (`.gz`) pre-compressed build chunks to reduce transfer sizes.
-*   **Fine-Grained Rollup Split**: Manual Rollup chunk splitting separates framework components into individual cached vendors (`vendor-react`, `vendor-firebase`, `vendor-motion`, `vendor-gsap`, etc.), allowing lazyloaded page chunks to download immediately.
-*   **Advanced PWA Setup (`vite-plugin-pwa`)**:
-    *   **AutoUpdate**: Automated service worker lifecycle updates.
-    *   **Runtime Cache Policies**: Google Fonts are stored locally via `CacheFirst`. Firebase product images and Supabase API payloads use a custom `StaleWhileRevalidate` strategy, enabling offline listing views.
-*   **Production Log Stripper**: Build files strip away all standard `console.*` statements automatically inside production environments, enhancing security.
-*   **Image Optimizer**: Assets are automatically compressed (82% png/jpeg/webp quality, 72% avif quality) using `vite-plugin-image-optimizer`.
-*   **Cinematic Motion & Animations**: Visuals are controlled via **Lenis** smooth scrolling, **GSAP**, and **Framer Motion**, delivering micro-interactions that feel premium and modern.
-
----
-
-## 🔍 SEO & Resiliency Controls
-
-To drive organic growth and maintain uninterrupted operations:
-
-1.  **Dynamic SEO Meta Engine (`usePageMeta`)**: A customized React hook dynamically updates titles, standard description tags, and OpenGraph (OG) properties (`og:title`, `og:description`, `og:url`) on route changes, enabling granular crawling.
-2.  **Milestone Celebration popups**: Integrated with Supabase, visiting counts increment atomically. Hits on milestones (e.g., multiples of 10) trigger canvas-drawn golden confetti bursts to increase engagement.
-3.  **High-Fidelity Error Boundaries**: A comprehensive custom `ErrorBoundary` component wraps our page templates. If any child component encounters a runtime crash, it intercepts the exception and serves a cinematic, dark-themed fallback interface with recovery prompts, maintaining app uptime.
+### 4. Integrations & Tooling
+*   **Cloudinary**: Remote image hosting and automatic visual transformations.
+*   **Google Apps Script**: Real-time sheets logging for checkout operations, feedback forms, and notifications.
+*   **Vercel Analytics & Speed Insights**: Real-time user experience metrics and load-speed telemetry.
+*   **xlsx / pdf-lib / pdf-encrypt-lite**: Client-side document parser, Excel exporting, and secure transaction receipt encryption.
 
 ---
 

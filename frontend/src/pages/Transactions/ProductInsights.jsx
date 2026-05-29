@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Layers, ShieldCheck, Gift, Car, Coins, RefreshCw } from 'lucide-react';
 import { fetchAllTransactions, fetchDashboardStats } from '../../services/transactionService';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function ProductInsights() {
   const [data, setData] = useState([]);

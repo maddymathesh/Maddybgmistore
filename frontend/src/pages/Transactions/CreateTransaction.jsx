@@ -9,7 +9,7 @@ import {
 import { createAccountTransaction, generateNextTransactionId } from '../../services/transactionService';
 import { generateCustomerPDF, generateInternalPDF } from '../../lib/pdfGenerator';
 import { exportToExcel } from '../../lib/excelExport';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 const STEPS = [
   { id: 0, label: 'Deal Info', icon: Hash },

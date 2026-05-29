@@ -1646,3 +1646,157 @@ select.input {
   border-color: rgba(34, 197, 94, 0.35) !important;
   box-shadow: 0 0 12px rgba(34, 197, 94, 0.12) !important;
 }
+
+/* ===================================================
+   PHASE 2 — PERFORMANCE & ACCESSIBILITY UPGRADES
+   =================================================== */
+
+/* ── Reduced Motion (A11Y) ─────────────────────────
+   Respects the OS-level "Reduce Motion" setting.
+   Disables all animations for users with vestibular disorders.
+   ──────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .ticker-inner {
+    animation: none !important;
+  }
+}
+
+/* ── GPU-Accelerated Animation Utilities ──────────
+   Apply to elements that animate with transform/opacity
+   for compositor-only (GPU) rendering at 60fps.
+   ──────────────────────────────────────────────────── */
+.gpu-accelerate {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* GPU acceleration on all animated cards */
+.card,
+.review-card,
+.connect-card,
+.why-us-card {
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* ── Content Visibility (Below-fold Performance) ──
+   Defers rendering of off-screen sections — reduces
+   initial paint time significantly on long pages.
+   ──────────────────────────────────────────────────── */
+.section-lazy {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
+}
+
+/* ── Mobile Touch & UX Improvements ───────────────
+   Minimum tap target sizes (Google: 48px, Apple: 44px)
+   + prevent iOS zoom on input focus
+   ──────────────────────────────────────────────────── */
+@media (pointer: coarse) {
+  .btn {
+    min-height: 44px;
+    padding: 13px 24px;
+  }
+
+  .btn-sm {
+    min-height: 40px;
+    padding: 10px 16px;
+  }
+
+  .input {
+    min-height: 48px;
+    padding: 14px 16px;
+    font-size: 16px; /* Prevent iOS auto-zoom */
+  }
+
+  select.input {
+    font-size: 16px;
+  }
+
+  /* Disable stuck hover effects on touch */
+  .card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .btn-gold:hover,
+  .btn-green:hover,
+  .btn-tg:hover,
+  .btn-red:hover,
+  .btn-outline:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .connect-card:hover,
+  .review-card:hover,
+  .why-us-card:hover {
+    transform: none;
+  }
+}
+
+/* ── Responsive Typography Scale ──────────────────
+   Fluid type for small screens
+   ──────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .stitle {
+    font-size: clamp(22px, 6vw, 36px);
+  }
+
+  .section {
+    padding: 60px 4%;
+  }
+
+  .section-alt {
+    padding: 50px 4%;
+  }
+
+  .stat-n {
+    font-size: 24px;
+  }
+
+  .modal {
+    padding: 24px 20px;
+    border-radius: 16px;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Smooth scroll (desktop only) ─────────────────
+   Touch devices use native momentum scrolling.
+   ──────────────────────────────────────────────────── */
+@media (pointer: fine) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ── Print Styles ──────────────────────────────────── */
+@media print {
+  .social-float,
+  .scroll-down-indicator,
+  nav,
+  footer {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+}

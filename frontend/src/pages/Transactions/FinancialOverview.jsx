@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { DollarSign, BarChart3, TrendingUp, RefreshCw, Layers, ShieldCheck } from 'lucide-react';
 import { fetchAllTransactions, fetchDashboardStats } from '../../services/transactionService';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function FinancialOverview() {
   const [data, setData] = useState([]);

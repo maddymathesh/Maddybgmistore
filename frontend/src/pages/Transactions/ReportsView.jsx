@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { FileBarChart, DollarSign, TrendingUp, ShoppingBag, PieChart, ArrowUpRight, Search, Download } from 'lucide-react';
 import { fetchAllTransactions } from '../../services/transactionService';
 import { exportToExcel } from '../../lib/excelExport';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function ReportsView() {
   const [data, setData] = useState([]);

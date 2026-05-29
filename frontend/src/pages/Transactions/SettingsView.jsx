@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Settings, Palette, Users, Shield, Phone, RefreshCw, CheckCircle2, FileText } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import SettingsPDFControls from '../../components/settings/SettingsPDFControls';
 
 const PRESET_THEMES = [

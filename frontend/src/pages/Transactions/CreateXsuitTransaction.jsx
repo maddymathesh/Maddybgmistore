@@ -9,7 +9,7 @@ import {
 import { createXsuitTransaction, generateNextXsuitId } from '../../services/transactionService';
 import { generateCustomerPDF, generateInternalPDF } from '../../lib/pdfGenerator';
 import { exportToExcel } from '../../lib/excelExport';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 const XSUIT_NAMES = [
   'Galadria', 'Ignis', 'Marmoris', 'Astral Splendor',

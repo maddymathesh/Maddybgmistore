@@ -8,7 +8,7 @@ import {
   Activity
 } from 'lucide-react';
 import { fetchAllTransactions, fetchDashboardStats } from '../../services/transactionService';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function Dashboard() {
   const [data, setData] = useState([]);

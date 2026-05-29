@@ -3,7 +3,7 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { GoogleAuthProvider, signInWithPopup, getRedirectResult } from "firebase/auth";
 import { auth } from "../firebase";
 import { useAuth } from "../context/AuthContext";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 import { Lock, Shield, User } from "lucide-react";
 
 export default function Login() {

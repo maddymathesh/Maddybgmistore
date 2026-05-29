@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
 import { Search, Filter, Eye, FileText, Download, Trash2, ChevronLeft, ChevronRight, FileOutput, Receipt, RefreshCw, Calendar, CalendarOff } from 'lucide-react';
 import { fetchAllTransactions, deleteTransaction } from '../../services/transactionService';
 
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { exportToExcel } from '../../lib/excelExport';
 import { generateCustomerPDF, generateInternalPDF, testPDF } from '../../lib/pdfGenerator';
 

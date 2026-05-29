@@ -3,7 +3,7 @@ import { supabase } from "../utils/supabase";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { MessageSquare, Star, Send, Sparkles, Smile, ArrowRight, HelpCircle, CheckCircle2 } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 
 export default function CustomerFeedbackPage() {
   const [name, setName] = useState("");

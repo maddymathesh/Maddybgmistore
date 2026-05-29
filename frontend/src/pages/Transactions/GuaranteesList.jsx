@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ShieldCheck, ShieldAlert, Search, Calendar, Phone, Receipt, Shield, RefreshCw } from 'lucide-react';
 import { fetchAllTransactions } from '../../services/transactionService';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function GuaranteesList() {
   const [data, setData] = useState([]);

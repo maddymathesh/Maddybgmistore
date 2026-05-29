@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Outlet, useLocation } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "sonner";
 import { ReactLenis } from "lenis/react";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollDownIndicator from "./components/ScrollDownIndicator";
@@ -8,6 +8,7 @@ import SocialFloat from "./components/SocialFloat";
 import { supabase } from "./utils/supabase";
 import { Trophy, Sparkles } from "lucide-react";
 import InitialPageLoader from "./components/InitialPageLoader";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 let hasIncremented = false;
 
@@ -33,7 +34,6 @@ function launchGoldenConfetti() {
   const colors = ["#FFD700", "#FFA500", "#FF8C00", "#EEE8AA", "#B8860B"];
   const particles = [];
 
-  // Emit confetti upwards from the bottom-center
   for (let i = 0; i < 150; i++) {
     particles.push({
       x: width / 2,
@@ -127,7 +127,6 @@ const PayoutGuide = lazy(() => import("./pages/PayoutGuide"));
 const UnlinkingGuide = lazy(() => import("./pages/UnlinkingGuide"));
 
 
-
 // Scroll to top on route change
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -148,7 +147,7 @@ function DefaultLayout() {
   );
 }
 
-// Loader (kept same)
+// ── Page Loader ─────────────────────
 function PageLoader() {
   return (
     <div
@@ -241,12 +240,22 @@ function PageLoader() {
   );
 }
 
+// ── Wrapped route helper ─────────────
+function Page({ children }) {
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<PageLoader />}>
+        {children}
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
+
 export default function App() {
   const [showIntro, setShowIntro] = useState(() => {
     return !sessionStorage.getItem("mbs_intro_loaded");
   });
 
-  // Delay Lenis to avoid blocking initial render
   const [enableSmooth, setEnableSmooth] = useState(false);
   const [celebrationUser, setCelebrationUser] = useState(null);
 
@@ -256,15 +265,12 @@ export default function App() {
     if (hasIncremented) return;
     hasIncremented = true;
 
-
-
     async function handleViewsFlow() {
       const dbCounted = sessionStorage.getItem("mbs_db_counted");
       let activeCount = 14852;
 
       try {
         if (!dbCounted) {
-          // 1. First load of this browser session -> Write & increment views in Supabase
           const { data, error } = await supabase.rpc("increment_views");
           if (!error && data !== null) {
             activeCount = Number(data);
@@ -277,7 +283,6 @@ export default function App() {
               setTimeout(launchGoldenConfetti, 400);
             }
           } else {
-            // Standard update fallback for Supabase
             const { data: selectData, error: selectError } = await supabase
               .from("site_views")
               .select("count")
@@ -300,7 +305,6 @@ export default function App() {
             }
           }
         } else {
-          // 2. Already counted in this session -> Simply fetch the count to read
           const { data, error } = await supabase
             .from("site_views")
             .select("count")
@@ -318,7 +322,6 @@ export default function App() {
       } catch (err) {
         console.warn("View tracking DB handle fallback triggered:", err.message);
 
-        // 3. LocalStorage Fallback (100% Offline/Quota Safe)
         let localViews = localStorage.getItem("mbs_fallback_views");
         if (!localViews) {
           localViews = "14852";
@@ -340,7 +343,6 @@ export default function App() {
           setTimeout(launchGoldenConfetti, 400);
         }
       }
-
     }
 
     handleViewsFlow();
@@ -350,14 +352,16 @@ export default function App() {
     <BrowserRouter>
       <ScrollToTop />
 
-      {/* Global UI (NOT blocked anymore) */}
+      {/* Global toast notifications */}
       <Toaster
         position="top-right"
+        richColors={false}
         toastOptions={{
           style: {
             background: "#111520",
             color: "#EAEAEA",
             border: "1px solid rgba(255,215,0,0.2)",
+            fontFamily: "var(--font-b)",
           },
         }}
       />
@@ -366,256 +370,40 @@ export default function App() {
 
       <Routes>
         <Route element={<DefaultLayout />}>
-          <Route
-            path="/"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <Home />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/buy"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <Buy />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/sell"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <Sell />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/exchange"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <Exchange />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/services/uc"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <UCPurchase />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/services/xsuit"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <XsuitGift />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/services/supercar"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <SupercarGift />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/recovery"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <Recovery />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/reviews"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <Reviews />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/proofs"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <ProofAndFeedback />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/connectwithus"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <ConnectWithUs />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/readystocks"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <ReadyStocks />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/terms"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <TermsConditions />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/privacy"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <PrivacyPolicy />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/refunds"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <RefundPolicy />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/faq"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <FAQ />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/feedback"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <CustomerFeedbackPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/f2f-deal"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <F2FDeal />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/escrow-deal"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <EscrowDeal />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/booking-system"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <BookingSystem />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/f2f-sell-guide"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <F2FSellGuide />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/no-returns-policy"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <NoReturnsPolicy />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/kyc-guide"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <KYCGuide />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/payout-guide"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <PayoutGuide />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/unlinking-guide"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <UnlinkingGuide />
-              </Suspense>
-            }
-          />
+          <Route path="/"                  element={<Page><Home /></Page>} />
+          <Route path="/buy"               element={<Page><Buy /></Page>} />
+          <Route path="/sell"              element={<Page><Sell /></Page>} />
+          <Route path="/exchange"          element={<Page><Exchange /></Page>} />
+          <Route path="/services/uc"       element={<Page><UCPurchase /></Page>} />
+          <Route path="/services/xsuit"    element={<Page><XsuitGift /></Page>} />
+          <Route path="/services/supercar" element={<Page><SupercarGift /></Page>} />
+          <Route path="/recovery"          element={<Page><Recovery /></Page>} />
+          <Route path="/reviews"           element={<Page><Reviews /></Page>} />
+          <Route path="/proofs"            element={<Page><ProofAndFeedback /></Page>} />
+          <Route path="/connectwithus"     element={<Page><ConnectWithUs /></Page>} />
+          <Route path="/readystocks"       element={<Page><ReadyStocks /></Page>} />
+          <Route path="/terms"             element={<Page><TermsConditions /></Page>} />
+          <Route path="/privacy"           element={<Page><PrivacyPolicy /></Page>} />
+          <Route path="/refunds"           element={<Page><RefundPolicy /></Page>} />
+          <Route path="/faq"               element={<Page><FAQ /></Page>} />
+          <Route path="/feedback"          element={<Page><CustomerFeedbackPage /></Page>} />
+          <Route path="/f2f-deal"          element={<Page><F2FDeal /></Page>} />
+          <Route path="/escrow-deal"       element={<Page><EscrowDeal /></Page>} />
+          <Route path="/booking-system"    element={<Page><BookingSystem /></Page>} />
+          <Route path="/f2f-sell-guide"    element={<Page><F2FSellGuide /></Page>} />
+          <Route path="/no-returns-policy" element={<Page><NoReturnsPolicy /></Page>} />
+          <Route path="/kyc-guide"         element={<Page><KYCGuide /></Page>} />
+          <Route path="/payout-guide"      element={<Page><PayoutGuide /></Page>} />
+          <Route path="/unlinking-guide"   element={<Page><UnlinkingGuide /></Page>} />
+          <Route path="/pay/:paymentId"    element={<Page><PaymentPage /></Page>} />
 
-
-          <Route
-            path="/pay/:paymentId"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <PaymentPage />
-              </Suspense>
-            }
-          />
-
-          {/* Protected route */}
-          <Route
-            path="/admin"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <ProtectedRoute>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              </Suspense>
-            }
-          />
+          {/* Protected admin route */}
+          <Route path="/admin" element={<Page><ProtectedRoute><AdminDashboard /></ProtectedRoute></Page>} />
         </Route>
 
-        <Route
-          path="/login"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <Login />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/transactions"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <ProtectedRoute>
-                <Transactions />
-              </ProtectedRoute>
-            </Suspense>
-          }
-        />
-        <Route
-          path="*"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <PageNotFound />
-            </Suspense>
-          }
-        />
+        <Route path="/login"        element={<Page><Login /></Page>} />
+        <Route path="/transactions" element={<Page><ProtectedRoute><Transactions /></ProtectedRoute></Page>} />
+        <Route path="*"             element={<Page><PageNotFound /></Page>} />
       </Routes>
 
       {celebrationUser && (
@@ -647,7 +435,6 @@ export default function App() {
               overflow: "hidden"
             }}
           >
-            {/* Golden radial background glow */}
             <div style={{ position: "absolute", width: "300px", height: "300px", background: "radial-gradient(circle, rgba(255,215,0,0.08) 0%, transparent 70%)", top: "-100px", left: "90px", zIndex: 0, pointerEvents: "none" }} />
 
             <div style={{ position: "relative", zIndex: 1 }}>
@@ -667,7 +454,7 @@ export default function App() {
               <button
                 onClick={() => {
                   setCelebrationUser(null);
-                  launchGoldenConfetti(); // Play a nice celebratory second burst
+                  launchGoldenConfetti();
                 }}
                 className="btn btn-gold"
                 style={{
@@ -697,15 +484,17 @@ export default function App() {
     </BrowserRouter>
   );
 
-  // Apply Lenis only after initial render
-  const mainApp = enableSmooth ? (
+  // Apply Lenis only after initial render; disabled on touch devices for native mobile feel
+  const isTouchDevice = typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
+  const mainApp = enableSmooth && !isTouchDevice ? (
     <ReactLenis
       root
       options={{
-        duration: 0.5,
+        duration: 1.2,
         easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
         orientation: "vertical",
         smoothWheel: true,
+        prevent: (node) => node.closest("[data-lenis-prevent]") !== null,
       }}
     >
       {AppContent}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../utils/supabase";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 import { Star, Loader2, X, Upload } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";

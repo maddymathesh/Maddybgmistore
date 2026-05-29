@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Lock, ShieldCheck, Gamepad2 } from 'lucide-react';
 import { useTransactionStore } from '../../store/useTransactionStore';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function PinLogin() {
   const [pin, setPin] = useState(['', '', '', '']);

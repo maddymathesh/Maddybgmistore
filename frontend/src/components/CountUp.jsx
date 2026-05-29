@@ -1,4 +1,4 @@
-import { useInView, useMotionValue, useSpring } from 'motion/react';
+import { useInView, useMotionValue, useSpring } from 'framer-motion';
 import { useCallback, useEffect, useRef, memo } from 'react';
 
 const CountUp = memo(function CountUp({

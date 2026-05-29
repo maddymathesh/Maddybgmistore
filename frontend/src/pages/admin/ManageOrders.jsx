@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { collection, onSnapshot, orderBy, query, updateDoc, doc, deleteDoc, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../../firebase";
 import AdminLayout from "../../components/AdminLayout";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 
 const EMPTY = { buyerName:"", buyerContact:"", accountTitle:"", amount:"", status:"pending", notes:"" };
 

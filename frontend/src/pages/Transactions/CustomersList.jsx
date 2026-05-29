@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, User, Phone, ArrowUpRight, Calendar, Receipt, DollarSign, ExternalLink } from 'lucide-react';
 import { fetchAllTransactions } from '../../services/transactionService';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function CustomersList() {
   const [data, setData] = useState([]);

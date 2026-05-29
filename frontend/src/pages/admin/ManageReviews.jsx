@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../utils/supabase";
 import AdminLayout from "../../components/AdminLayout";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 import { Star, Trash2, CheckCircle, Clock, Search } from "lucide-react";
 
 const EMPTY = { name: "", stars: 5, text: "", tracking_id: "", status: "approved" };

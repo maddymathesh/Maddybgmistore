@@ -9,7 +9,7 @@ import {
 import { createSupercarTransaction, generateNextSupercarId } from '../../services/transactionService';
 import { generateCustomerPDF, generateInternalPDF } from '../../lib/pdfGenerator';
 import { exportToExcel } from '../../lib/excelExport';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 const SUPERCAR_NAMES = [
   'Bugatti', 'Koenigsegg', 'Lamborghini', 'McLaren',

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MessageSquare, Star, User, ThumbsUp, RefreshCw, CheckCircle2 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function CustomerFeedback() {
   const [reviews, setReviews] = useState([

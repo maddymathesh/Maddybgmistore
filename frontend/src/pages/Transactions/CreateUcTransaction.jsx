@@ -7,7 +7,7 @@ import { generateCustomerPDF, generateInternalPDF } from '../../lib/pdfGenerator
 import { exportToExcel } from '../../lib/excelExport';
 import * as api from '../../services/api';
 import { supabase } from '../../utils/supabase';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 const SELLER_PHONE = '+91 9025391516';
 const UC_METHODS = ['View Login Method', 'Character ID Method', 'Midasbuy', 'In-Game Topup', 'Redeem Method'];

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle2, AlertCircle, AlertTriangle, Clock, Plus, Trash2 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function TasksAlerts() {
   const [tasks, setTasks] = useState([

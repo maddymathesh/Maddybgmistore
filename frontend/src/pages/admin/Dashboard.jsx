@@ -10,7 +10,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useTransactionStore } from "../../store/useTransactionStore";
 import { useRef } from "react";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 import Navbar from "../../components/Navbar";
 import { LogOut, Sparkles, Plus, Trash2, Pencil, Star, Copy, Users, TrendingUp, DollarSign, Camera, Coins, Zap, Car, Clock, ShieldCheck, User as UserIcon, Tag, Hash, ArrowRightLeft, MessageSquare, History, Key, Download, FileText, CheckCircle2, ThumbsUp, AlertCircle, Calendar, Save, BookOpen, RotateCcw, Smartphone, ChevronDown, ChevronUp, Sliders, CopyCheck, Eye, Check } from "lucide-react";
 import { generateNextTransactionId, generateNextXsuitId, generateNextSupercarId, generateNextUcId } from "../../services/transactionService";

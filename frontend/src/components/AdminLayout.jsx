@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Menu, X } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 
 const navItems = [
   { to: "/admin", icon: "📊", label: "Dashboard" },

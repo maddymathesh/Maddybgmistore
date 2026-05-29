@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged, signOut, sendEmailVerification } from "firebase/auth";
 import { auth, db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 import { useTransactionStore } from "../store/useTransactionStore";
 
 const AuthContext = createContext(null);

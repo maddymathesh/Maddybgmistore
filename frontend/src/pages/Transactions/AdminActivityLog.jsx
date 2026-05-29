@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { History, Shield, Download, FileText, Settings, Plus, RefreshCw, Key } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function AdminActivityLog() {
   const [filterType, setFilterType] = useState('All');

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 import { Settings, LogOut, ChevronDown, X, Menu } from "lucide-react";
 
 const navLinks = [

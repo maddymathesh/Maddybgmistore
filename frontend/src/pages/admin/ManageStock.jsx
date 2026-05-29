@@ -5,7 +5,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebase";
 import AdminLayout from "../../components/AdminLayout";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 
 const EMPTY = { title:"", price:"", loginType:"", tier:"Budget", details:"", available:true, videoUrl:"" };
 

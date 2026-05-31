@@ -6,9 +6,20 @@
     "node": "22"
   },
   "main": "index.js",
+  "scripts": {
+    "db:pull": "drizzle-kit pull",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
+  },
   "dependencies": {
+    "drizzle-orm": "^0.45.2",
     "firebase-admin": "^12.7.0",
     "firebase-functions": "^5.1.1",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "postgres": "^3.4.4"
+  },
+  "devDependencies": {
+    "dotenv": "^16.4.5",
+    "drizzle-kit": "^0.31.10"
   }
 }

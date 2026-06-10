@@ -164,15 +164,28 @@ export default function Navbar() {
           ))}
 
           {isAdmin && (
-            <li>
-              <a
-                href={process.env.NODE_ENV === "development" ? "http://localhost:3001" : "https://admin.maddybgmistore.in"}
-                target="_blank"
-                rel="noreferrer"
-                className={`${deskLinkStyle} text-gold`}
-              >
-                Admin Panel
-              </a>
+            <li className="relative group/adminNav">
+              <div className={`${deskLinkStyle} text-gold group-hover/adminNav:text-gold`}>
+                Manage <ChevronDown size={13} className="ml-1 transition-transform group-hover/adminNav:rotate-180" />
+              </div>
+              <div className="absolute top-full right-0 hidden group-hover/adminNav:block bg-[#111520] border border-[var(--color-border-gold)] rounded-xl py-2 min-w-[200px] shadow-2xl animate-fade-in mt-1">
+                <a
+                  href={process.env.NODE_ENV === "development" ? "http://localhost:3001" : "https://admin.maddybgmistore.in"}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block px-4 py-2 text-[13px] text-muted hover:text-gold hover:bg-gold-dim transition-all"
+                >
+                  ⚙ Admin Panel
+                </a>
+                <a
+                  href={process.env.NODE_ENV === "development" ? "http://localhost:3001/transactions" : "https://admin.maddybgmistore.in/transactions"}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block px-4 py-2 text-[13px] text-muted hover:text-gold hover:bg-gold-dim transition-all"
+                >
+                  🧾 Transactions Panel
+                </a>
+              </div>
             </li>
           )}
 
@@ -295,14 +308,24 @@ export default function Navbar() {
           ))}
 
           {isAdmin && (
-            <a
-              href={process.env.NODE_ENV === "development" ? "http://localhost:3001" : "https://admin.maddybgmistore.in"}
-              target="_blank"
-              rel="noreferrer"
-              className={`${mobileLinkStyle} text-gold`}
-            >
-              ⚙ Admin Panel
-            </a>
+            <>
+              <a
+                href={process.env.NODE_ENV === "development" ? "http://localhost:3001" : "https://admin.maddybgmistore.in"}
+                target="_blank"
+                rel="noreferrer"
+                className={`${mobileLinkStyle} text-gold mt-1`}
+              >
+                ⚙ Admin Panel
+              </a>
+              <a
+                href={process.env.NODE_ENV === "development" ? "http://localhost:3001/transactions" : "https://admin.maddybgmistore.in/transactions"}
+                target="_blank"
+                rel="noreferrer"
+                className={`${mobileLinkStyle} text-gold`}
+              >
+                🧾 Transactions Panel
+              </a>
+            </>
           )}
 
           <hr className="border-t border-white/10 my-3" />

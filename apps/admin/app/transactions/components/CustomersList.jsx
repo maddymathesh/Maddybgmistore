@@ -70,7 +70,7 @@ const filteredCustomers = useMemo(() => {
       {/* Search Header */}
       <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <div style={{ position: 'relative', flex: 1, maxWidth: '400px' }}>
-          <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
+          <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-muted)' }} />
           <input
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
@@ -79,19 +79,19 @@ const filteredCustomers = useMemo(() => {
             placeholder="Search by Customer Phone..."
           />
         </div>
-        <div style={{ fontSize: '13px', color: 'var(--muted)', marginLeft: 'auto' }}>
-          Total Unique Customers: <span style={{ color: 'var(--gold)', fontWeight: 700 }}>{customers.length}</span>
+        <div style={{ fontSize: '13px', color: 'var(--color-muted)', marginLeft: 'auto' }}>
+          Total Unique Customers: <span style={{ color: 'var(--color-gold)', fontWeight: 700 }}>{customers.length}</span>
         </div>
       </div>
 
       {/* Customers Grid */}
       {isLoading ? (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--muted)' }}>
-          <div className="animate-spin" style={{ display: 'inline-block', width: '24px', height: '24px', border: '2px solid var(--gold)', borderTopColor: 'transparent', borderRadius: '50%', marginBottom: '12px' }} />
+        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--color-muted)' }}>
+          <div className="animate-spin" style={{ display: 'inline-block', width: '24px', height: '24px', border: '2px solid var(--color-gold)', borderTopColor: 'transparent', borderRadius: '50%', marginBottom: '12px' }} />
           <p>Processing customer records...</p>
         </div>
       ) : filteredCustomers.length === 0 ? (
-        <div className="card" style={{ textAlign: 'center', padding: '60px 0', color: 'var(--muted)' }}>
+        <div className="card" style={{ textAlign: 'center', padding: '60px 0', color: 'var(--color-muted)' }}>
           <User size={48} style={{ margin: '0 auto 16px', opacity: 0.2 }} />
           No customers found.
         </div>
@@ -107,8 +107,8 @@ const filteredCustomers = useMemo(() => {
               onClick={() => setSelectedCustomer(customer)}
               style={{
                 cursor: 'pointer',
-                border: '1px solid var(--border-gold)',
-                background: 'linear-gradient(135deg, var(--bg2), rgba(255,215,0,0.02))',
+                border: '1px solid var(--color-border-gold)',
+                background: 'linear-gradient(135deg, var(--color-bg2), rgba(255,215,0,0.02))',
                 transition: 'all 0.3s ease',
                 position: 'relative',
                 overflow: 'hidden'
@@ -116,18 +116,18 @@ const filteredCustomers = useMemo(() => {
               whileHover={{ scale: 1.02, boxShadow: '0 8px 30px rgba(255, 215, 0, 0.05)' }}
             >
               {/* Gold accent line */}
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'linear-gradient(90deg, var(--gold), var(--orange))' }} />
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'linear-gradient(90deg, var(--color-gold), var(--color-orange))' }} />
               
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--gold-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gold)' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--color-gold-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-gold)' }}>
                     <User size={20} />
                   </div>
                   <div>
-                    <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text)' }}>
+                    <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#eaeaea' }}>
                       {customer.phone}
                     </h3>
-                    <p style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                    <p style={{ fontSize: '11px', color: 'var(--color-muted)' }}>
                       Last purchase: {new Date(customer.lastPurchaseDate).toLocaleDateString()}
                     </p>
                   </div>
@@ -137,22 +137,22 @@ const filteredCustomers = useMemo(() => {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '20px', padding: '12px 16px', background: 'var(--bg)', borderRadius: '8px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '20px', padding: '12px 16px', background: 'var(--color-bg)', borderRadius: '8px' }}>
                 <div>
-                  <span style={{ fontSize: '11px', color: 'var(--muted)', display: 'block', textTransform: 'uppercase' }}>Total Spent</span>
+                  <span style={{ fontSize: '11px', color: 'var(--color-muted)', display: 'block', textTransform: 'uppercase' }}>Total Spent</span>
                   <span style={{ fontSize: '16px', fontWeight: 800, color: '#34d399' }}>
                     ₹{customer.totalSpent.toLocaleString()}
                   </span>
                 </div>
                 <div>
-                  <span style={{ fontSize: '11px', color: 'var(--muted)', display: 'block', textTransform: 'uppercase' }}>Total Orders</span>
-                  <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--gold)' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--color-muted)', display: 'block', textTransform: 'uppercase' }}>Total Orders</span>
+                  <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--color-gold)' }}>
                     {customer.ordersCount} deals
                   </span>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px', fontSize: '12px', color: 'var(--gold)', fontWeight: 600, alignItems: 'center', gap: '4px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px', fontSize: '12px', color: 'var(--color-gold)', fontWeight: 600, alignItems: 'center', gap: '4px' }}>
                 View Deal History <ArrowUpRight size={14} />
               </div>
             </motion.div>
@@ -174,8 +174,8 @@ const filteredCustomers = useMemo(() => {
                 width: '100%',
                 maxWidth: '560px',
                 height: '100vh',
-                background: 'var(--bg)',
-                borderLeft: '1px solid var(--border-gold)',
+                background: 'var(--color-bg)',
+                borderLeft: '1px solid var(--color-border-gold)',
                 padding: '40px 32px',
                 display: 'flex',
                 flexDirection: 'column',
@@ -185,14 +185,14 @@ const filteredCustomers = useMemo(() => {
               {/* Close and Header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--gold-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gold)' }}>
+                  <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--color-gold-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-gold)' }}>
                     <Phone size={24} />
                   </div>
                   <div>
                     <h2 style={{ fontSize: '22px', fontWeight: 800, fontFamily: 'var(--font-h)' }}>
                       {selectedCustomer.phone}
                     </h2>
-                    <p style={{ fontSize: '13px', color: 'var(--muted)' }}>
+                    <p style={{ fontSize: '13px', color: 'var(--color-muted)' }}>
                       VIP Customer Profile
                     </p>
                   </div>
@@ -202,23 +202,23 @@ const filteredCustomers = useMemo(() => {
 
               {/* Quick stats grid */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '32px' }}>
-                <div className="card" style={{ border: '1px solid var(--border-gold)', background: 'var(--bg2)' }}>
-                  <span style={{ fontSize: '11px', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', marginBottom: '4px' }}>Revenue Contribution</span>
+                <div className="card" style={{ border: '1px solid var(--color-border-gold)', background: 'var(--color-bg2)' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--color-muted)', display: 'block', textTransform: 'uppercase', marginBottom: '4px' }}>Revenue Contribution</span>
                   <span style={{ fontSize: '24px', fontWeight: 800, color: '#34d399' }}>
                     ₹{selectedCustomer.totalSpent.toLocaleString()}
                   </span>
                 </div>
-                <div className="card" style={{ border: '1px solid var(--border)', background: 'var(--bg2)' }}>
-                  <span style={{ fontSize: '11px', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', marginBottom: '4px' }}>Total Transactions</span>
-                  <span style={{ fontSize: '24px', fontWeight: 800, color: 'var(--gold)' }}>
+                <div className="card" style={{ border: '1px solid var(--color-border)', background: 'var(--color-bg2)' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--color-muted)', display: 'block', textTransform: 'uppercase', marginBottom: '4px' }}>Total Transactions</span>
+                  <span style={{ fontSize: '24px', fontWeight: 800, color: 'var(--color-gold)' }}>
                     {selectedCustomer.ordersCount} Purchases
                   </span>
                 </div>
               </div>
 
               {/* Transactions Timeline */}
-              <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '16px', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Receipt size={16} style={{ color: 'var(--gold)' }} /> Purchase History
+              <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '16px', color: '#eaeaea', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Receipt size={16} style={{ color: 'var(--color-gold)' }} /> Purchase History
               </h3>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
@@ -227,8 +227,8 @@ const filteredCustomers = useMemo(() => {
                     key={tx.transaction_id}
                     style={{
                       padding: '16px',
-                      background: 'var(--bg2)',
-                      border: '1px solid var(--border)',
+                      background: 'var(--color-bg2)',
+                      border: '1px solid var(--color-border)',
                       borderRadius: 'var(--radius)',
                       display: 'flex',
                       flexDirection: 'column',
@@ -236,7 +236,7 @@ const filteredCustomers = useMemo(() => {
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontFamily: 'monospace', fontSize: '12px', color: 'var(--gold)', fontWeight: 600 }}>
+                      <span style={{ fontFamily: 'monospace', fontSize: '12px', color: 'var(--color-gold)', fontWeight: 600 }}>
                         {tx.transaction_id}
                       </span>
                       <span className={`status ${tx.transaction_type === 'Account' ? 'status-available' : tx.transaction_type === 'XSuit' ? 'status-pending' : tx.transaction_type === 'Supercar' ? 'status-sold' : 'status-available'}`} style={{ fontSize: '10px' }}>
@@ -245,7 +245,7 @@ const filteredCustomers = useMemo(() => {
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--muted)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--color-muted)' }}>
                         <Calendar size={13} /> {new Date(tx.transaction_date).toLocaleDateString()}
                       </div>
                       <div style={{ fontWeight: 800, color: '#fff' }}>
@@ -254,9 +254,9 @@ const filteredCustomers = useMemo(() => {
                     </div>
 
                     {/* Details details */}
-                    <div style={{ display: 'flex', gap: '16px', borderTop: '1px dashed var(--border)', paddingTop: '10px', fontSize: '11px', color: 'var(--muted)' }}>
-                      <div>Mode: <span style={{ color: 'var(--text)' }}>{tx.mode_of_deal}</span></div>
-                      <div>Payment: <span style={{ color: 'var(--text)' }}>{tx.payment_status}</span></div>
+                    <div style={{ display: 'flex', gap: '16px', borderTop: '1px dashed var(--color-border)', paddingTop: '10px', fontSize: '11px', color: 'var(--color-muted)' }}>
+                      <div>Mode: <span style={{ color: '#eaeaea' }}>{tx.mode_of_deal}</span></div>
+                      <div>Payment: <span style={{ color: '#eaeaea' }}>{tx.payment_status}</span></div>
                     </div>
                   </div>
                 ))}

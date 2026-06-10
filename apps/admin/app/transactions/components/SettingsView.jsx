@@ -93,8 +93,8 @@ export default function SettingsView() {
     
     const root = document.documentElement;
     Object.entries(theme.colors).forEach(([key, val]) => {
-      // Map JS camelCase variables to CSS variables
-      const cssKey = `--${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
+      // Map JS camelCase variables to CSS variables with color- prefix
+      const cssKey = `--color-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
       root.style.setProperty(cssKey, val);
     });
 
@@ -128,9 +128,9 @@ export default function SettingsView() {
   return (
     <div className="space-y-6">
       {/* Theme Picker */}
-      <div className="card" style={{ border: '1px solid var(--border-gold)' }}>
-        <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '18px', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Palette size={18} style={{ color: 'var(--gold)' }} /> Premium UI Themes
+      <div className="card" style={{ border: '1px solid var(--color-border-gold)' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '18px', color: '#eaeaea', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Palette size={18} style={{ color: 'var(--color-gold)' }} /> Premium UI Themes
         </h3>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
@@ -139,8 +139,8 @@ export default function SettingsView() {
               key={theme.id}
               onClick={() => applyTheme(theme.id)}
               style={{
-                background: activeTheme === theme.id ? 'var(--gold-dim)' : 'var(--bg)',
-                border: activeTheme === theme.id ? '2px solid var(--gold)' : '1px solid var(--border)',
+                background: activeTheme === theme.id ? 'var(--color-gold-dim)' : 'var(--color-bg)',
+                border: activeTheme === theme.id ? '2px solid var(--color-gold)' : '1px solid var(--color-border)',
                 padding: '16px',
                 borderRadius: '10px',
                 cursor: 'pointer',
@@ -149,10 +149,10 @@ export default function SettingsView() {
               }}
             >
               {activeTheme === theme.id && (
-                <CheckCircle2 size={16} style={{ position: 'absolute', top: '12px', right: '12px', color: 'var(--gold)' }} />
+                <CheckCircle2 size={16} style={{ position: 'absolute', top: '12px', right: '12px', color: 'var(--color-gold)' }} />
               )}
               <h4 style={{ fontWeight: 700, fontSize: '14px', color: '#fff' }}>{theme.name}</h4>
-              <p style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '4px' }}>{theme.desc}</p>
+              <p style={{ fontSize: '11px', color: 'var(--color-muted)', marginTop: '4px' }}>{theme.desc}</p>
               
               {/* Color dots preview */}
               <div style={{ display: 'flex', gap: '6px', marginTop: '12px' }}>
@@ -166,9 +166,9 @@ export default function SettingsView() {
       </div>
 
       {/* Role and Permissions Control */}
-      <div className="card" style={{ border: '1px solid var(--border)' }}>
-        <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '18px', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Users size={18} style={{ color: 'var(--orange)' }} /> Access Control & User Roles
+      <div className="card" style={{ border: '1px solid var(--color-border)' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '18px', color: '#eaeaea', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Users size={18} style={{ color: 'var(--color-orange)' }} /> Access Control & User Roles
         </h3>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
@@ -177,15 +177,15 @@ export default function SettingsView() {
             { id: 'seller', label: 'Authorized Seller', desc: 'Can enter sales details' },
             { id: 'loader', label: 'UC Loader Profile', desc: 'Can only fulfill active UC packs' }
           ].map(role => (
-            <div key={role.id} style={{ background: 'var(--bg)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+            <div key={role.id} style={{ background: 'var(--color-bg)', padding: '16px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
               <strong style={{ display: 'block', fontSize: '14px', color: '#fff' }}>{role.label}</strong>
-              <span style={{ display: 'block', fontSize: '11px', color: 'var(--muted)', marginBottom: '12px' }}>{role.desc}</span>
+              <span style={{ display: 'block', fontSize: '11px', color: 'var(--color-muted)', marginBottom: '12px' }}>{role.desc}</span>
               
               {/* Permissions list toggles */}
               <div style={{ display: 'grid', gap: '8px' }}>
                 {Object.entries(rolePermissions[role.id]).map(([perm, val]) => (
                   <div key={perm} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
-                    <span style={{ textTransform: 'capitalize', color: 'var(--muted)' }}>{perm.replace(/([A-Z])/g, ' $1')}</span>
+                    <span style={{ textTransform: 'capitalize', color: 'var(--color-muted)' }}>{perm.replace(/([A-Z])/g, ' $1')}</span>
                     <button
                       onClick={() => togglePermission(role.id, perm)}
                       className={`status ${val ? 'status-available' : 'status-sold'}`}
@@ -204,33 +204,33 @@ export default function SettingsView() {
       {/* Default Support configuration & Cache Clear */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
         {/* Support configuration */}
-        <div className="card" style={{ border: '1px solid var(--border)' }}>
-          <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '16px', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Phone size={16} style={{ color: 'var(--gold)' }} /> Default Customer Support
+        <div className="card" style={{ border: '1px solid var(--color-border)' }}>
+          <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '16px', color: '#eaeaea', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Phone size={16} style={{ color: 'var(--color-gold)' }} /> Default Customer Support
           </h3>
           <div style={{ display: 'flex', gap: '10px' }}>
             <input
               value={whatsappSupport}
               onChange={e => setWhatsappSupport(e.target.value)}
-              className="input"
+              className="input-field"
               style={{ flex: 1, height: '38px' }}
               placeholder="+91 90253 91516"
             />
-            <button onClick={handleSaveSupport} className="btn btn-gold" style={{ height: '38px', padding: '0 16px', fontSize: '12px' }}>
+            <button onClick={handleSaveSupport} className="btn btn-gold h-[38px] px-4 text-xs">
               Save Contact
             </button>
           </div>
         </div>
 
         {/* Caching panel */}
-        <div className="card" style={{ border: '1px solid var(--border)' }}>
-          <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '16px', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <RefreshCw size={16} style={{ color: 'var(--orange)' }} /> Data Refresh & Cache
+        <div className="card" style={{ border: '1px solid var(--color-border)' }}>
+          <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '16px', color: '#eaeaea', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <RefreshCw size={16} style={{ color: 'var(--color-orange)' }} /> Data Refresh & Cache
           </h3>
-          <p style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '16px' }}>
+          <p style={{ fontSize: '11px', color: 'var(--color-muted)', marginBottom: '16px' }}>
             Clear local device cache for transactions sheets to pull live records immediately.
           </p>
-          <button onClick={handleClearCache} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '38px', padding: '0 16px', fontSize: '12px' }}>
+          <button onClick={handleClearCache} className="btn btn-outline flex items-center gap-1.5 h-[38px] px-4 text-xs">
             <RefreshCw size={12} /> Force Clear Local Cache
           </button>
         </div>

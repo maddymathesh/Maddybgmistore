@@ -109,7 +109,7 @@ export default function Dashboard() {
     return (
       <div className="admin-stat-grid" style={{ gap: '20px' }}>
         {[1, 2, 3, 4].map(i => (
-          <div key={i} style={{ height: '120px', background: 'var(--card)', borderRadius: 'var(--radius)', border: '1px solid var(--border-gold)', opacity: 0.5 }} className="animate-pulse" />
+          <div key={i} style={{ height: '120px', background: 'var(--card)', borderRadius: 'var(--radius)', border: '1px solid var(--color-border-gold)', opacity: 0.5 }} className="animate-pulse" />
         ))}
       </div>
     );

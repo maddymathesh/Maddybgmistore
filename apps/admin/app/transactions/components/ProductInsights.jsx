@@ -56,16 +56,16 @@ export default function ProductInsights() {
     return (
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
         {[1, 2, 3, 4].map(i => (
-          <div key={i} style={{ height: '220px', background: 'var(--card)', borderRadius: 'var(--radius)', border: '1px solid var(--border-gold)', opacity: 0.5 }} className="animate-pulse" />
+          <div key={i} style={{ height: '220px', background: 'var(--card)', borderRadius: 'var(--radius)', border: '1px solid var(--color-border-gold)', opacity: 0.5 }} className="animate-pulse" />
         ))}
       </div>
     );
   }
 
   const products = [
-    { type: 'Account', label: 'Accounts Store', color: 'var(--gold)', icon: ShieldCheck, desc: 'Premium BGMI account sales and listings.' },
+    { type: 'Account', label: 'Accounts Store', color: 'var(--color-gold)', icon: ShieldCheck, desc: 'Premium BGMI account sales and listings.' },
     { type: 'XSuit', label: 'X-Suits Gifting', color: '#f1c40f', icon: Gift, desc: 'Levelable character suits gifted via in-game mechanics.' },
-    { type: 'Supercar', label: 'Supercar Gifting', color: 'var(--red)', icon: Car, desc: 'Limited edition vehicle keys gifted directly to buyers.' },
+    { type: 'Supercar', label: 'Supercar Gifting', color: 'var(--color-red)', icon: Car, desc: 'Limited edition vehicle keys gifted directly to buyers.' },
     { type: 'UC', label: 'UC Store Packets', color: '#3498db', icon: Coins, desc: 'Unknown Cash bundles delivered to customer IDs.' }
   ];
 
@@ -74,12 +74,12 @@ export default function ProductInsights() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h2 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>Product Sales Performance</h2>
-          <p style={{ fontSize: '12px', color: 'var(--muted)', margin: '4px 0 0' }}>Real-time breakdown of volume, revenue and profitability across stores.</p>
+          <p style={{ fontSize: '12px', color: 'var(--color-muted)', margin: '4px 0 0' }}>Real-time breakdown of volume, revenue and profitability across stores.</p>
         </div>
         <button
           onClick={() => loadData(true)}
           className="btn btn-outline"
-          style={{ padding: '8px 16px', fontSize: '12px', borderColor: 'var(--border-gold)', color: 'var(--gold)' }}
+          style={{ padding: '8px 16px', fontSize: '12px', borderColor: 'var(--color-border-gold)', color: 'var(--color-gold)' }}
         >
           <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} style={{ marginRight: '6px' }} /> Refresh Insights
         </button>
@@ -100,19 +100,19 @@ export default function ProductInsights() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               className="card"
-              style={{ border: '1px solid var(--border)', background: 'var(--card)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '220px' }}
+              style={{ border: '1px solid var(--color-border)', background: 'var(--card)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '220px' }}
             >
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--bg2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: prod.color, border: '1px solid var(--border)' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--color-bg2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: prod.color, border: '1px solid var(--color-border)' }}>
                     <IconComp size={20} />
                   </div>
                   <div>
-                    <h4 style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--text)' }}>{prod.label}</h4>
+                    <h4 style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: '#eaeaea' }}>{prod.label}</h4>
                   </div>
                 </div>
 
-                <p style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '18px', lineHeight: '1.4' }}>
+                <p style={{ fontSize: '12px', color: 'var(--color-muted)', marginBottom: '18px', lineHeight: '1.4' }}>
                   {prod.desc}
                 </p>
               </div>
@@ -120,18 +120,18 @@ export default function ProductInsights() {
               <div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
                   <div>
-                    <p style={{ fontSize: '10px', color: 'var(--muted)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Total Orders</p>
-                    <p style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text)', margin: 0 }}>{count} deals</p>
+                    <p style={{ fontSize: '10px', color: 'var(--color-muted)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Total Orders</p>
+                    <p style={{ fontSize: '14px', fontWeight: 800, color: '#eaeaea', margin: 0 }}>{count} deals</p>
                   </div>
                   <div>
-                    <p style={{ fontSize: '10px', color: 'var(--muted)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Net Profits</p>
+                    <p style={{ fontSize: '10px', color: 'var(--color-muted)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Net Profits</p>
                     <p style={{ fontSize: '14px', fontWeight: 800, color: '#2ecc71', margin: 0 }}>₹{profit.toLocaleString('en-IN')}</p>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--muted)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--color-muted)' }}>
                   <span>Total Revenue:</span>
-                  <span style={{ fontWeight: 700, color: 'var(--text)' }}>₹{revenue.toLocaleString('en-IN')}</span>
+                  <span style={{ fontWeight: 700, color: '#eaeaea' }}>₹{revenue.toLocaleString('en-IN')}</span>
                 </div>
               </div>
             </motion.div>

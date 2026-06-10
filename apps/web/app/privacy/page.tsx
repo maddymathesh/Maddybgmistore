@@ -1,9 +1,9 @@
 /* eslint-disable @next/next/no-img-element, @next/next/no-html-link-for-pages */
 "use client";
 
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
-import SocialFloat from "../../components/SocialFloat";
+
+
+
 import { Shield, Lock, Database, UserCheck, Share2, HelpCircle, ChevronRight, Eye } from "lucide-react";
 
 export default function PrivacyPolicy() {
@@ -79,7 +79,7 @@ export default function PrivacyPolicy() {
 
   return (
     <>
-      <Navbar />
+      
       <div style={{ background: "var(--color-bg)", minHeight: "100vh" }}>
         
         {/* Hero Section */}
@@ -222,8 +222,8 @@ export default function PrivacyPolicy() {
         </section>
 
       </div>
-      <Footer />
-      <SocialFloat />
+      
+      
 
       <style>{`
         .privacy-card:hover {

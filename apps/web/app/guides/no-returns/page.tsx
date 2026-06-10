@@ -1,15 +1,15 @@
 "use client";
 
-import Navbar from "../../../components/Navbar";
-import Footer from "../../../components/Footer";
-import SocialFloat from "../../../components/SocialFloat";
+
+
+
 import Link from "next/link";
 import { ShieldCheck, AlertTriangle, HelpCircle, ArrowLeft, TrendingDown } from "lucide-react";
 
 export default function NoReturnsPolicy() {
   return (
     <>
-      <Navbar />
+      
       <div style={{ background: "var(--color-bg)", minHeight: "100vh" }}>
         
         {/* HERO BANNER */}
@@ -165,8 +165,8 @@ export default function NoReturnsPolicy() {
         </section>
 
       </div>
-      <Footer />
-      <SocialFloat />
+      
+      
 
       <style>{`
         .back-btn:hover {

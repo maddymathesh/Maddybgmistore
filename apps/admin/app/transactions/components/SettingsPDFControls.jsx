@@ -58,12 +58,12 @@ const S = {
     fontWeight: 700,
     letterSpacing: '0.12em',
     textTransform: 'uppercase',
-    color: 'var(--gold)',
+    color: 'var(--color-gold)',
   },
   topSub: {
     margin: '4px 0 0',
     fontSize: 11.5,
-    color: 'var(--muted)',
+    color: 'var(--color-muted)',
     lineHeight: 1.5,
   },
   internalBanner: {
@@ -73,7 +73,7 @@ const S = {
     border: '1px solid rgba(255, 215, 0, 0.1)',
     borderRadius: 8,
     fontSize: 11.5,
-    color: 'var(--gold)',
+    color: 'var(--color-gold)',
     display: 'flex',
     alignItems: 'center',
     gap: 8,
@@ -88,10 +88,10 @@ const S = {
     padding: '8px 18px',
     fontSize: 12,
     fontWeight: active ? 700 : 400,
-    color: active ? 'var(--gold)' : 'var(--muted)',
+    color: active ? 'var(--color-gold)' : 'var(--color-muted)',
     background: 'transparent',
     border: 'none',
-    borderBottom: active ? '2px solid var(--gold)' : '2px solid transparent',
+    borderBottom: active ? '2px solid var(--color-gold)' : '2px solid transparent',
     cursor: 'pointer',
     letterSpacing: '0.04em',
     marginBottom: -1,
@@ -111,7 +111,7 @@ const S = {
     fontWeight: 700,
     letterSpacing: '0.14em',
     textTransform: 'uppercase',
-    color: 'var(--gold)',
+    color: 'var(--color-gold)',
     marginBottom: 8,
     paddingBottom: 5,
     borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
@@ -134,7 +134,7 @@ const S = {
     transition: 'background 0.12s, border-color 0.12s',
   }),
   checkbox: {
-    accentColor: 'var(--gold)',
+    accentColor: 'var(--color-gold)',
     width: 14,
     height: 14,
     flexShrink: 0,
@@ -151,7 +151,7 @@ const S = {
     padding: '1px 5px',
     borderRadius: 3,
     background: 'rgba(255, 215, 0, 0.08)',
-    color: 'var(--gold)',
+    color: 'var(--color-gold)',
     letterSpacing: '0.06em',
     flexShrink: 0,
   },
@@ -174,7 +174,7 @@ const S = {
       border: '1px solid',
       transition: 'all 0.12s',
     };
-    if (variant === 'ghost')   return { ...base, background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.05)', color: 'var(--muted)' };
+    if (variant === 'ghost')   return { ...base, background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.05)', color: 'var(--color-muted)' };
     if (variant === 'danger')  return { ...base, background: 'transparent', borderColor: 'rgba(239, 68, 68, 0.2)', color: '#ef4444' };
     return base;
   },
@@ -189,7 +189,7 @@ const S = {
     padding: '10px 28px',
     borderRadius: 8,
     border: 'none',
-    background: saved ? '#1e3a1e' : 'var(--gold)',
+    background: saved ? '#1e3a1e' : 'var(--color-gold)',
     color: saved ? '#2ecc71' : '#0d0d1a',
     fontWeight: 700,
     fontSize: 13,
@@ -202,7 +202,7 @@ const S = {
   }),
   statusText: {
     fontSize: 11,
-    color: 'var(--muted)',
+    color: 'var(--color-muted)',
   },
   toast: (visible) => ({
     position: 'fixed',
@@ -291,7 +291,7 @@ export default function SettingsPDFControls() {
         <div style={S.topBar}>
           <p style={S.topTitle}>Customer PDF — Field Controls</p>
           <p style={S.topSub}>
-            Choose exactly which fields appear on the <strong style={{ color: 'var(--gold)' }}>Customer PDF</strong> for each transaction type.
+            Choose exactly which fields appear on the <strong style={{ color: 'var(--color-gold)' }}>Customer PDF</strong> for each transaction type.
             These settings are saved and applied every time a Customer PDF is generated.
           </p>
           <div style={S.internalBanner}>
@@ -323,7 +323,7 @@ export default function SettingsPDFControls() {
                   padding: '1px 5px',
                   borderRadius: 10,
                   background: active ? 'rgba(255, 215, 0, 0.1)' : 'rgba(255, 255, 255, 0.05)',
-                  color: active ? 'var(--gold)' : 'var(--muted)',
+                  color: active ? 'var(--color-gold)' : 'var(--color-muted)',
                   marginLeft: 6,
                 }}>
                   {en}/{rel.length}

@@ -2,9 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useRouter } from 'next/navigation';
-import { useTransactionStore } from './useTransactionStore';
-import PinLogin from './PinLogin';
+import { useUser, UserButton } from '@clerk/nextjs';
 import Dashboard from './Dashboard';
 import TransactionsList from './TransactionsList';
 import CreateTransaction from './CreateTransaction';
@@ -41,9 +39,11 @@ import {
   History,
   DollarSign,
   Menu,
-  X
+  X,
+  ShieldAlert,
+  Loader2
 } from 'lucide-react';
-
+import { useRouter } from 'next/navigation';
 
 const SIDEBAR_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -59,14 +59,43 @@ const SIDEBAR_ITEMS = [
 ];
 
 export default function TransactionsLayout() {
-  const isAuthenticated = useTransactionStore((state: any) => state.isAuthenticated);
-  const logout = useTransactionStore((state: any) => state.logout);
+  const { user, isLoaded } = useUser();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const router = useRouter();
 
-  if (!isAuthenticated) {
-    return <PinLogin />;
+  if (!isLoaded) {
+    return (
+      <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg)' }}>
+        <Loader2 size={36} className="animate-spin" style={{ color: 'var(--color-gold)' }} />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div style={{ display: 'flex', minHeight: '100vh', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px', background: 'var(--color-bg)', color: '#fff', fontFamily: 'var(--font-b)' }}>
+        <ShieldAlert size={48} style={{ color: 'var(--color-gold)' }} />
+        <h1 style={{ fontFamily: 'var(--font-h)', fontSize: '24px', fontWeight: 900 }}>Authentication Required</h1>
+        <p style={{ fontSize: '14px', color: 'var(--color-muted)', fontFamily: 'monospace' }}>Please sign in to access the Transactions Panel.</p>
+        <a href="/sign-in" className="btn btn-gold px-6 py-2.5 text-sm">Sign In</a>
+      </div>
+    );
+  }
+
+  const isPermanentAdmin = user?.primaryEmailAddress?.emailAddress === "maddybgmistoreog@gmail.com";
+  const userRole = (user?.publicMetadata?.role) || "USER";
+  const isAdmin = isPermanentAdmin || ["SUPER_ADMIN", "ADMIN", "TRANSACTION_MANAGER", "CONTENT_MANAGER"].includes(userRole);
+
+  if (!isAdmin) {
+    return (
+      <div style={{ display: 'flex', minHeight: '100vh', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px', background: 'var(--color-bg)', color: '#fff', fontFamily: 'var(--font-b)' }}>
+        <ShieldAlert size={48} style={{ color: 'var(--color-red)' }} />
+        <h1 style={{ fontFamily: 'var(--font-h)', fontSize: '24px', fontWeight: 900, color: 'var(--color-red)' }}>Access Denied</h1>
+        <p style={{ fontSize: '14px', color: 'var(--color-muted)', fontFamily: 'monospace' }}>You do not have administrative privileges to view this page.</p>
+        <a href="/" className="btn btn-outline px-6 py-2.5 text-sm">← Return Home</a>
+      </div>
+    );
   }
 
   const renderContent = () => {
@@ -101,7 +130,7 @@ export default function TransactionsLayout() {
         return <SettingsView />;
       default:
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '40vh', color: 'var(--muted)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '40vh', color: 'var(--color-muted)' }}>
             <h2 style={{ fontFamily: 'var(--font-h)', fontSize: '24px', fontWeight: 700, marginBottom: '8px' }}>Coming Soon</h2>
             <p>This module is currently under development.</p>
           </div>
@@ -110,31 +139,39 @@ export default function TransactionsLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] font-[var(--font-b)] flex overflow-hidden">
+    <div className="admin-layout" style={{ background: 'var(--color-bg)', color: '#eaeaea', fontFamily: 'var(--font-b)' }}>
       {/* Sidebar Overlay Backdrop on Mobile */}
-      {isSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm transition-opacity"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
+      <div 
+        className={`admin-sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
+        onClick={() => setIsSidebarOpen(false)}
+      />
 
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-72 glass-panel border-r border-white/5 flex flex-col transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static`}>
-        <div className="p-6 border-b border-white/5 flex items-center justify-between">
-          <div className="leading-tight">
-            <span className="font-[var(--font-h)] font-bold text-2xl text-[var(--color-gold)]">MBSx</span> <br/>
-            <span className="text-xs text-white uppercase tracking-widest font-semibold">Transaction Panel</span>
+      <aside className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`}>
+        <div className="admin-sidebar-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', lineHeight: 1.2 }}>
+          <div>
+            MBSx <br/><span style={{ fontSize: '14px', color: '#fff' }}>Transaction Panel</span>
           </div>
           <button 
             onClick={() => setIsSidebarOpen(false)}
-            className="lg:hidden p-2 rounded-md text-[var(--color-muted)] hover:text-white hover:bg-white/5 transition-colors"
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "var(--color-muted)",
+              cursor: "pointer",
+              display: "none",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "4px",
+              borderRadius: "4px"
+            }}
+            className="mobile-only-close-btn"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1 scrollbar-thin">
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0 12px' }}>
           {SIDEBAR_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -145,80 +182,108 @@ export default function TransactionsLayout() {
                   setActiveTab(item.id);
                   setIsSidebarOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 text-[13.5px] font-bold tracking-wide ${isActive ? 'bg-[var(--color-gold-dim)] text-[var(--color-gold)] shadow-inner' : 'text-[var(--color-muted)] hover:bg-white/5 hover:text-white'}`}
+                className={`admin-nav-item ${isActive ? 'active' : ''}`}
+                style={{ width: '100%', border: 'none', background: isActive ? 'var(--color-gold-dim)' : 'transparent', borderRadius: '8px', marginBottom: '4px', justifyContent: 'flex-start' }}
               >
-                <Icon size={18} />
+                <Icon size={18} className="nav-icon" />
                 {item.label}
               </button>
             );
           })}
         </div>
 
-        <div className="p-6 border-t border-white/5">
-          <button
-            onClick={() => { logout(); router.push('/'); }}
-            className="w-full btn btn-outline border-red-500/30 text-red-500 hover:bg-red-500/10 justify-center"
-          >
-            <LogOut size={16} />
-            Logout
-          </button>
+        <div style={{ padding: '24px', borderTop: '1px solid var(--color-border-gold)', marginTop: 'auto', display: 'flex', justifyContent: 'center' }}>
+          <UserButton afterSignOutUrl="/" appearance={{ elements: { userButtonBox: "scale-125" } }} />
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto scrollbar-thin">
-        <div className="p-4 md:p-8 xl:p-10 flex-1 max-w-7xl mx-auto w-full">
-          {/* Header */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 md:mb-12">
-            <div className="flex items-center gap-4">
-              <button 
-                onClick={() => setIsSidebarOpen(true)} 
-                className="lg:hidden p-2.5 rounded-xl bg-white/5 text-white hover:bg-white/10 transition-colors border border-white/10" 
-                aria-label="Toggle Sidebar"
-              >
-                <Menu size={22} />
-              </button>
-              <div>
-                <h1 className="font-[var(--font-h)] text-2xl md:text-3xl xl:text-4xl font-bold capitalize tracking-tight">
-                  {activeTab.replace('_', ' ')} <span className="text-[var(--color-gold)]">Panel</span>
-                </h1>
-                <p className="text-xs md:text-sm text-[var(--color-muted)] mt-1.5 font-medium">
-                  {new Date().toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex flex-wrap items-center gap-3 lg:gap-4">
-              {(activeTab === 'transactions') && (
-                <>
-                  <button onClick={() => setActiveTab('create_account')} className="btn btn-gold text-[12px] px-4 py-2.5"><Plus size={15}/> Account</button>
-                  <button onClick={() => setActiveTab('create_xsuit')} className="btn btn-outline border-[var(--color-border-gold)] text-[var(--color-gold)] text-[12px] px-4 py-2.5"><Plus size={15}/> XSuit</button>
-                  <button onClick={() => setActiveTab('create_supercar')} className="btn btn-outline border-red-500/40 text-red-500 text-[12px] px-4 py-2.5 hover:border-red-500 hover:bg-red-500/10"><Plus size={15}/> Supercar</button>
-                  <button onClick={() => setActiveTab('create_uc')} className="btn btn-outline border-blue-500/40 text-blue-500 text-[12px] px-4 py-2.5 hover:border-blue-500 hover:bg-blue-500/10"><Plus size={15}/> UC</button>
-                </>
-              )}
-              <div className="hidden md:flex w-11 h-11 rounded-full bg-gradient-to-br from-[var(--color-gold)] to-[var(--color-orange)] items-center justify-center text-black shadow-lg shadow-[var(--color-gold-dim)]">
-                <ShieldCheck size={22} />
-              </div>
+      <main className="admin-main">
+        <div className="admin-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button 
+              onClick={() => setIsSidebarOpen(true)} 
+              className="mobile-sidebar-toggle" 
+              aria-label="Toggle Sidebar"
+            >
+              <Menu size={20} />
+            </button>
+            <div>
+              <h1 className="admin-title">
+                {activeTab.replace('_', ' ')} <span style={{ color: 'var(--color-gold)' }}>Panel</span>
+              </h1>
+              <p style={{ fontSize: '13px', color: 'var(--color-muted)', marginTop: '4px' }}>
+                {new Date().toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+              </p>
             </div>
           </div>
-
-          {/* Content Render */}
-          <div className="relative">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.2 }}
-              >
-                {renderContent()}
-              </motion.div>
-            </AnimatePresence>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }} className="admin-header-actions">
+            {(activeTab === 'transactions') && (
+              <>
+                <button onClick={() => setActiveTab('create_account')} className="btn btn-gold px-4 py-2.5 text-xs">
+                  <Plus size={15} /> Account
+                </button>
+                <button onClick={() => setActiveTab('create_xsuit')} className="btn btn-outline border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/10 px-4 py-2.5 text-xs">
+                  <Plus size={15} /> XSuit Gift
+                </button>
+                <button onClick={() => setActiveTab('create_supercar')} className="btn btn-outline border-red-500/50 text-red-500 hover:bg-red-500/10 px-4 py-2.5 text-xs">
+                  <Plus size={15} /> Supercar Gift
+                </button>
+                <button onClick={() => setActiveTab('create_uc')} className="btn btn-outline border-blue-500/50 text-blue-500 hover:bg-blue-500/10 px-4 py-2.5 text-xs">
+                  <Plus size={15} /> UC Order
+                </button>
+              </>
+            )}
+            <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--color-gold), var(--color-orange))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000' }} className="hide-mobile">
+              <ShieldCheck size={22} />
+            </div>
           </div>
         </div>
+
+        {/* Content Render */}
+        <div style={{ position: 'relative' }}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.2 }}
+            >
+              {renderContent()}
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </main>
+
+      {/* Mobile styling overrides */}
+      <style>{`
+        @media (max-width: 1024px) {
+          .mobile-only-close-btn {
+            display: flex !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .admin-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+          }
+          .admin-header-actions {
+            width: 100%;
+            gap: 8px;
+          }
+          .admin-header-actions button {
+            flex: 1;
+            min-width: 120px;
+            justify-content: center;
+          }
+          .hide-mobile {
+            display: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

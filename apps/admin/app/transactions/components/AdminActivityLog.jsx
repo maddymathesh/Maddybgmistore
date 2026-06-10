@@ -25,10 +25,10 @@ export default function AdminActivityLog() {
 
   const getIcon = (type) => {
     switch (type) {
-      case 'Downloads': return <Download size={14} style={{ color: 'var(--gold)' }} />;
+      case 'Downloads': return <Download size={14} style={{ color: 'var(--color-gold)' }} />;
       case 'Settings': return <Settings size={14} style={{ color: '#3498db' }} />;
       case 'Transactions': return <Plus size={14} style={{ color: '#2ecc71' }} />;
-      case 'Security': return <Key size={14} style={{ color: 'var(--red)' }} />;
+      case 'Security': return <Key size={14} style={{ color: 'var(--color-red)' }} />;
       default: return <FileText size={14} />;
     }
   };
@@ -38,10 +38,10 @@ export default function AdminActivityLog() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h2 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>Admin Audit Logs</h2>
-          <p style={{ fontSize: '12px', color: 'var(--muted)', margin: '4px 0 0' }}>Security trace timeline tracking administrative actions, configuration updates and downloads.</p>
+          <p style={{ fontSize: '12px', color: 'var(--color-muted)', margin: '4px 0 0' }}>Security trace timeline tracking administrative actions, configuration updates and downloads.</p>
         </div>
 
-        <div style={{ display: 'flex', gap: '6px', background: 'var(--bg2)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', gap: '6px', background: 'var(--color-bg2)', padding: '4px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
           {['All', 'Transactions', 'Downloads', 'Settings', 'Security'].map(type => (
             <button
               key={type}
@@ -52,8 +52,8 @@ export default function AdminActivityLog() {
                 fontSize: '11px',
                 borderRadius: '6px',
                 background: filterType === type ? 'rgba(255, 215, 0, 0.12)' : 'transparent',
-                color: filterType === type ? 'var(--gold)' : 'var(--muted)',
-                border: filterType === type ? '1px solid var(--border-gold)' : '1px solid transparent',
+                color: filterType === type ? 'var(--color-gold)' : 'var(--color-muted)',
+                border: filterType === type ? '1px solid var(--color-border-gold)' : '1px solid transparent',
                 fontWeight: filterType === type ? 700 : 500,
                 transition: 'all 0.15s'
               }}
@@ -64,9 +64,9 @@ export default function AdminActivityLog() {
         </div>
       </div>
 
-      <div className="card" style={{ border: '1px solid var(--border)' }}>
-        <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '22px', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <History size={18} style={{ color: 'var(--gold)' }} /> Live Audit Timeline ({filteredLogs.length} events)
+      <div className="card" style={{ border: '1px solid var(--color-border)' }}>
+        <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '22px', color: '#eaeaea', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <History size={18} style={{ color: 'var(--color-gold)' }} /> Live Audit Timeline ({filteredLogs.length} events)
         </h3>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', paddingLeft: '8px' }}>
@@ -77,7 +77,7 @@ export default function AdminActivityLog() {
                 display: 'flex',
                 gap: '14px',
                 alignItems: 'flex-start',
-                borderLeft: '2px solid var(--border)',
+                borderLeft: '2px solid var(--color-border)',
                 marginLeft: '10px',
                 paddingLeft: '20px',
                 position: 'relative',
@@ -92,8 +92,8 @@ export default function AdminActivityLog() {
                 width: '16px',
                 height: '16px',
                 borderRadius: '50%',
-                background: 'var(--bg)',
-                border: '2px solid var(--border)',
+                background: 'var(--color-bg)',
+                border: '2px solid var(--color-border)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
@@ -102,20 +102,20 @@ export default function AdminActivityLog() {
               </div>
 
               <div style={{ flex: 1, marginTop: '2px' }}>
-                <p style={{ fontSize: '13px', color: 'var(--text)', margin: 0, fontWeight: 600 }}>{log.text}</p>
-                <div style={{ display: 'flex', gap: '10px', marginTop: '4px', fontSize: '11px', color: 'var(--muted)' }}>
+                <p style={{ fontSize: '13px', color: '#eaeaea', margin: 0, fontWeight: 600 }}>{log.text}</p>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '4px', fontSize: '11px', color: 'var(--color-muted)' }}>
                   <span>Logged: <strong>{log.user}</strong></span>
                   <span>·</span>
                   <span>{log.time}</span>
                   <span>·</span>
-                  <span style={{ color: 'var(--gold)', fontWeight: 600 }}>{log.type}</span>
+                  <span style={{ color: 'var(--color-gold)', fontWeight: 600 }}>{log.type}</span>
                 </div>
               </div>
             </div>
           ))}
 
           {filteredLogs.length === 0 && (
-            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--muted)', fontSize: '12px' }}>
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-muted)', fontSize: '12px' }}>
               No system activity events matched your selected filter.
             </div>
           )}

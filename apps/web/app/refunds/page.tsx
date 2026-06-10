@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars, @next/next/no-img-element, @next/next/no-html-link-for-pages */
 "use client";
 
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
-import SocialFloat from "../../components/SocialFloat";
+
+
+
 import { AlertCircle, RotateCcw, ShieldAlert, Award, FileText, CheckCircle2, ChevronRight } from "lucide-react";
 
 export default function RefundPolicy() {
@@ -64,7 +64,7 @@ export default function RefundPolicy() {
 
   return (
     <>
-      <Navbar />
+      
       <div style={{ background: "var(--color-bg)", minHeight: "100vh" }}>
         
         {/* Hero Section */}
@@ -207,8 +207,8 @@ export default function RefundPolicy() {
         </section>
 
       </div>
-      <Footer />
-      <SocialFloat />
+      
+      
 
       <style>{`
         .refunds-card:hover {

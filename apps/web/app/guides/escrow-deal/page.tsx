@@ -2,9 +2,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Navbar from "../../../components/Navbar";
-import Footer from "../../../components/Footer";
-import SocialFloat from "../../../components/SocialFloat";
+
+
+
 import Link from "next/link";
 import { 
   ShieldCheck, Users, CreditCard, Info, AlertTriangle, 
@@ -76,7 +76,7 @@ export default function EscrowDeal() {
 
   return (
     <>
-      <Navbar />
+      
       <div style={{ background: "var(--color-bg)", color: "#fff", paddingTop: "102px", minHeight: "100vh", overflow: "hidden" }}>
         
         {/* HERO SECTION */}
@@ -496,8 +496,8 @@ export default function EscrowDeal() {
         </section>
 
       </div>
-      <Footer />
-      <SocialFloat />
+      
+      
 
       <style>{`
         .bs-calc-grid {

@@ -2,9 +2,9 @@
 "use client";
 
 import { useState, useEffect, useRef, CSSProperties } from "react";
-import Navbar from "../../../components/Navbar";
-import Footer from "../../../components/Footer";
-import SocialFloat from "../../../components/SocialFloat";
+
+
+
 import Link from "next/link";
 import {
   ShieldCheck, MapPin, CreditCard, AlertTriangle, Users,
@@ -147,7 +147,7 @@ export default function F2FDealGuide() {
 
   return (
     <>
-      <Navbar />
+      
       
       {/* Premium Dark Page Wrapper */}
       <div style={{ 
@@ -1384,8 +1384,8 @@ export default function F2FDealGuide() {
 
       </div>
 
-      <Footer />
-      <SocialFloat />
+      
+      
 
       {/* Embedded CSS rules for layout queries and animations */}
       <style>{`

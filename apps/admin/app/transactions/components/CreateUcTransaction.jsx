@@ -35,22 +35,22 @@ function SearchDropdown({ options, value, onChange, placeholder, renderOption, g
   return (
     <div ref={ref} style={{ position: 'relative' }}>
       <div className="input" style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', userSelect: 'none' }} onClick={() => setOpen(o => !o)}>
-        <span style={{ color: value ? 'var(--text)' : 'var(--muted)' }}>{value ? (getLabel ? getLabel(value) : value) : placeholder}</span>
-        <Search size={14} style={{ color: 'var(--muted)', flexShrink: 0 }} />
+        <span style={{ color: value ? '#eaeaea' : 'var(--color-muted)' }}>{value ? (getLabel ? getLabel(value) : value) : placeholder}</span>
+        <Search size={14} style={{ color: 'var(--color-muted)', flexShrink: 0 }} />
       </div>
       <AnimatePresence>
         {open && (
           <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
-            style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 200, background: 'var(--bg3)', border: '1px solid var(--border-gold)', borderRadius: 'var(--radius)', marginTop: '4px', overflow: 'hidden', boxShadow: '0 12px 40px rgba(0,0,0,0.5)' }}>
+            style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 200, background: 'var(--bg3)', border: '1px solid var(--color-border-gold)', borderRadius: 'var(--radius)', marginTop: '4px', overflow: 'hidden', boxShadow: '0 12px 40px rgba(0,0,0,0.5)' }}>
             <div style={{ padding: '8px' }}>
               <input className="input" style={{ fontSize: '13px', padding: '8px 12px' }} placeholder="Search..." value={q} onChange={e => setQ(e.target.value)} onClick={e => e.stopPropagation()} autoFocus />
             </div>
             <div style={{ maxHeight: '220px', overflowY: 'auto' }}>
               {filtered.length === 0 ? (
-                <div style={{ padding: '12px 16px', color: 'var(--muted)', fontSize: '13px' }}>No results</div>
+                <div style={{ padding: '12px 16px', color: 'var(--color-muted)', fontSize: '13px' }}>No results</div>
               ) : filtered.map((opt, i) => (
                 <div key={i} onClick={() => { onChange(opt); setOpen(false); setQ(''); }}
-                  style={{ padding: '10px 16px', cursor: 'pointer', fontSize: '14px', background: value === opt ? 'var(--gold-dim)' : 'transparent', color: value === opt ? 'var(--gold)' : 'var(--text)', transition: 'background .15s' }}
+                  style={{ padding: '10px 16px', cursor: 'pointer', fontSize: '14px', background: value === opt ? 'var(--color-gold-dim)' : 'transparent', color: value === opt ? 'var(--color-gold)' : '#eaeaea', transition: 'background .15s' }}
                   onMouseEnter={e => { if (value !== opt) e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
                   onMouseLeave={e => { if (value !== opt) e.currentTarget.style.background = 'transparent'; }}>
                   {renderOption ? renderOption(opt) : opt}
@@ -181,28 +181,28 @@ export default function CreateUcTransaction({ onBack }) {
     return (
       <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} style={{ maxWidth: '700px', margin: '0 auto' }}>
         <div className="card" style={{ padding: '48px 40px', textAlign: 'center' }}>
-          <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--gold), var(--orange))', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', color: '#000' }}>
+          <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--color-gold), var(--color-orange))', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', color: '#000' }}>
             <CheckCircle2 size={36} />
           </div>
           <h2 style={{ fontFamily: 'var(--font-h)', fontSize: '26px', fontWeight: 700, marginBottom: '6px' }}>UC Transaction Saved!</h2>
-          <div style={{ display: 'inline-block', background: 'var(--gold-dim)', border: '1px solid var(--border-gold)', borderRadius: '8px', padding: '8px 20px', marginBottom: '8px' }}>
-            <span style={{ fontFamily: 'monospace', fontSize: '18px', fontWeight: 700, color: 'var(--gold)' }}>#{savedTransaction.transaction_id}</span>
+          <div style={{ display: 'inline-block', background: 'var(--color-gold-dim)', border: '1px solid var(--color-border-gold)', borderRadius: '8px', padding: '8px 20px', marginBottom: '8px' }}>
+            <span style={{ fontFamily: 'monospace', fontSize: '18px', fontWeight: 700, color: 'var(--color-gold)' }}>#{savedTransaction.transaction_id}</span>
           </div>
-          <p style={{ color: 'var(--muted)', marginBottom: '28px', fontSize: '14px' }}>
-            💎 <strong style={{ color: 'var(--text)' }}>{det.uc_pack}</strong> × {det.num_packs} packs = <strong style={{ color: 'var(--gold)' }}>{Number(det.total_uc).toLocaleString('en-IN')} UC</strong>
+          <p style={{ color: 'var(--color-muted)', marginBottom: '28px', fontSize: '14px' }}>
+            💎 <strong style={{ color: '#eaeaea' }}>{det.uc_pack}</strong> × {det.num_packs} packs = <strong style={{ color: 'var(--color-gold)' }}>{Number(det.total_uc).toLocaleString('en-IN')} UC</strong>
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '28px' }}>
-            {[{ label: 'Sold Price', val: `₹${soldPrice.toLocaleString('en-IN')}`, color: 'var(--text)' }, { label: 'Cost Price', val: `₹${costPrice.toLocaleString('en-IN')}`, color: 'var(--muted)' }, { label: 'Profit', val: `₹${profit.toLocaleString('en-IN')}`, color: profit >= 0 ? 'var(--green)' : 'var(--red)' }].map(s => (
-              <div key={s.label} style={{ background: 'var(--bg2)', borderRadius: '10px', padding: '14px', border: '1px solid var(--border)' }}>
-                <div style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>{s.label}</div>
+            {[{ label: 'Sold Price', val: `₹${soldPrice.toLocaleString('en-IN')}`, color: '#eaeaea' }, { label: 'Cost Price', val: `₹${costPrice.toLocaleString('en-IN')}`, color: 'var(--color-muted)' }, { label: 'Profit', val: `₹${profit.toLocaleString('en-IN')}`, color: profit >= 0 ? 'var(--color-green)' : 'var(--color-red)' }].map(s => (
+              <div key={s.label} style={{ background: 'var(--color-bg2)', borderRadius: '10px', padding: '14px', border: '1px solid var(--color-border)' }}>
+                <div style={{ fontSize: '11px', color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>{s.label}</div>
                 <div style={{ fontSize: '18px', fontWeight: 700, color: s.color }}>{s.val}</div>
               </div>
             ))}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '28px' }}>
-            <button className="btn btn-outline" onClick={() => generateCustomerPDF(savedTransaction)} style={{ flexDirection: 'column', gap: '6px', padding: '14px 8px' }}><FileText size={20} style={{ color: 'var(--gold)' }} /><span style={{ fontSize: '11px' }}>Customer PDF</span></button>
-            <button className="btn btn-outline" onClick={() => generateInternalPDF(savedTransaction)} style={{ flexDirection: 'column', gap: '6px', padding: '14px 8px' }}><FileOutput size={20} style={{ color: 'var(--orange)' }} /><span style={{ fontSize: '11px' }}>Internal PDF</span></button>
-            <button className="btn btn-outline" onClick={() => exportToExcel([savedTransaction], savedTransaction.transaction_id)} style={{ flexDirection: 'column', gap: '6px', padding: '14px 8px' }}><Table size={20} style={{ color: 'var(--green)' }} /><span style={{ fontSize: '11px' }}>Export Excel</span></button>
+            <button className="btn btn-outline flex-col gap-1.5 py-3 px-2" onClick={() => generateCustomerPDF(savedTransaction)}><FileText size={20} style={{ color: 'var(--color-gold)' }} /><span className="text-[11px]">Customer PDF</span></button>
+            <button className="btn btn-outline flex-col gap-1.5 py-3 px-2" onClick={() => generateInternalPDF(savedTransaction)}><FileOutput size={20} style={{ color: 'var(--color-orange)' }} /><span className="text-[11px]">Internal PDF</span></button>
+            <button className="btn btn-outline flex-col gap-1.5 py-3 px-2" onClick={() => exportToExcel([savedTransaction], savedTransaction.transaction_id)}><Table size={20} style={{ color: 'var(--color-green)' }} /><span className="text-[11px]">Export Excel</span></button>
           </div>
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
             <button className="btn btn-outline" onClick={() => { setSavedTransaction(null); setStep(0); setSelectedMethod(''); setSelectedPack(null); setNumPacks(1); generateNextUcId().then(id => { setNextId(id); setValue('transaction_id', id); }); }}>+ New UC Transaction</button>
@@ -219,7 +219,7 @@ export default function CreateUcTransaction({ onBack }) {
       case 0:
         return (
           <div style={grid}>
-            <div><Label>Transaction ID</Label><div className="input" style={{ background: 'var(--bg2)', color: 'var(--gold)', fontFamily: 'monospace', fontWeight: 700, fontSize: '16px' }}>#{nextId}</div></div>
+            <div><Label>Transaction ID</Label><div className="input" style={{ background: 'var(--color-bg2)', color: 'var(--color-gold)', fontFamily: 'monospace', fontWeight: 700, fontSize: '16px' }}>#{nextId}</div></div>
             <div><Label>Transaction Date</Label><input type="date" className="input" {...register('transaction_date', { required: true })} /></div>
             <div><Label>Mode of Deal</Label><select className="input" {...register('mode_of_deal')}>{['WhatsApp', 'Telegram', 'Instagram', 'Face to Face'].map(o => <option key={o}>{o}</option>)}</select></div>
             <div><Label>Mode of Payment</Label><select className="input" {...register('mode_of_payment')}>{['Full Payment via UPI / Bank Transfer', 'Full Payment in Cash', 'Half Payment in UPI / Bank Transfer & Half in Cash', 'Easy Monthly Instalment (EMI)'].map(o => <option key={o}>{o}</option>)}</select></div>
@@ -238,7 +238,7 @@ export default function CreateUcTransaction({ onBack }) {
 
             {/* UC Pack — from Supabase */}
             <div>
-              <Label>UC Pack {packsLoading && <span style={{ color: 'var(--muted)', fontSize: '11px' }}>(Loading...)</span>}</Label>
+              <Label>UC Pack {packsLoading && <span style={{ color: 'var(--color-muted)', fontSize: '11px' }}>(Loading...)</span>}</Label>
               <SearchDropdown
                 options={ucPacks}
                 value={selectedPack}
@@ -247,8 +247,8 @@ export default function CreateUcTransaction({ onBack }) {
                 getLabel={p => p ? `${p.uc_amount}${p.bonus_uc > 0 ? ` + ${p.bonus_uc} Bonus` : ''} — ₹${Number(p.offer_price).toLocaleString('en-IN')}` : ''}
                 renderOption={p => (
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>💎 {p.uc_amount}{p.bonus_uc > 0 ? <span style={{ color: 'var(--gold)', fontSize: '12px', marginLeft: '6px' }}>+{p.bonus_uc} Bonus</span> : null}</span>
-                    <span style={{ color: 'var(--green)', fontWeight: 700, fontSize: '13px' }}>₹{Number(p.offer_price).toLocaleString('en-IN')}</span>
+                    <span>💎 {p.uc_amount}{p.bonus_uc > 0 ? <span style={{ color: 'var(--color-gold)', fontSize: '12px', marginLeft: '6px' }}>+{p.bonus_uc} Bonus</span> : null}</span>
+                    <span style={{ color: 'var(--color-green)', fontWeight: 700, fontSize: '13px' }}>₹{Number(p.offer_price).toLocaleString('en-IN')}</span>
                   </div>
                 )}
               />
@@ -262,7 +262,7 @@ export default function CreateUcTransaction({ onBack }) {
               </div>
               <div>
                 <Label>Total UC Amount (Auto-Calculated)</Label>
-                <div className="input" style={{ background: 'var(--gold-dim)', borderColor: 'var(--border-gold)', color: 'var(--gold)', fontWeight: 700, fontSize: '18px' }}>
+                <div className="input" style={{ background: 'var(--color-gold-dim)', borderColor: 'var(--color-border-gold)', color: 'var(--color-gold)', fontWeight: 700, fontSize: '18px' }}>
                   💎 {totalUc > 0 ? totalUc.toLocaleString('en-IN') + ' UC' : '—'}
                 </div>
               </div>
@@ -270,7 +270,7 @@ export default function CreateUcTransaction({ onBack }) {
 
             {/* Pack details preview */}
             {selectedPack && (
-              <div style={{ background: 'var(--bg2)', border: '1px solid var(--border-gold)', borderRadius: 'var(--radius)', padding: '16px 20px' }}>
+              <div style={{ background: 'var(--color-bg2)', border: '1px solid var(--color-border-gold)', borderRadius: 'var(--radius)', padding: '16px 20px' }}>
                 <p className="slabel" style={{ marginBottom: '10px' }}>Pack Summary</p>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
                   {[
@@ -280,8 +280,8 @@ export default function CreateUcTransaction({ onBack }) {
                     { label: 'Method', val: selectedPack.method || 'Any' },
                   ].map(({ label, val }) => (
                     <div key={label}>
-                      <div style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '3px' }}>{label}</div>
-                      <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text)' }}>{val}</div>
+                      <div style={{ fontSize: '11px', color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '3px' }}>{label}</div>
+                      <div style={{ fontSize: '14px', fontWeight: 700, color: '#eaeaea' }}>{val}</div>
                     </div>
                   ))}
                 </div>
@@ -311,7 +311,7 @@ export default function CreateUcTransaction({ onBack }) {
             <div><Label>Sold Price (₹)</Label><input type="number" className="input" placeholder="0.00" {...register('sold_price')} /></div>
             <div style={{ gridColumn: '1 / -1' }}>
               <Label>Net Profit (Auto-Calculated)</Label>
-              <div className="input" style={{ background: profit >= 0 ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)', borderColor: profit >= 0 ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)', color: profit >= 0 ? 'var(--green)' : 'var(--red)', fontWeight: 700, fontSize: '22px' }}>
+              <div className="input" style={{ background: profit >= 0 ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)', borderColor: profit >= 0 ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)', color: profit >= 0 ? 'var(--color-green)' : 'var(--color-red)', fontWeight: 700, fontSize: '22px' }}>
                 ₹ {profit.toLocaleString('en-IN')}
               </div>
             </div>
@@ -347,7 +347,7 @@ export default function CreateUcTransaction({ onBack }) {
                         padding: '6px',
                         backgroundColor: "#111520",
                         color: "#fff",
-                        border: "1px solid var(--border)",
+                        border: "1px solid var(--color-border)",
                         borderRadius: "4px",
                         opacity: 0.9,
                         cursor: "pointer"
@@ -398,7 +398,7 @@ export default function CreateUcTransaction({ onBack }) {
                     />
                   </div>
                   {errors[key] && (
-                    <p style={{ color: 'var(--red)', fontSize: '11px', marginTop: '4px' }}>
+                    <p style={{ color: 'var(--color-red)', fontSize: '11px', marginTop: '4px' }}>
                       {errors[key].message || 'This field is required'}
                     </p>
                   )}
@@ -414,26 +414,26 @@ export default function CreateUcTransaction({ onBack }) {
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', display: 'grid', gap: '24px' }}>
-      <button onClick={onBack} className="btn btn-outline" style={{ width: 'fit-content', padding: '8px 16px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <button onClick={onBack} className="btn btn-outline w-fit px-4 py-2 text-xs flex items-center gap-2">
         <ArrowLeft size={15} /> Back to Transactions
       </button>
 
       <div className="card" style={{ padding: '22px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <h2 style={{ fontFamily: 'var(--font-h)', fontSize: '22px', fontWeight: 700, marginBottom: '2px' }}>New UC Order Transaction</h2>
-          <p style={{ color: 'var(--muted)', fontSize: '13px' }}>BGMI UC Purchase — Step {step + 1} of {STEPS.length}</p>
+          <p style={{ color: 'var(--color-muted)', fontSize: '13px' }}>BGMI UC Purchase — Step {step + 1} of {STEPS.length}</p>
         </div>
-        <div style={{ fontFamily: 'monospace', fontSize: '20px', fontWeight: 700, color: 'var(--gold)', background: 'var(--gold-dim)', padding: '8px 18px', borderRadius: '8px', border: '1px solid var(--border-gold)' }}>#{nextId}</div>
+        <div style={{ fontFamily: 'monospace', fontSize: '20px', fontWeight: 700, color: 'var(--color-gold)', background: 'var(--color-gold-dim)', padding: '8px 18px', borderRadius: '8px', border: '1px solid var(--color-border-gold)' }}>#{nextId}</div>
       </div>
 
       {/* Step Nav */}
-      <div style={{ display: 'flex', background: 'var(--card)', borderRadius: 'var(--radius)', border: '1px solid var(--border-gold)', overflow: 'hidden' }}>
+      <div style={{ display: 'flex', background: 'var(--card)', borderRadius: 'var(--radius)', border: '1px solid var(--color-border-gold)', overflow: 'hidden' }}>
         {STEPS.map((s, i) => {
           const Icon = s.icon; const isActive = step === i; const isDone = step > i;
           return (
-            <button key={s.id} type="button" onClick={() => setStep(i)} style={{ flex: 1, padding: '13px 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: isActive ? 'var(--gold-dim)' : 'transparent', borderRight: i < STEPS.length - 1 ? '1px solid var(--border-gold)' : 'none', cursor: 'pointer', borderBottom: isActive ? '2px solid var(--gold)' : '2px solid transparent', transition: 'all .2s' }}>
-              <Icon size={15} style={{ color: isDone ? 'var(--green)' : isActive ? 'var(--gold)' : 'var(--muted)' }} />
-              <span style={{ fontSize: '10px', fontWeight: 600, color: isDone ? 'var(--green)' : isActive ? 'var(--gold)' : 'var(--muted)', letterSpacing: '0.5px' }}>{isDone ? '✓ ' : ''}{s.label}</span>
+            <button key={s.id} type="button" onClick={() => setStep(i)} style={{ flex: 1, padding: '13px 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: isActive ? 'var(--color-gold-dim)' : 'transparent', borderRight: i < STEPS.length - 1 ? '1px solid var(--color-border-gold)' : 'none', cursor: 'pointer', borderBottom: isActive ? '2px solid var(--color-gold)' : '2px solid transparent', transition: 'all .2s' }}>
+              <Icon size={15} style={{ color: isDone ? 'var(--color-green)' : isActive ? 'var(--color-gold)' : 'var(--color-muted)' }} />
+              <span style={{ fontSize: '10px', fontWeight: 600, color: isDone ? 'var(--color-green)' : isActive ? 'var(--color-gold)' : 'var(--color-muted)', letterSpacing: '0.5px' }}>{isDone ? '✓ ' : ''}{s.label}</span>
             </button>
           );
         })}
@@ -442,19 +442,19 @@ export default function CreateUcTransaction({ onBack }) {
       <form onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }}>
         <AnimatePresence mode="wait">
           <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.18 }} className="card" style={{ padding: '32px' }}>
-            <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '22px', paddingBottom: '14px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              {React.createElement(STEPS[step].icon, { size: 17, style: { color: 'var(--gold)' } })} {STEPS[step].label}
+            <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '22px', paddingBottom: '14px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {React.createElement(STEPS[step].icon, { size: 17, style: { color: 'var(--color-gold)' } })} {STEPS[step].label}
             </h3>
             {renderStep()}
           </motion.div>
         </AnimatePresence>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '18px' }}>
-          <button type="button" onClick={() => setStep(s => Math.max(0, s - 1))} disabled={step === 0} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: step === 0 ? 0.4 : 1 }}>
+          <button type="button" onClick={() => setStep(s => Math.max(0, s - 1))} disabled={step === 0} className={`btn btn-outline flex items-center gap-2 ${step === 0 ? 'opacity-40 cursor-not-allowed' : ''}`}>
             <ChevronLeft size={16} /> Previous
           </button>
           {step < STEPS.length - 1 ? (
-            <button type="button" onClick={() => setStep(s => Math.min(STEPS.length - 1, s + 1))} className="btn btn-gold" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button type="button" onClick={() => setStep(s => Math.min(STEPS.length - 1, s + 1))} className="btn btn-gold flex items-center gap-2">
               Next Step <ChevronRight size={16} />
             </button>
           ) : (

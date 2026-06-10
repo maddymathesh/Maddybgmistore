@@ -3,9 +3,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Navbar from "../../../components/Navbar";
-import Footer from "../../../components/Footer";
-import SocialFloat from "../../../components/SocialFloat";
+
+
+
 import Link from "next/link";
 import {
   ShieldCheck, CheckCircle, Copy, AlertTriangle, CreditCard,
@@ -235,7 +235,7 @@ export default function PaymentPage() {
 
     return (
       <>
-        <Navbar />
+        
         <div className="payment-page-container">
           <div className="payment-card-wrap" style={{ maxWidth: "460px" }}>
             <div className="glass-card" style={{ textAlign: "center", padding: "50px 30px", border: "1px solid rgba(239, 68, 68, 0.2)", background: "rgba(17, 21, 32, 0.7)", borderRadius: "24px" }}>
@@ -257,7 +257,7 @@ export default function PaymentPage() {
             </div>
           </div>
         </div>
-        <Footer />
+        
         <style>{`
           .payment-page-container {
             padding: 120px 20px 80px;
@@ -276,7 +276,7 @@ export default function PaymentPage() {
 
   return (
     <>
-      <Navbar />
+      
       <div className="payment-page-container">
         <div className="payment-card-wrap">
           <div className={`glass-card main-payment-card ${shake ? "shake-anim" : ""}`}>
@@ -786,8 +786,8 @@ export default function PaymentPage() {
           }
         `}</style>
       </div>
-      <Footer />
-      <SocialFloat />
+      
+      
     </>
   );
 }

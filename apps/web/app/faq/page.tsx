@@ -2,9 +2,9 @@
 "use client";
 
 import { useState } from "react";
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
-import SocialFloat from "../../components/SocialFloat";
+
+
+
 import { 
   Search, HelpCircle, ChevronDown, ShoppingBag, 
   RefreshCw, ShieldCheck, Gamepad2, 
@@ -96,7 +96,7 @@ export default function FAQ() {
 
   return (
     <>
-      <Navbar />
+      
       <div style={{ background: "var(--color-bg)", minHeight: "100vh" }}>
         
         {/* Hero Section */}
@@ -337,8 +337,8 @@ export default function FAQ() {
         </section>
 
       </div>
-      <Footer />
-      <SocialFloat />
+      
+      
 
       <style>{`
         .faq-scrollbar-hide::-webkit-scrollbar {

@@ -1,15 +1,15 @@
 "use client";
 
-import Navbar from "../../../components/Navbar";
-import Footer from "../../../components/Footer";
-import SocialFloat from "../../../components/SocialFloat";
+
+
+
 import Link from "next/link";
 import { CreditCard, Clock, ArrowLeft, CheckCircle, Zap, ShieldCheck, AlertCircle } from "lucide-react";
 
 export default function PayoutGuide() {
   return (
     <>
-      <Navbar />
+      
       <div style={{ background: "var(--color-bg)", minHeight: "100vh" }}>
         
         {/* HERO BANNER */}
@@ -223,8 +223,8 @@ export default function PayoutGuide() {
         </section>
 
       </div>
-      <Footer />
-      <SocialFloat />
+      
+      
 
       <style>{`
         .back-link:hover {

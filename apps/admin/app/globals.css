@@ -240,7 +240,7 @@ html, body {
 
 /* ===== A11Y FOCUS ===== */
 :focus-visible {
-  outline: 2px solid var(--gold);
+  outline: 2px solid var(--color-gold);
   outline-offset: 4px;
 }
 
@@ -297,11 +297,11 @@ img {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg);
+  background: var(--color-bg);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-gold);
+  background: var(--color-border-gold);
   border-radius: 4px;
 }
 
@@ -320,7 +320,7 @@ img {
 .ticker-item {
   font-size: 11px;
   font-weight: 600;
-  color: var(--gold);
+  color: var(--color-gold);
   letter-spacing: 2px;
   text-transform: uppercase;
   white-space: nowrap;
@@ -356,7 +356,7 @@ img {
 }
 
 .btn-gold {
-  background: linear-gradient(135deg, var(--gold), var(--orange));
+  background: linear-gradient(135deg, var(--color-gold), var(--color-orange));
   color: #000;
 }
 
@@ -367,17 +367,17 @@ img {
 
 .btn-outline {
   background: transparent;
-  color: var(--text);
+  color: var(--foreground);
   border: 1px solid rgba(255, 255, 255, .18);
 }
 
 .btn-outline:hover {
-  border-color: var(--gold);
-  color: var(--gold);
+  border-color: var(--color-gold);
+  color: var(--color-gold);
 }
 
 .btn-green {
-  background: var(--green);
+  background: var(--color-green);
   color: #000;
 }
 
@@ -397,7 +397,7 @@ img {
 }
 
 .btn-red {
-  background: var(--red);
+  background: var(--color-red);
   color: #fff;
 }
 
@@ -417,8 +417,8 @@ img {
 
 .section-alt {
   background: rgba(255, 255, 255, .015);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
   padding: 70px;
   min-height: 50vh;
 }
@@ -426,7 +426,7 @@ img {
 .slabel {
   font-size: 11px;
   font-weight: 600;
-  color: var(--orange);
+  color: var(--color-orange);
   letter-spacing: 3px;
   text-transform: uppercase;
   margin-bottom: 10px;
@@ -442,7 +442,7 @@ img {
 }
 
 .ssub {
-  color: var(--muted);
+  color: var(--color-muted);
   max-width: 520px;
 
 }
@@ -458,7 +458,7 @@ img {
 }
 
 .g {
-  background: linear-gradient(135deg, var(--gold) 0%, var(--orange) 100%);
+  background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-orange) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -489,7 +489,7 @@ img {
 /* ===== CARDS ===== */
 .card {
   background: var(--card);
-  border: 1px solid var(--border-gold);
+  border: 1px solid var(--color-border-gold);
   border-radius: var(--radius);
   padding: 28px 24px;
   position: relative;
@@ -504,7 +504,7 @@ img {
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
   opacity: 0;
   transition: opacity .3s;
 }
@@ -532,7 +532,7 @@ img {
   gap: 8px;
   background: rgba(255, 215, 0, 0.08);
   border: 1px solid rgba(255, 215, 0, 0.28);
-  color: var(--gold);
+  color: var(--color-gold);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 2px;
@@ -565,7 +565,7 @@ img {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 215, 0, 0.3);
-  color: var(--gold);
+  color: var(--color-gold);
   font-family: var(--font-h);
   font-size: 11px;
   font-weight: 700;
@@ -579,15 +579,15 @@ img {
 .stats-bar {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  background: var(--bg2);
-  border-top: 1px solid var(--border-gold);
-  border-bottom: 1px solid var(--border-gold);
+  background: var(--color-bg2);
+  border-top: 1px solid var(--color-border-gold);
+  border-bottom: 1px solid var(--color-border-gold);
 }
 
 .stat {
   text-align: center;
   padding: 24px 16px;
-  border-right: 1px solid var(--border-gold);
+  border-right: 1px solid var(--color-border-gold);
 }
 
 .stat:last-child {
@@ -598,12 +598,12 @@ img {
   font-family: var(--font-h);
   font-size: 30px;
   font-weight: 700;
-  color: var(--gold);
+  color: var(--color-gold);
 }
 
 .stat-l {
   font-size: 11px;
-  color: var(--muted);
+  color: var(--color-muted);
   text-transform: uppercase;
   letter-spacing: 1.5px;
   margin-top: 2px;
@@ -621,7 +621,7 @@ img {
   align-items: flex-start;
   gap: 16px;
   padding: 14px 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .steps-list li:last-child {
@@ -633,7 +633,7 @@ img {
   min-width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--gold), var(--orange));
+  background: linear-gradient(135deg, var(--color-gold), var(--color-orange));
   color: #000;
   font-family: var(--font-h);
   font-size: 15px;
@@ -646,13 +646,13 @@ img {
 
 .step-text {
   font-size: 14px;
-  color: var(--text);
+  color: var(--foreground);
   line-height: 1.6;
 }
 
 .step-text small {
   display: block;
-  color: var(--muted);
+  color: var(--color-muted);
   font-size: 12px;
   margin-top: 3px;
 }
@@ -670,7 +670,7 @@ img {
   gap: 12px;
   padding: 16px 18px;
   background: var(--card);
-  border: 1px solid var(--border-gold);
+  border: 1px solid var(--color-border-gold);
   border-radius: 10px;
 }
 
@@ -712,11 +712,11 @@ img {
 /* ===== FORM INPUTS ===== */
 .input {
   width: 100%;
-  background: var(--bg2);
-  border: 1px solid var(--border-gold);
+  background: var(--color-bg2);
+  border: 1px solid var(--color-border-gold);
   border-radius: 8px;
   padding: 12px 16px;
-  color: var(--text);
+  color: var(--foreground);
   font-family: var(--font-b);
   font-size: 14px;
   transition: border-color .2s;
@@ -724,11 +724,11 @@ img {
 
 .input:focus {
   outline: none;
-  border-color: var(--gold);
+  border-color: var(--color-gold);
 }
 
 .input::placeholder {
-  color: var(--muted);
+  color: var(--color-muted);
 }
 
 textarea.input {
@@ -756,7 +756,7 @@ select.input {
 
 .modal {
   background: var(--bg3);
-  border: 1px solid var(--border-gold);
+  border: 1px solid var(--color-border-gold);
   border-radius: 20px;
   padding: 36px 32px;
   width: 100%;
@@ -771,8 +771,8 @@ select.input {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--border);
-  color: var(--muted);
+  background: var(--color-border);
+  color: var(--color-muted);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -782,7 +782,7 @@ select.input {
 }
 
 .modal-close:hover {
-  background: var(--red);
+  background: var(--color-red);
   color: #fff;
 }
 
@@ -790,9 +790,9 @@ select.input {
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  background: var(--gold-dim);
+  background: var(--color-gold-dim);
   border: 1px solid var(--gold-border);
-  color: var(--gold);
+  color: var(--color-gold);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -808,8 +808,8 @@ select.input {
 
 .admin-sidebar {
   width: 240px;
-  background: var(--bg2);
-  border-right: 1px solid var(--border-gold);
+  background: var(--color-bg2);
+  border-right: 1px solid var(--color-border-gold);
   padding: 24px 0;
   display: flex;
   flex-direction: column;
@@ -823,12 +823,12 @@ select.input {
 
 .admin-sidebar-logo {
   padding: 0 24px 24px;
-  border-bottom: 1px solid var(--border-gold);
+  border-bottom: 1px solid var(--color-border-gold);
   margin-bottom: 16px;
   font-family: var(--font-h);
   font-size: 18px;
   font-weight: 700;
-  color: var(--gold);
+  color: var(--color-gold);
 }
 
 .admin-sidebar-logo span {
@@ -840,7 +840,7 @@ select.input {
   align-items: center;
   gap: 12px;
   padding: 12px 24px;
-  color: var(--muted);
+  color: var(--color-muted);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -850,8 +850,8 @@ select.input {
 
 .admin-nav-item:hover,
 .admin-nav-item.active {
-  color: var(--gold);
-  background: var(--gold-dim);
+  color: var(--color-gold);
+  background: var(--color-gold-dim);
 }
 
 .admin-nav-item .nav-icon {
@@ -889,14 +889,14 @@ select.input {
 
 .admin-stat-card {
   background: var(--card);
-  border: 1px solid var(--border-gold);
+  border: 1px solid var(--color-border-gold);
   border-radius: var(--radius);
   padding: 24px;
 }
 
 .admin-stat-card .label {
   font-size: 11px;
-  color: var(--muted);
+  color: var(--color-muted);
   text-transform: uppercase;
   letter-spacing: 1.5px;
   margin-bottom: 8px;
@@ -906,7 +906,7 @@ select.input {
   font-family: var(--font-h);
   font-size: 32px;
   font-weight: 700;
-  color: var(--gold);
+  color: var(--color-gold);
 }
 
 .admin-table {
@@ -918,18 +918,18 @@ select.input {
   text-align: left;
   font-size: 11px;
   font-weight: 600;
-  color: var(--muted);
+  color: var(--color-muted);
   text-transform: uppercase;
   letter-spacing: 1.5px;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--border-gold);
-  background: var(--bg2);
+  border-bottom: 1px solid var(--color-border-gold);
+  background: var(--color-bg2);
   white-space: nowrap;
 }
 
 .admin-table td {
   padding: 14px 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-border);
   font-size: 13px;
   vertical-align: middle;
   white-space: nowrap;
@@ -945,7 +945,7 @@ select.input {
 
 .table-wrap {
   background: var(--card);
-  border: 1px solid var(--border-gold);
+  border: 1px solid var(--color-border-gold);
   border-radius: var(--radius);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -977,16 +977,16 @@ select.input {
   width: 42px;
   height: 42px;
   border-radius: 10px;
-  background: var(--bg2);
-  border: 1px solid var(--border-gold);
-  color: var(--gold);
+  background: var(--color-bg2);
+  border: 1px solid var(--color-border-gold);
+  color: var(--color-gold);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .mobile-sidebar-toggle:hover {
-  background: var(--gold-dim);
-  border-color: var(--gold);
+  background: var(--color-gold-dim);
+  border-color: var(--color-gold);
 }
 
 /* ===== RESPONSIVE MEDIA QUERIES FOR LAYOUT ===== */
@@ -1036,19 +1036,19 @@ select.input {
 
 .status-available {
   background: rgba(34, 197, 94, .15);
-  color: var(--green);
+  color: var(--color-green);
   border: 1px solid rgba(34, 197, 94, .3);
 }
 
 .status-sold {
   background: rgba(239, 68, 68, .15);
-  color: var(--red);
+  color: var(--color-red);
   border: 1px solid rgba(239, 68, 68, .3);
 }
 
 .status-pending {
   background: rgba(255, 215, 0, .15);
-  color: var(--gold);
+  color: var(--color-gold);
   border: 1px solid var(--gold-border);
 }
 
@@ -1061,7 +1061,7 @@ select.input {
 
 .review-card {
   background: var(--card);
-  border: 1px solid var(--border-gold);
+  border: 1px solid var(--color-border-gold);
   border-radius: var(--radius);
   padding: 20px;
   transition: transform .2s, box-shadow .2s;
@@ -1083,7 +1083,7 @@ select.input {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--gold), var(--orange));
+  background: linear-gradient(135deg, var(--color-gold), var(--color-orange));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1102,17 +1102,17 @@ select.input {
 
 .review-date {
   font-size: 11px;
-  color: var(--muted);
+  color: var(--color-muted);
 }
 
 .review-stars {
-  color: var(--gold);
+  color: var(--color-gold);
   font-size: 13px;
   margin-bottom: 8px;
 }
 
 .review-text {
-  color: var(--muted);
+  color: var(--color-muted);
   font-size: 13px;
   line-height: 1.7;
   margin-bottom: 12px;
@@ -1124,7 +1124,7 @@ select.input {
   gap: 6px;
   font-size: 11px;
   font-weight: 600;
-  color: var(--green);
+  color: var(--color-green);
 }
 
 /* ===== CONNECT PAGE ===== */
@@ -1136,7 +1136,7 @@ select.input {
 
 .connect-card {
   background: var(--card);
-  border: 1px solid var(--border-gold);
+  border: 1px solid var(--color-border-gold);
   border-radius: var(--radius);
   padding: 24px 28px;
   display: flex;
@@ -1147,7 +1147,7 @@ select.input {
 }
 
 .connect-card:hover {
-  border-color: var(--gold);
+  border-color: var(--color-gold);
   background: rgba(255, 215, 0, .06);
   transform: translateY(-3px);
 }
@@ -1165,7 +1165,7 @@ select.input {
 }
 
 .connect-info p {
-  color: var(--muted);
+  color: var(--color-muted);
   font-size: 13px;
 }
 
@@ -1212,7 +1212,7 @@ select.input {
   font-family: var(--font-h);
   font-size: 15px;
   font-weight: 700;
-  color: var(--text);
+  color: var(--foreground);
   line-height: 1.5;
   margin-bottom: 14px;
   letter-spacing: 0.3px;
@@ -1278,9 +1278,9 @@ select.input {
   font-family: var(--font-h);
   font-size: 22px;
   font-weight: 800;
-  color: var(--gold);
+  color: var(--color-gold);
   background: rgba(255, 215, 0, 0.08);
-  border: 1px solid var(--border-gold);
+  border: 1px solid var(--color-border-gold);
   border-radius: 10px;
   padding: 8px 18px;
   letter-spacing: 0.5px;
@@ -1289,7 +1289,7 @@ select.input {
 }
 
 .account-card:hover .account-price-badge {
-  border-color: var(--gold);
+  border-color: var(--color-gold);
   background: rgba(255, 215, 0, 0.12);
   box-shadow: 0 0 15px rgba(255, 215, 0, 0.15), inset 0 0 10px rgba(255, 215, 0, 0.1);
 }
@@ -1338,7 +1338,7 @@ select.input {
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
-  color: var(--gold);
+  color: var(--color-gold);
   cursor: pointer;
   animation: bounce-down 2s infinite;
   opacity: 1;
@@ -1497,7 +1497,7 @@ select.input {
   background: rgba(15, 18, 28, 0.98);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border-gold);
+  border: 1px solid var(--color-border-gold);
   border-radius: 12px;
   padding: 8px;
   margin-top: 12px;
@@ -1531,7 +1531,7 @@ select.input {
   aspect-ratio: 1/1;
   object-fit: cover;
   border-radius: 50%;
-  border: 1.5px solid var(--border-gold);
+  border: 1.5px solid var(--color-border-gold);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   mix-blend-mode: difference;
   filter: brightness(1.1);
@@ -1539,7 +1539,7 @@ select.input {
 
 .logo-img:hover {
   transform: scale(1.1) rotate(8deg);
-  border-color: var(--gold);
+  border-color: var(--color-gold);
   box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
 }
 
@@ -1568,7 +1568,7 @@ select.input {
   font-family: var(--font-h);
   font-size: 14px;
   font-weight: 600;
-  color: var(--text);
+  color: var(--foreground);
   background: none;
   border: none;
   cursor: pointer;
@@ -1578,7 +1578,7 @@ select.input {
 
 .dropdown-item:hover {
   background: rgba(255, 215, 0, 0.1);
-  color: var(--gold);
+  color: var(--color-gold);
 }
 
 .dropdown-item.logout {
@@ -1642,7 +1642,7 @@ select.input {
   background: rgba(8, 10, 15, 0.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border-gold);
+  border: 1px solid var(--color-border-gold);
   color: #fff;
   padding: 6px 14px;
   border-radius: 8px;
@@ -1692,7 +1692,7 @@ select.input {
   left: 0;
   min-width: 200px;
   background: var(--bg3);
-  border: 1px solid var(--border-gold);
+  border: 1px solid var(--color-border-gold);
   border-radius: 12px;
   padding: 8px;
   opacity: 0;
@@ -1783,7 +1783,7 @@ select.input {
 }
 .why-us-card p {
   font-size: 13px;
-  color: var(--muted);
+  color: var(--color-muted);
   line-height: 1.6;
   margin: 0;
 }

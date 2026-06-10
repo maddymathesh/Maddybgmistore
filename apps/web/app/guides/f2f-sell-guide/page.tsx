@@ -2,9 +2,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Navbar from "../../../components/Navbar";
-import Footer from "../../../components/Footer";
-import SocialFloat from "../../../components/SocialFloat";
+
+
+
 import Link from "next/link";
 import {
   ShieldCheck, MapPin, CreditCard, AlertTriangle, Users,
@@ -102,7 +102,7 @@ export default function F2FSellGuide() {
 
   return (
     <>
-      <Navbar />
+      
       <div style={{ background: "var(--color-bg)", color: "#fff", paddingTop: "102px", minHeight: "100vh" }}>
         
         {/* HERO BANNER */}
@@ -607,8 +607,8 @@ export default function F2FSellGuide() {
         </section>
 
       </div>
-      <Footer />
-      <SocialFloat />
+      
+      
 
       <style>{`
         .back-btn:hover {

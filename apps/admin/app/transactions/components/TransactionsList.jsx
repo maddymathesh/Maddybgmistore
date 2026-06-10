@@ -170,10 +170,10 @@ export default function TransactionsList({ onAddNew }) {
         header: 'Actions',
         cell: ({ row }) => (
           <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <button onClick={() => setSelectedTxForDetails(row.original)} style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text)', background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: '6px', cursor: 'pointer', padding: '4px 10px', fontSize: '11px', fontWeight: 600 }}><Eye size={13} /> View</button>
-            <button onClick={() => handleCustomerDownload(row.original)} style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--gold)', background: 'var(--gold-dim)', border: '1px solid var(--border-gold)', borderRadius: '6px', cursor: 'pointer', padding: '4px 10px', fontSize: '11px', fontWeight: 600 }}><FileText size={13} /> Cust PDF</button>
-            <button onClick={() => handleInternalDownload(row.original)} style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--orange)', background: 'rgba(251,146,60,0.1)', border: '1px solid rgba(251,146,60,0.3)', borderRadius: '6px', cursor: 'pointer', padding: '4px 10px', fontSize: '11px', fontWeight: 600 }}><FileOutput size={13} /> Int PDF</button>
-            <button onClick={() => handleDelete(row.original)} style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--red)', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '6px', cursor: 'pointer', padding: '4px 10px', fontSize: '11px', fontWeight: 600 }}><Trash2 size={13} /> Delete</button>
+            <button onClick={() => setSelectedTxForDetails(row.original)} style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#eaeaea', background: 'var(--color-bg2)', border: '1px solid var(--color-border)', borderRadius: '6px', cursor: 'pointer', padding: '4px 10px', fontSize: '11px', fontWeight: 600 }}><Eye size={13} /> View</button>
+            <button onClick={() => handleCustomerDownload(row.original)} style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--color-gold)', background: 'var(--color-gold-dim)', border: '1px solid var(--color-border-gold)', borderRadius: '6px', cursor: 'pointer', padding: '4px 10px', fontSize: '11px', fontWeight: 600 }}><FileText size={13} /> Cust PDF</button>
+            <button onClick={() => handleInternalDownload(row.original)} style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--color-orange)', background: 'rgba(251,146,60,0.1)', border: '1px solid rgba(251,146,60,0.3)', borderRadius: '6px', cursor: 'pointer', padding: '4px 10px', fontSize: '11px', fontWeight: 600 }}><FileOutput size={13} /> Int PDF</button>
+            <button onClick={() => handleDelete(row.original)} style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--color-red)', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '6px', cursor: 'pointer', padding: '4px 10px', fontSize: '11px', fontWeight: 600 }}><Trash2 size={13} /> Delete</button>
           </div>
         )
       }
@@ -217,12 +217,12 @@ export default function TransactionsList({ onAddNew }) {
   const renderDetailSection = (title, items) => {
     return (
       <div style={{ marginBottom: '24px' }}>
-        <h3 style={{ fontSize: '13px', textTransform: 'uppercase', color: 'var(--gold)', letterSpacing: '0.1em', margin: '0 0 12px 0', borderBottom: '1px solid var(--border)', paddingBottom: '6px', fontWeight: 700 }}>{title}</h3>
+        <h3 style={{ fontSize: '13px', textTransform: 'uppercase', color: 'var(--color-gold)', letterSpacing: '0.1em', margin: '0 0 12px 0', borderBottom: '1px solid var(--color-border)', paddingBottom: '6px', fontWeight: 700 }}>{title}</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px 24px' }}>
           {items.map(([label, val, highlight]) => (
             <div key={label} style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '2px' }}>{label}</span>
-              <span style={{ fontSize: '13px', color: highlight ? 'var(--gold)' : '#fff', fontWeight: highlight ? 700 : 500, wordBreak: 'break-all' }}>{val || '—'}</span>
+              <span style={{ fontSize: '11px', color: 'var(--color-muted)', marginBottom: '2px' }}>{label}</span>
+              <span style={{ fontSize: '13px', color: highlight ? 'var(--color-gold)' : '#fff', fontWeight: highlight ? 700 : 500, wordBreak: 'break-all' }}>{val || '—'}</span>
             </div>
           ))}
         </div>

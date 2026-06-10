@@ -1,14 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import {
   LayoutDashboard, Gamepad2, Star, MessageSquare, Link2, CreditCard,
   Radio, Settings, Plus, Edit, Trash2, Check, X, ShieldAlert,
   Loader2, RefreshCw, MessageCircle, Copy,
-  TrendingUp, Users, Zap, Camera, Key, User
+  TrendingUp, Users, Zap, Camera, Key, User,
+  Menu, Coins, Gift, Car, FileCheck, History
 } from "lucide-react";
 
 import {
@@ -37,11 +38,27 @@ type ActiveTab =
   | "admin_controls"
   | "dashboard";
 
+const SIDEBAR_ITEMS = [
+  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "accounts", label: "Accounts", icon: Gamepad2 },
+  { id: "description_factory", label: "Description Factory", icon: Zap },
+  { id: "uc_packs", label: "UC Packs", icon: Coins },
+  { id: "xsuit_gifts", label: "Xsuit Gifts", icon: Gift },
+  { id: "cars", label: "Cars", icon: Car },
+  { id: "reviews", label: "Reviews", icon: Star },
+  { id: "proofs", label: "Proofs", icon: FileCheck },
+  { id: "payments", label: "Payments", icon: CreditCard },
+  { id: "customer_feedback", label: "Customer Feedback", icon: MessageSquare },
+  { id: "activity_log", label: "Activity Log", icon: History },
+  { id: "admin_controls", label: "Admin Controls", icon: Settings },
+];
+
 export default function AdminDashboard() {
   const { user, isLoaded } = useUser();
 
   // All hooks MUST be declared before any conditional returns (Rules of Hooks)
-  const [activeTab, setActiveTab] = useState<ActiveTab>("accounts");
+  const [activeTab, setActiveTab] = useState<ActiveTab>("dashboard");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // States for DB data
@@ -552,74 +569,96 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-[var(--color-bg)] text-[#eaeaea] font-sans">
+    <div className="flex min-h-screen bg-[var(--color-bg)] text-[#eaeaea] font-sans overflow-hidden">
       
-      {/* HEADER SECTION */}
-      <div className="w-full flex flex-col shrink-0 border-b border-[var(--color-border)]">
-        {/* Top Header */}
-        <div className="h-[80px] px-8 flex items-center justify-between bg-[var(--color-bg2)]">
-          <div className="flex items-center gap-3">
-            <h1 className="font-h text-2xl font-black tracking-wide text-white flex items-center gap-2">
+      {/* Sidebar Overlay Backdrop on Mobile */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* SIDEBAR SECTION */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-72 glass-panel border-r border-white/5 flex flex-col transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static`}>
+        <div className="p-6 border-b border-white/5 flex items-center justify-between">
+          <div className="leading-tight">
+            <span className="font-h font-black tracking-wide text-2xl text-white flex items-center gap-2">
               Admin <span className="text-[var(--color-gold)]">Panel</span>
-            </h1>
+            </span>
+            <span className="text-[10px] text-[var(--color-muted)] uppercase tracking-widest font-bold mt-1 block">
+              Core Workspace
+            </span>
           </div>
-          <div className="flex items-center gap-4">
-            <a 
-              href="/transactions"
-              className="btn btn-gold text-[11px] px-4 py-2 flex items-center gap-2 uppercase tracking-widest"
-            >
-              <CreditCard size={14} /> Transaction Panel
-            </a>
-            <div className="border border-[var(--color-red)]/20 px-4 py-2 rounded-lg bg-red-500/5 flex items-center gap-2 transition hover:bg-red-500/10 cursor-pointer">
-              <UserButton afterSignOutUrl="/sign-in" />
-              <span className="text-[11px] font-bold text-red-400 uppercase tracking-widest">
-                Logout
-              </span>
-            </div>
-            <button onClick={triggerRefresh} className="p-2 hover:bg-white/5 rounded-lg text-[var(--color-muted)] hover:text-white transition">
-              <RefreshCw size={18} />
-            </button>
-          </div>
+          <button 
+            onClick={() => setIsSidebarOpen(false)}
+            className="lg:hidden p-2 rounded-md text-[var(--color-muted)] hover:text-white hover:bg-white/5 transition-colors"
+          >
+            <X size={20} />
+          </button>
         </div>
 
-        {/* Horizontal Navigation */}
-        <nav className="h-[50px] px-8 bg-black/5 flex items-end gap-2 overflow-x-auto whitespace-nowrap scrollbar-none border-t border-[var(--color-border)]">
-          {[
-            { id: "accounts", label: "Accounts" },
-            { id: "description_factory", label: "Description Factory" },
-            { id: "uc_packs", label: "UC Packs" },
-            { id: "xsuit_gifts", label: "Xsuit Gifts" },
-            { id: "cars", label: "Cars" },
-            { id: "reviews", label: "Reviews" },
-            { id: "proofs", label: "Proofs" },
-            { id: "payments", label: "Payments" },
-            { id: "customer_feedback", label: "Customer Feedback" },
-            { id: "activity_log", label: "Activity Log" },
-            { id: "admin_controls", label: "Admin Controls" },
-          ].map(item => {
+        <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1 scrollbar-thin">
+          {SIDEBAR_ITEMS.map((item) => {
+            const Icon = item.icon;
             const active = activeTab === item.id;
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id as ActiveTab)}
-                className={`h-[40px] px-6 font-h text-[10px] font-black uppercase tracking-widest transition-colors duration-200 rounded-t-xl ${
-                  active 
-                    ? "text-black bg-[var(--color-gold)]" 
-                    : "text-[var(--color-muted)] hover:text-white hover:bg-white/5"
-                }`}
+                onClick={() => {
+                  setActiveTab(item.id as ActiveTab);
+                  setIsSidebarOpen(false);
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 text-[13.5px] font-bold tracking-wide ${active ? 'bg-[var(--color-gold-dim)] text-[var(--color-gold)] shadow-inner' : 'text-[var(--color-muted)] hover:bg-white/5 hover:text-white'}`}
               >
+                <Icon size={18} />
                 {item.label}
               </button>
             );
           })}
-        </nav>
-      </div>
+        </div>
+
+        <div className="p-6 border-t border-white/5 flex flex-col gap-3">
+          <a 
+            href="/transactions"
+            className="w-full btn btn-outline justify-center border-[var(--color-gold)]/30 text-[var(--color-gold)] hover:bg-[var(--color-gold)]/10 text-[11px] py-2"
+          >
+            <CreditCard size={14} /> Transaction Panel
+          </a>
+          <div className="w-full flex items-center justify-between bg-black/20 p-2 rounded-lg border border-white/5">
+            <UserButton afterSignOutUrl="/sign-in" />
+            <span className="text-[10px] text-[var(--color-muted)] font-bold">LOGGED IN</span>
+          </div>
+        </div>
+      </aside>
 
       {/* MAIN CONTENT WORKSPACE */}
-      <main className="flex-grow flex flex-col min-w-0">
+      <main className="flex-1 flex flex-col min-w-0 h-screen relative">
+        
+        {/* Sticky Header */}
+        <header className="h-[80px] shrink-0 border-b border-white/5 glass-panel sticky top-0 z-30 flex items-center justify-between px-6 lg:px-10">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className="lg:hidden p-2 rounded-xl text-white hover:bg-white/10 transition-colors"
+            >
+              <Menu size={24} />
+            </button>
+            <h2 className="font-h font-bold text-lg lg:text-xl tracking-wide flex items-center gap-2 text-white">
+              {SIDEBAR_ITEMS.find(i => i.id === activeTab)?.icon && React.createElement(SIDEBAR_ITEMS.find(i => i.id === activeTab)!.icon, { size: 20, className: "text-[var(--color-gold)]" })}
+              {SIDEBAR_ITEMS.find(i => i.id === activeTab)?.label || "Dashboard"}
+            </h2>
+          </div>
+          <button 
+            onClick={triggerRefresh} 
+            className="flex items-center gap-2 p-2 px-4 bg-white/5 border border-white/10 rounded-lg text-white hover:bg-white/10 transition font-bold text-xs uppercase tracking-wider"
+          >
+            <RefreshCw size={14} /> <span className="hidden sm:inline">Refresh</span>
+          </button>
+        </header>
 
         {/* CONTAINER SCROLL */}
-        <div className="flex-grow p-8 overflow-y-auto">
+        <div className="flex-1 p-6 lg:p-10 overflow-y-auto scrollbar-thin">
           {loading && !metrics ? (
             <div className="flex flex-col items-center justify-center h-full gap-4">
               <Loader2 size={36} className="animate-spin text-[var(--color-gold)]" />
@@ -634,21 +673,21 @@ export default function AdminDashboard() {
                 <div className="flex flex-col gap-8">
                   {/* METRICS ROW */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-[var(--color-card)] border border-[var(--color-border-gold)] rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                    <div className="glass-panel border border-[var(--color-gold)]/20 shadow-[0_0_15px_rgba(255,215,0,0.05)] rounded-2xl p-6 shadow-xl relative overflow-hidden">
                       <div className="absolute top-0 right-0 p-6 opacity-10"><TrendingUp size={80} className="text-[var(--color-gold)]" /></div>
                       <span className="text-[10px] font-bold text-[var(--color-gold)] uppercase tracking-wider block mb-1">Total Sales Revenue</span>
                       <strong className="text-4xl font-h font-black text-white">₹{Number(metrics.analytics.revenue).toLocaleString("en-IN")}</strong>
                       <span className="text-xs text-[var(--color-muted)] block mt-2 font-mono">Mapped from logged transactions</span>
                     </div>
 
-                    <div className="bg-[var(--color-card)] border border-green-500/20 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                    <div className="glass-panel border border-green-500/20 rounded-2xl p-6 shadow-xl relative overflow-hidden">
                       <div className="absolute top-0 right-0 p-6 opacity-10"><Users size={80} className="text-green-500" /></div>
                       <span className="text-[10px] font-bold text-green-400 uppercase tracking-wider block mb-1">Total Profit</span>
                       <strong className="text-4xl font-h font-black text-white">₹{Number(metrics.analytics.profit).toLocaleString("en-IN")}</strong>
                       <span className="text-xs text-[var(--color-muted)] block mt-2 font-mono">Difference of owner vs sold price</span>
                     </div>
 
-                    <div className="bg-[var(--color-card)] border border-blue-500/20 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                    <div className="glass-panel border border-blue-500/20 rounded-2xl p-6 shadow-xl relative overflow-hidden">
                       <div className="absolute top-0 right-0 p-6 opacity-10"><LayoutDashboard size={80} className="text-blue-500" /></div>
                       <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider block mb-1">Counter Site Views</span>
                       <strong className="text-4xl font-h font-black text-white">{metrics.totalViews.toLocaleString()}</strong>
@@ -664,7 +703,7 @@ export default function AdminDashboard() {
                       { label: "Unread Feedback", val: metrics.feedback.unread, desc: "Awaiting administrator response", highlight: metrics.feedback.unread > 0 },
                       { label: "Total Handover Logs", val: metrics.analytics.count, desc: "Manual transaction counts" }
                     ].map((stat, idx) => (
-                      <div key={idx} className={`bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-6 shadow-md ${stat.highlight ? "border-orange-500/30 bg-orange-500/2" : ""}`}>
+                      <div key={idx} className={`glass-panel rounded-2xl p-6 shadow-md ${stat.highlight ? "border-orange-500/30 bg-orange-500/2" : ""}`}>
                         <span className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-wider block mb-1">{stat.label}</span>
                         <strong className="text-2xl font-h font-extrabold text-white block">{stat.val}</strong>
                         <span className="text-xs text-[var(--color-muted)] block mt-1">{stat.desc}</span>
@@ -673,7 +712,7 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* QUICK TIPS PANEL */}
-                  <div className="bg-gradient-to-r from-yellow-500/5 to-orange-500/5 border border-[var(--color-border-gold)] rounded-2xl p-6 flex gap-4 items-start">
+                  <div className="bg-gradient-to-r from-yellow-500/5 to-orange-500/5 border border-[var(--color-gold)]/20 shadow-[0_0_15px_rgba(255,215,0,0.05)] rounded-2xl p-6 flex gap-4 items-start">
                     <ShieldAlert className="text-[var(--color-gold)] shrink-0" size={24} />
                     <div>
                       <h4 className="font-h font-bold text-white uppercase text-sm tracking-wider mb-1">Administrator Safety Protocol</h4>
@@ -692,7 +731,7 @@ export default function AdminDashboard() {
               {activeTab === "accounts" && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   {/* ADD PRODUCT FORM */}
-                  <div className="lg:col-span-1 bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-6 shadow-xl h-fit">
+                  <div className="lg:col-span-1 glass-panel rounded-2xl p-6 shadow-xl h-fit">
                     <div className="flex items-center gap-2 mb-6 text-[var(--color-gold)] font-bold tracking-wider font-h">
                       <Plus size={16} /> Add Product
                     </div>
@@ -753,7 +792,7 @@ export default function AdminDashboard() {
 
                   {/* INVENTORY LIST */}
                   <div className="lg:col-span-2">
-                    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl flex flex-col overflow-hidden shadow-xl min-h-[400px]">
+                    <div className="glass-panel rounded-2xl flex flex-col overflow-hidden shadow-xl min-h-[400px]">
                       <div className="p-4 border-b border-[var(--color-border)] flex justify-between items-center bg-black/20">
                         <span className="font-h text-[13px] font-bold text-white tracking-wider">Account Inventory</span>
                         <span className="text-[10px] text-[var(--color-muted)] font-mono">{productsList.length} items</span>
@@ -839,25 +878,25 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="grid grid-cols-4 gap-4">
-                      <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-3 flex flex-col justify-center">
+                      <div className="glass-panel rounded-xl p-3 flex flex-col justify-center">
                         <span className="text-[8px] font-bold text-[var(--color-muted)] tracking-widest uppercase mb-1">MYTHICS DETECTED</span>
                         <span className="text-xl font-black font-h text-[var(--color-gold)]">{parsedData.mythics}</span>
                       </div>
-                      <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-3 flex flex-col justify-center">
+                      <div className="glass-panel rounded-xl p-3 flex flex-col justify-center">
                         <span className="text-[8px] font-bold text-[var(--color-muted)] tracking-widest uppercase mb-1">X-SUITS DETECTED</span>
                         <span className="text-xl font-black font-h text-[var(--color-gold)]">{parsedData.xsuits}</span>
                       </div>
-                      <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-3 flex flex-col justify-center">
+                      <div className="glass-panel rounded-xl p-3 flex flex-col justify-center">
                         <span className="text-[8px] font-bold text-[var(--color-muted)] tracking-widest uppercase mb-1">WEAPON LABS DETECTED</span>
                         <span className="text-xl font-black font-h text-[var(--color-gold)]">{parsedData.guns}</span>
                       </div>
-                      <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-3 flex flex-col justify-center">
+                      <div className="glass-panel rounded-xl p-3 flex flex-col justify-center">
                         <span className="text-[8px] font-bold text-[var(--color-muted)] tracking-widest uppercase mb-1">VEHICLES DETECTED</span>
                         <span className="text-xl font-black font-h text-[var(--color-gold)]">{parsedData.vehicles}</span>
                       </div>
                     </div>
 
-                    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-4">
+                    <div className="glass-panel rounded-xl p-4">
                       <div className="flex items-center gap-2 mb-3 text-[10px] font-bold uppercase tracking-wider text-white">
                         <Edit size={12} className="text-[var(--color-gold)]" /> PASTE MESSY RAW BGMI DATA
                       </div>
@@ -877,7 +916,7 @@ export default function AdminDashboard() {
                       </div>
                     </div>
 
-                    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-4 flex justify-between items-center cursor-pointer hover:bg-white/5 transition">
+                    <div className="glass-panel rounded-xl p-4 flex justify-between items-center cursor-pointer hover:bg-white/5 transition">
                       <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[var(--color-gold)]">
                         <Settings size={12} /> FINE-TUNE PARSED DATA (MANUAL EDITING)
                       </div>
@@ -937,10 +976,10 @@ export default function AdminDashboard() {
                         </button>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
-                        <button className="bg-[var(--color-card)] border border-[var(--color-border)] hover:bg-white/5 transition rounded-xl text-white font-bold text-[10px] justify-center flex items-center py-3 gap-2">
+                        <button className="glass-panel hover:bg-white/5 transition rounded-xl text-white font-bold text-[10px] justify-center flex items-center py-3 gap-2">
                           <Copy size={12} /> COPY BOTH STYLES
                         </button>
-                        <button className="bg-[var(--color-card)] border border-[var(--color-border)] hover:bg-white/5 transition rounded-xl text-white font-bold text-[10px] justify-center flex items-center py-3 gap-2">
+                        <button className="glass-panel hover:bg-white/5 transition rounded-xl text-white font-bold text-[10px] justify-center flex items-center py-3 gap-2">
                           <Check size={12} /> DOWNLOAD TXT FILE
                         </button>
                       </div>
@@ -955,7 +994,7 @@ export default function AdminDashboard() {
               {activeTab === "uc_packs" && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   {/* ADD UC PACK */}
-                  <div className="lg:col-span-1 bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-6 shadow-xl">
+                  <div className="lg:col-span-1 glass-panel rounded-2xl p-6 shadow-xl">
                     <div className="flex items-center gap-2 mb-6 text-white font-bold tracking-wider font-h">
                       <Link2 size={16} /> Add UC Pack
                     </div>
@@ -1007,12 +1046,12 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* UC PACK LIST */}
-                  <div className="lg:col-span-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl flex flex-col overflow-hidden shadow-xl">
+                  <div className="lg:col-span-2 glass-panel rounded-2xl flex flex-col overflow-hidden shadow-xl">
                     <div className="p-4 border-b border-[var(--color-border)] font-h text-sm font-bold tracking-wider text-white">
                       UC Price List
                     </div>
                     <div className="p-6">
-                      <div className="bg-[var(--color-gold-dim)] border border-[var(--color-border-gold)] rounded-lg p-4 flex gap-3 text-[11px] text-[var(--color-gold)] font-mono">
+                      <div className="bg-[var(--color-gold-dim)] border border-[var(--color-gold)]/20 shadow-[0_0_15px_rgba(255,215,0,0.05)] rounded-lg p-4 flex gap-3 text-[11px] text-[var(--color-gold)] font-mono">
                         <ShieldAlert size={16} className="shrink-0" />
                         Note: UC prices fluctuate based on market demand and availability. Update prices regularly to reflect the current market rate.
                       </div>
@@ -1047,7 +1086,7 @@ export default function AdminDashboard() {
               {activeTab === "xsuit_gifts" && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   {/* ADD XSUIT GIFT */}
-                  <div className="lg:col-span-1 bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-6 shadow-xl">
+                  <div className="lg:col-span-1 glass-panel rounded-2xl p-6 shadow-xl">
                     <div className="flex items-center gap-2 mb-6 text-white font-bold tracking-wider font-h">
                       <Zap size={16} /> Add Xsuit Gift
                     </div>
@@ -1087,7 +1126,7 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* XSUIT LIST */}
-                  <div className="lg:col-span-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl flex flex-col overflow-hidden shadow-xl">
+                  <div className="lg:col-span-2 glass-panel rounded-2xl flex flex-col overflow-hidden shadow-xl">
                     <div className="p-4 border-b border-[var(--color-border)] font-h text-sm font-bold tracking-wider text-white">
                       Xsuit Gift List
                     </div>
@@ -1104,7 +1143,7 @@ export default function AdminDashboard() {
               {activeTab === "cars" && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   {/* ADD CAR GIFT */}
-                  <div className="lg:col-span-1 bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-6 shadow-xl">
+                  <div className="lg:col-span-1 glass-panel rounded-2xl p-6 shadow-xl">
                     <div className="flex items-center gap-2 mb-6 text-white font-bold tracking-wider font-h">
                       <Gamepad2 size={16} /> Add Supercar Gift
                     </div>
@@ -1151,7 +1190,7 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* CAR LIST */}
-                  <div className="lg:col-span-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl flex flex-col overflow-hidden shadow-xl">
+                  <div className="lg:col-span-2 glass-panel rounded-2xl flex flex-col overflow-hidden shadow-xl">
                     <div className="p-4 border-b border-[var(--color-border)] font-h text-sm font-bold tracking-wider text-white">
                       Supercar Gift List
                     </div>
@@ -1167,7 +1206,7 @@ export default function AdminDashboard() {
                   ============================================================== */}
               {activeTab === "proofs" && (
                 <div className="flex flex-col gap-6">
-                  <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-6 shadow-xl">
+                  <div className="glass-panel rounded-2xl p-6 shadow-xl">
                     <div className="flex items-center gap-2 mb-6 text-white font-bold tracking-wider text-sm font-h">
                       <Camera size={16} /> Upload New Proof
                     </div>
@@ -1207,7 +1246,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-6 shadow-xl flex flex-col items-center justify-center min-h-[300px]">
+                  <div className="glass-panel rounded-2xl p-6 shadow-xl flex flex-col items-center justify-center min-h-[300px]">
                     <Camera size={48} className="text-white/5 mb-4" />
                     <p className="text-[11px] text-[var(--color-muted)] font-mono">No proofs uploaded yet. Use the upload panel above to get started.</p>
                   </div>
@@ -1221,25 +1260,25 @@ export default function AdminDashboard() {
                 <div className="flex flex-col gap-6">
                   {/* STATS */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-6 flex flex-col items-center justify-center shadow-lg">
+                    <div className="glass-panel rounded-xl p-6 flex flex-col items-center justify-center shadow-lg">
                       <span className="text-3xl font-black font-h text-[var(--color-gold)] mb-1">{reviewsList.length}</span>
                       <span className="text-[10px] font-bold text-[var(--color-muted)] tracking-widest uppercase">TOTAL</span>
                     </div>
-                    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-6 flex flex-col items-center justify-center shadow-lg">
+                    <div className="glass-panel rounded-xl p-6 flex flex-col items-center justify-center shadow-lg">
                       <span className="text-3xl font-black font-h text-green-500 mb-1">{reviewsList.filter(r => r.status === 'approved').length}</span>
                       <span className="text-[10px] font-bold text-[var(--color-muted)] tracking-widest uppercase">APPROVED</span>
                     </div>
-                    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-6 flex flex-col items-center justify-center shadow-lg">
+                    <div className="glass-panel rounded-xl p-6 flex flex-col items-center justify-center shadow-lg">
                       <span className="text-3xl font-black font-h text-orange-500 mb-1">{reviewsList.filter(r => r.status === 'pending').length}</span>
                       <span className="text-[10px] font-bold text-[var(--color-muted)] tracking-widest uppercase">PENDING</span>
                     </div>
-                    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-6 flex flex-col items-center justify-center shadow-lg">
+                    <div className="glass-panel rounded-xl p-6 flex flex-col items-center justify-center shadow-lg">
                       <span className="text-3xl font-black font-h text-red-500 mb-1">{reviewsList.filter(r => r.status === 'rejected').length}</span>
                       <span className="text-[10px] font-bold text-[var(--color-muted)] tracking-widest uppercase">REJECTED</span>
                     </div>
                   </div>
 
-                  <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl flex flex-col overflow-hidden shadow-xl min-h-[400px]">
+                  <div className="glass-panel rounded-2xl flex flex-col overflow-hidden shadow-xl min-h-[400px]">
                     <div className="p-4 border-b border-[var(--color-border)] flex justify-between items-center bg-black/20">
                       <span className="font-h text-[13px] font-bold text-white tracking-wider">Review Management</span>
                       <span className="text-[10px] text-[var(--color-muted)] font-mono">Reviews submitted by buyers - No manual entries</span>
@@ -1314,7 +1353,7 @@ export default function AdminDashboard() {
                 <div className="flex flex-col gap-6">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* CSAT CARD */}
-                    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-8 flex flex-col items-center justify-center shadow-xl">
+                    <div className="glass-panel rounded-2xl p-8 flex flex-col items-center justify-center shadow-xl">
                       <div className="w-32 h-32 rounded-full border-[6px] border-[var(--color-gold)] flex flex-col items-center justify-center mb-6">
                          <span className="text-[40px] font-black font-h text-white leading-none">5.0</span>
                          <span className="text-[10px] font-bold text-[var(--color-gold)] uppercase tracking-widest mt-1">STORE CSAT</span>
@@ -1323,7 +1362,7 @@ export default function AdminDashboard() {
                       <p className="text-[11px] text-[var(--color-muted)] font-mono text-center max-w-[250px]">Calculated from {feedbackList.length} store improvement ratings.</p>
                     </div>
                     {/* CRM ACTION CENTER */}
-                    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-6 shadow-xl">
+                    <div className="glass-panel rounded-2xl p-6 shadow-xl">
                       <div className="flex items-center gap-2 mb-6 text-white font-bold tracking-wider text-sm font-h border-b border-white/5 pb-4">
                         <Users size={16} className="text-[var(--color-gold)]" /> CRM Action Center
                       </div>
@@ -1337,13 +1376,13 @@ export default function AdminDashboard() {
                           <span className="text-[9px] font-bold text-[var(--color-muted)] tracking-widest uppercase">READ / PROCESSED</span>
                         </div>
                       </div>
-                      <div className="bg-[var(--color-gold-dim)] border border-[var(--color-border-gold)] border-dashed rounded-lg p-3 text-[10px] text-[var(--color-muted)] leading-relaxed">
+                      <div className="bg-[var(--color-gold-dim)] border border-[var(--color-gold)]/20 shadow-[0_0_15px_rgba(255,215,0,0.05)] border-dashed rounded-lg p-3 text-[10px] text-[var(--color-muted)] leading-relaxed">
                         <span className="text-[var(--color-gold)] font-bold">💡 What Customers Want:</span> Review specific requested items in cards below. Click the WhatsApp button to fulfill requests directly!
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl flex flex-col overflow-hidden shadow-xl min-h-[300px]">
+                  <div className="glass-panel rounded-2xl flex flex-col overflow-hidden shadow-xl min-h-[300px]">
                     <div className="p-4 border-b border-[var(--color-border)] flex justify-between items-center bg-black/20">
                       <span className="font-h text-[13px] font-bold text-white tracking-wider flex items-center gap-2"><MessageSquare size={14} className="text-blue-400"/> Customer Feedback Registry</span>
                       <span className="text-[10px] text-[var(--color-muted)] font-mono">{feedbackList.length} submitted suggestions</span>
@@ -1422,7 +1461,7 @@ export default function AdminDashboard() {
               {activeTab === "payments" && (
                 <div className="flex flex-col gap-6">
                   {/* DEFAULT PAYMENT TOOLS */}
-                  <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-6 shadow-xl">
+                  <div className="glass-panel rounded-2xl p-6 shadow-xl">
                     <div className="flex items-center gap-2 mb-6 text-white font-bold tracking-wider text-sm font-h border-b border-white/5 pb-4">
                       <Zap size={16} className="text-[var(--color-gold)]" /> DEFAULT PAYMENT TOOLS
                     </div>
@@ -1467,7 +1506,7 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Payment Manager Generator */}
-                  <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-6 shadow-xl">
+                  <div className="glass-panel rounded-2xl p-6 shadow-xl">
                     <div className="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
                       <div className="flex items-center gap-2 text-white font-bold tracking-wider text-sm font-h">
                         <Zap size={16} className="text-[var(--color-gold)]" /> Payment Manager Generator
@@ -1559,22 +1598,22 @@ export default function AdminDashboard() {
 
                   {/* Stats Cards */}
                   <div className="grid grid-cols-3 gap-6">
-                    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-6 flex flex-col items-center justify-center shadow-lg">
+                    <div className="glass-panel rounded-xl p-6 flex flex-col items-center justify-center shadow-lg">
                       <span className="text-3xl font-black font-h text-[var(--color-gold)] mb-1">{paymentLinksList.length}</span>
                       <span className="text-[10px] font-bold text-[var(--color-muted)] tracking-widest uppercase">TOTAL</span>
                     </div>
-                    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-6 flex flex-col items-center justify-center shadow-lg">
+                    <div className="glass-panel rounded-xl p-6 flex flex-col items-center justify-center shadow-lg">
                       <span className="text-3xl font-black font-h text-emerald-500 mb-1">{paymentLinksList.filter(l => l.status === 'active').length}</span>
                       <span className="text-[10px] font-bold text-[var(--color-muted)] tracking-widest uppercase">ACTIVE</span>
                     </div>
-                    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-6 flex flex-col items-center justify-center shadow-lg">
+                    <div className="glass-panel rounded-xl p-6 flex flex-col items-center justify-center shadow-lg">
                       <span className="text-3xl font-black font-h text-red-500 mb-1">{paymentLinksList.filter(l => l.status !== 'active').length}</span>
                       <span className="text-[10px] font-bold text-[var(--color-muted)] tracking-widest uppercase">REVOKED</span>
                     </div>
                   </div>
 
                   {/* Table */}
-                  <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl flex flex-col overflow-hidden shadow-xl min-h-[300px]">
+                  <div className="glass-panel rounded-2xl flex flex-col overflow-hidden shadow-xl min-h-[300px]">
                     <div className="p-4 border-b border-[var(--color-border)] flex justify-between items-center bg-black/20">
                       <span className="font-h text-[13px] font-bold text-white tracking-wider flex items-center gap-2">Master Payment Registry</span>
                       <span className="text-[10px] text-[var(--color-muted)] font-mono">{paymentLinksList.length} total links</span>
@@ -1640,7 +1679,7 @@ export default function AdminDashboard() {
                   TAB: ACTIVITY LOG
                   ============================================================== */}
               {activeTab === "activity_log" && (
-                <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-8 shadow-xl min-h-[600px]">
+                <div className="glass-panel rounded-2xl p-8 shadow-xl min-h-[600px]">
                   <div className="flex items-center gap-2 mb-8 text-white font-bold tracking-wider text-sm font-h border-b border-white/5 pb-4">
                     <RefreshCw size={16} className="text-[var(--color-gold)]" /> Admin Activity Audit Trail
                   </div>
@@ -1688,7 +1727,7 @@ export default function AdminDashboard() {
               {activeTab === "admin_controls" && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   {/* ADD NEW ADMIN */}
-                  <div className="col-span-1 bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-6 shadow-xl h-fit">
+                  <div className="col-span-1 glass-panel rounded-2xl p-6 shadow-xl h-fit">
                     <div className="flex items-center gap-2 mb-6 text-[var(--color-gold)] font-bold tracking-wider text-sm font-h">
                       <Key size={16} /> Add New Admin
                     </div>
@@ -1714,7 +1753,7 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* ACTIVE ADMINISTRATORS */}
-                  <div className="col-span-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-6 shadow-xl h-fit">
+                  <div className="col-span-2 glass-panel rounded-2xl p-6 shadow-xl h-fit">
                     <div className="flex items-center justify-between mb-6">
                       <div className="flex items-center gap-2 text-white font-bold tracking-wider text-sm font-h">
                         <ShieldAlert size={16} className="text-[var(--color-gold)]" /> Active Administrators

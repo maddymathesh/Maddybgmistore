@@ -1,15 +1,15 @@
 "use client";
 
-import Navbar from "../../../components/Navbar";
-import Footer from "../../../components/Footer";
-import SocialFloat from "../../../components/SocialFloat";
+
+
+
 import Link from "next/link";
 import { ShieldCheck, FileText, Lock, ArrowLeft, CheckCircle } from "lucide-react";
 
 export default function KYCGuide() {
   return (
     <>
-      <Navbar />
+      
       <div style={{ background: "var(--color-bg)", minHeight: "100vh" }}>
         
         {/* HERO BANNER */}
@@ -147,8 +147,8 @@ export default function KYCGuide() {
         </section>
 
       </div>
-      <Footer />
-      <SocialFloat />
+      
+      
 
       <style>{`
         .back-btn:hover {

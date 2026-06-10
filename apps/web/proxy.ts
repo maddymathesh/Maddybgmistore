@@ -1,6 +1,11 @@
 import { clerkMiddleware } from "@clerk/nextjs/server";
+import type { NextRequest, NextFetchEvent } from "next/server";
 
-export default clerkMiddleware();
+const handler = clerkMiddleware();
+
+export function proxy(request: NextRequest, event: NextFetchEvent) {
+  return handler(request, event);
+}
 
 export const config = {
   matcher: [

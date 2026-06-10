@@ -360,8 +360,8 @@ export default function AdminDashboard() {
   // While Clerk is loading, show spinner
   if (!isLoaded) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[var(--color-bg)]">
-        <Loader2 size={36} className="animate-spin text-[var(--color-gold)]" />
+      <div className="flex min-h-screen items-center justify-center bg-bg">
+        <Loader2 size={36} className="animate-spin text-gold" />
       </div>
     );
   }
@@ -369,10 +369,10 @@ export default function AdminDashboard() {
   // Not logged in at all
   if (!user) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-[var(--color-bg)] text-white font-sans">
-        <ShieldAlert size={48} className="text-[var(--color-gold)]" />
+      <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-bg text-white font-sans">
+        <ShieldAlert size={48} className="text-gold" />
         <h1 className="font-h text-2xl font-black">Authentication Required</h1>
-        <p className="text-sm text-[var(--color-muted)] font-mono">Please sign in to access the Admin Panel.</p>
+        <p className="text-sm text-muted font-mono">Please sign in to access the Admin Panel.</p>
         <Link href="/sign-in" className="btn btn-gold px-6 py-2.5 text-sm">Sign In</Link>
       </div>
     );
@@ -381,17 +381,17 @@ export default function AdminDashboard() {
   // Logged in but not an admin
   if (!isAdmin) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-[var(--color-bg)] text-white font-sans">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-bg text-white font-sans">
         <ShieldAlert size={48} className="text-red-500" />
         <h1 className="font-h text-2xl font-black text-red-400">Access Denied</h1>
-        <p className="text-sm text-[var(--color-muted)] font-mono">You do not have administrative privileges to view this page.</p>
+        <p className="text-sm text-muted font-mono">You do not have administrative privileges to view this page.</p>
         <Link href="/" className="btn btn-outline px-6 py-2.5 text-sm">← Return Home</Link>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-[var(--color-bg)] text-[#eaeaea] font-sans overflow-hidden">
+    <div className="flex min-h-screen bg-bg text-[#eaeaea] font-sans overflow-hidden">
       
       {/* Sidebar Overlay Backdrop on Mobile */}
       {isSidebarOpen && (
@@ -406,15 +406,15 @@ export default function AdminDashboard() {
         <div className="p-6 border-b border-white/5 flex items-center justify-between">
           <div className="leading-tight">
             <span className="font-h font-black tracking-wide text-2xl text-white flex items-center gap-2">
-              Admin <span className="text-[var(--color-gold)]">Panel</span>
+              Admin <span className="text-gold">Panel</span>
             </span>
-            <span className="text-[10px] text-[var(--color-muted)] uppercase tracking-widest font-bold mt-1 block">
+            <span className="text-[10px] text-muted uppercase tracking-widest font-bold mt-1 block">
               Core Workspace
             </span>
           </div>
           <button 
             onClick={() => setIsSidebarOpen(false)}
-            className="lg:hidden p-2 rounded-md text-[var(--color-muted)] hover:text-white hover:bg-white/5 transition-colors"
+            className="lg:hidden p-2 rounded-md text-muted hover:text-white hover:bg-white/5 transition-colors"
           >
             <X size={20} />
           </button>
@@ -431,7 +431,7 @@ export default function AdminDashboard() {
                   setActiveTab(item.id as ActiveTab);
                   setIsSidebarOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 text-[13.5px] font-bold tracking-wide ${active ? 'bg-[var(--color-gold-dim)] text-[var(--color-gold)] shadow-inner' : 'text-[var(--color-muted)] hover:bg-white/5 hover:text-white'}`}
+                className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 text-[13.5px] font-bold tracking-wide ${active ? 'bg-gold-dim text-gold shadow-inner' : 'text-muted hover:bg-white/5 hover:text-white'}`}
               >
                 <Icon size={18} />
                 {item.label}
@@ -443,13 +443,13 @@ export default function AdminDashboard() {
         <div className="p-6 border-t border-white/5 flex flex-col gap-3">
           <Link 
             href="/transactions"
-            className="w-full btn btn-outline justify-center border-[var(--color-gold)]/30 text-[var(--color-gold)] hover:bg-[var(--color-gold)]/10 text-[11px] py-2"
+            className="w-full btn btn-outline justify-center border-gold/30 text-gold hover:bg-gold/10 text-[11px] py-2"
           >
             <CreditCard size={14} /> Transaction Panel
           </Link>
           <div className="w-full flex items-center justify-between bg-black/20 p-2 rounded-lg border border-white/5">
             <UserButton afterSignOutUrl="/sign-in" />
-            <span className="text-[10px] text-[var(--color-muted)] font-bold">LOGGED IN</span>
+            <span className="text-[10px] text-muted font-bold">LOGGED IN</span>
           </div>
         </div>
       </aside>
@@ -458,7 +458,7 @@ export default function AdminDashboard() {
       <main className="flex-1 flex flex-col min-w-0 h-screen relative">
         
         {/* Sticky Header */}
-        <header className="h-[80px] shrink-0 border-b border-white/5 glass-panel sticky top-0 z-30 flex items-center justify-between px-6 lg:px-10">
+        <header className="h-20 shrink-0 border-b border-white/5 glass-panel sticky top-0 z-30 flex items-center justify-between px-6 lg:px-10">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setIsSidebarOpen(true)}
@@ -467,7 +467,7 @@ export default function AdminDashboard() {
               <Menu size={24} />
             </button>
             <h2 className="font-h font-bold text-lg lg:text-xl tracking-wide flex items-center gap-2 text-white">
-              {SIDEBAR_ITEMS.find(i => i.id === activeTab)?.icon && React.createElement(SIDEBAR_ITEMS.find(i => i.id === activeTab)!.icon, { size: 20, className: "text-[var(--color-gold)]" })}
+              {SIDEBAR_ITEMS.find(i => i.id === activeTab)?.icon && React.createElement(SIDEBAR_ITEMS.find(i => i.id === activeTab)!.icon, { size: 20, className: "text-gold" })}
               {SIDEBAR_ITEMS.find(i => i.id === activeTab)?.label || "Dashboard"}
             </h2>
           </div>
@@ -483,8 +483,8 @@ export default function AdminDashboard() {
         <div className="flex-1 p-6 lg:p-10 overflow-y-auto scrollbar-thin">
           {loading && !metrics ? (
             <div className="flex flex-col items-center justify-center h-full gap-4">
-              <Loader2 size={36} className="animate-spin text-[var(--color-gold)]" />
-              <p className="text-sm text-[var(--color-muted)] font-mono uppercase tracking-widest">Hydrating dashboard workspaces...</p>
+              <Loader2 size={36} className="animate-spin text-gold" />
+              <p className="text-sm text-muted font-mono uppercase tracking-widest">Hydrating dashboard workspaces...</p>
             </div>
           ) : (
             <>
@@ -495,25 +495,25 @@ export default function AdminDashboard() {
                 <div className="flex flex-col gap-8">
                   {/* METRICS ROW */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="glass-panel border border-[var(--color-gold)]/20 shadow-[0_0_15px_rgba(255,215,0,0.05)] rounded-2xl p-6 shadow-xl relative overflow-hidden">
-                      <div className="absolute top-0 right-0 p-6 opacity-10"><TrendingUp size={80} className="text-[var(--color-gold)]" /></div>
-                      <span className="text-[10px] font-bold text-[var(--color-gold)] uppercase tracking-wider block mb-1">Total Sales Revenue</span>
+                    <div className="glass-panel border border-gold/20 shadow-[0_0_15px_rgba(255,215,0,0.05)] rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                      <div className="absolute top-0 right-0 p-6 opacity-10"><TrendingUp size={80} className="text-gold" /></div>
+                      <span className="text-[10px] font-bold text-gold uppercase tracking-wider block mb-1">Total Sales Revenue</span>
                       <strong className="text-4xl font-h font-black text-white">₹{Number(metrics.analytics.revenue).toLocaleString("en-IN")}</strong>
-                      <span className="text-xs text-[var(--color-muted)] block mt-2 font-mono">Mapped from logged transactions</span>
+                      <span className="text-xs text-muted block mt-2 font-mono">Mapped from logged transactions</span>
                     </div>
 
                     <div className="glass-panel border border-green-500/20 rounded-2xl p-6 shadow-xl relative overflow-hidden">
                       <div className="absolute top-0 right-0 p-6 opacity-10"><Users size={80} className="text-green-500" /></div>
                       <span className="text-[10px] font-bold text-green-400 uppercase tracking-wider block mb-1">Total Profit</span>
                       <strong className="text-4xl font-h font-black text-white">₹{Number(metrics.analytics.profit).toLocaleString("en-IN")}</strong>
-                      <span className="text-xs text-[var(--color-muted)] block mt-2 font-mono">Difference of owner vs sold price</span>
+                      <span className="text-xs text-muted block mt-2 font-mono">Difference of owner vs sold price</span>
                     </div>
 
                     <div className="glass-panel border border-blue-500/20 rounded-2xl p-6 shadow-xl relative overflow-hidden">
                       <div className="absolute top-0 right-0 p-6 opacity-10"><LayoutDashboard size={80} className="text-blue-500" /></div>
                       <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider block mb-1">Counter Site Views</span>
                       <strong className="text-4xl font-h font-black text-white">{metrics.totalViews.toLocaleString()}</strong>
-                      <span className="text-xs text-[var(--color-muted)] block mt-2 font-mono">Live counter tracked on public portal</span>
+                      <span className="text-xs text-muted block mt-2 font-mono">Live counter tracked on public portal</span>
                     </div>
                   </div>
 
@@ -526,19 +526,19 @@ export default function AdminDashboard() {
                       { label: "Total Handover Logs", val: metrics.analytics.count, desc: "Manual transaction counts" }
                     ].map((stat, idx) => (
                       <div key={idx} className={`glass-panel rounded-2xl p-6 shadow-md ${stat.highlight ? "border-orange-500/30 bg-orange-500/2" : ""}`}>
-                        <span className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-wider block mb-1">{stat.label}</span>
+                        <span className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-1">{stat.label}</span>
                         <strong className="text-2xl font-h font-extrabold text-white block">{stat.val}</strong>
-                        <span className="text-xs text-[var(--color-muted)] block mt-1">{stat.desc}</span>
+                        <span className="text-xs text-muted block mt-1">{stat.desc}</span>
                       </div>
                     ))}
                   </div>
 
                   {/* QUICK TIPS PANEL */}
-                  <div className="bg-gradient-to-r from-yellow-500/5 to-orange-500/5 border border-[var(--color-gold)]/20 shadow-[0_0_15px_rgba(255,215,0,0.05)] rounded-2xl p-6 flex gap-4 items-start">
-                    <ShieldAlert className="text-[var(--color-gold)] shrink-0" size={24} />
+                  <div className="bg-gradient-to-r from-yellow-500/5 to-orange-500/5 border border-gold/20 shadow-[0_0_15px_rgba(255,215,0,0.05)] rounded-2xl p-6 flex gap-4 items-start">
+                    <ShieldAlert className="text-gold shrink-0" size={24} />
                     <div>
                       <h4 className="font-h font-bold text-white uppercase text-sm tracking-wider mb-1">Administrator Safety Protocol</h4>
-                      <p className="text-xs text-[var(--color-muted)] leading-relaxed">
+                      <p className="text-xs text-muted leading-relaxed">
                         Secure transaction settings and PIN codes are active. Never share payment links PINs with third parties.
                         When adding new accounts in Ready Stocks, upload high-quality catalog images. Formatted broadcast scripts can be shared on WhatsApp and Telegram channels directly from the Broadcast Maker tab.
                       </p>
@@ -554,7 +554,7 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   {/* ADD PRODUCT FORM */}
                   <div className="lg:col-span-1 glass-panel rounded-2xl p-6 shadow-xl h-fit">
-                    <div className="flex items-center gap-2 mb-6 text-[var(--color-gold)] font-bold tracking-wider font-h">
+                    <div className="flex items-center gap-2 mb-6 text-gold font-bold tracking-wider font-h">
                       <Plus size={16} /> Add Product
                     </div>
                     <form onSubmit={handleProductSubmit} className="flex flex-col gap-4">
@@ -577,7 +577,7 @@ export default function AdminDashboard() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">PRIMARY LOGIN</label>
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">PRIMARY LOGIN</label>
                         <select value={productForm.primaryLogin || "Facebook"} onChange={e => setProductForm({ ...productForm, primaryLogin: e.target.value })} className="input-field">
                           <option value="X">X</option>
                           <option value="Facebook">Facebook</option>
@@ -585,7 +585,7 @@ export default function AdminDashboard() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">SECONDARY LOGIN</label>
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">SECONDARY LOGIN</label>
                         <select value={productForm.secondaryLogin || "None (Single Login)"} onChange={e => setProductForm({ ...productForm, secondaryLogin: e.target.value })} className="input-field">
                           <option value="None (Single Login)">None (Single Login)</option>
                           <option value="Play Games">Play Games</option>
@@ -594,7 +594,7 @@ export default function AdminDashboard() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">PROMO TAG</label>
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">PROMO TAG</label>
                         <select value={productForm.tag} onChange={e => setProductForm({ ...productForm, tag: e.target.value })} className="input-field">
                           <option value="None">None</option>
                           <option value="Hot">Hot</option>
@@ -614,10 +614,10 @@ export default function AdminDashboard() {
 
                   {/* INVENTORY LIST */}
                   <div className="lg:col-span-2">
-                    <div className="glass-panel rounded-2xl flex flex-col overflow-hidden shadow-xl min-h-[400px]">
-                      <div className="p-4 border-b border-[var(--color-border)] flex justify-between items-center bg-black/20">
+                    <div className="glass-panel rounded-2xl flex flex-col overflow-hidden shadow-xl min-h-100">
+                      <div className="p-4 border-b border-border flex justify-between items-center bg-black/20">
                         <span className="font-h text-[13px] font-bold text-white tracking-wider">Account Inventory</span>
-                        <span className="text-[10px] text-[var(--color-muted)] font-mono">{productsList.length} items</span>
+                        <span className="text-[10px] text-muted font-mono">{productsList.length} items</span>
                       </div>
                       <div className="table-wrap m-4">
                         <table className="admin-table font-sans">
@@ -629,7 +629,7 @@ export default function AdminDashboard() {
                                     <div className="flex flex-col gap-1">
                                       <strong className="text-white text-xs">{prod.title}</strong>
                                       <div className="flex items-center gap-2">
-                                        <span className="font-bold text-[var(--color-gold)] font-mono text-[11px]">₹{Number(prod.price).toLocaleString("en-IN")}</span>
+                                        <span className="font-bold text-gold font-mono text-[11px]">₹{Number(prod.price).toLocaleString("en-IN")}</span>
                                         <span className={`text-[9px] px-1.5 py-0.5 rounded font-black uppercase tracking-wider ${prod.status === "available" ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-red-500/10 text-red-400 border border-red-500/20"}`}>{prod.status}</span>
                                       </div>
                                     </div>
@@ -651,7 +651,7 @@ export default function AdminDashboard() {
                                           tag: prod.tag || "None",
                                           imageUrls: prod.imageUrls || []
                                         });
-                                      }} className="p-2 bg-white/5 border border-white/10 rounded-md text-[var(--color-gold)] hover:bg-white/10 transition">
+                                      }} className="p-2 bg-white/5 border border-white/10 rounded-md text-gold hover:bg-white/10 transition">
                                         <Edit size={12} />
                                       </button>
                                       <button onClick={() => handleDeleteProduct(prod.id)} className="p-2 bg-white/5 border border-white/10 rounded-md text-red-400 hover:bg-white/10 transition">
@@ -663,7 +663,7 @@ export default function AdminDashboard() {
                               ))
                             ) : (
                               <tr>
-                                <td className="text-center py-8 text-[var(--color-muted)] font-mono text-xs">No products listed. Add one to begin!</td>
+                                <td className="text-center py-8 text-muted font-mono text-xs">No products listed. Add one to begin!</td>
                               </tr>
                             )}
                           </tbody>
@@ -682,15 +682,15 @@ export default function AdminDashboard() {
                   {/* LEFT PANEL: PARSER */}
                   <div className="flex flex-col gap-6">
                     <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2 font-bold tracking-wider font-h text-[var(--color-gold)]">
+                      <div className="flex items-center gap-2 font-bold tracking-wider font-h text-gold">
                         <Zap size={16} /> AI Description Factory
                         <span className="text-[8px] bg-green-500 text-black px-1.5 py-0.5 rounded ml-2 uppercase">100% Client-Side</span>
                       </div>
                       <div className="flex gap-2">
-                        <button className="text-[9px] font-bold border border-white/20 px-3 py-1.5 rounded hover:bg-white/5 transition text-[var(--color-muted)] flex items-center gap-1">
+                        <button className="text-[9px] font-bold border border-white/20 px-3 py-1.5 rounded hover:bg-white/5 transition text-muted flex items-center gap-1">
                           <LayoutDashboard size={12} /> BROWSER PRESETS (0)
                         </button>
-                        <button className="text-[9px] font-bold border border-[var(--color-gold)] text-[var(--color-gold)] px-3 py-1.5 rounded hover:bg-[var(--color-gold)] hover:text-black transition flex items-center gap-1">
+                        <button className="text-[9px] font-bold border border-gold text-gold px-3 py-1.5 rounded hover:bg-gold hover:text-black transition flex items-center gap-1">
                           <Check size={12} /> SAVE PRESET
                         </button>
                         <button className="text-[9px] font-bold bg-red-500/20 text-red-400 px-3 py-1.5 rounded hover:bg-red-500 hover:text-white transition flex items-center gap-1">
@@ -701,34 +701,34 @@ export default function AdminDashboard() {
 
                     <div className="grid grid-cols-4 gap-4">
                       <div className="glass-panel rounded-xl p-3 flex flex-col justify-center">
-                        <span className="text-[8px] font-bold text-[var(--color-muted)] tracking-widest uppercase mb-1">MYTHICS DETECTED</span>
-                        <span className="text-xl font-black font-h text-[var(--color-gold)]">{parsedData.mythics}</span>
+                        <span className="text-[8px] font-bold text-muted tracking-widest uppercase mb-1">MYTHICS DETECTED</span>
+                        <span className="text-xl font-black font-h text-gold">{parsedData.mythics}</span>
                       </div>
                       <div className="glass-panel rounded-xl p-3 flex flex-col justify-center">
-                        <span className="text-[8px] font-bold text-[var(--color-muted)] tracking-widest uppercase mb-1">X-SUITS DETECTED</span>
-                        <span className="text-xl font-black font-h text-[var(--color-gold)]">{parsedData.xsuits}</span>
+                        <span className="text-[8px] font-bold text-muted tracking-widest uppercase mb-1">X-SUITS DETECTED</span>
+                        <span className="text-xl font-black font-h text-gold">{parsedData.xsuits}</span>
                       </div>
                       <div className="glass-panel rounded-xl p-3 flex flex-col justify-center">
-                        <span className="text-[8px] font-bold text-[var(--color-muted)] tracking-widest uppercase mb-1">WEAPON LABS DETECTED</span>
-                        <span className="text-xl font-black font-h text-[var(--color-gold)]">{parsedData.guns}</span>
+                        <span className="text-[8px] font-bold text-muted tracking-widest uppercase mb-1">WEAPON LABS DETECTED</span>
+                        <span className="text-xl font-black font-h text-gold">{parsedData.guns}</span>
                       </div>
                       <div className="glass-panel rounded-xl p-3 flex flex-col justify-center">
-                        <span className="text-[8px] font-bold text-[var(--color-muted)] tracking-widest uppercase mb-1">VEHICLES DETECTED</span>
-                        <span className="text-xl font-black font-h text-[var(--color-gold)]">{parsedData.vehicles}</span>
+                        <span className="text-[8px] font-bold text-muted tracking-widest uppercase mb-1">VEHICLES DETECTED</span>
+                        <span className="text-xl font-black font-h text-gold">{parsedData.vehicles}</span>
                       </div>
                     </div>
 
                     <div className="glass-panel rounded-xl p-4">
                       <div className="flex items-center gap-2 mb-3 text-[10px] font-bold uppercase tracking-wider text-white">
-                        <Edit size={12} className="text-[var(--color-gold)]" /> PASTE MESSY RAW BGMI DATA
+                        <Edit size={12} className="text-gold" /> PASTE MESSY RAW BGMI DATA
                       </div>
-                      <p className="text-[9px] text-[var(--color-muted)] mb-4">
+                      <p className="text-[9px] text-muted mb-4">
                         Paste messy raw specifications below. The AI/Rule-based parser will instantly detect values, clean spellings, calculate totals, and organize posting formats.
                       </p>
                       <textarea 
                         value={rawDescription}
                         onChange={e => setRawDescription(e.target.value)}
-                        className="w-full h-[250px] bg-black/40 border border-white/10 rounded-lg p-3 text-xs text-[var(--color-muted)] font-mono resize-none focus:outline-none focus:border-[var(--color-gold)] transition"
+                        className="w-full h-62.5 bg-black/40 border border-white/10 rounded-lg p-3 text-xs text-muted font-mono resize-none focus:outline-none focus:border-gold transition"
                         placeholder="Example Paste Structure:&#10;&#10;100 mythics&#10;ignis xsuit lvl 4&#10;galadria xsuit lvl 1&#10;m416 shinobi kami on hit&#10;m416 sealed realm lvl 6 on hit&#10;42 gun labs&#10;19 kill feeds&#10;3 supercars&#10;4 upgraded vehicles&#10;&#10;account level 81&#10;pro collector 63"
                       ></textarea>
                       <div className="flex justify-end mt-3">
@@ -739,7 +739,7 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="glass-panel rounded-xl p-4 flex justify-between items-center cursor-pointer hover:bg-white/5 transition">
-                      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[var(--color-gold)]">
+                      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-gold">
                         <Settings size={12} /> FINE-TUNE PARSED DATA (MANUAL EDITING)
                       </div>
                       <X size={14} className="rotate-45" />
@@ -748,28 +748,28 @@ export default function AdminDashboard() {
 
                   {/* RIGHT PANEL: PREVIEW */}
                   <div className="flex flex-col gap-6">
-                    <div className="flex gap-2 mb-2 border-b border-[var(--color-border)] pb-4">
-                      <button className="text-[9px] font-bold bg-[var(--color-gold)] text-black px-4 py-1.5 rounded-full flex items-center gap-1">
+                    <div className="flex gap-2 mb-2 border-b border-border pb-4">
+                      <button className="text-[9px] font-bold bg-gold text-black px-4 py-1.5 rounded-full flex items-center gap-1">
                          <MessageSquare size={12} /> WHATSAPP VIEW
                       </button>
-                      <button className="text-[9px] font-bold border border-white/20 text-[var(--color-muted)] hover:text-white px-4 py-1.5 rounded-full flex items-center gap-1 transition">
+                      <button className="text-[9px] font-bold border border-white/20 text-muted hover:text-white px-4 py-1.5 rounded-full flex items-center gap-1 transition">
                          <Zap size={12} /> TELEGRAM VIEW
                       </button>
                     </div>
 
-                    <div className="flex-grow flex items-center justify-center bg-black/20 border border-[var(--color-border)] rounded-2xl p-6 relative overflow-hidden">
+                    <div className="grow flex items-center justify-center bg-black/20 border border-border rounded-2xl p-6 relative overflow-hidden">
                       {/* Simulated WhatsApp Phone */}
-                      <div className="w-[300px] h-[450px] bg-[#111b21] rounded-[2rem] border-[6px] border-[#222e35] shadow-2xl flex flex-col overflow-hidden relative">
+                      <div className="w-75 h-112.5 bg-[#111b21] rounded-4xl border-[6px] border-[#222e35] shadow-2xl flex flex-col overflow-hidden relative">
                         {/* Header */}
-                        <div className="bg-[#202c33] h-12 flex items-center px-3 gap-3 flex-shrink-0">
-                          <div className="w-8 h-8 rounded-full bg-[var(--color-gold)]/20 flex items-center justify-center text-[var(--color-gold)] text-xs font-bold">MB</div>
+                        <div className="bg-[#202c33] h-12 flex items-center px-3 gap-3 shrink-0">
+                          <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center text-gold text-xs font-bold">MB</div>
                           <div className="flex flex-col">
                             <span className="text-white text-[11px] font-bold">Maddy BGMI Store WhatsApp Channel</span>
-                            <span className="text-[8px] text-[var(--color-muted)]">Official • posting style</span>
+                            <span className="text-[8px] text-muted">Official • posting style</span>
                           </div>
                         </div>
                         {/* Chat Body */}
-                        <div className="flex-grow bg-[#0b141a] p-3 overflow-y-auto">
+                        <div className="grow bg-[#0b141a] p-3 overflow-y-auto">
                           <div className="bg-[#005c4b] rounded-lg rounded-tl-none p-3 max-w-[90%] shadow text-[10px] text-white leading-relaxed font-sans">
                             <span className="block mb-2 font-bold">#NEWSTOCK<br/>#NEWPOST</span>
                             <span className="block mb-3">‼️❤️ Premium Deal Of The Day ❤️‼️</span>
@@ -786,8 +786,8 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="flex flex-col gap-3">
-                      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)] border-b border-[var(--color-border)] pb-2">
-                        <LayoutDashboard size={12} className="text-[var(--color-gold)]" /> Description Actions
+                      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-muted border-b border-border pb-2">
+                        <LayoutDashboard size={12} className="text-gold" /> Description Actions
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <button className="btn btn-outline justify-center text-[10px] py-3">
@@ -822,25 +822,25 @@ export default function AdminDashboard() {
                     </div>
                     <form className="flex flex-col gap-4">
                       <div>
-                        <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">UC AMOUNT</label>
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">UC AMOUNT</label>
                         <input type="text" placeholder="e.g. 8,000 UC" className="input-field" />
                       </div>
                       <div>
-                        <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">BONUS UC</label>
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">BONUS UC</label>
                         <input type="text" placeholder="e.g. 60" className="input-field" />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">SELLING PRICE (₹)</label>
+                          <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">SELLING PRICE (₹)</label>
                           <input type="text" placeholder="e.g. 7,500" className="input-field" />
                         </div>
                         <div>
-                          <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">OUR OFFER PRICE (₹)</label>
+                          <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">OUR OFFER PRICE (₹)</label>
                           <input type="text" placeholder="e.g. 6,500" className="input-field" />
                         </div>
                       </div>
                       <div>
-                        <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">PURCHASE METHOD</label>
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">PURCHASE METHOD</label>
                         <select className="input-field">
                           <option>View Login UC (Facebook / X)</option>
                           <option>Player ID (In-Game)</option>
@@ -848,14 +848,14 @@ export default function AdminDashboard() {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">STATUS</label>
+                          <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">STATUS</label>
                           <select className="input-field">
                             <option>Available</option>
                             <option>Out of Stock</option>
                           </select>
                         </div>
                         <div>
-                          <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">PROMO TAG</label>
+                          <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">PROMO TAG</label>
                           <select className="input-field">
                             <option>None</option>
                             <option>Best Value</option>
@@ -869,29 +869,29 @@ export default function AdminDashboard() {
 
                   {/* UC PACK LIST */}
                   <div className="lg:col-span-2 glass-panel rounded-2xl flex flex-col overflow-hidden shadow-xl">
-                    <div className="p-4 border-b border-[var(--color-border)] font-h text-sm font-bold tracking-wider text-white">
+                    <div className="p-4 border-b border-border font-h text-sm font-bold tracking-wider text-white">
                       UC Price List
                     </div>
                     <div className="p-6">
-                      <div className="bg-[var(--color-gold-dim)] border border-[var(--color-gold)]/20 shadow-[0_0_15px_rgba(255,215,0,0.05)] rounded-lg p-4 flex gap-3 text-[11px] text-[var(--color-gold)] font-mono">
+                      <div className="bg-gold-dim border border-gold/20 shadow-[0_0_15px_rgba(255,215,0,0.05)] rounded-lg p-4 flex gap-3 text-[11px] text-gold font-mono">
                         <ShieldAlert size={16} className="shrink-0" />
                         Note: UC prices fluctuate based on market demand and availability. Update prices regularly to reflect the current market rate.
                       </div>
                       
                       <div className="mt-6 flex flex-col gap-4">
-                        <div className="p-4 border border-[var(--color-border)] rounded-xl flex items-center justify-between hover:bg-white/5 transition cursor-pointer">
+                        <div className="p-4 border border-border rounded-xl flex items-center justify-between hover:bg-white/5 transition cursor-pointer">
                           <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-2">
                               <span className="font-black text-white font-h">8100</span>
-                              <span className="bg-[var(--color-gold)] text-black text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider">BEST VALUE</span>
+                              <span className="bg-gold text-black text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider">BEST VALUE</span>
                               <span className="text-[10px] text-blue-400 font-mono bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">🔑 View Login</span>
                             </div>
-                            <span className="text-[10px] text-[var(--color-muted)]">Market: <span className="line-through">₹7500</span></span>
+                            <span className="text-[10px] text-muted">Market: <span className="line-through">₹7500</span></span>
                           </div>
                           <div className="flex items-center gap-4">
                             <span className="text-green-500 font-black font-h text-lg tracking-wider">₹6500</span>
                             <div className="flex gap-2">
-                              <button className="text-[var(--color-gold)] hover:text-white transition"><Edit size={14}/></button>
+                              <button className="text-gold hover:text-white transition"><Edit size={14}/></button>
                               <button className="text-red-400 hover:text-white transition"><Trash2 size={14}/></button>
                             </div>
                           </div>
@@ -914,15 +914,15 @@ export default function AdminDashboard() {
                     </div>
                     <form className="flex flex-col gap-4">
                       <div>
-                        <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">XSUIT NAME</label>
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">XSUIT NAME</label>
                         <input type="text" placeholder="e.g. Poseidon X-Suit" className="input-field" />
                       </div>
                       <div>
-                        <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">OFFER PRICE (₹)</label>
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">OFFER PRICE (₹)</label>
                         <input type="text" placeholder="e.g. 15000" className="input-field" />
                       </div>
                       <div>
-                        <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">PROMO TAG</label>
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">PROMO TAG</label>
                         <select className="input-field">
                           <option>None</option>
                           <option>Hot</option>
@@ -930,16 +930,16 @@ export default function AdminDashboard() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">IMAGE SOURCE</label>
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">IMAGE SOURCE</label>
                         <div className="flex gap-4 mb-2">
-                          <label className="flex items-center gap-2 text-[11px] text-[var(--color-gold)] cursor-pointer">
-                            <input type="radio" name="xsuit_img_src" defaultChecked className="accent-[var(--color-gold)]" /> File Upload
+                          <label className="flex items-center gap-2 text-[11px] text-gold cursor-pointer">
+                            <input type="radio" name="xsuit_img_src" defaultChecked className="accent-gold" /> File Upload
                           </label>
                           <label className="flex items-center gap-2 text-[11px] text-white cursor-pointer">
-                            <input type="radio" name="xsuit_img_src" className="accent-[var(--color-gold)]" /> Drive Image ID
+                            <input type="radio" name="xsuit_img_src" className="accent-gold" /> Drive Image ID
                           </label>
                         </div>
-                        <div className="border border-dashed border-[var(--color-border)] rounded-lg p-6 flex items-center justify-center text-[10px] text-[var(--color-muted)] cursor-pointer hover:border-[var(--color-gold)] hover:text-[var(--color-gold)] transition">
+                        <div className="border border-dashed border-border rounded-lg p-6 flex items-center justify-center text-[10px] text-muted cursor-pointer hover:border-gold hover:text-gold transition">
                           Click to Upload Xsuit Image
                         </div>
                       </div>
@@ -949,11 +949,11 @@ export default function AdminDashboard() {
 
                   {/* XSUIT LIST */}
                   <div className="lg:col-span-2 glass-panel rounded-2xl flex flex-col overflow-hidden shadow-xl">
-                    <div className="p-4 border-b border-[var(--color-border)] font-h text-sm font-bold tracking-wider text-white">
+                    <div className="p-4 border-b border-border font-h text-sm font-bold tracking-wider text-white">
                       Xsuit Gift List
                     </div>
-                    <div className="p-6 flex items-center justify-center h-full min-h-[400px]">
-                      <span className="text-[10px] text-[var(--color-muted)] font-mono">No Xsuit Gifts listed yet.</span>
+                    <div className="p-6 flex items-center justify-center h-full min-h-100">
+                      <span className="text-[10px] text-muted font-mono">No Xsuit Gifts listed yet.</span>
                     </div>
                   </div>
                 </div>
@@ -971,15 +971,15 @@ export default function AdminDashboard() {
                     </div>
                     <form className="flex flex-col gap-4">
                       <div>
-                        <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">SUPERCAR NAME</label>
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">SUPERCAR NAME</label>
                         <input type="text" placeholder="e.g. Lamborghini Aventador" className="input-field" />
                       </div>
                       <div>
-                        <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">OFFER PRICE (₹)</label>
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">OFFER PRICE (₹)</label>
                         <input type="text" placeholder="e.g. 15000" className="input-field" />
                       </div>
                       <div>
-                        <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">PROMO TAG</label>
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">PROMO TAG</label>
                         <select className="input-field">
                           <option>None</option>
                           <option>Hot</option>
@@ -987,23 +987,23 @@ export default function AdminDashboard() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">CARD TYPE</label>
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">CARD TYPE</label>
                         <select className="input-field">
                           <option>One-Card</option>
                           <option>Three-Card</option>
                         </select>
                       </div>
                       <div>
-                        <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">IMAGE SOURCE</label>
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">IMAGE SOURCE</label>
                         <div className="flex gap-4 mb-2">
-                          <label className="flex items-center gap-2 text-[11px] text-[var(--color-gold)] cursor-pointer">
-                            <input type="radio" name="car_img_src" defaultChecked className="accent-[var(--color-gold)]" /> File Upload
+                          <label className="flex items-center gap-2 text-[11px] text-gold cursor-pointer">
+                            <input type="radio" name="car_img_src" defaultChecked className="accent-gold" /> File Upload
                           </label>
                           <label className="flex items-center gap-2 text-[11px] text-white cursor-pointer">
-                            <input type="radio" name="car_img_src" className="accent-[var(--color-gold)]" /> Drive Image ID
+                            <input type="radio" name="car_img_src" className="accent-gold" /> Drive Image ID
                           </label>
                         </div>
-                        <div className="border border-dashed border-[var(--color-border)] rounded-lg p-6 flex items-center justify-center text-[10px] text-[var(--color-muted)] cursor-pointer hover:border-[var(--color-gold)] hover:text-[var(--color-gold)] transition">
+                        <div className="border border-dashed border-border rounded-lg p-6 flex items-center justify-center text-[10px] text-muted cursor-pointer hover:border-gold hover:text-gold transition">
                           Click to Upload Supercar Image
                         </div>
                       </div>
@@ -1013,11 +1013,11 @@ export default function AdminDashboard() {
 
                   {/* CAR LIST */}
                   <div className="lg:col-span-2 glass-panel rounded-2xl flex flex-col overflow-hidden shadow-xl">
-                    <div className="p-4 border-b border-[var(--color-border)] font-h text-sm font-bold tracking-wider text-white">
+                    <div className="p-4 border-b border-border font-h text-sm font-bold tracking-wider text-white">
                       Supercar Gift List
                     </div>
-                    <div className="p-6 flex items-center justify-center h-full min-h-[400px]">
-                      <span className="text-[10px] text-[var(--color-muted)] font-mono">No Supercars listed yet.</span>
+                    <div className="p-6 flex items-center justify-center h-full min-h-100">
+                      <span className="text-[10px] text-muted font-mono">No Supercars listed yet.</span>
                     </div>
                   </div>
                 </div>
@@ -1034,31 +1034,31 @@ export default function AdminDashboard() {
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                       <div className="col-span-1 lg:col-span-1">
-                        <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">TITLE</label>
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">TITLE</label>
                         <input type="text" placeholder="e.g. Payment Proof, Deal Feedback" className="input-field" />
                       </div>
                       <div className="col-span-1">
-                        <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">MONTH</label>
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">MONTH</label>
                         <select className="input-field"><option>June</option></select>
                       </div>
                       <div className="col-span-1">
-                        <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">YEAR</label>
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">YEAR</label>
                         <select className="input-field"><option>2026</option></select>
                       </div>
                       <div className="col-span-1">
-                        <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">IMAGE SOURCE</label>
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">IMAGE SOURCE</label>
                         <div className="flex gap-4 mb-2">
-                          <label className="flex items-center gap-2 text-[11px] text-[var(--color-gold)] cursor-pointer">
-                            <input type="radio" name="proof_img_src" defaultChecked className="accent-[var(--color-gold)]" /> File Upload
+                          <label className="flex items-center gap-2 text-[11px] text-gold cursor-pointer">
+                            <input type="radio" name="proof_img_src" defaultChecked className="accent-gold" /> File Upload
                           </label>
-                          <label className="flex items-center gap-2 text-[11px] text-[var(--color-muted)] cursor-pointer">
-                            <input type="radio" name="proof_img_src" className="accent-[var(--color-gold)]" /> Drive Image ID
+                          <label className="flex items-center gap-2 text-[11px] text-muted cursor-pointer">
+                            <input type="radio" name="proof_img_src" className="accent-gold" /> Drive Image ID
                           </label>
                         </div>
                       </div>
                       <div className="col-span-1">
-                        <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">IMAGE INPUT</label>
-                        <div className="border border-dashed border-[var(--color-border)] rounded-lg p-3 flex items-center justify-center text-[10px] text-[var(--color-muted)] cursor-pointer hover:border-[var(--color-gold)] hover:text-[var(--color-gold)] transition h-[42px]">
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">IMAGE INPUT</label>
+                        <div className="border border-dashed border-border rounded-lg p-3 flex items-center justify-center text-[10px] text-muted cursor-pointer hover:border-gold hover:text-gold transition h-10.5">
                           Click to choose file
                         </div>
                       </div>
@@ -1068,9 +1068,9 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  <div className="glass-panel rounded-2xl p-6 shadow-xl flex flex-col items-center justify-center min-h-[300px]">
+                  <div className="glass-panel rounded-2xl p-6 shadow-xl flex flex-col items-center justify-center min-h-75">
                     <Camera size={48} className="text-white/5 mb-4" />
-                    <p className="text-[11px] text-[var(--color-muted)] font-mono">No proofs uploaded yet. Use the upload panel above to get started.</p>
+                    <p className="text-[11px] text-muted font-mono">No proofs uploaded yet. Use the upload panel above to get started.</p>
                   </div>
                 </div>
               )}
@@ -1083,27 +1083,27 @@ export default function AdminDashboard() {
                   {/* STATS */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                     <div className="glass-panel rounded-xl p-6 flex flex-col items-center justify-center shadow-lg">
-                      <span className="text-3xl font-black font-h text-[var(--color-gold)] mb-1">{reviewsList.length}</span>
-                      <span className="text-[10px] font-bold text-[var(--color-muted)] tracking-widest uppercase">TOTAL</span>
+                      <span className="text-3xl font-black font-h text-gold mb-1">{reviewsList.length}</span>
+                      <span className="text-[10px] font-bold text-muted tracking-widest uppercase">TOTAL</span>
                     </div>
                     <div className="glass-panel rounded-xl p-6 flex flex-col items-center justify-center shadow-lg">
                       <span className="text-3xl font-black font-h text-green-500 mb-1">{reviewsList.filter(r => r.status === 'approved').length}</span>
-                      <span className="text-[10px] font-bold text-[var(--color-muted)] tracking-widest uppercase">APPROVED</span>
+                      <span className="text-[10px] font-bold text-muted tracking-widest uppercase">APPROVED</span>
                     </div>
                     <div className="glass-panel rounded-xl p-6 flex flex-col items-center justify-center shadow-lg">
                       <span className="text-3xl font-black font-h text-orange-500 mb-1">{reviewsList.filter(r => r.status === 'pending').length}</span>
-                      <span className="text-[10px] font-bold text-[var(--color-muted)] tracking-widest uppercase">PENDING</span>
+                      <span className="text-[10px] font-bold text-muted tracking-widest uppercase">PENDING</span>
                     </div>
                     <div className="glass-panel rounded-xl p-6 flex flex-col items-center justify-center shadow-lg">
                       <span className="text-3xl font-black font-h text-red-500 mb-1">{reviewsList.filter(r => r.status === 'rejected').length}</span>
-                      <span className="text-[10px] font-bold text-[var(--color-muted)] tracking-widest uppercase">REJECTED</span>
+                      <span className="text-[10px] font-bold text-muted tracking-widest uppercase">REJECTED</span>
                     </div>
                   </div>
 
-                  <div className="glass-panel rounded-2xl flex flex-col overflow-hidden shadow-xl min-h-[400px]">
-                    <div className="p-4 border-b border-[var(--color-border)] flex justify-between items-center bg-black/20">
+                  <div className="glass-panel rounded-2xl flex flex-col overflow-hidden shadow-xl min-h-100">
+                    <div className="p-4 border-b border-border flex justify-between items-center bg-black/20">
                       <span className="font-h text-[13px] font-bold text-white tracking-wider">Review Management</span>
-                      <span className="text-[10px] text-[var(--color-muted)] font-mono">Reviews submitted by buyers - No manual entries</span>
+                      <span className="text-[10px] text-muted font-mono">Reviews submitted by buyers - No manual entries</span>
                     </div>
                     {reviewsList.length > 0 ? (
                       <div className="table-wrap m-4">
@@ -1122,8 +1122,8 @@ export default function AdminDashboard() {
                             {reviewsList.map((rev) => (
                               <tr key={rev.id}>
                                 <td className="font-semibold text-white">{rev.name}</td>
-                                <td className="font-bold text-[var(--color-gold)] font-mono">{rev.rating} / 5 ★</td>
-                                <td className="max-w-[300px] truncate text-xs">{rev.comment || "No comment left"}</td>
+                                <td className="font-bold text-gold font-mono">{rev.rating} / 5 ★</td>
+                                <td className="max-w-75 truncate text-xs">{rev.comment || "No comment left"}</td>
                                 <td>
                                   <span className={`text-[10px] px-2.5 py-1 rounded-full font-black uppercase tracking-wider ${
                                     rev.status === "approved" 
@@ -1135,7 +1135,7 @@ export default function AdminDashboard() {
                                     {rev.status}
                                   </span>
                                 </td>
-                                <td className="text-xs text-[var(--color-muted)]">{new Date(rev.createdAt).toLocaleDateString()}</td>
+                                <td className="text-xs text-muted">{new Date(rev.createdAt).toLocaleDateString()}</td>
                                 <td>
                                   <div className="flex gap-2">
                                     {rev.status !== "approved" && (
@@ -1159,9 +1159,9 @@ export default function AdminDashboard() {
                         </table>
                       </div>
                     ) : (
-                      <div className="flex flex-col items-center justify-center flex-grow opacity-60 mt-10">
-                        <MessageSquare size={36} className="text-[var(--color-muted)] mb-4" />
-                        <span className="text-[11px] text-[var(--color-muted)] font-mono">No buyer reviews yet. Share your review link after each successful deal.</span>
+                      <div className="flex flex-col items-center justify-center grow opacity-60 mt-10">
+                        <MessageSquare size={36} className="text-muted mb-4" />
+                        <span className="text-[11px] text-muted font-mono">No buyer reviews yet. Share your review link after each successful deal.</span>
                       </div>
                     )}
                   </div>
@@ -1176,38 +1176,38 @@ export default function AdminDashboard() {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* CSAT CARD */}
                     <div className="glass-panel rounded-2xl p-8 flex flex-col items-center justify-center shadow-xl">
-                      <div className="w-32 h-32 rounded-full border-[6px] border-[var(--color-gold)] flex flex-col items-center justify-center mb-6">
+                      <div className="w-32 h-32 rounded-full border-[6px] border-gold flex flex-col items-center justify-center mb-6">
                          <span className="text-[40px] font-black font-h text-white leading-none">5.0</span>
-                         <span className="text-[10px] font-bold text-[var(--color-gold)] uppercase tracking-widest mt-1">STORE CSAT</span>
+                         <span className="text-[10px] font-bold text-gold uppercase tracking-widest mt-1">STORE CSAT</span>
                       </div>
                       <h3 className="text-white font-bold text-[13px] tracking-wider font-h mb-2">Constructive CSAT Index</h3>
-                      <p className="text-[11px] text-[var(--color-muted)] font-mono text-center max-w-[250px]">Calculated from {feedbackList.length} store improvement ratings.</p>
+                      <p className="text-[11px] text-muted font-mono text-center max-w-62.5">Calculated from {feedbackList.length} store improvement ratings.</p>
                     </div>
                     {/* CRM ACTION CENTER */}
                     <div className="glass-panel rounded-2xl p-6 shadow-xl">
                       <div className="flex items-center gap-2 mb-6 text-white font-bold tracking-wider text-sm font-h border-b border-white/5 pb-4">
-                        <Users size={16} className="text-[var(--color-gold)]" /> CRM Action Center
+                        <Users size={16} className="text-gold" /> CRM Action Center
                       </div>
                       <div className="grid grid-cols-2 gap-4 mb-6">
                         <div className="bg-red-500/5 border border-red-500/10 rounded-xl p-6 flex flex-col items-center justify-center">
                           <span className="text-3xl font-black font-h text-red-500 mb-2">{feedbackList.filter(f => f.status === 'unread').length}</span>
-                          <span className="text-[9px] font-bold text-[var(--color-muted)] tracking-widest uppercase">UNREAD FEEDBACK</span>
+                          <span className="text-[9px] font-bold text-muted tracking-widest uppercase">UNREAD FEEDBACK</span>
                         </div>
                         <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-6 flex flex-col items-center justify-center">
                           <span className="text-3xl font-black font-h text-emerald-500 mb-2">{feedbackList.filter(f => f.status !== 'unread').length}</span>
-                          <span className="text-[9px] font-bold text-[var(--color-muted)] tracking-widest uppercase">READ / PROCESSED</span>
+                          <span className="text-[9px] font-bold text-muted tracking-widest uppercase">READ / PROCESSED</span>
                         </div>
                       </div>
-                      <div className="bg-[var(--color-gold-dim)] border border-[var(--color-gold)]/20 shadow-[0_0_15px_rgba(255,215,0,0.05)] border-dashed rounded-lg p-3 text-[10px] text-[var(--color-muted)] leading-relaxed">
-                        <span className="text-[var(--color-gold)] font-bold">💡 What Customers Want:</span> Review specific requested items in cards below. Click the WhatsApp button to fulfill requests directly!
+                      <div className="bg-gold-dim border border-gold/20 shadow-[0_0_15px_rgba(255,215,0,0.05)] border-dashed rounded-lg p-3 text-[10px] text-muted leading-relaxed">
+                        <span className="text-gold font-bold">💡 What Customers Want:</span> Review specific requested items in cards below. Click the WhatsApp button to fulfill requests directly!
                       </div>
                     </div>
                   </div>
 
-                  <div className="glass-panel rounded-2xl flex flex-col overflow-hidden shadow-xl min-h-[300px]">
-                    <div className="p-4 border-b border-[var(--color-border)] flex justify-between items-center bg-black/20">
+                  <div className="glass-panel rounded-2xl flex flex-col overflow-hidden shadow-xl min-h-75">
+                    <div className="p-4 border-b border-border flex justify-between items-center bg-black/20">
                       <span className="font-h text-[13px] font-bold text-white tracking-wider flex items-center gap-2"><MessageSquare size={14} className="text-blue-400"/> Customer Feedback Registry</span>
-                      <span className="text-[10px] text-[var(--color-muted)] font-mono">{feedbackList.length} submitted suggestions</span>
+                      <span className="text-[10px] text-muted font-mono">{feedbackList.length} submitted suggestions</span>
                     </div>
                     {feedbackList.length > 0 ? (
                       <div className="table-wrap m-4">
@@ -1228,14 +1228,14 @@ export default function AdminDashboard() {
                               <tr key={fb.id}>
                                 <td className="font-semibold text-white">{fb.name}</td>
                                 <td className="font-mono text-xs">{fb.phone}</td>
-                                <td className="font-bold text-[var(--color-gold)] font-mono">{fb.stars} ★</td>
-                                <td className="max-w-[250px] truncate text-xs">{fb.comment}</td>
-                                <td className="text-xs text-[var(--color-muted)]">{fb.desiredItems || "—"}</td>
+                                <td className="font-bold text-gold font-mono">{fb.stars} ★</td>
+                                <td className="max-w-62.5 truncate text-xs">{fb.comment}</td>
+                                <td className="text-xs text-muted">{fb.desiredItems || "—"}</td>
                                 <td>
                                   <span className={`text-[10px] px-2.5 py-1 rounded-full font-black uppercase tracking-wider ${
                                     fb.status === "unread" 
                                       ? "bg-red-500/10 text-red-400 border border-red-500/20" 
-                                      : "bg-white/5 text-[var(--color-muted)] border border-white/10"
+                                      : "bg-white/5 text-muted border border-white/10"
                                   }`}>
                                     {fb.status}
                                   </span>
@@ -1258,7 +1258,7 @@ export default function AdminDashboard() {
                                         <MessageCircle size={14} />
                                       </a>
                                     )}
-                                    <button onClick={() => handleFeedbackStatus(fb.id, "archived")} className="p-2 hover:bg-white/5 rounded-lg text-[var(--color-muted)] hover:text-white transition" title="Archive Log">
+                                    <button onClick={() => handleFeedbackStatus(fb.id, "archived")} className="p-2 hover:bg-white/5 rounded-lg text-muted hover:text-white transition" title="Archive Log">
                                       <Trash2 size={14} />
                                     </button>
                                   </div>
@@ -1269,8 +1269,8 @@ export default function AdminDashboard() {
                         </table>
                       </div>
                     ) : (
-                      <div className="flex flex-col items-center justify-center flex-grow opacity-60 mt-10">
-                         <span className="text-[11px] text-[var(--color-muted)] font-mono">No customer feedbacks submitted yet. Share the link <span className="text-[var(--color-gold)] font-bold">/feedback</span> with your clients to start collecting suggestions!</span>
+                      <div className="flex flex-col items-center justify-center grow opacity-60 mt-10">
+                         <span className="text-[11px] text-muted font-mono">No customer feedbacks submitted yet. Share the link <span className="text-gold font-bold">/feedback</span> with your clients to start collecting suggestions!</span>
                       </div>
                     )}
                   </div>
@@ -1285,25 +1285,25 @@ export default function AdminDashboard() {
                   {/* DEFAULT PAYMENT TOOLS */}
                   <div className="glass-panel rounded-2xl p-6 shadow-xl">
                     <div className="flex items-center gap-2 mb-6 text-white font-bold tracking-wider text-sm font-h border-b border-white/5 pb-4">
-                      <Zap size={16} className="text-[var(--color-gold)]" /> DEFAULT PAYMENT TOOLS
+                      <Zap size={16} className="text-gold" /> DEFAULT PAYMENT TOOLS
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
                        <div>
-                          <label className="block text-[9px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">PAYEE NAME (EDIT)</label>
+                          <label className="block text-[9px] text-muted font-bold uppercase tracking-wider mb-2">PAYEE NAME (EDIT)</label>
                           <input type="text" placeholder="MATHEESWARAN R" className="input-field" />
                        </div>
                        <div>
-                          <label className="block text-[9px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">PAYEE UPI ID (EDIT)</label>
+                          <label className="block text-[9px] text-muted font-bold uppercase tracking-wider mb-2">PAYEE UPI ID (EDIT)</label>
                           <input type="text" placeholder="maddyxpay@ybl" className="input-field" />
                        </div>
                        <div>
-                          <label className="block text-[9px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">BANK DETAILS ACCESS PIN (OPTIONAL)</label>
+                          <label className="block text-[9px] text-muted font-bold uppercase tracking-wider mb-2">BANK DETAILS ACCESS PIN (OPTIONAL)</label>
                           <input type="text" placeholder="e.g. 1536" className="input-field" />
                        </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
                        <div className="col-span-2">
-                          <label className="block text-[9px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">BANK DETAILS (EDIT)</label>
+                          <label className="block text-[9px] text-muted font-bold uppercase tracking-wider mb-2">BANK DETAILS (EDIT)</label>
                           <div className="flex gap-2">
                             <input type="text" placeholder="Bank Name" className="input-field" />
                             <input type="text" placeholder="Account Holder" className="input-field" />
@@ -1311,15 +1311,15 @@ export default function AdminDashboard() {
                        </div>
                        <div className="col-span-3 flex gap-2">
                           <div className="flex-1">
-                            <label className="block text-[9px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">&nbsp;</label>
+                            <label className="block text-[9px] text-muted font-bold uppercase tracking-wider mb-2">&nbsp;</label>
                             <input type="text" placeholder="Account Number" className="input-field" />
                           </div>
                           <div className="flex-1">
-                            <label className="block text-[9px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">&nbsp;</label>
+                            <label className="block text-[9px] text-muted font-bold uppercase tracking-wider mb-2">&nbsp;</label>
                             <input type="text" placeholder="IFSC Code" className="input-field" />
                           </div>
                           <div className="flex-1">
-                            <label className="block text-[9px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">&nbsp;</label>
+                            <label className="block text-[9px] text-muted font-bold uppercase tracking-wider mb-2">&nbsp;</label>
                             <input type="text" placeholder="Branch" className="input-field" />
                           </div>
                        </div>
@@ -1331,22 +1331,22 @@ export default function AdminDashboard() {
                   <div className="glass-panel rounded-2xl p-6 shadow-xl">
                     <div className="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
                       <div className="flex items-center gap-2 text-white font-bold tracking-wider text-sm font-h">
-                        <Zap size={16} className="text-[var(--color-gold)]" /> Payment Manager Generator
+                        <Zap size={16} className="text-gold" /> Payment Manager Generator
                       </div>
-                      <span className="text-[9px] font-mono text-[var(--color-muted)]">SECURE CHECKOUT GENERATION</span>
+                      <span className="text-[9px] font-mono text-muted">SECURE CHECKOUT GENERATION</span>
                     </div>
                     <form onSubmit={handleCreatePayLink} className="flex flex-col gap-5">
                       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
                         <div className="col-span-1">
-                          <label className="block text-[9px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">TRANSACTION TYPE</label>
+                          <label className="block text-[9px] text-muted font-bold uppercase tracking-wider mb-2">TRANSACTION TYPE</label>
                           <select className="input-field border-white/20"><option>Account (MBSA)</option></select>
                         </div>
                         <div className="col-span-1">
-                          <label className="block text-[9px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">TRANSACTION ID</label>
+                          <label className="block text-[9px] text-muted font-bold uppercase tracking-wider mb-2">TRANSACTION ID</label>
                           <input type="text" value="# MBSA404" className="input-field text-white font-bold bg-white/5 border-white/20" readOnly />
                         </div>
                         <div className="col-span-1">
-                          <label className="block text-[9px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">CUSTOMER NAME</label>
+                          <label className="block text-[9px] text-muted font-bold uppercase tracking-wider mb-2">CUSTOMER NAME</label>
                           <div className="relative">
                             <input 
                               type="text" 
@@ -1356,22 +1356,22 @@ export default function AdminDashboard() {
                               placeholder="e.g. Surya" 
                               className="input-field pl-8 border-white/20" 
                             />
-                            <Users size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-gold)]" />
+                            <Users size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-gold" />
                           </div>
                         </div>
                         <div className="col-span-1">
-                          <label className="block text-[9px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">AMOUNT (₹)</label>
+                          <label className="block text-[9px] text-muted font-bold uppercase tracking-wider mb-2">AMOUNT (₹)</label>
                           <input 
                             type="number" 
                             required
                             value={payLinkForm.amount}
                             onChange={e => setPayLinkForm({ ...payLinkForm, amount: e.target.value })}
                             placeholder="₹ 0.00" 
-                            className="input-field text-[var(--color-gold)] font-bold border-white/20" 
+                            className="input-field text-gold font-bold border-white/20" 
                           />
                         </div>
                         <div className="col-span-1">
-                          <label className="block text-[9px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">EXPIRY TIME</label>
+                          <label className="block text-[9px] text-muted font-bold uppercase tracking-wider mb-2">EXPIRY TIME</label>
                           <select 
                             value={payLinkForm.expiresHours}
                             onChange={e => setPayLinkForm({ ...payLinkForm, expiresHours: Number(e.target.value) })}
@@ -1386,7 +1386,7 @@ export default function AdminDashboard() {
                       
                       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
                         <div className="col-span-1">
-                           <label className="block text-[9px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">ACCESS PIN (OPTIONAL)</label>
+                           <label className="block text-[9px] text-muted font-bold uppercase tracking-wider mb-2">ACCESS PIN (OPTIONAL)</label>
                            <div className="relative">
                              <input 
                                type="text" 
@@ -1396,13 +1396,13 @@ export default function AdminDashboard() {
                                placeholder="None" 
                                className="input-field pl-8 border-white/20" 
                              />
-                             <ShieldAlert size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-gold)]" />
+                             <ShieldAlert size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-gold" />
                            </div>
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-[9px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">PAYMENT NOTE / REFERENCE</label>
+                        <label className="block text-[9px] text-muted font-bold uppercase tracking-wider mb-2">PAYMENT NOTE / REFERENCE</label>
                         <input 
                           type="text" 
                           value={payLinkForm.note}
@@ -1421,24 +1421,24 @@ export default function AdminDashboard() {
                   {/* Stats Cards */}
                   <div className="grid grid-cols-3 gap-6">
                     <div className="glass-panel rounded-xl p-6 flex flex-col items-center justify-center shadow-lg">
-                      <span className="text-3xl font-black font-h text-[var(--color-gold)] mb-1">{paymentLinksList.length}</span>
-                      <span className="text-[10px] font-bold text-[var(--color-muted)] tracking-widest uppercase">TOTAL</span>
+                      <span className="text-3xl font-black font-h text-gold mb-1">{paymentLinksList.length}</span>
+                      <span className="text-[10px] font-bold text-muted tracking-widest uppercase">TOTAL</span>
                     </div>
                     <div className="glass-panel rounded-xl p-6 flex flex-col items-center justify-center shadow-lg">
                       <span className="text-3xl font-black font-h text-emerald-500 mb-1">{paymentLinksList.filter(l => l.status === 'active').length}</span>
-                      <span className="text-[10px] font-bold text-[var(--color-muted)] tracking-widest uppercase">ACTIVE</span>
+                      <span className="text-[10px] font-bold text-muted tracking-widest uppercase">ACTIVE</span>
                     </div>
                     <div className="glass-panel rounded-xl p-6 flex flex-col items-center justify-center shadow-lg">
                       <span className="text-3xl font-black font-h text-red-500 mb-1">{paymentLinksList.filter(l => l.status !== 'active').length}</span>
-                      <span className="text-[10px] font-bold text-[var(--color-muted)] tracking-widest uppercase">REVOKED</span>
+                      <span className="text-[10px] font-bold text-muted tracking-widest uppercase">REVOKED</span>
                     </div>
                   </div>
 
                   {/* Table */}
-                  <div className="glass-panel rounded-2xl flex flex-col overflow-hidden shadow-xl min-h-[300px]">
-                    <div className="p-4 border-b border-[var(--color-border)] flex justify-between items-center bg-black/20">
+                  <div className="glass-panel rounded-2xl flex flex-col overflow-hidden shadow-xl min-h-75">
+                    <div className="p-4 border-b border-border flex justify-between items-center bg-black/20">
                       <span className="font-h text-[13px] font-bold text-white tracking-wider flex items-center gap-2">Master Payment Registry</span>
-                      <span className="text-[10px] text-[var(--color-muted)] font-mono">{paymentLinksList.length} total links</span>
+                      <span className="text-[10px] text-muted font-mono">{paymentLinksList.length} total links</span>
                     </div>
                     {paymentLinksList.length > 0 ? (
                       <div className="table-wrap m-4">
@@ -1457,7 +1457,7 @@ export default function AdminDashboard() {
                             {paymentLinksList.map((link) => (
                               <tr key={link.id}>
                                 <td>
-                                  <strong className="text-[var(--color-gold)] text-xs font-mono">#{link.transactionId}</strong>
+                                  <strong className="text-gold text-xs font-mono">#{link.transactionId}</strong>
                                 </td>
                                 <td>
                                   <span className="text-[10px] text-red-400 font-bold uppercase tracking-wider">
@@ -1465,17 +1465,17 @@ export default function AdminDashboard() {
                                   </span>
                                 </td>
                                 <td>
-                                  <strong className="text-[var(--color-muted)] uppercase text-xs tracking-wider">{link.customerName}</strong>
+                                  <strong className="text-muted uppercase text-xs tracking-wider">{link.customerName}</strong>
                                 </td>
                                 <td className="font-bold text-emerald-500 font-mono">₹{Number(link.amount).toLocaleString("en-IN")}</td>
                                 <td>
                                   <div className="flex flex-col">
-                                    <span className="text-xs text-[var(--color-muted)]">2 Jun, 09:30 pm <span className="text-red-400 text-[10px]">(EXPIRED)</span></span>
+                                    <span className="text-xs text-muted">2 Jun, 09:30 pm <span className="text-red-400 text-[10px]">(EXPIRED)</span></span>
                                   </div>
                                 </td>
                                 <td>
                                   <div className="flex gap-2">
-                                    <button onClick={() => copyPayLinkCheckout(link.id)} className="px-3 py-1 bg-white/5 border border-white/10 rounded-md text-[var(--color-gold)] hover:bg-white/10 transition text-[10px] font-bold tracking-wider flex items-center gap-1">
+                                    <button onClick={() => copyPayLinkCheckout(link.id)} className="px-3 py-1 bg-white/5 border border-white/10 rounded-md text-gold hover:bg-white/10 transition text-[10px] font-bold tracking-wider flex items-center gap-1">
                                       <Copy size={12} /> COPY
                                     </button>
                                     <button onClick={() => handleRevokePayLink(link.id)} className="px-3 py-1 bg-white/5 border border-white/10 rounded-md text-red-400 hover:bg-white/10 transition text-[10px] font-bold tracking-wider flex items-center gap-1">
@@ -1489,8 +1489,8 @@ export default function AdminDashboard() {
                         </table>
                       </div>
                     ) : (
-                      <div className="flex flex-col items-center justify-center flex-grow opacity-60 mt-10">
-                        <span className="text-[11px] text-[var(--color-muted)] font-mono">No payment links generated.</span>
+                      <div className="flex flex-col items-center justify-center grow opacity-60 mt-10">
+                        <span className="text-[11px] text-muted font-mono">No payment links generated.</span>
                       </div>
                     )}
                   </div>
@@ -1501,42 +1501,42 @@ export default function AdminDashboard() {
                   TAB: ACTIVITY LOG
                   ============================================================== */}
               {activeTab === "activity_log" && (
-                <div className="glass-panel rounded-2xl p-8 shadow-xl min-h-[600px]">
+                <div className="glass-panel rounded-2xl p-8 shadow-xl min-h-150">
                   <div className="flex items-center gap-2 mb-8 text-white font-bold tracking-wider text-sm font-h border-b border-white/5 pb-4">
-                    <RefreshCw size={16} className="text-[var(--color-gold)]" /> Admin Activity Audit Trail
+                    <RefreshCw size={16} className="text-gold" /> Admin Activity Audit Trail
                   </div>
                   
                   <div className="flex flex-col gap-8 relative pl-6 border-l-2 border-white/10">
                     {/* Dummy Logs like the image */}
                     <div className="relative">
-                      <div className="absolute -left-[31px] top-1 w-3 h-3 rounded-full bg-[var(--color-gold)] shadow-[0_0_10px_var(--color-gold)]"></div>
+                      <div className="absolute -left-7.75 top-1 w-3 h-3 rounded-full bg-gold shadow-[0_0_10px_var(--color-gold)]"></div>
                       <h4 className="text-sm font-bold text-white mb-1">Admin logged into Supabase Control Panel</h4>
-                      <p className="text-[10px] text-[var(--color-muted)] font-mono">Logged by Admin (Owner) • Just now • Action: Security</p>
+                      <p className="text-[10px] text-muted font-mono">Logged by Admin (Owner) • Just now • Action: Security</p>
                     </div>
                     <div className="relative">
-                      <div className="absolute -left-[31px] top-1 w-3 h-3 rounded-full bg-[var(--color-gold)] shadow-[0_0_10px_var(--color-gold)]"></div>
+                      <div className="absolute -left-7.75 top-1 w-3 h-3 rounded-full bg-gold shadow-[0_0_10px_var(--color-gold)]"></div>
                       <h4 className="text-sm font-bold text-white mb-1">Fetched latest reviews and product catalog</h4>
-                      <p className="text-[10px] text-[var(--color-muted)] font-mono">Logged by Admin (Owner) • 5 mins ago • Action: Catalog</p>
+                      <p className="text-[10px] text-muted font-mono">Logged by Admin (Owner) • 5 mins ago • Action: Catalog</p>
                     </div>
                     <div className="relative">
-                      <div className="absolute -left-[31px] top-1 w-3 h-3 rounded-full bg-[var(--color-gold)] shadow-[0_0_10px_var(--color-gold)]"></div>
+                      <div className="absolute -left-7.75 top-1 w-3 h-3 rounded-full bg-gold shadow-[0_0_10px_var(--color-gold)]"></div>
                       <h4 className="text-sm font-bold text-white mb-1">Saved new product item: Accounts listings synced</h4>
-                      <p className="text-[10px] text-[var(--color-muted)] font-mono">Logged by Admin (Owner) • 1 hour ago • Action: Inventory</p>
+                      <p className="text-[10px] text-muted font-mono">Logged by Admin (Owner) • 1 hour ago • Action: Inventory</p>
                     </div>
                     <div className="relative">
-                      <div className="absolute -left-[31px] top-1 w-3 h-3 rounded-full bg-[var(--color-gold)] shadow-[0_0_10px_var(--color-gold)]"></div>
+                      <div className="absolute -left-7.75 top-1 w-3 h-3 rounded-full bg-gold shadow-[0_0_10px_var(--color-gold)]"></div>
                       <h4 className="text-sm font-bold text-white mb-1">Payment manager UPI configuration updated</h4>
-                      <p className="text-[10px] text-[var(--color-muted)] font-mono">Logged by Admin (Owner) • 3 hours ago • Action: Settings</p>
+                      <p className="text-[10px] text-muted font-mono">Logged by Admin (Owner) • 3 hours ago • Action: Settings</p>
                     </div>
                     <div className="relative">
-                      <div className="absolute -left-[31px] top-1 w-3 h-3 rounded-full bg-[var(--color-gold)] shadow-[0_0_10px_var(--color-gold)]"></div>
+                      <div className="absolute -left-7.75 top-1 w-3 h-3 rounded-full bg-gold shadow-[0_0_10px_var(--color-gold)]"></div>
                       <h4 className="text-sm font-bold text-white mb-1">Verified active buyer payment link expiry</h4>
-                      <p className="text-[10px] text-[var(--color-muted)] font-mono">Logged by Loader (Suresh) • 6 hours ago • Action: Payments</p>
+                      <p className="text-[10px] text-muted font-mono">Logged by Loader (Suresh) • 6 hours ago • Action: Payments</p>
                     </div>
                     <div className="relative">
-                      <div className="absolute -left-[31px] top-1 w-3 h-3 rounded-full bg-[var(--color-gold)] shadow-[0_0_10px_var(--color-gold)]"></div>
+                      <div className="absolute -left-7.75 top-1 w-3 h-3 rounded-full bg-gold shadow-[0_0_10px_var(--color-gold)]"></div>
                       <h4 className="text-sm font-bold text-white mb-1">Approved customer rating review: 5 stars published</h4>
-                      <p className="text-[10px] text-[var(--color-muted)] font-mono">Logged by Admin (Owner) • Yesterday • Action: Reviews</p>
+                      <p className="text-[10px] text-muted font-mono">Logged by Admin (Owner) • Yesterday • Action: Reviews</p>
                     </div>
                   </div>
                 </div>
@@ -1550,25 +1550,25 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   {/* ADD NEW ADMIN */}
                   <div className="col-span-1 glass-panel rounded-2xl p-6 shadow-xl h-fit">
-                    <div className="flex items-center gap-2 mb-6 text-[var(--color-gold)] font-bold tracking-wider text-sm font-h">
+                    <div className="flex items-center gap-2 mb-6 text-gold font-bold tracking-wider text-sm font-h">
                       <Key size={16} /> Add New Admin
                     </div>
                     <form className="flex flex-col gap-5">
                       <div>
-                        <label className="block text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-wider mb-2">ADMIN EMAIL ADDRESS</label>
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">ADMIN EMAIL ADDRESS</label>
                         <div className="relative">
                           <input 
                             type="email" 
                             placeholder="e.g. sethu@mbsx.store" 
                             className="input-field pl-9" 
                           />
-                          <User size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-gold)]" />
+                          <User size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-gold" />
                         </div>
                       </div>
                       <button type="button" className="btn btn-gold w-full justify-center py-3 text-[11px]">AUTHORIZE ADMIN</button>
                     </form>
                     
-                    <div className="mt-6 bg-blue-500/5 border border-blue-500/10 rounded-xl p-4 text-[10px] text-[var(--color-muted)] leading-relaxed">
+                    <div className="mt-6 bg-blue-500/5 border border-blue-500/10 rounded-xl p-4 text-[10px] text-muted leading-relaxed">
                       <div className="font-bold text-blue-400 mb-1 flex items-center gap-1"><ShieldAlert size={12} /> Security Note:</div>
                       Adding an email creates/assigns a verified <strong className="text-white">admin custom claim</strong> in Firebase Auth. The new administrator can log in directly and manage all aspects of the transaction panel securely.
                     </div>
@@ -1578,7 +1578,7 @@ export default function AdminDashboard() {
                   <div className="col-span-2 glass-panel rounded-2xl p-6 shadow-xl h-fit">
                     <div className="flex items-center justify-between mb-6">
                       <div className="flex items-center gap-2 text-white font-bold tracking-wider text-sm font-h">
-                        <ShieldAlert size={16} className="text-[var(--color-gold)]" /> Active Administrators
+                        <ShieldAlert size={16} className="text-gold" /> Active Administrators
                       </div>
                       <button className="text-[9px] font-bold border border-white/10 px-4 py-1.5 rounded hover:bg-white/5 transition text-white uppercase tracking-wider">
                         REFRESH LIST
@@ -1589,19 +1589,19 @@ export default function AdminDashboard() {
                       <table className="admin-table text-left w-full">
                         <thead>
                           <tr className="border-b border-white/5">
-                            <th className="py-3 px-4 text-[9px] font-bold text-[var(--color-muted)] uppercase tracking-wider">EMAIL ADDRESS</th>
-                            <th className="py-3 px-4 text-[9px] font-bold text-[var(--color-muted)] uppercase tracking-wider">ROLE & CLAIM</th>
-                            <th className="py-3 px-4 text-[9px] font-bold text-[var(--color-muted)] uppercase tracking-wider">ADDED DATE</th>
-                            <th className="py-3 px-4 text-[9px] font-bold text-[var(--color-muted)] uppercase tracking-wider text-right">ACTION</th>
+                            <th className="py-3 px-4 text-[9px] font-bold text-muted uppercase tracking-wider">EMAIL ADDRESS</th>
+                            <th className="py-3 px-4 text-[9px] font-bold text-muted uppercase tracking-wider">ROLE & CLAIM</th>
+                            <th className="py-3 px-4 text-[9px] font-bold text-muted uppercase tracking-wider">ADDED DATE</th>
+                            <th className="py-3 px-4 text-[9px] font-bold text-muted uppercase tracking-wider text-right">ACTION</th>
                           </tr>
                         </thead>
                         <tbody>
                           <tr className="border-b border-white/5 hover:bg-white/5 transition group">
                             <td className="py-4 px-4 text-xs text-white font-semibold">lokesh0212004@gmail.com</td>
                             <td className="py-4 px-4">
-                              <span className="text-[8px] font-black uppercase tracking-widest text-[var(--color-gold)] bg-[var(--color-gold)]/10 px-2 py-1 rounded">ADMIN</span>
+                              <span className="text-[8px] font-black uppercase tracking-widest text-gold bg-gold/10 px-2 py-1 rounded">ADMIN</span>
                             </td>
-                            <td className="py-4 px-4 text-[10px] text-[var(--color-muted)] font-mono">18 May 2026</td>
+                            <td className="py-4 px-4 text-[10px] text-muted font-mono">18 May 2026</td>
                             <td className="py-4 px-4 text-right">
                               <button className="text-[9px] font-bold border border-red-500/20 text-red-400 px-4 py-1.5 rounded hover:bg-red-500 hover:text-white transition uppercase tracking-wider">
                                 REVOKE

@@ -100,7 +100,7 @@ apps/admin/
 │   ├── services/                 # Admin page service API hooks
 │   └── lib/                      # Admin-specific client initialization script
 ├── components/                   # Admin UI components
-├── middleware.ts                 # Clerk RBAC Middleware checks
+├── proxy.ts                      # Clerk RBAC Proxy checks
 ├── next.config.js                # basePath & Sentry configurations
 ├── tsconfig.json                 # TypeScript compiler setup
 └── package.json                  # Admin dependencies and workspaces

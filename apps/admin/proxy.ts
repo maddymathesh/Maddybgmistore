@@ -1,9 +1,10 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import type { NextRequest, NextFetchEvent } from "next/server";
 
 const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)", "/api/webhook/clerk(.*)"]);
 
-export default clerkMiddleware(async (auth, req) => {
+const handler = clerkMiddleware(async (auth, req) => {
   if (!isPublicRoute(req)) {
     const session = await auth();
     const userId = session.userId;
@@ -23,8 +24,6 @@ export default clerkMiddleware(async (auth, req) => {
     const validAdminRoles = ["SUPER_ADMIN", "ADMIN", "TRANSACTION_MANAGER", "CONTENT_MANAGER"];
     
     // Check if the user is the permanent admin via clerkClient or session claims if available
-    // For Edge runtime we check claims if possible, or we will just let the app handle the final check
-    // Wait, let's just use clerkClient to get the email since it's an admin dashboard (performance impact is acceptable for admins)
     let isPermanentAdmin = false;
     try {
       const { clerkClient } = await import("@clerk/nextjs/server");
@@ -47,6 +46,10 @@ export default clerkMiddleware(async (auth, req) => {
   }
   return NextResponse.next();
 });
+
+export function proxy(request: NextRequest, event: NextFetchEvent) {
+  return handler(request, event);
+}
 
 export const config = {
   matcher: [

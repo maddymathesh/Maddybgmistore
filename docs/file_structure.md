@@ -45,7 +45,7 @@ MaddyBgmistoreV2/
 │   │   ├── components/           # Specific components (Navbar, Footer, Ticker)
 │   │   ├── public/               # Public assets (images, logos)
 │   │   ├── eslint.config.js      # App ESLint configuration
-│   │   ├── middleware.ts         # Public middleware (Clerk setup)
+│   │   ├── proxy.ts              # Public proxy (Clerk setup)
 │   │   ├── next-env.d.ts         # Next.js types
 │   │   ├── next.config.js        # Next.js configurations
 │   │   ├── postcss.config.mjs    # PostCSS configs
@@ -67,7 +67,7 @@ MaddyBgmistoreV2/
 │       │   ├── layout.tsx        # Admin dashboard shell layout
 │       │   └── page.tsx          # Clerk validation check
 │       ├── components/           # Shared administrative components
-│       ├── middleware.ts         # Clerk role-based access middleware
+│       ├── proxy.ts              # Clerk role-based access proxy
 │       ├── next.config.js        # basePath redirect & Sentry configs
 │       ├── tsconfig.json         # TypeScript config
 │       └── package.json          # Admin dependency packages

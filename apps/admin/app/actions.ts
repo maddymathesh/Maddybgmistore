@@ -4,9 +4,9 @@ import {
   db, siteViews, products,
   reviews, customerFeedback, paymentLinks, adminPaymentSettings, 
   transactions, accountTransactions, xsuitTransactions, supercarTransactions, ucTransactions,
-  activityLogs
+  activityLogs,
+  eq, desc
 } from "@repo/db";
-import { eq, desc } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 
 // Auth Gatekeeper Helper
@@ -611,8 +611,8 @@ export async function addAdmin(email: string) {
     if (users.data.length === 0) {
       return { success: false, error: "No user found with this email. They must sign up first." };
     }
-    
     const targetUser = users.data[0];
+    if (!targetUser) return { success: false, error: "User not found." };
     await client.users.updateUserMetadata(targetUser.id, {
       publicMetadata: {
         ...targetUser.publicMetadata,

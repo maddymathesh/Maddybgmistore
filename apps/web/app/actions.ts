@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { db, siteViews, products, ucPrices, xsuitGifts, supercarGifts, reviews, proofs, customerFeedback, paymentLinks, adminPaymentSettings } from "@repo/db";
-import { eq, desc, asc } from "drizzle-orm";
+import { db, siteViews, products, ucPrices, xsuitGifts, supercarGifts, reviews, proofs, customerFeedback, paymentLinks, adminPaymentSettings, eq, desc, asc } from "@repo/db";
 
 export async function getOrIncrementViews(shouldIncrement: boolean) {
   try {

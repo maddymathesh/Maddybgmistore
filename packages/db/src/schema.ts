@@ -145,6 +145,15 @@ export const customerFeedback = pgTable("customer_feedback", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+// 11.5 Activity Logs Table
+export const activityLogs = pgTable("activity_logs", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  adminEmail: text("admin_email").notNull(),
+  actionType: text("action_type").notNull(), // e.g. "Security", "Catalog", "Inventory"
+  description: text("description").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
 // 12. Main Transactions Log Table
 export const transactions = pgTable("transactions", {
   id: uuid("id").defaultRandom().primaryKey(),

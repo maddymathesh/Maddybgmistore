@@ -96,21 +96,21 @@ export default function Navbar() {
 
   const doubled = [...tickerItems, ...tickerItems];
 
-  const deskLinkStyle = "text-muted hover:text-gold hover:bg-gold-dim text-[13px] font-semibold tracking-[0.8px] uppercase px-2.5 py-2 rounded-lg transition-all duration-200 inline-flex items-center cursor-pointer whitespace-nowrap";
-  const activeLinkStyle = "text-gold bg-gold-dim";
+  const deskLinkStyle = "text-gray-300 hover:text-white font-sans text-[14px] font-medium tracking-wide px-4 py-2 transition-colors duration-200 inline-flex items-center cursor-pointer whitespace-nowrap rounded-full hover:bg-white/5";
+  const activeLinkStyle = "text-white bg-white/10";
 
-  const mobileLinkStyle = "text-muted text-[14px] font-semibold tracking-[1px] uppercase px-4 py-3.5 rounded-[10px] block transition-colors duration-150";
+  const mobileLinkStyle = "text-gray-300 text-[15px] font-sans font-medium px-4 py-3.5 rounded-xl block transition-colors duration-150 hover:bg-white/5";
 
   return (
     <header
       ref={navRef}
       className="fixed top-0 left-0 right-0 z-[1000] transition-all duration-300"
       style={{
-        background: scrolled ? "rgba(8, 10, 15, 0.92)" : "rgba(8, 10, 15, 0.65)",
-        backdropFilter: "blur(18px)",
-        WebkitBackdropFilter: "blur(18px)",
-        borderBottom: scrolled ? "1px solid rgba(255, 215, 0, 0.22)" : "1px solid rgba(255, 255, 255, 0.05)",
-        boxShadow: scrolled ? "0 10px 30px rgba(0, 0, 0, 0.5)" : "none",
+        background: scrolled ? "rgba(8, 10, 15, 0.75)" : "rgba(8, 10, 15, 0.4)",
+        backdropFilter: "blur(24px)",
+        WebkitBackdropFilter: "blur(24px)",
+        borderBottom: scrolled ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid transparent",
+        boxShadow: scrolled ? "0 4px 30px rgba(0, 0, 0, 0.3)" : "none",
       }}
     >
       {/* ── Main Nav Bar ── */}
@@ -130,21 +130,21 @@ export default function Navbar() {
             <li key={l.label || l.to} className="relative group/nav py-3">
               {l.subLinks ? (
                 <>
-                  <div className={`${deskLinkStyle} group-hover/nav:text-gold`}>
-                    {l.label}{" "}
+                  <div className={`${deskLinkStyle} group-hover/nav:text-white group-hover/nav:bg-white/5`}>
+                    {l.label}
                     <ChevronDown
-                      size={13}
-                      className="ml-1 flex-shrink-0 transition-transform group-hover/nav:rotate-180"
+                      size={14}
+                      className="ml-1 opacity-60 flex-shrink-0 transition-transform group-hover/nav:rotate-180"
                     />
                   </div>
                   {/* Dropdown Menu */}
-                  <div className="absolute top-full left-0 hidden group-hover/nav:block bg-[#111520] border border-[var(--color-border-gold)] rounded-xl py-2 min-w-[200px] shadow-2xl animate-fade-in before:content-[''] before:absolute before:-top-3 before:left-0 before:right-0 before:h-3 mt-1 z-50">
+                  <div className="absolute top-[calc(100%+4px)] left-1/2 -translate-x-1/2 hidden group-hover/nav:block bg-[#111520]/80 backdrop-blur-2xl border border-white/10 rounded-[18px] p-2 min-w-[200px] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.7)] animate-fade-in before:content-[''] before:absolute before:-top-4 before:left-0 before:right-0 before:h-4 z-50">
                     {l.subLinks.map((s) => (
                       <Link
                         key={s.to}
                         href={s.to}
-                        className={`block px-4 py-2 text-[13px] text-muted hover:text-gold hover:bg-gold-dim transition-all duration-150 ${
-                          pathname === s.to ? "text-gold bg-gold-dim" : ""
+                        className={`block px-4 py-2.5 text-[14px] font-sans font-medium text-gray-300 hover:text-white hover:bg-white/10 rounded-[10px] transition-all duration-150 ${
+                          pathname === s.to ? "text-white bg-white/10" : ""
                         }`}
                       >
                         {s.label}
@@ -166,26 +166,26 @@ export default function Navbar() {
           ))}
 
           {isAdmin && (
-            <li className="relative group/adminNav py-3">
-              <div className={`${deskLinkStyle} text-gold group-hover/adminNav:text-gold`}>
-                Manage <ChevronDown size={13} className="ml-1 transition-transform group-hover/adminNav:rotate-180" />
+            <li className="relative group/adminNav py-3 ml-2">
+              <div className={`${deskLinkStyle} text-white font-semibold group-hover/adminNav:bg-white/5`}>
+                Manage <ChevronDown size={14} className="ml-1 opacity-60 transition-transform group-hover/adminNav:rotate-180" />
               </div>
-              <div className="absolute top-full right-0 hidden group-hover/adminNav:block bg-[#111520] border border-[var(--color-border-gold)] rounded-xl py-2 min-w-[200px] shadow-2xl animate-fade-in before:content-[''] before:absolute before:-top-3 before:left-0 before:right-0 before:h-3 mt-1 z-50">
+              <div className="absolute top-[calc(100%+4px)] right-0 hidden group-hover/adminNav:block bg-[#111520]/80 backdrop-blur-2xl border border-white/10 rounded-[18px] p-2 min-w-[180px] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.7)] animate-fade-in before:content-[''] before:absolute before:-top-4 before:left-0 before:right-0 before:h-4 z-50">
                 <a
                   href={process.env.NODE_ENV === "development" ? "http://localhost:3001" : "https://admin.maddybgmistore.in"}
                   target="_blank"
                   rel="noreferrer"
-                  className="block px-4 py-2 text-[13px] text-muted hover:text-gold hover:bg-gold-dim transition-all"
+                  className="block px-4 py-2.5 text-[14px] font-sans font-medium text-gray-300 hover:text-white hover:bg-white/10 rounded-[10px] transition-all"
                 >
-                  ⚙ Admin Panel
+                  Admin Dashboard
                 </a>
                 <a
                   href={process.env.NODE_ENV === "development" ? "http://localhost:3001/transactions" : "https://admin.maddybgmistore.in/transactions"}
                   target="_blank"
                   rel="noreferrer"
-                  className="block px-4 py-2 text-[13px] text-muted hover:text-gold hover:bg-gold-dim transition-all"
+                  className="block px-4 py-2.5 text-[14px] font-sans font-medium text-gray-300 hover:text-white hover:bg-white/10 rounded-[10px] transition-all mt-1"
                 >
-                  🧾 Transactions Panel
+                  Transactions Panel
                 </a>
               </div>
             </li>
@@ -241,17 +241,7 @@ export default function Navbar() {
         </button>
       </nav>
 
-      {/* ── Scrolling Ticker Banner ── */}
-      <div className="h-[28px] bg-black/40 border-t border-white/5 overflow-hidden relative flex items-center">
-        <div className="flex whitespace-nowrap items-center text-[10px] font-bold text-gold tracking-[1.5px] uppercase animate-ticker">
-          {doubled.map((item, i) => (
-            <span key={i} className="inline-flex items-center gap-2 mr-16">
-              <span className="text-[12px]">{item.emoji}</span>
-              <span>{item.text}</span>
-            </span>
-          ))}
-        </div>
-      </div>
+
 
 
       {/* ── Mobile Overlay Backdrop ── */}
@@ -264,7 +254,7 @@ export default function Navbar() {
 
       {/* ── Mobile Slide-Down Menu ── */}
       <div
-        className="fixed left-0 right-0 z-[998] bg-[#080a0f]/95 backdrop-blur-[20px] border-b border-gold/20 overflow-y-auto transition-[max-height] duration-300 ease-in-out"
+        className="fixed left-0 right-0 z-[998] bg-[#080a0f]/95 backdrop-blur-[24px] border-b border-white/5 overflow-y-auto transition-[max-height] duration-300 ease-in-out"
         style={{
           top: "92px",
           maxHeight: mobileOpen ? "calc(100vh - 92px)" : "0",
@@ -283,14 +273,14 @@ export default function Navbar() {
                   >
                     {l.label}
                     <ChevronDown
-                      size={16}
-                      className={`text-gold transition-transform duration-200 ${
+                      size={18}
+                      className={`text-gray-400 transition-transform duration-200 ${
                         mobileExpanded[l.label] ? "rotate-180" : ""
                       }`}
                     />
                   </button>
                   <div
-                    className="overflow-hidden transition-all duration-300 bg-gold/5 rounded-lg pl-3"
+                    className="overflow-hidden transition-all duration-300 bg-white/5 rounded-xl mt-1 mx-2"
                     style={{
                       maxHeight: mobileExpanded[l.label] ? "200px" : "0",
                     }}
@@ -299,8 +289,8 @@ export default function Navbar() {
                       <Link
                         key={s.to}
                         href={s.to}
-                        className={`${mobileLinkStyle} text-[13px] ${
-                          pathname === s.to ? "text-gold bg-gold/10" : ""
+                        className={`${mobileLinkStyle} text-[14px] px-6 py-3 ${
+                          pathname === s.to ? "text-white bg-white/10" : "text-gray-400"
                         }`}
                       >
                         {s.label}
@@ -312,7 +302,7 @@ export default function Navbar() {
                 <Link
                   href={l.to}
                   className={`${mobileLinkStyle} ${
-                    pathname === l.to ? "text-gold bg-gold/10" : ""
+                    pathname === l.to ? "text-white bg-white/10" : ""
                   }`}
                 >
                   {l.label}
@@ -327,17 +317,17 @@ export default function Navbar() {
                 href={process.env.NODE_ENV === "development" ? "http://localhost:3001" : "https://admin.maddybgmistore.in"}
                 target="_blank"
                 rel="noreferrer"
-                className={`${mobileLinkStyle} text-gold mt-1`}
+                className={`${mobileLinkStyle} text-white mt-2 border border-white/10 bg-white/5 text-center`}
               >
-                ⚙ Admin Panel
+                Admin Dashboard
               </a>
               <a
                 href={process.env.NODE_ENV === "development" ? "http://localhost:3001/transactions" : "https://admin.maddybgmistore.in/transactions"}
                 target="_blank"
                 rel="noreferrer"
-                className={`${mobileLinkStyle} text-gold`}
+                className={`${mobileLinkStyle} text-white mt-2 border border-white/10 bg-white/5 text-center`}
               >
-                🧾 Transactions Panel
+                Transactions Panel
               </a>
             </>
           )}
@@ -376,16 +366,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      <style>{`
-        .animate-ticker {
-          display: inline-flex;
-          animation: ticker 35s linear infinite;
-        }
-        @keyframes ticker {
-          0% { transform: translate3d(0, 0, 0); }
-          100% { transform: translate3d(-50%, 0, 0); }
-        }
-      `}</style>
+
     </header>
   );
 }

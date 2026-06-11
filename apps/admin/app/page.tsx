@@ -19,7 +19,8 @@ import {
   getAdminReviews, updateReviewStatus, deleteReview,
   getFeedbackLogs, updateFeedbackStatus,
   getPaymentLinks, createPaymentLink, revokePaymentLink,
-  getTransactionsRegistry
+  getTransactionsRegistry,
+  getAdminActivityLogs, getActiveAdmins, addAdmin, revokeAdmin
 } from "./actions";
 
 type ActiveTab = 
@@ -65,6 +66,8 @@ export default function AdminDashboard() {
   const [reviewsList, setReviewsList] = useState<any[]>([]);
   const [feedbackList, setFeedbackList] = useState<any[]>([]);
   const [paymentLinksList, setPaymentLinksList] = useState<any[]>([]);
+  const [activityLogsList, setActivityLogsList] = useState<any[]>([]);
+  const [activeAdminsList, setActiveAdminsList] = useState<any[]>([]);
 
   // Description Factory State
   const [rawDescription, setRawDescription] = useState("");
@@ -98,14 +101,18 @@ export default function AdminDashboard() {
         reviewsRes,
         feedbackRes,
         payLinksRes,
-        _txnRes
+        _txnRes,
+        logsRes,
+        adminsRes
       ] = await Promise.all([
         getAdminMetrics(),
         getAdminProducts(),
         getAdminReviews(),
         getFeedbackLogs(),
         getPaymentLinks(),
-        getTransactionsRegistry()
+        getTransactionsRegistry(),
+        getAdminActivityLogs(),
+        getActiveAdmins()
       ]);
 
       if (metricsRes.success) setMetrics(metricsRes.metrics);
@@ -113,6 +120,8 @@ export default function AdminDashboard() {
       if (reviewsRes.success) setReviewsList(reviewsRes.reviews || []);
       if (feedbackRes.success) setFeedbackList(feedbackRes.feedback || []);
       if (payLinksRes.success) setPaymentLinksList(payLinksRes.paymentLinks || []);
+      if (logsRes.success) setActivityLogsList(logsRes.logs || []);
+      if (adminsRes.success) setActiveAdminsList(adminsRes.admins || []);
     } catch (_err) {
       console.error("Failed to load dashboard details:", _err);
       toast.error("Failed to sync some dashboard items");
@@ -305,6 +314,41 @@ export default function AdminDashboard() {
   // --- GLOBAL SETTINGS ---
   // Unused state hooks (txnForm, settingsForm) removed to resolve ESLint warnings
 
+  // --- ADMIN CONTROLS HANDLERS ---
+  const [newAdminEmail, setNewAdminEmail] = useState("");
+
+  const handleAddAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAdminEmail) return;
+    try {
+      const res = await addAdmin(newAdminEmail);
+      if (res.success) {
+        toast.success("Admin authorized successfully");
+        setNewAdminEmail("");
+        triggerRefresh();
+      } else {
+        toast.error(res.error || "Failed to add admin");
+      }
+    } catch (_err) {
+      toast.error("Error adding admin");
+    }
+  };
+
+  const handleRevokeAdmin = async (id: string) => {
+    if (!confirm("Are you sure you want to revoke this user's admin access?")) return;
+    try {
+      const res = await revokeAdmin(id);
+      if (res.success) {
+        toast.success("Admin access revoked");
+        triggerRefresh();
+      } else {
+        toast.error(res.error || "Failed to revoke admin");
+      }
+    } catch (_err) {
+      toast.error("Error revoking admin");
+    }
+  };
+
   // Description Factory Parser
   useEffect(() => {
     const text = rawDescription.toLowerCase();
@@ -441,12 +485,7 @@ export default function AdminDashboard() {
         </div>
 
         <div className="p-6 border-t border-white/5 flex flex-col gap-3">
-          <Link 
-            href="/transactions"
-            className="w-full btn btn-outline justify-center border-gold/30 text-gold hover:bg-gold/10 text-[11px] py-2"
-          >
-            <CreditCard size={14} /> Transaction Panel
-          </Link>
+
           <div className="w-full flex items-center justify-between bg-black/20 p-2 rounded-lg border border-white/5">
             <UserButton afterSignOutUrl="/sign-in" />
             <span className="text-[10px] text-muted font-bold">LOGGED IN</span>
@@ -1507,37 +1546,19 @@ export default function AdminDashboard() {
                   </div>
                   
                   <div className="flex flex-col gap-8 relative pl-6 border-l-2 border-white/10">
-                    {/* Dummy Logs like the image */}
-                    <div className="relative">
-                      <div className="absolute -left-7.75 top-1 w-3 h-3 rounded-full bg-gold shadow-[0_0_10px_var(--color-gold)]"></div>
-                      <h4 className="text-sm font-bold text-white mb-1">Admin logged into Supabase Control Panel</h4>
-                      <p className="text-[10px] text-muted font-mono">Logged by Admin (Owner) • Just now • Action: Security</p>
-                    </div>
-                    <div className="relative">
-                      <div className="absolute -left-7.75 top-1 w-3 h-3 rounded-full bg-gold shadow-[0_0_10px_var(--color-gold)]"></div>
-                      <h4 className="text-sm font-bold text-white mb-1">Fetched latest reviews and product catalog</h4>
-                      <p className="text-[10px] text-muted font-mono">Logged by Admin (Owner) • 5 mins ago • Action: Catalog</p>
-                    </div>
-                    <div className="relative">
-                      <div className="absolute -left-7.75 top-1 w-3 h-3 rounded-full bg-gold shadow-[0_0_10px_var(--color-gold)]"></div>
-                      <h4 className="text-sm font-bold text-white mb-1">Saved new product item: Accounts listings synced</h4>
-                      <p className="text-[10px] text-muted font-mono">Logged by Admin (Owner) • 1 hour ago • Action: Inventory</p>
-                    </div>
-                    <div className="relative">
-                      <div className="absolute -left-7.75 top-1 w-3 h-3 rounded-full bg-gold shadow-[0_0_10px_var(--color-gold)]"></div>
-                      <h4 className="text-sm font-bold text-white mb-1">Payment manager UPI configuration updated</h4>
-                      <p className="text-[10px] text-muted font-mono">Logged by Admin (Owner) • 3 hours ago • Action: Settings</p>
-                    </div>
-                    <div className="relative">
-                      <div className="absolute -left-7.75 top-1 w-3 h-3 rounded-full bg-gold shadow-[0_0_10px_var(--color-gold)]"></div>
-                      <h4 className="text-sm font-bold text-white mb-1">Verified active buyer payment link expiry</h4>
-                      <p className="text-[10px] text-muted font-mono">Logged by Loader (Suresh) • 6 hours ago • Action: Payments</p>
-                    </div>
-                    <div className="relative">
-                      <div className="absolute -left-7.75 top-1 w-3 h-3 rounded-full bg-gold shadow-[0_0_10px_var(--color-gold)]"></div>
-                      <h4 className="text-sm font-bold text-white mb-1">Approved customer rating review: 5 stars published</h4>
-                      <p className="text-[10px] text-muted font-mono">Logged by Admin (Owner) • Yesterday • Action: Reviews</p>
-                    </div>
+                    {activityLogsList.length > 0 ? (
+                      activityLogsList.map((log) => (
+                        <div className="relative" key={log.id}>
+                          <div className="absolute -left-7.75 top-1 w-3 h-3 rounded-full bg-gold shadow-[0_0_10px_var(--color-gold)]"></div>
+                          <h4 className="text-sm font-bold text-white mb-1">{log.description}</h4>
+                          <p className="text-[10px] text-muted font-mono">
+                            Logged by {log.adminEmail} • {new Date(log.createdAt).toLocaleString()} • Action: {log.actionType}
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-[11px] text-muted font-mono opacity-60">No activity logs found.</div>
+                    )}
                   </div>
                 </div>
               )}
@@ -1553,7 +1574,7 @@ export default function AdminDashboard() {
                     <div className="flex items-center gap-2 mb-6 text-gold font-bold tracking-wider text-sm font-h">
                       <Key size={16} /> Add New Admin
                     </div>
-                    <form className="flex flex-col gap-5">
+                    <form className="flex flex-col gap-5" onSubmit={handleAddAdmin}>
                       <div>
                         <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">ADMIN EMAIL ADDRESS</label>
                         <div className="relative">
@@ -1561,11 +1582,13 @@ export default function AdminDashboard() {
                             type="email" 
                             placeholder="e.g. sethu@mbsx.store" 
                             className="input-field pl-9" 
+                            value={newAdminEmail}
+                            onChange={(e) => setNewAdminEmail(e.target.value)}
                           />
                           <User size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-gold" />
                         </div>
                       </div>
-                      <button type="button" className="btn btn-gold w-full justify-center py-3 text-[11px]">AUTHORIZE ADMIN</button>
+                      <button type="submit" className="btn btn-gold w-full justify-center py-3 text-[11px]">AUTHORIZE ADMIN</button>
                     </form>
                     
                     <div className="mt-6 bg-blue-500/5 border border-blue-500/10 rounded-xl p-4 text-[10px] text-muted leading-relaxed">
@@ -1580,7 +1603,7 @@ export default function AdminDashboard() {
                       <div className="flex items-center gap-2 text-white font-bold tracking-wider text-sm font-h">
                         <ShieldAlert size={16} className="text-gold" /> Active Administrators
                       </div>
-                      <button className="text-[9px] font-bold border border-white/10 px-4 py-1.5 rounded hover:bg-white/5 transition text-white uppercase tracking-wider">
+                      <button onClick={triggerRefresh} className="text-[9px] font-bold border border-white/10 px-4 py-1.5 rounded hover:bg-white/5 transition text-white uppercase tracking-wider">
                         REFRESH LIST
                       </button>
                     </div>
@@ -1596,18 +1619,20 @@ export default function AdminDashboard() {
                           </tr>
                         </thead>
                         <tbody>
-                          <tr className="border-b border-white/5 hover:bg-white/5 transition group">
-                            <td className="py-4 px-4 text-xs text-white font-semibold">lokesh0212004@gmail.com</td>
-                            <td className="py-4 px-4">
-                              <span className="text-[8px] font-black uppercase tracking-widest text-gold bg-gold/10 px-2 py-1 rounded">ADMIN</span>
-                            </td>
-                            <td className="py-4 px-4 text-[10px] text-muted font-mono">18 May 2026</td>
-                            <td className="py-4 px-4 text-right">
-                              <button className="text-[9px] font-bold border border-red-500/20 text-red-400 px-4 py-1.5 rounded hover:bg-red-500 hover:text-white transition uppercase tracking-wider">
-                                REVOKE
-                              </button>
-                            </td>
-                          </tr>
+                          {activeAdminsList.map((admin) => (
+                            <tr className="border-b border-white/5 hover:bg-white/5 transition group" key={admin.id}>
+                              <td className="py-4 px-4 text-xs text-white font-semibold">{admin.email}</td>
+                              <td className="py-4 px-4">
+                                <span className="text-[8px] font-black uppercase tracking-widest text-gold bg-gold/10 px-2 py-1 rounded">{admin.role}</span>
+                              </td>
+                              <td className="py-4 px-4 text-[10px] text-muted font-mono">{admin.addedDate}</td>
+                              <td className="py-4 px-4 text-right">
+                                <button onClick={() => handleRevokeAdmin(admin.id)} className="text-[9px] font-bold border border-red-500/20 text-red-400 px-4 py-1.5 rounded hover:bg-red-500 hover:text-white transition uppercase tracking-wider">
+                                  REVOKE
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>

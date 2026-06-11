@@ -3,7 +3,8 @@
 import { 
   db, siteViews, products,
   reviews, customerFeedback, paymentLinks, adminPaymentSettings, 
-  transactions, accountTransactions, xsuitTransactions, supercarTransactions, ucTransactions 
+  transactions, accountTransactions, xsuitTransactions, supercarTransactions, ucTransactions,
+  activityLogs
 } from "@repo/db";
 import { eq, desc } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
@@ -19,18 +20,22 @@ async function verifyAdminAccess() {
   const validAdminRoles = ["SUPER_ADMIN", "ADMIN", "TRANSACTION_MANAGER", "CONTENT_MANAGER"];
   
   if (!userId) {
-    throw new Error("Access Denied: Administrative privileges required.");
+    throw new Error("Access Denied: Administrative privileges required. (No user ID)");
   }
 
   let isPermanentAdmin = false;
+  let userEmail = "";
   try {
     const { clerkClient } = await import("@clerk/nextjs/server");
     const client = await clerkClient();
     const user = await client.users.getUser(userId);
-    const email = user.primaryEmailAddressId 
-      ? user.emailAddresses.find(e => e.id === user.primaryEmailAddressId)?.emailAddress 
-      : user.emailAddresses[0]?.emailAddress;
-    if (email === "r.mateshwaran.io@gmail.com" ) {
+    userEmail = user.primaryEmailAddressId 
+      ? user.emailAddresses.find(e => e.id === user.primaryEmailAddressId)?.emailAddress || ""
+      : user.emailAddresses[0]?.emailAddress || "";
+      
+    console.log(`[Admin Access Check] User: ${userId}, Email: ${userEmail}, Role: ${userRole}`);
+      
+    if (userEmail === "r.mateshwaran.io@gmail.com" || userEmail === "maddybgmistoreog@gmail.com") {
       isPermanentAdmin = true;
     }
   } catch (error) {
@@ -38,6 +43,7 @@ async function verifyAdminAccess() {
   }
 
   if (!isPermanentAdmin && !validAdminRoles.includes(userRole)) {
+    console.warn(`[Admin Access Denied] ${userEmail} is not an admin.`);
     throw new Error("Access Denied: Administrative privileges required.");
   }
   
@@ -144,6 +150,7 @@ export async function createProduct(data: {
       })
       .returning();
 
+    await logAdminAction("Catalog", `Created new product: ${data.title}`);
     return { success: true, product: newProduct };
   } catch (error) {
     console.error("Failed to create product:", error);
@@ -171,6 +178,8 @@ export async function updateProduct(id: string, data: Partial<{
       .set(data)
       .where(eq(products.id, id))
       .returning();
+      
+    await logAdminAction("Catalog", `Updated product: ${id}`);
     return { success: true, product: updatedProduct };
   } catch (error) {
     console.error("Failed to update product:", error);
@@ -182,6 +191,7 @@ export async function deleteProduct(id: string) {
   await verifyAdminAccess();
   try {
     await db.delete(products).where(eq(products.id, id));
+    await logAdminAction("Catalog", `Deleted product: ${id}`);
     return { success: true };
   } catch (error) {
     console.error("Failed to delete product:", error);
@@ -209,6 +219,8 @@ export async function updateReviewStatus(id: string, status: string) {
       .set({ status })
       .where(eq(reviews.id, id))
       .returning();
+    
+    await logAdminAction("Reviews", `Updated review status to ${status} for review ID: ${id}`);
     return { success: true, review: updatedReview };
   } catch (error) {
     console.error("Failed to update review status:", error);
@@ -220,6 +232,7 @@ export async function deleteReview(id: string) {
   await verifyAdminAccess();
   try {
     await db.delete(reviews).where(eq(reviews.id, id));
+    await logAdminAction("Reviews", `Deleted review: ${id}`);
     return { success: true };
   } catch (error) {
     console.error("Failed to delete review:", error);
@@ -247,6 +260,8 @@ export async function updateFeedbackStatus(id: string, status: string) {
       .set({ status })
       .where(eq(customerFeedback.id, id))
       .returning();
+      
+    await logAdminAction("Feedback", `Updated customer feedback status to ${status} for ID: ${id}`);
     return { success: true, feedback: updated };
   } catch (error) {
     console.error("Failed to update feedback:", error);
@@ -311,6 +326,7 @@ export async function createPaymentLink(data: {
       })
       .returning();
 
+    await logAdminAction("Payments", `Created payment link for ${data.customerName} (${data.amount} INR)`);
     return { success: true, paymentLink: newLink };
   } catch (error) {
     console.error("Failed to create payment link:", error);
@@ -330,6 +346,8 @@ export async function revokePaymentLink(id: string) {
       })
       .where(eq(paymentLinks.id, id))
       .returning();
+      
+    await logAdminAction("Payments", `Revoked payment link ID: ${id}`);
     return { success: true, paymentLink: updated };
   } catch (error) {
     console.error("Failed to revoke payment link:", error);
@@ -513,9 +531,139 @@ export async function updateAdminPaymentSettings(data: {
       .where(eq(adminPaymentSettings.id, 1))
       .returning();
 
+    await logAdminAction("Settings", `Updated global payment settings (UPI: ${data.payeeUpiId})`);
     return { success: true, settings: updated };
   } catch (error) {
     console.error("Failed to update admin payment settings:", error);
     return { success: false, error: "Failed to update settings" };
   }
 }
+
+// 8. Admin Controls (Clerk Metadata & Activity Logging)
+export async function logAdminAction(actionType: string, description: string) {
+  try {
+    const { userId } = await verifyAdminAccess();
+    let adminEmail = "Unknown Admin";
+    
+    try {
+      const { clerkClient } = await import("@clerk/nextjs/server");
+      const client = await clerkClient();
+      const user = await client.users.getUser(userId);
+      adminEmail = user.primaryEmailAddressId 
+        ? user.emailAddresses.find(e => e.id === user.primaryEmailAddressId)?.emailAddress || "Unknown Admin"
+        : user.emailAddresses[0]?.emailAddress || "Unknown Admin";
+    } catch(e) {}
+    
+    await db.insert(activityLogs).values({
+      adminEmail,
+      actionType,
+      description
+    });
+  } catch (error) {
+    console.error("Failed to log admin action:", error);
+  }
+}
+
+export async function getAdminActivityLogs() {
+  await verifyAdminAccess();
+  try {
+    const data = await db.select().from(activityLogs).orderBy(desc(activityLogs.createdAt)).limit(50);
+    return { success: true, logs: data };
+  } catch (error) {
+    console.error("Failed to fetch activity logs:", error);
+    return { success: false, logs: [] };
+  }
+}
+
+export async function getActiveAdmins() {
+  await verifyAdminAccess();
+  try {
+    const { clerkClient } = await import("@clerk/nextjs/server");
+    const client = await clerkClient();
+    const users = await client.users.getUserList(); // Simplified for beta - production would search/paginate
+    
+    const adminUsers = users.data.filter(u => {
+      const role = u.publicMetadata?.role as string | undefined;
+      const email = u.emailAddresses[0]?.emailAddress;
+      return (role === "SUPER_ADMIN" || role === "ADMIN" || role === "TRANSACTION_MANAGER" || role === "CONTENT_MANAGER") || 
+             email === "maddybgmistoreog@gmail.com" || email === "r.mateshwaran.io@gmail.com";
+    }).map(u => ({
+      id: u.id,
+      email: u.emailAddresses[0]?.emailAddress || "Unknown",
+      role: u.publicMetadata?.role as string || "SUPER_ADMIN",
+      addedDate: new Date(u.createdAt).toLocaleDateString("en-GB", { day: 'numeric', month: 'short', year: 'numeric' })
+    }));
+
+    return { success: true, admins: adminUsers };
+  } catch (error) {
+    console.error("Failed to fetch active admins:", error);
+    return { success: false, admins: [] };
+  }
+}
+
+export async function addAdmin(email: string) {
+  await verifyAdminAccess();
+  try {
+    const { clerkClient } = await import("@clerk/nextjs/server");
+    const client = await clerkClient();
+    
+    const users = await client.users.getUserList({ emailAddress: [email] });
+    if (users.data.length === 0) {
+      return { success: false, error: "No user found with this email. They must sign up first." };
+    }
+    
+    const targetUser = users.data[0];
+    await client.users.updateUserMetadata(targetUser.id, {
+      publicMetadata: {
+        ...targetUser.publicMetadata,
+        role: "ADMIN"
+      }
+    });
+
+    await logAdminAction("Security", `Authorized new admin: ${email}`);
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to add admin:", error);
+    return { success: false, error: "Failed to add admin." };
+  }
+}
+
+export async function revokeAdmin(userId: string) {
+  const { userId: currentUserId } = await verifyAdminAccess();
+  if (userId === currentUserId) {
+    return { success: false, error: "You cannot revoke your own admin access." };
+  }
+
+  try {
+    const { clerkClient } = await import("@clerk/nextjs/server");
+    const client = await clerkClient();
+    
+    const targetUser = await client.users.getUser(userId);
+    const email = targetUser.emailAddresses[0]?.emailAddress || "Unknown";
+
+    if (email === "maddybgmistoreog@gmail.com" || email === "r.mateshwaran.io@gmail.com") {
+      return { success: false, error: "Cannot revoke permanent owner access." };
+    }
+    
+    // Create new metadata excluding the role
+    const newMetadata = { ...targetUser.publicMetadata };
+    delete newMetadata.role;
+
+    // Use empty string to delete field, or just overwrite with object without it
+    // Clerk docs: to delete a key, set its value to null
+    await client.users.updateUserMetadata(userId, {
+      publicMetadata: {
+        role: null
+      }
+    });
+
+    await logAdminAction("Security", `Revoked admin access for: ${email}`);
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to revoke admin:", error);
+    return { success: false, error: "Failed to revoke admin." };
+  }
+}
+

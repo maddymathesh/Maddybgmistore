@@ -9,6 +9,7 @@
     "check-types": "turbo run check-types"
   },
   "devDependencies": {
+    "drizzle-kit": "^0.31.10",
     "prettier": "^3.7.4",
     "turbo": "^2.9.16",
     "typescript": "5.9.2"
@@ -22,6 +23,7 @@
     "packages/*"
   ],
   "dependencies": {
+    "drizzle-orm": "^0.45.2",
     "ogl": "^1.0.11"
   }
 }

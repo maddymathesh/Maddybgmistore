@@ -177,7 +177,7 @@ export default function Navbar() {
                   rel="noreferrer"
                   className="block px-4 py-2.5 text-[14px] font-sans font-medium text-gray-300 hover:text-white hover:bg-white/10 rounded-[10px] transition-all"
                 >
-                  Admin Dashboard
+                  Admin Panel
                 </a>
                 <a
                   href={process.env.NODE_ENV === "development" ? "http://localhost:3001/transactions" : "https://admin.maddybgmistore.in/transactions"}

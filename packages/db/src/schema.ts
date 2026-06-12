@@ -41,33 +41,38 @@ export const products = pgTable("products", {
 // 3. UC Prices Table (Catalog)
 export const ucPrices = pgTable("uc_prices", {
   id: uuid("id").defaultRandom().primaryKey(),
+  name: text("name"),
   ucAmount: integer("uc_amount").notNull(),
   marketPrice: numeric("market_price"),
   offerPrice: numeric("offer_price").notNull(),
   bonusUc: integer("bonus_uc").default(0).notNull(),
   method: text("method").default("view_login").notNull(), // view_login, character_id
   tag: text("tag").default("None").notNull(),
+  status: text("status").default("Available").notNull(), // Available, Coming Soon, Limited Stock, Out of Stock, Hidden
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // 4. X-Suit Gifts Table (Catalog)
 export const xsuitGifts = pgTable("xsuit_gifts", {
   id: uuid("id").defaultRandom().primaryKey(),
-  name: text("name").notNull(),
-  price: numeric("price").notNull(),
-  imageUrl: text("image_url"),
-  tag: text("tag").default("None").notNull(),
+  xsuitName: text("xsuit_name").notNull(),
+  sellingPrice: numeric("selling_price").notNull(),
+  offerPrice: numeric("offer_price").notNull(),
+  promoTag: text("promo_tag").default("None").notNull(),
+  imageUrl: text("image_url").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // 5. Supercar Gifts Table (Catalog)
 export const supercarGifts = pgTable("supercar_gifts", {
   id: uuid("id").defaultRandom().primaryKey(),
-  name: text("name").notNull(),
-  price: numeric("price").notNull(),
-  type: text("type"), // Sports, SUV
-  imageUrl: text("image_url"),
-  tag: text("tag").default("None").notNull(),
+  supercarName: text("supercar_name").notNull(),
+  sellingPrice: numeric("selling_price").notNull(),
+  offerPrice: numeric("offer_price").notNull(),
+  carType: text("car_type").default("Sports").notNull(), // Sports, SUV
+  imageUrl: text("image_url").notNull(),
+  promoTag: text("promo_tag").default("None").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
@@ -77,7 +82,7 @@ export const reviews = pgTable("reviews", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: text("name").notNull(),
   comment: text("comment"),
-  rating: integer("rating").notNull(),
+  rating: integer("stars").notNull(),
   status: text("status").default("pending").notNull(), // pending, approved, rejected
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
@@ -89,6 +94,8 @@ export const proofs = pgTable("proofs", {
   imageUrl: text("image_url").notNull(),
   month: text("month").notNull(),
   year: text("year").notNull(),
+  category: text("category").default("Payment").notNull(),
+  transactionId: text("transaction_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
@@ -103,6 +110,7 @@ export const adminPaymentSettings = pgTable("admin_payment_settings", {
   accountNumber: text("account_number"),
   ifscCode: text("ifsc_code"),
   branch: text("branch"),
+  defaultPin: text("default_pin"),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
@@ -142,6 +150,7 @@ export const customerFeedback = pgTable("customer_feedback", {
   desiredItems: text("desired_items"),
   phone: text("phone"),
   status: text("status").default("unread").notNull(), // unread, read, archived
+  readBy: text("read_by"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
@@ -149,6 +158,7 @@ export const customerFeedback = pgTable("customer_feedback", {
 export const activityLogs = pgTable("activity_logs", {
   id: uuid("id").defaultRandom().primaryKey(),
   adminEmail: text("admin_email").notNull(),
+  adminRole: text("admin_role"),
   actionType: text("action_type").notNull(), // e.g. "Security", "Catalog", "Inventory"
   description: text("description").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),

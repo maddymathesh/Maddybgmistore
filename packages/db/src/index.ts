@@ -3,6 +3,7 @@ import postgres from "postgres";
 import * as schema from "./schema";
 
 const databaseUrl = process.env.DATABASE_URL_POOLED || process.env.DATABASE_URL || "";
+console.log("DB Init databaseUrl:", databaseUrl ? `${databaseUrl.substring(0, 25)}...` : "EMPTY");
 
 export const client = postgres(databaseUrl, { prepare: false });
 export const db = drizzle(client, { schema });

@@ -2,6 +2,7 @@
 "use server";
 
 import { db, siteViews, products, ucPrices, xsuitGifts, supercarGifts, reviews, proofs, customerFeedback, paymentLinks, adminPaymentSettings, eq, desc, asc } from "@repo/db";
+import { auth } from "@clerk/nextjs/server";
 
 export async function getOrIncrementViews(shouldIncrement: boolean) {
   try {
@@ -131,11 +132,10 @@ export async function getReviews(page: number = 0) {
 
 export async function submitReview(name: string, rating: number, comment: string) {
   try {
-    const positive = ["good","great","awesome","best","safe","secured","trusted","fast","legit","nice","excellent","perfect","maddy","mbs","recommend","happy","satisfied","smooth","quick","reliable"];
-    const negative = ["bad","scam","fake","worst","slow","terrible","poor","hate","fraud","cheat","theft","stolen","avoid","warned"];
-    const lower = comment.toLowerCase();
-    const aiApproved = positive.some(w => lower.includes(w)) && !negative.some(w => lower.includes(w));
-    const status = aiApproved ? "approved" : "pending";
+    const { userId } = await auth();
+    if (!userId) {
+      return { success: false, error: "Access Denied: You must be logged in to submit a review." };
+    }
 
     const [newReview] = await db
       .insert(reviews)
@@ -143,11 +143,11 @@ export async function submitReview(name: string, rating: number, comment: string
         name: name.trim() || "Anonymous",
         rating,
         comment: comment.trim(),
-        status,
+        status: "pending",
       })
       .returning();
 
-    return { success: true, review: newReview, aiApproved };
+    return { success: true, review: newReview, aiApproved: false };
   } catch (error) {
     console.error("Failed to submit review:", error);
     return { success: false, error: "Failed to submit review" };
@@ -208,7 +208,20 @@ export async function getPaymentLink(paymentId: string) {
     }
 
     if (link.status !== "active") {
-      return { success: false, reason: link.status, link };
+      const adminSettingsData = await db.query.adminPaymentSettings.findFirst({
+        where: eq(adminPaymentSettings.id, 1),
+      });
+      const { pin, ...publicLink } = link;
+      let proofUrl = null;
+      if (link.status === "paid") {
+        const proofRecord = await db.query.proofs.findFirst({
+          where: eq(proofs.transactionId, link.transactionId),
+        });
+        if (proofRecord) {
+          proofUrl = proofRecord.imageUrl;
+        }
+      }
+      return { success: false, reason: link.status, link: publicLink, adminSettings: adminSettingsData || null, proofUrl };
     }
 
     if (link.failedAttempts >= 5) {
@@ -288,6 +301,48 @@ export async function verifyPaymentPin(paymentId: string, inputPin: string) {
   } catch (error) {
     console.error("Failed to verify payment PIN:", error);
     return { success: false, reason: "error" };
+  }
+}
+
+export async function submitPaymentProof(paymentId: string, imageUrl: string) {
+  try {
+    const link = await db.query.paymentLinks.findFirst({
+      where: eq(paymentLinks.id, paymentId),
+    });
+
+    if (!link) {
+      return { success: false, error: "Payment session not found" };
+    }
+
+    if (link.status !== "active") {
+      return { success: false, error: `This payment link is already ${link.status}` };
+    }
+
+    // 1. Update payment link status to paid
+    await db
+      .update(paymentLinks)
+      .set({ status: "paid" })
+      .where(eq(paymentLinks.id, paymentId));
+
+    // 2. Automatically create a record in the proofs table
+    const now = new Date();
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const currentMonth = months[now.getMonth()] || "January";
+    const currentYear = now.getFullYear().toString();
+
+    await db.insert(proofs).values({
+      title: `Payment Proof - ${link.customerName}`,
+      imageUrl: imageUrl,
+      month: currentMonth,
+      year: currentYear,
+      category: "Payment",
+      transactionId: link.transactionId || null,
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to submit payment proof:", error);
+    return { success: false, error: "Failed to submit payment proof" };
   }
 }
 

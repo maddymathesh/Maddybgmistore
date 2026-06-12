@@ -7,12 +7,13 @@ import { useParams, useRouter } from "next/navigation";
 
 
 import Link from "next/link";
+import { toast } from "sonner";
 import {
   ShieldCheck, CheckCircle, Copy, AlertTriangle, CreditCard,
   ChevronDown, ChevronUp, Lock, XCircle, Send, MessageCircle, Clock,
-  ExternalLink, ArrowLeft, RefreshCw, Key, ShieldAlert
+  ExternalLink, ArrowLeft, RefreshCw, Key, ShieldAlert, Download, Camera
 } from "lucide-react";
-import { getPaymentLink, verifyPaymentPin } from "../../actions";
+import { getPaymentLink, verifyPaymentPin, submitPaymentProof } from "../../actions";
 
 export default function PaymentPage() {
   const params = useParams();
@@ -27,6 +28,11 @@ export default function PaymentPage() {
 
   const [showBank, setShowBank] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [amountCopied, setAmountCopied] = useState(false);
+  const [downloadingQr, setDownloadingQr] = useState(false);
+  const [uploadingProof, setUploadingProof] = useState(false);
+  const [proofUploaded, setProofUploaded] = useState(false);
+  const [screenshotUrl, setScreenshotUrl] = useState("");
   const [timeLeft, setTimeLeft] = useState("");
 
   // PIN Protected Gateways
@@ -46,10 +52,13 @@ export default function PaymentPage() {
     setLoading(true);
     try {
       const res = await getPaymentLink(paymentId);
-      if (res.success && res.link) {
+      if (res.link) {
         setPaymentData(res.link);
         setAdminSettings(res.adminSettings);
         setFailedAttempts(res.link.failedAttempts || 0);
+      }
+
+      if (res.success && res.link) {
         setIsValidLink(true);
         if (!res.requiresPin) {
           setIsUnlocked(true);
@@ -57,6 +66,9 @@ export default function PaymentPage() {
       } else {
         setIsValidLink(false);
         setReason(res.reason || "not_found");
+        if (res.reason === "paid") {
+          setIsUnlocked(true);
+        }
       }
     } catch (err) {
       console.error("Error loading payment link:", err);
@@ -185,19 +197,90 @@ export default function PaymentPage() {
     });
   };
 
-  const upiId = paymentData?.payeeUpi || adminSettings?.payeeUpiId || "";
+  const handleCopyAmount = () => {
+    navigator.clipboard.writeText(amount.toString()).then(() => {
+      setAmountCopied(true);
+      setTimeout(() => setAmountCopied(false), 2000);
+    });
+  };
+
+  const handleDownloadQr = async () => {
+    setDownloadingQr(true);
+    try {
+      const response = await fetch(qrCodeUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `MBS-QR-${paymentData?.transactionId || "PAY"}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("CORS fetch failed, opening QR code image directly in new tab for manual download:", error);
+      window.open(qrCodeUrl, "_blank");
+    } finally {
+      setDownloadingQr(false);
+    }
+  };
+
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dkvyv4ooq";
+  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_PRESET || "mbs_reviews";
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingProof(true);
+    setError("");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", uploadPreset);
+
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (data.secure_url) {
+        setScreenshotUrl(data.secure_url);
+        const submitRes = await submitPaymentProof(paymentId, data.secure_url);
+        if (submitRes.success) {
+          setProofUploaded(true);
+          setIsValidLink(false);
+          setReason("paid");
+          toast.success("Payment proof uploaded successfully!");
+        } else {
+          setError(submitRes.error || "Failed to link proof to payment session");
+        }
+      } else {
+        setError("Failed to upload screenshot to cloud storage");
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+      setError("Error uploading proof screenshot");
+    } finally {
+      setUploadingProof(false);
+    }
+  };
+
+  const upiId = paymentData?.upiId || adminSettings?.payeeUpiId || "";
   const payeeName = paymentData?.payeeName || adminSettings?.payeeName || "Maddy BGMI Store";
   const amount = paymentData?.amount || 0;
   const note = paymentData?.note || `MBS Order ${paymentId?.slice(0,8)}`;
 
-  const baseUpiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
-  const gpayLink = `gpay://upi/pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
-  const phonepeLink = `phonepe://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
-  const paytmLink = `paytmmp://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+  const trParam = paymentData?.transactionId ? `&tr=${paymentData.transactionId}` : "";
+  const baseUpiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}${trParam}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+  const gpayLink = `gpay://upi/pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}${trParam}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+  const phonepeLink = `phonepe://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}${trParam}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+  const paytmLink = `paytmmp://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}${trParam}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
 
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(baseUpiUrl)}`;
 
-  const whatsappMsg = encodeURIComponent(`Hello Maddy, I have completed the payment of ₹${amount} for Order ID: ${paymentId}. Here is the payment screenshot.`);
+  const whatsappMsg = encodeURIComponent(`Hello Maddy, I have completed the payment of ₹${amount} for Order ID: ${paymentData?.transactionId || paymentId}. Here is the payment screenshot.`);
   const whatsappUrl = `https://wa.me/+919025391516?text=${whatsappMsg}`;
   const telegramUrl = `https://t.me/MBSxMADDY17`;
 
@@ -217,6 +300,90 @@ export default function PaymentPage() {
 
   // Handle Inactive/Revoked/Expired/Locked out links
   if (!isValidLink) {
+    if (reason === "paid") {
+      const confirmMsg = screenshotUrl 
+        ? `Hello Maddy, I have completed the payment of ₹${amount} for Order ID: ${paymentData?.transactionId || paymentId}. Here is my uploaded proof screenshot: ${screenshotUrl}`
+        : `Hello Maddy, I have completed the payment of ₹${amount} for Order ID: ${paymentData?.transactionId || paymentId}. Please confirm my order.`;
+      const confirmWhatsappUrl = `https://wa.me/+919025391516?text=${encodeURIComponent(confirmMsg)}`;
+      const confirmTelegramUrl = `https://t.me/MBSxMADDY17`;
+
+      return (
+        <>
+          <div className="payment-page-container">
+            <div className="payment-card-wrap" style={{ maxWidth: "480px" }}>
+              <div className="glass-card" style={{ textAlign: "center", padding: "40px 30px", border: "1px solid rgba(16, 185, 129, 0.2)", background: "rgba(17, 21, 32, 0.75)", borderRadius: "24px", boxShadow: "0 8px 32px rgba(16, 185, 129, 0.05)" }}>
+                <div style={{ display: "inline-flex", background: "rgba(16, 185, 129, 0.08)", padding: "20px", borderRadius: "50%", marginBottom: "20px", border: "1px solid rgba(16, 185, 129, 0.2)" }}>
+                  <CheckCircle size={44} style={{ color: "var(--color-gold)" }} />
+                </div>
+                <h1 style={{ fontFamily: "var(--font-h)", fontSize: "22px", color: "#fff", fontWeight: 900, marginBottom: "8px", textTransform: "uppercase", letterSpacing: "1px" }}>
+                  Payment Successful
+                </h1>
+                <p style={{ color: "var(--color-muted)", fontSize: "13.5px", lineHeight: 1.6, marginBottom: "25px", maxWidth: "360px", margin: "0 auto 25px" }}>
+                  Your payment proof has been successfully logged. Our administration coordinators are verifying your transaction.
+                </p>
+
+                {/* Transaction details box */}
+                <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "16px", padding: "20px", textAlign: "left", marginBottom: "25px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px dashed rgba(255,255,255,0.05)", paddingBottom: "10px", marginBottom: "10px" }}>
+                    <span style={{ fontSize: "11px", color: "var(--color-muted)", fontWeight: 700, textTransform: "uppercase" }}>Transaction ID</span>
+                    <span style={{ fontSize: "12px", color: "#fff", fontWeight: 700, fontFamily: "monospace" }}>#{paymentData?.transactionId}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px dashed rgba(255,255,255,0.05)", paddingBottom: "10px", marginBottom: "10px" }}>
+                    <span style={{ fontSize: "11px", color: "var(--color-muted)", fontWeight: 700, textTransform: "uppercase" }}>Customer Name</span>
+                    <span style={{ fontSize: "12px", color: "#fff", fontWeight: 600 }}>{paymentData?.customerName}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px dashed rgba(255,255,255,0.05)", paddingBottom: "10px", marginBottom: "10px" }}>
+                    <span style={{ fontSize: "11px", color: "var(--color-muted)", fontWeight: 700, textTransform: "uppercase" }}>Amount Paid</span>
+                    <span style={{ fontSize: "13px", color: "var(--color-gold)", fontWeight: 800, fontFamily: "monospace" }}>₹{Number(amount).toLocaleString("en-IN")}</span>
+                  </div>
+                  {paymentData?.note && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                      <span style={{ fontSize: "11px", color: "var(--color-muted)", fontWeight: 700, textTransform: "uppercase" }}>Reference / Note</span>
+                      <span style={{ fontSize: "11.5px", color: "#fff", lineHeight: 1.4 }}>{paymentData.note}</span>
+                    </div>
+                  )}
+                </div>
+
+                {screenshotUrl && (
+                  <div style={{ marginBottom: "25px" }}>
+                    <span style={{ display: "block", fontSize: "10px", color: "var(--color-muted)", fontWeight: 700, textTransform: "uppercase", marginBottom: "8px", textAlign: "left" }}>Uploaded Proof</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", padding: "10px", borderRadius: "12px" }}>
+                      <img src={screenshotUrl} alt="Uploaded Proof" style={{ width: "45px", height: "45px", objectFit: "cover", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.1)" }} />
+                      <div style={{ textAlign: "left" }}>
+                        <p style={{ fontSize: "11px", color: "#fff", fontWeight: 700, margin: 0 }}>screenshot_proof.png</p>
+                        <a href={screenshotUrl} target="_blank" rel="noreferrer" style={{ fontSize: "10px", color: "var(--color-gold)", textDecoration: "underline", display: "inline-block", marginTop: "2px" }}>Open image in new tab</a>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  <a href={confirmWhatsappUrl} target="_blank" rel="noreferrer" className="btn btn-green" style={{ justifyContent: "center", gap: "8px" }}>
+                    <MessageCircle size={16} /> Submit on WhatsApp
+                  </a>
+                  <a href={confirmTelegramUrl} target="_blank" rel="noreferrer" className="btn btn-outline" style={{ justifyContent: "center", gap: "8px", borderColor: "rgba(255,255,255,0.15)", color: "#fff" }}>
+                    <Send size={16} /> Submit on Telegram
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <style>{`
+            .payment-page-container {
+              padding: 120px 20px 80px;
+              min-height: 100vh;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background: radial-gradient(circle at top right, rgba(16,185,129,0.02), transparent 400px), 
+                          radial-gradient(circle at bottom left, rgba(255,215,0,0.02), transparent 400px),
+                          var(--color-bg);
+            }
+          `}</style>
+        </>
+      );
+    }
+
     let errorTitle = "Link Inactive";
     let errorDesc = "This payment link does not exist, has expired, or has been revoked.";
     let icon = <XCircle size={48} style={{ color: "var(--color-red)" }} />;
@@ -365,11 +532,15 @@ export default function PaymentPage() {
                 {/* Amount Section */}
                 <div className="amount-section" style={{ textAlign: "center" }}>
                   <span className="amount-label">TOTAL AMOUNT PAYABLE</span>
-                  <div className="amount-value">
+                  <div className="amount-value" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", cursor: "pointer" }} onClick={handleCopyAmount} title="Copy Amount">
                     <span className="currency">₹</span>
                     {Number(amount).toLocaleString("en-IN")}
+                    <span style={{ fontSize: "10px", color: amountCopied ? "var(--color-gold)" : "var(--color-muted)", display: "inline-flex", alignItems: "center", gap: "4px", background: "rgba(255,255,255,0.03)", padding: "4px 8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.05)", marginLeft: "8px", fontWeight: 700 }}>
+                      {amountCopied ? <CheckCircle size={11} style={{ color: "var(--color-gold)" }} /> : <Copy size={11} />}
+                      {amountCopied ? "COPIED" : "COPY"}
+                    </span>
                   </div>
-                  <div className="order-id-badge">ORDER ID: {paymentId}</div>
+                  <div className="order-id-badge">TRANSACTION ID: {paymentData?.transactionId || paymentId}</div>
                   {paymentData?.note && (
                     <p style={{ color: "var(--color-muted)", fontSize: "13px", marginTop: "12px" }}>
                       Note: <span style={{ color: "#fff", fontWeight: 500 }}>{paymentData.note}</span>
@@ -379,18 +550,44 @@ export default function PaymentPage() {
 
                 <div className="payment-grid">
                   {/* Left: QR Code */}
-                  <div className="qr-container">
-                    <div className="qr-frame">
+                  <div className="qr-container" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    <div className="qr-frame" style={{ marginBottom: "12px" }}>
                       <img src={qrCodeUrl} alt="Scan to Pay" />
                       <div className="qr-overlay">
                         <img src="/logo.png" alt="" style={{ width: "30px", opacity: 0.5 }} onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} />
                       </div>
                     </div>
-                    <p className="qr-hint">Scan with any UPI App</p>
+                    <p className="qr-hint" style={{ marginBottom: "12px" }}>Scan with any UPI App</p>
+                    <button 
+                      onClick={handleDownloadQr} 
+                      className="btn btn-outline" 
+                      style={{ 
+                        padding: "6px 14px", 
+                        fontSize: "11px", 
+                        borderRadius: "8px", 
+                        gap: "6px",
+                        background: "rgba(255,215,0,0.03)",
+                        borderColor: "rgba(255,215,0,0.15)",
+                        color: "var(--color-gold)",
+                        textTransform: "uppercase",
+                        letterSpacing: "1px",
+                        fontWeight: 700
+                      }}
+                      disabled={downloadingQr}
+                    >
+                      {downloadingQr ? <RefreshCw size={12} style={{ animation: "spin 1s linear infinite" }} /> : <Download size={12} />}
+                      {downloadingQr ? "Downloading..." : "Download QR"}
+                    </button>
                   </div>
 
                   {/* Right: Payment Info */}
                   <div className="payee-info">
+                    {paymentData?.customerName && (
+                      <div className="info-row">
+                        <span className="label">Customer Name</span>
+                        <span className="value" style={{ color: "#fff", fontWeight: 700 }}>{paymentData.customerName}</span>
+                      </div>
+                    )}
                     <div className="info-row">
                       <span className="label">Payee Name</span>
                       <span className="value">{payeeName}</span>
@@ -433,7 +630,8 @@ export default function PaymentPage() {
                 </div>
 
                 {/* Bank Section */}
-                {(adminSettings?.bankName || adminSettings?.accountNumber) && (
+                {((paymentData?.bankDetails?.bankName || adminSettings?.bankName) || 
+                  (paymentData?.bankDetails?.accountNumber || adminSettings?.accountNumber)) && (
                   <div className="bank-section-wrap">
                     <button className={`bank-toggle ${showBank ? "active" : ""}`} onClick={() => setShowBank(!showBank)}>
                       <div className="toggle-label">
@@ -447,11 +645,11 @@ export default function PaymentPage() {
                       <div className="bank-details-panel">
                         <div className="details-list">
                           {[
-                            ["Bank Name", adminSettings?.bankName || "FEDERAL BANK"],
-                            ["Account Holder", adminSettings?.accountHolder || "MATHESHWARAN R"],
-                            ["Account Number", adminSettings?.accountNumber || "23550100026910"],
-                            ["IFSC Code", adminSettings?.ifscCode || "FDRL0002355"],
-                            ["Branch", adminSettings?.branch || "Alagusenai"]
+                            ["Bank Name", paymentData?.bankDetails?.bankName || adminSettings?.bankName || "FEDERAL BANK"],
+                            ["Account Holder", paymentData?.bankDetails?.accountHolder || adminSettings?.accountHolder || "MATHESHWARAN R"],
+                            ["Account Number", paymentData?.bankDetails?.accountNumber || adminSettings?.accountNumber || "23550100026910"],
+                            ["IFSC Code", paymentData?.bankDetails?.ifscCode || adminSettings?.ifscCode || "FDRL0002355"],
+                            ["Branch", paymentData?.bankDetails?.branch || adminSettings?.branch || "Alagusenai"]
                           ].map(([label, val]) => (
                             <div key={label} className="detail-item">
                               <span className="d-label">{label}</span>
@@ -464,19 +662,64 @@ export default function PaymentPage() {
                   </div>
                 )}
 
-                {/* Footer Proof Sharing */}
-                <div className="proof-footer">
-                  <div className="proof-hint">
-                    <CheckCircle size={14} />
-                    <span>SHARE PAYMENT PROOF TO CONFIRM ORDER</span>
+                {/* Footer Proof Sharing / Uploader */}
+                <div className="proof-footer" style={{ borderTop: "1px dashed rgba(255,255,255,0.08)", marginTop: "25px", paddingTop: "20px" }}>
+                  <div className="proof-hint" style={{ marginBottom: "15px" }}>
+                    <ShieldCheck size={14} style={{ color: "var(--color-gold)" }} />
+                    <span style={{ fontSize: "11px", letterSpacing: "0.5px", fontWeight: 700 }}>SUBMIT TRANSACTION SCREENSHOT PROOF</span>
                   </div>
-                  <div className="proof-buttons">
-                    <a href={whatsappUrl} className="proof-btn wa" target="_blank" rel="noreferrer">
-                      <MessageCircle size={18} /> WhatsApp
-                    </a>
-                    <a href={telegramUrl} className="proof-btn tg" target="_blank" rel="noreferrer">
-                      <Send size={18} /> Telegram
-                    </a>
+
+                  <div className="upload-container" style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", width: "100%", marginTop: "4px" }}>
+                      <a 
+                        href={whatsappUrl} 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        className="btn btn-outline"
+                        style={{ 
+                          display: "flex", 
+                          alignItems: "center", 
+                          justifyContent: "center", 
+                          gap: "8px", 
+                          padding: "10px", 
+                          borderRadius: "10px",
+                          borderColor: "rgba(37, 211, 102, 0.25)",
+                          background: "rgba(37, 211, 102, 0.04)",
+                          color: "#25D366",
+                          fontSize: "11px",
+                          fontWeight: 700,
+                          textTransform: "uppercase"
+                        }}
+                      >
+                        <MessageCircle size={14} /> Submit on WhatsApp
+                      </a>
+                      <a 
+                        href={telegramUrl} 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        className="btn btn-outline"
+                        style={{ 
+                          display: "flex", 
+                          alignItems: "center", 
+                          justifyContent: "center", 
+                          gap: "8px", 
+                          padding: "10px", 
+                          borderRadius: "10px",
+                          borderColor: "rgba(34, 158, 217, 0.25)",
+                          background: "rgba(34, 158, 217, 0.04)",
+                          color: "var(--color-tg)",
+                          fontSize: "11px",
+                          fontWeight: 700,
+                          textTransform: "uppercase"
+                        }}
+                      >
+                        <Send size={14} /> Submit on Telegram
+                      </a>
+                    </div>
+                    
+                    <p style={{ color: "var(--color-muted)", fontSize: "10.5px", textAlign: "center", lineHeight: 1.4 }}>
+                      Click 'Submit on WhatsApp' or 'Submit on Telegram' to send your payment screenshot directly to our support coordinator.
+                    </p>
                   </div>
                 </div>
               </>

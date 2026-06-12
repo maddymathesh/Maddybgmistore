@@ -253,11 +253,25 @@ export async function getFeedbackLogs() {
 }
 
 export async function updateFeedbackStatus(id: string, status: string) {
-  await verifyAdminAccess();
+  const { userId } = await verifyAdminAccess();
+  
+  let adminEmail = "Unknown Admin";
+  try {
+    const { clerkClient } = await import("@clerk/nextjs/server");
+    const client = await clerkClient();
+    const user = await client.users.getUser(userId);
+    adminEmail = user.primaryEmailAddressId 
+      ? user.emailAddresses.find(e => e.id === user.primaryEmailAddressId)?.emailAddress || "Unknown Admin"
+      : user.emailAddresses[0]?.emailAddress || "Unknown Admin";
+  } catch(e) {}
+
   try {
     const [updated] = await db
       .update(customerFeedback)
-      .set({ status })
+      .set({ 
+        status,
+        readBy: status === "read" || status === "archived" ? adminEmail : null
+      })
       .where(eq(customerFeedback.id, id))
       .returning();
       
@@ -282,17 +296,18 @@ export async function getPaymentLinks() {
 }
 
 export async function createPaymentLink(data: {
+  transactionId: string;
   customerName: string;
   amount: string;
   note?: string;
-  pin: string; // User/Admin specified PIN
+  pin?: string;
   expiresHours: number;
 }) {
   await verifyAdminAccess();
   try {
     // Generate secure keys & access tokens
     const secureToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    const txnId = `MBSPAY-${Math.floor(100000 + Math.random() * 900000)}`;
+    const txnId = data.transactionId || `MBSPAY-${Math.floor(100000 + Math.random() * 900000)}`;
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + data.expiresHours);
 
@@ -300,6 +315,8 @@ export async function createPaymentLink(data: {
     const adminSettingsData = await db.query.adminPaymentSettings.findFirst({
       where: eq(adminPaymentSettings.id, 1),
     });
+
+    const finalPin = data.pin || adminSettingsData?.defaultPin || "";
 
     const [newLink] = await db
       .insert(paymentLinks)
@@ -311,7 +328,7 @@ export async function createPaymentLink(data: {
         status: "active",
         expiresAt: expiresAt,
         note: data.note || "Order Payment Lockin",
-        pin: data.pin || Math.floor(100000 + Math.random() * 900000).toString(),
+        pin: finalPin,
         upiId: adminSettingsData?.payeeUpiId || "",
         payeeName: adminSettingsData?.payeeName || "Maddy BGMI Store",
         bankDetails: adminSettingsData ? {
@@ -322,7 +339,7 @@ export async function createPaymentLink(data: {
           branch: adminSettingsData.branch,
           accountType: adminSettingsData.accountType
         } : null,
-        failedAttempts: 0
+          failedAttempts: 0
       })
       .returning();
 
@@ -352,6 +369,18 @@ export async function revokePaymentLink(id: string) {
   } catch (error) {
     console.error("Failed to revoke payment link:", error);
     return { success: false, error: "Failed to revoke payment link" };
+  }
+}
+
+export async function deletePaymentLink(id: string) {
+  await verifyAdminAccess();
+  try {
+    await db.delete(paymentLinks).where(eq(paymentLinks.id, id));
+    await logAdminAction("Payments", `Deleted payment link ID: ${id}`);
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete payment link:", error);
+    return { success: false, error: "Failed to delete payment link" };
   }
 }
 
@@ -497,7 +526,8 @@ export async function getAdminPaymentSettings() {
           accountHolder: "MATHESHWARAN R",
           accountNumber: "23550100026910",
           ifscCode: "FDRL0002355",
-          branch: "Alagusenai"
+          branch: "Alagusenai",
+          defaultPin: ""
         })
         .returning();
       settings = newSettings;
@@ -519,6 +549,7 @@ export async function updateAdminPaymentSettings(data: {
   accountNumber: string;
   ifscCode: string;
   branch: string;
+  defaultPin?: string;
 }) {
   await verifyAdminAccess();
   try {
@@ -542,7 +573,7 @@ export async function updateAdminPaymentSettings(data: {
 // 8. Admin Controls (Clerk Metadata & Activity Logging)
 export async function logAdminAction(actionType: string, description: string) {
   try {
-    const { userId } = await verifyAdminAccess();
+    const { userId, userRole } = await verifyAdminAccess();
     let adminEmail = "Unknown Admin";
     
     try {
@@ -556,6 +587,7 @@ export async function logAdminAction(actionType: string, description: string) {
     
     await db.insert(activityLogs).values({
       adminEmail,
+      adminRole: userRole,
       actionType,
       description
     });
@@ -601,7 +633,7 @@ export async function getActiveAdmins() {
   }
 }
 
-export async function addAdmin(email: string) {
+export async function addAdmin(email: string, role: string = "ADMIN") {
   await verifyAdminAccess();
   try {
     const { clerkClient } = await import("@clerk/nextjs/server");
@@ -616,11 +648,11 @@ export async function addAdmin(email: string) {
     await client.users.updateUserMetadata(targetUser.id, {
       publicMetadata: {
         ...targetUser.publicMetadata,
-        role: "ADMIN"
+        role: role
       }
     });
 
-    await logAdminAction("Security", `Authorized new admin: ${email}`);
+    await logAdminAction("Security", `Authorized new admin: ${email} with role: ${role}`);
     
     return { success: true };
   } catch (error) {
@@ -681,20 +713,41 @@ export async function getUcPacks() {
   }
 }
 
-export async function createUcPack(data: { ucAmount: number, marketPrice?: string, offerPrice: string, bonusUc?: number, method?: string, tag?: string }) {
+export async function createUcPack(data: { name?: string, ucAmount: number, marketPrice?: string, offerPrice: string, bonusUc?: number, method?: string, tag?: string, status?: string }) {
   await verifyAdminAccess();
   try {
     await db.insert(ucPrices).values({
       ...data,
+      name: data.name || "",
       bonusUc: data.bonusUc || 0,
       method: data.method || "view_login",
       tag: data.tag || "None",
+      status: data.status || "Available",
     });
     await logAdminAction("Catalog", `Added new UC Pack: ${data.ucAmount} UC`);
     return { success: true };
   } catch (error: any) {
     console.error("Failed to create UC pack:", error);
     return { success: false, error: error.message };
+  }
+}
+
+export async function updateUcPack(id: string, data: Partial<{ name?: string, ucAmount: number, marketPrice?: string, offerPrice: string, bonusUc?: number, method?: string, tag?: string, status?: string }>) {
+  await verifyAdminAccess();
+  try {
+    const [updatedPack] = await db
+      .update(ucPrices)
+      .set({
+        ...data,
+        updatedAt: new Date(),
+      })
+      .where(eq(ucPrices.id, id))
+      .returning();
+    await logAdminAction("Catalog", `Updated UC Pack ID: ${id}`);
+    return { success: true, ucPack: updatedPack };
+  } catch (error: any) {
+    console.error("Failed to update UC pack:", error);
+    return { success: false, error: error.message || "Failed to update UC pack" };
   }
 }
 
@@ -724,17 +777,38 @@ export async function getXsuitGifts() {
   }
 }
 
-export async function createXsuitGift(data: { name: string, price: string, imageUrl?: string, tag?: string }) {
+export async function createXsuitGift(data: { xsuitName: string, sellingPrice: string, offerPrice: string, imageUrl: string, promoTag?: string }) {
   await verifyAdminAccess();
   try {
     await db.insert(xsuitGifts).values({
-      ...data,
-      tag: data.tag || "None",
+      xsuitName: data.xsuitName,
+      sellingPrice: data.sellingPrice,
+      offerPrice: data.offerPrice,
+      imageUrl: data.imageUrl,
+      promoTag: data.promoTag || "None",
     });
-    await logAdminAction("Catalog", `Added new X-Suit Gift: ${data.name}`);
+    await logAdminAction("Catalog", `Added new X-Suit Gift: ${data.xsuitName}`);
     return { success: true };
   } catch (error: any) {
     console.error("Failed to create X-suit gift:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function updateXsuitGift(id: string, data: { xsuitName: string, sellingPrice: string, offerPrice: string, imageUrl: string, promoTag?: string }) {
+  await verifyAdminAccess();
+  try {
+    await db.update(xsuitGifts).set({
+      xsuitName: data.xsuitName,
+      sellingPrice: data.sellingPrice,
+      offerPrice: data.offerPrice,
+      imageUrl: data.imageUrl,
+      promoTag: data.promoTag || "None",
+    }).where(eq(xsuitGifts.id, id));
+    await logAdminAction("Catalog", `Updated X-Suit Gift: ${data.xsuitName}`);
+    return { success: true };
+  } catch (error: any) {
+    console.error("Failed to update X-suit gift:", error);
     return { success: false, error: error.message };
   }
 }
@@ -765,17 +839,41 @@ export async function getSupercars() {
   }
 }
 
-export async function createSupercar(data: { name: string, price: string, type?: string, imageUrl?: string, tag?: string }) {
+export async function createSupercar(data: { supercarName: string, sellingPrice: string, offerPrice: string, carType: string, imageUrl: string, promoTag?: string }) {
   await verifyAdminAccess();
   try {
     await db.insert(supercarGifts).values({
-      ...data,
-      tag: data.tag || "None",
+      supercarName: data.supercarName,
+      sellingPrice: data.sellingPrice,
+      offerPrice: data.offerPrice,
+      carType: data.carType,
+      imageUrl: data.imageUrl,
+      promoTag: data.promoTag || "None",
     });
-    await logAdminAction("Catalog", `Added new Supercar Gift: ${data.name}`);
+    await logAdminAction("Catalog", `Added new Supercar Gift: ${data.supercarName}`);
     return { success: true };
   } catch (error: any) {
     console.error("Failed to create Supercar gift:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function updateSupercar(id: string, data: { supercarName: string, sellingPrice: string, offerPrice: string, carType: string, imageUrl: string, promoTag?: string }) {
+  await verifyAdminAccess();
+  try {
+    await db.update(supercarGifts).set({
+      supercarName: data.supercarName,
+      sellingPrice: data.sellingPrice,
+      offerPrice: data.offerPrice,
+      carType: data.carType,
+      imageUrl: data.imageUrl,
+      promoTag: data.promoTag || "None",
+      updatedAt: new Date(),
+    }).where(eq(supercarGifts.id, id));
+    await logAdminAction("Catalog", `Updated Supercar Gift: ${data.supercarName}`);
+    return { success: true };
+  } catch (error: any) {
+    console.error("Failed to update Supercar gift:", error);
     return { success: false, error: error.message };
   }
 }
@@ -806,11 +904,11 @@ export async function getProofs() {
   }
 }
 
-export async function createProof(data: { title?: string, imageUrl: string, month: string, year: string }) {
+export async function createProof(data: { title?: string, imageUrl: string, month: string, year: string, category: string, transactionId?: string }) {
   await verifyAdminAccess();
   try {
     await db.insert(proofs).values(data);
-    await logAdminAction("Catalog", `Added new Proof: ${data.title || 'Untitled'}`);
+    await logAdminAction("Catalog", `Added new Proof: ${data.title || 'Untitled'} (${data.category})`);
     return { success: true };
   } catch (error: any) {
     console.error("Failed to create proof:", error);
@@ -827,5 +925,22 @@ export async function deleteProof(id: string) {
   } catch (error: any) {
     console.error("Failed to delete proof:", error);
     return { success: false, error: error.message };
+  }
+}
+
+export async function markPaymentAsPaid(id: string) {
+  await verifyAdminAccess();
+  try {
+    const [updated] = await db
+      .update(paymentLinks)
+      .set({ status: "paid" })
+      .where(eq(paymentLinks.id, id))
+      .returning();
+      
+    await logAdminAction("Payments", `Manually marked payment link ID: ${id} as PAID`);
+    return { success: true, paymentLink: updated };
+  } catch (error: any) {
+    console.error("Failed to mark payment as paid:", error);
+    return { success: false, error: error.message || "Failed to update status" };
   }
 }

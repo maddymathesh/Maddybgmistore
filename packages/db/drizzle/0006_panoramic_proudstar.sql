@@ -1,0 +1,1 @@
+ALTER TABLE "admin_payment_settings" ADD COLUMN "default_pin" text;

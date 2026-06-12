@@ -10,10 +10,11 @@ import { getXsuitGifts } from "../../actions";
 
 interface XsuitGift {
   id: string;
-  name: string;
-  price: string;
+  xsuitName: string;
+  sellingPrice: string;
+  offerPrice: string;
   imageUrl: string | null;
-  tag: string;
+  promoTag: string;
 }
 
 export default function XsuitGiftPage() {
@@ -293,9 +294,10 @@ export default function XsuitGiftPage() {
               margin: "0 auto"
             }}>
               {suits.map((s) => {
-                const priceVal = parseFloat(s.price);
-                const isMythic = priceVal > 45000;
-                const activeTag = isMythic ? "Mythic Armory" : "Legendary Suit";
+                const sellingPriceVal = parseFloat(s.sellingPrice);
+                const offerPriceVal = parseFloat(s.offerPrice);
+                const isMythic = offerPriceVal > 45000;
+                const activeTag = s.promoTag && s.promoTag !== "None" ? s.promoTag : (isMythic ? "Mythic Armory" : "Legendary Suit");
                 
                 return (
                   <div 
@@ -325,7 +327,7 @@ export default function XsuitGiftPage() {
                       {s.imageUrl ? (
                         <img 
                           src={s.imageUrl} 
-                          alt={s.name} 
+                          alt={s.xsuitName} 
                           loading="lazy"
                           className="hover-zoom"
                           style={{
@@ -384,25 +386,41 @@ export default function XsuitGiftPage() {
                         marginBottom: "6px",
                         letterSpacing: "0.5px"
                       }}>
-                        {s.name}
+                        {s.xsuitName}
                       </h3>
                       
                       <div style={{
-                        fontSize: "26px",
-                        fontWeight: 900,
-                        color: "var(--color-gold)",
-                        fontFamily: "var(--font-h)",
-                        marginBottom: "24px",
-                        textShadow: "0 2px 10px rgba(255,215,0,0.15)"
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "10px",
+                        marginBottom: "24px"
                       }}>
-                        ₹{priceVal.toLocaleString("en-IN")}
+                        <span style={{
+                          fontSize: "16px",
+                          fontWeight: 500,
+                          color: "rgba(255,255,255,0.4)",
+                          fontFamily: "var(--font-h)",
+                          textDecoration: "line-through"
+                        }}>
+                          ₹{sellingPriceVal.toLocaleString("en-IN")}
+                        </span>
+                        <span style={{
+                          fontSize: "26px",
+                          fontWeight: 900,
+                          color: "var(--color-gold)",
+                          fontFamily: "var(--font-h)",
+                          textShadow: "0 2px 10px rgba(255,215,0,0.15)"
+                        }}>
+                          ₹{offerPriceVal.toLocaleString("en-IN")}
+                        </span>
                       </div>
                       
                       <div style={{
                         display: "grid", gap: "10px", marginTop: "auto"
                       }}>
                         <a 
-                          href={`https://wa.me/+919025391516?text=${encodeURIComponent(contactText(s.name))}`} 
+                          href={`https://wa.me/+919025391516?text=${encodeURIComponent(contactText(s.xsuitName))}`} 
                           target="_blank" 
                           rel="noreferrer"
                           className="social-btn-wa"
@@ -417,7 +435,7 @@ export default function XsuitGiftPage() {
                           <MessageCircle size={16} /> WhatsApp Deal
                         </a>
                         <a 
-                          href={`https://t.me/maddy_bgmistore?text=${encodeURIComponent(contactText(s.name))}`} 
+                          href={`https://t.me/maddy_bgmistore?text=${encodeURIComponent(contactText(s.xsuitName))}`} 
                           target="_blank" 
                           rel="noreferrer"
                           className="social-btn-tg"

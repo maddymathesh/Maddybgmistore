@@ -11,6 +11,8 @@ interface Proof {
   imageUrl: string;
   month: string;
   year: string;
+  category: string;
+  transactionId: string | null;
   createdAt: Date;
 }
 
@@ -143,10 +145,52 @@ export default function ProofsPage() {
                               display: "flex", 
                               alignItems: "center", 
                               justifyContent: "center", 
-                              color: "#fff" 
+                              color: "#fff",
+                              zIndex: 20
                             }}>
                             <ExternalLink size={14} />
                           </a>
+
+                          {/* Category Badge */}
+                          <span style={{
+                            position: "absolute",
+                            top: "12px",
+                            left: "12px",
+                            background: p.category === "Payment" ? "rgba(255,215,0,0.15)" : p.category === "Account Sale" ? "rgba(74,222,128,0.15)" : "rgba(255,255,255,0.08)",
+                            border: `1px solid ${p.category === "Payment" ? "rgba(255,215,0,0.3)" : p.category === "Account Sale" ? "rgba(74,222,128,0.3)" : "rgba(255,255,255,0.15)"}`,
+                            color: p.category === "Payment" ? "#ffd700" : p.category === "Account Sale" ? "#4ade80" : "#a4b0be",
+                            padding: "4px 9px",
+                            borderRadius: "12px",
+                            fontSize: "9px",
+                            fontWeight: "bold",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.5px",
+                            backdropFilter: "blur(4px)",
+                            zIndex: 20
+                          }}>
+                            {p.category || "Payment"}
+                          </span>
+
+                          {/* Transaction ID Badge */}
+                          {p.transactionId && (
+                            <span style={{
+                              position: "absolute",
+                              bottom: "12px",
+                              right: "12px",
+                              background: "rgba(0,0,0,0.75)",
+                              border: "1px solid rgba(255,255,255,0.12)",
+                              color: "#fff",
+                              padding: "3px 7px",
+                              borderRadius: "4px",
+                              fontSize: "8.5px",
+                              fontWeight: "black",
+                              fontFamily: "monospace",
+                              letterSpacing: "0.5px",
+                              zIndex: 20
+                            }}>
+                              #{p.transactionId}
+                            </span>
+                          )}
                         </div>
                         <div style={{ padding: "16px", background: "#131722" }}>
                           <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#fff", margin: 0 }}>{p.title || "Verified Transaction"}</h3>

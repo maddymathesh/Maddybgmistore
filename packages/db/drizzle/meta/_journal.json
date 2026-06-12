@@ -15,6 +15,48 @@
       "when": 1781184416082,
       "tag": "0001_silly_doctor_strange",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781279929503,
+      "tag": "0002_sudden_natasha_romanoff",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1781296355372,
+      "tag": "0003_reflective_toro",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1781296794026,
+      "tag": "0004_productive_sentinels",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1781298411196,
+      "tag": "0005_greedy_sleeper",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1781298890143,
+      "tag": "0006_panoramic_proudstar",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1781301887503,
+      "tag": "0007_skinny_thunderbird",
+      "breakpoints": true
     }
   ]
 }

@@ -10,11 +10,12 @@ import { getSupercarGifts } from "../../actions";
 
 interface SupercarGift {
   id: string;
-  name: string;
-  price: string;
-  type: string | null;
+  supercarName: string;
+  sellingPrice: string;
+  offerPrice: string;
+  carType: string | null;
   imageUrl: string | null;
-  tag: string;
+  promoTag: string;
 }
 
 export default function SupercarGiftPage() {
@@ -52,7 +53,7 @@ export default function SupercarGiftPage() {
   // Filter cars based on selection
   const filteredCars = cars.filter(c => {
     if (selectedFilter === "all") return true;
-    return getCardCategory(c.type) === selectedFilter;
+    return getCardCategory(c.carType) === selectedFilter;
   });
 
   return (
@@ -326,8 +327,10 @@ export default function SupercarGiftPage() {
               margin: "0 auto"
             }}>
               {filteredCars.map((c) => {
-                const priceVal = parseFloat(c.price);
-                const isThreeCard = getCardCategory(c.type) === "3-card";
+                const sellingPriceVal = parseFloat(c.sellingPrice);
+                const offerPriceVal = parseFloat(c.offerPrice);
+                const isThreeCard = getCardCategory(c.carType) === "3-card";
+                const activeTag = c.promoTag && c.promoTag !== "None" ? c.promoTag : "";
                 
                 return (
                   <div 
@@ -357,7 +360,7 @@ export default function SupercarGiftPage() {
                       {c.imageUrl ? (
                         <img 
                           src={c.imageUrl} 
-                          alt={c.name}
+                          alt={c.supercarName}
                           loading="lazy"
                           className="hover-zoom"
                           style={{
@@ -373,8 +376,9 @@ export default function SupercarGiftPage() {
                           color: "var(--color-muted)", fontSize: "14px"
                         }}>No Image Available</div>
                       )}
-                      {/* Premium Top tags */}
-                      {c.type && (
+                      
+                      {/* Premium Top Left Type Tag */}
+                      {c.carType && (
                         <div style={{
                           position: "absolute", top: "14px", left: "14px",
                           background: "linear-gradient(135deg, var(--color-gold), var(--color-orange))",
@@ -385,26 +389,44 @@ export default function SupercarGiftPage() {
                           letterSpacing: "1px", textTransform: "uppercase",
                           boxShadow: "0 4px 10px rgba(0,0,0,0.3)"
                         }}>
-                          {c.type}
+                          {c.carType}
                         </div>
                       )}
 
-                      {/* Hot Listing Badge */}
-                      {isThreeCard && (
+                      {/* Hot Listing Badge / Promo Tag on Top Right */}
+                      {activeTag ? (
                         <div style={{
                           position: "absolute", top: "14px", right: "14px",
-                          background: "rgba(239, 68, 68, 0.85)",
+                          background: "rgba(255, 215, 0, 0.15)",
                           backdropFilter: "blur(4px)",
-                          border: "1px solid rgba(255,255,255,0.15)",
-                          color: "#fff",
-                          fontSize: "9px", fontWeight: 900,
+                          border: "1px solid var(--color-border-gold)",
+                          color: "var(--color-gold)",
+                          fontSize: "10px", fontWeight: 900,
                           fontFamily: "var(--font-h)",
-                          padding: "3px 8px", borderRadius: "4px",
+                          padding: "4px 12px", borderRadius: "6px",
                           letterSpacing: "0.5px",
-                          display: "flex", alignItems: "center", gap: "4px"
+                          display: "flex", alignItems: "center", gap: "4px",
+                          boxShadow: "0 4px 10px rgba(0,0,0,0.3)"
                         }}>
-                          <Flame size={10} /> HYPERCAR
+                          {activeTag}
                         </div>
+                      ) : (
+                        isThreeCard && (
+                          <div style={{
+                            position: "absolute", top: "14px", right: "14px",
+                            background: "rgba(239, 68, 68, 0.85)",
+                            backdropFilter: "blur(4px)",
+                            border: "1px solid rgba(255,255,255,0.15)",
+                            color: "#fff",
+                            fontSize: "9px", fontWeight: 900,
+                            fontFamily: "var(--font-h)",
+                            padding: "3px 8px", borderRadius: "4px",
+                            letterSpacing: "0.5px",
+                            display: "flex", alignItems: "center", gap: "4px"
+                          }}>
+                            <Flame size={10} /> HYPERCAR
+                          </div>
+                        )
                       )}
                     </div>
 
@@ -424,25 +446,41 @@ export default function SupercarGiftPage() {
                         marginBottom: "6px",
                         letterSpacing: "0.5px"
                       }}>
-                        {c.name}
+                        {c.supercarName}
                       </h3>
                       
                       <div style={{
-                        fontSize: "26px",
-                        fontWeight: 900,
-                        color: "var(--color-gold)",
-                        fontFamily: "var(--font-h)",
-                        marginBottom: "24px",
-                        textShadow: "0 2px 10px rgba(255,215,0,0.15)"
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "10px",
+                        marginBottom: "24px"
                       }}>
-                        ₹{priceVal.toLocaleString("en-IN")}
+                        <span style={{
+                          fontSize: "16px",
+                          fontWeight: 500,
+                          color: "rgba(255,255,255,0.4)",
+                          fontFamily: "var(--font-h)",
+                          textDecoration: "line-through"
+                        }}>
+                          ₹{sellingPriceVal.toLocaleString("en-IN")}
+                        </span>
+                        <span style={{
+                          fontSize: "26px",
+                          fontWeight: 900,
+                          color: "var(--color-gold)",
+                          fontFamily: "var(--font-h)",
+                          textShadow: "0 2px 10px rgba(255,215,0,0.15)"
+                        }}>
+                          ₹{offerPriceVal.toLocaleString("en-IN")}
+                        </span>
                       </div>
                       
                       <div style={{
                         display: "grid", gap: "10px", marginTop: "auto"
                       }}>
                         <a 
-                          href={`https://wa.me/+919025391516?text=${encodeURIComponent(contactText(c.name))}`} 
+                          href={`https://wa.me/+919025391516?text=${encodeURIComponent(contactText(c.supercarName))}`} 
                           target="_blank" 
                           rel="noreferrer"
                           className="social-btn-wa"
@@ -457,7 +495,7 @@ export default function SupercarGiftPage() {
                           <MessageCircle size={16} /> WhatsApp Deal
                         </a>
                         <a 
-                          href={`https://t.me/maddy_bgmistore?text=${encodeURIComponent(contactText(c.name))}`} 
+                          href={`https://t.me/maddy_bgmistore?text=${encodeURIComponent(contactText(c.supercarName))}`} 
                           target="_blank" 
                           rel="noreferrer"
                           className="social-btn-tg"

@@ -26,31 +26,36 @@ export interface Product {
 
 export interface UcPrice {
   id: string;
+  name?: string;
   ucAmount: number;
   marketPrice?: string;
   offerPrice: string;
   bonusUc: number;
   method: "view_login" | "character_id";
   tag: string;
+  status: string;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface XsuitGift {
   id: string;
-  name: string;
-  price: string;
-  imageUrl?: string;
-  tag: string;
+  xsuitName: string;
+  sellingPrice: string;
+  offerPrice: string;
+  promoTag: string;
+  imageUrl: string;
   createdAt: Date;
 }
 
 export interface SupercarGift {
   id: string;
-  name: string;
-  price: string;
-  type?: string;
-  imageUrl?: string;
-  tag: string;
+  supercarName: string;
+  sellingPrice: string;
+  offerPrice: string;
+  carType: string;
+  imageUrl: string;
+  promoTag: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -70,6 +75,8 @@ export interface Proof {
   imageUrl: string;
   month: string;
   year: string;
+  category: string;
+  transactionId?: string;
   createdAt: Date;
 }
 
@@ -83,6 +90,7 @@ export interface AdminPaymentSettings {
   accountNumber?: string;
   ifscCode?: string;
   branch?: string;
+  defaultPin?: string;
   updatedAt: Date;
 }
 
@@ -113,6 +121,7 @@ export interface CustomerFeedback {
   desiredItems?: string;
   phone?: string;
   status: "unread" | "read" | "archived";
+  readBy?: string;
   createdAt: Date;
 }
 

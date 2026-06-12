@@ -80,6 +80,7 @@ const CHAR_ID_STEPS = [
 
 interface UcPack {
   id: string;
+  name?: string | null;
   ucAmount: number;
   marketPrice: string | null;
   offerPrice: string;
@@ -184,8 +185,14 @@ function UcPackCard({ pack, accentColor, glowClass, contactPrefix }: UcPackCardP
           alignItems: "baseline",
           gap: "6px"
         }}>
-          {pack.ucAmount}
-          <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--color-gold)", letterSpacing: "1px" }}>UC</span>
+          {pack.name ? (
+            pack.name
+          ) : (
+            <>
+              {pack.ucAmount}
+              <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--color-gold)", letterSpacing: "1px" }}>UC</span>
+            </>
+          )}
         </div>
         {pack.bonusUc > 0 && (
           <div style={{

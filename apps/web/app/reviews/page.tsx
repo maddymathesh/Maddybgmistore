@@ -103,21 +103,7 @@ export default function ReviewsPage() {
     try {
       const res = await submitReview(name, rating, comment);
       if (res.success && res.review) {
-        if (res.aiApproved) {
-          toast.success("🎉 Review published! Thank you.");
-          // Add to list immediately
-          const newReview: Review = {
-            ...res.review,
-            createdAt: new Date(res.review.createdAt)
-          } as Review;
-          setReviews(prev => [newReview, ...prev]);
-          setStats(prev => ({
-            averageRating: (prev.averageRating * prev.totalReviews + rating) / (prev.totalReviews + 1),
-            totalReviews: prev.totalReviews + 1
-          }));
-        } else {
-          toast.success("✅ Submitted! Awaiting admin approval.");
-        }
+        toast.success("✅ Submitted! Your review is awaiting admin approval.");
 
         localStorage.setItem("lastReviewSubmit", Date.now().toString());
         setCooldown(120);

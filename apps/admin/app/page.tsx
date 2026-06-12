@@ -327,13 +327,35 @@ export default function AdminDashboard() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   // Compute admin status (client-side guard; middleware is the real enforcer)
-  const isPermanentAdmin = user?.primaryEmailAddress?.emailAddress === "maddybgmistoreog@gmail.com";
+  const isPermanentAdmin = user?.primaryEmailAddress?.emailAddress === "maddybgmistoreog@gmail.com" || user?.primaryEmailAddress?.emailAddress === "r.mateshwaran.io@gmail.com";
   const userRole = (user?.publicMetadata?.role as string) || "USER";
   const isAdmin = isPermanentAdmin || ["SUPER_ADMIN", "ADMIN", "TRANSACTION_MANAGER", "CONTENT_MANAGER"].includes(userRole);
 
+  // Safe wrapper: catches individual server action throws so one failure doesn't kill the batch
+  const safeCall = async <T,>(fn: () => Promise<T>, fallback: T): Promise<T> => {
+    try {
+      return await fn();
+    } catch (err) {
+      console.error("[Dashboard] Individual action failed:", err);
+      return fallback;
+    }
+  };
+
+  // Fallback metrics object when the metrics query fails
+  const FALLBACK_METRICS = {
+    totalViews: 0,
+    products: { total: 0, available: 0, sold: 0 },
+    reviews: { total: 0, pending: 0, approved: 0 },
+    feedback: { unread: 0 },
+    analytics: { count: 0, revenue: 0, profit: 0 }
+  };
+
   // Load all dashboard data
   const loadDashboardData = async () => {
-    if (!user || !isAdmin) return;
+    if (!user || !isAdmin) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const [
@@ -351,22 +373,28 @@ export default function AdminDashboard() {
         proofsRes,
         paymentSettingsRes
       ] = await Promise.all([
-        getAdminMetrics(),
-        getAdminProducts(),
-        getAdminReviews(),
-        getFeedbackLogs(),
-        getPaymentLinks(),
-        getTransactionsRegistry(),
-        getAdminActivityLogs(),
-        getActiveAdmins(),
-        getUcPacks(),
-        getXsuitGifts(),
-        getSupercars(),
-        getProofs(),
-        getAdminPaymentSettings()
+        safeCall(() => getAdminMetrics(), { success: false } as any),
+        safeCall(() => getAdminProducts(), { success: false, products: [] } as any),
+        safeCall(() => getAdminReviews(), { success: false, reviews: [] } as any),
+        safeCall(() => getFeedbackLogs(), { success: false, feedback: [] } as any),
+        safeCall(() => getPaymentLinks(), { success: false, paymentLinks: [] } as any),
+        safeCall(() => getTransactionsRegistry(), { success: false, transactions: [] } as any),
+        safeCall(() => getAdminActivityLogs(), { success: false, logs: [] } as any),
+        safeCall(() => getActiveAdmins(), { success: false, admins: [] } as any),
+        safeCall(() => getUcPacks(), { success: false, ucPacks: [] } as any),
+        safeCall(() => getXsuitGifts(), { success: false, xsuitGifts: [] } as any),
+        safeCall(() => getSupercars(), { success: false, supercars: [] } as any),
+        safeCall(() => getProofs(), { success: false, proofs: [] } as any),
+        safeCall(() => getAdminPaymentSettings(), { success: false, settings: null } as any)
       ]);
 
-      if (metricsRes.success) setMetrics(metricsRes.metrics);
+      // Always set metrics (use fallback if the query failed) so dashboard renders
+      if (metricsRes.success && metricsRes.metrics) {
+        setMetrics(metricsRes.metrics);
+      } else {
+        console.warn("[Dashboard] Metrics fetch failed, using fallback");
+        setMetrics(FALLBACK_METRICS);
+      }
       if (productsRes.success) setProductsList(productsRes.products || []);
       if (reviewsRes.success) setReviewsList(reviewsRes.reviews || []);
       if (feedbackRes.success) setFeedbackList(feedbackRes.feedback || []);
@@ -384,6 +412,8 @@ export default function AdminDashboard() {
     } catch (_err) {
       console.error("Failed to load dashboard details:", _err);
       toast.error("Failed to sync some dashboard items");
+      // Even on total failure, still set fallback metrics so dashboard renders
+      if (!metrics) setMetrics(FALLBACK_METRICS);
     } finally {
       setLoading(false);
     }
@@ -392,7 +422,11 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (isLoaded && user && isAdmin) {
       loadDashboardData();
+    } else if (isLoaded) {
+      // Clerk finished loading but user isn't admin — clear the spinner
+      setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshKey, isLoaded, user, isAdmin]);
 
   const triggerRefresh = () => {

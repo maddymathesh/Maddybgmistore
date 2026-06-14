@@ -15,8 +15,6 @@ import { fetchAllTransactions, deleteTransaction } from '../../services/transact
 import { toast } from 'sonner';
 import { exportToExcel } from '../../lib/excelExport';
 import { generateCustomerPDF, generateInternalPDF, testPDF } from '../../lib/pdfGenerator';
-import { Dropdown } from '@repo/ui/dropdown';
-
 export default function TransactionsList({ onAddNew, onEdit }) {
   const [data, setData] = useState([]);
   const [globalFilter, setGlobalFilter] = useState('');

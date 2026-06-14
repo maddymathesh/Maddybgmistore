@@ -111,6 +111,7 @@ export const adminPaymentSettings = pgTable("admin_payment_settings", {
   ifscCode: text("ifsc_code"),
   branch: text("branch"),
   defaultPin: text("default_pin"),
+  rolePermissions: jsonb("role_permissions"),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
@@ -161,6 +162,8 @@ export const activityLogs = pgTable("activity_logs", {
   adminRole: text("admin_role"),
   actionType: text("action_type").notNull(), // e.g. "Security", "Catalog", "Inventory"
   description: text("description").notNull(),
+  ipAddress: text("ip_address"),
+  deviceInfo: text("device_info"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 

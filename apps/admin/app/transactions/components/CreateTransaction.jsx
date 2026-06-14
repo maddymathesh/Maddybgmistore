@@ -200,7 +200,7 @@ export default function CreateTransaction({ onBack, initialData }) {
   }, [step]);
 
   const detail = initialData?.account_transactions?.[0] || {};
-  const { register, handleSubmit, watch, setValue, getValues, formState: { errors } } = useForm({
+  const { register, handleSubmit, watch, setValue, getValues, reset, formState: { errors } } = useForm({
     defaultValues: initialData ? {
       ...initialData,
       ...detail,
@@ -321,6 +321,73 @@ export default function CreateTransaction({ onBack, initialData }) {
       additional_expenses: '',
     }
   });
+
+  // Autosave draft values to localStorage
+  const formValues = watch();
+  useEffect(() => {
+    if (!initialData && formValues && Object.keys(formValues).length > 0) {
+      localStorage.setItem('mbs_tx_draft_v1', JSON.stringify(formValues));
+    }
+  }, [formValues, initialData]);
+
+  // Load draft values on mount
+  useEffect(() => {
+    if (!initialData) {
+      const draft = localStorage.getItem('mbs_tx_draft_v1');
+      if (draft) {
+        try {
+          const parsed = JSON.parse(draft);
+          reset(parsed);
+          // Small delay before toast to ensure sonner is ready
+          setTimeout(() => {
+            toast.info('Restored your unsaved transaction draft! ✍️', {
+              action: {
+                label: 'Clear Draft',
+                onClick: () => {
+                  localStorage.removeItem('mbs_tx_draft_v1');
+                  reset({
+                    transaction_id: '',
+                    transaction_date: new Date().toISOString().split('T')[0],
+                    mode_of_deal: 'WhatsApp',
+                    mode_of_payment: 'Full Payment via UPI / Bank Transfer',
+                    payment_status: 'Pending Payment',
+                    account_title: '',
+                    stock_id: '',
+                    category: 'Mid-Range',
+                    listing_source: 'WhatsApp',
+                    secondary_login_provider: 'Null (Single Login Only)',
+                    primary_email_id: '',
+                    primary_email_type: 'Select',
+                    primary_login_username: '',
+                    primary_login_password: '',
+                    primary_recovery_email: '',
+                    primary_recovery_phone: '',
+                    primary_dob: '',
+                    primary_2fa_status: 'Off',
+                    primary_authenticator_status: 'Off',
+                    primary_backup_codes: '',
+                    primary_passkey_status: 'Off',
+                    primary_passkey_details: '',
+                    primary_trusted_number: '',
+                    secondary_login_scenario: 'Empty',
+                    primary_unlink_plan: '30 Days',
+                    secondary_unlink_plan: 'No Guarantee',
+                    owner_price: '',
+                    sold_price: '',
+                    commission: '',
+                    additional_expenses: ''
+                  });
+                  toast.success('Draft cleared.');
+                }
+              }
+            });
+          }, 500);
+        } catch (e) {
+          console.error('Failed to parse draft:', e);
+        }
+      }
+    }
+  }, [initialData, reset]);
 
   useEffect(() => {
     if (user) {
@@ -593,6 +660,7 @@ export default function CreateTransaction({ onBack, initialData }) {
         saved = await createAccountTransaction(mainData, detailData);
       }
       setSavedTransaction({ ...saved, ...mainData, account_transactions: [detailData] });
+      localStorage.removeItem('mbs_tx_draft_v1'); // Clear draft on successful save
       toast.success(`Transaction ${data.transaction_id} ${initialData ? 'updated' : 'saved'} successfully!`);
     } catch (err) {
       console.error(err);
@@ -602,7 +670,7 @@ export default function CreateTransaction({ onBack, initialData }) {
     }
   };
 
-  const inputClasses = "w-full bg-[#080a0f]/60 border border-white/5 rounded-xl py-3 px-4 text-xs font-mono text-white focus:outline-none focus:border-yellow-500/30 focus:ring-1 focus:ring-yellow-500/20 transition-all placeholder:text-gray-500";
+  const inputClasses = "w-full bg-[#080a0f]/60 border border-white/5 rounded-xl h-11 px-4 text-xs font-mono text-white focus:outline-none focus:border-yellow-500/30 focus:ring-1 focus:ring-yellow-500/20 transition-all placeholder:text-gray-500";
   const selectClasses = `${inputClasses} appearance-none cursor-pointer`;
 
   // ── SUCCESS SCREEN ────────────────────────────────────────────────────────
@@ -1075,44 +1143,73 @@ export default function CreateTransaction({ onBack, initialData }) {
               <div className="absolute top-0 left-0 w-1 h-full bg-cyan-500"></div>
               <div className="ml-2">
                 <h4 className="text-sm uppercase text-cyan-500 font-bold tracking-widest mb-2 font-h flex items-center gap-2">
-                  <Clock size={14} /> Unlink Timeline
+                  <Clock size={14} /> Unlink Stages & Timeline
                 </h4>
-                <p className="text-xs text-[var(--color-muted)] font-mono mb-6">Dates to track when logins can be safely unlinked from the account.</p>
-                
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {/* Primary Unlink */}
-                  <div className="bg-black/30 rounded-xl p-5 border border-white/5">
-                    <h5 className="text-[11px] uppercase text-gray-300 font-bold tracking-widest mb-4 font-mono flex items-center gap-2">
-                      <Key size={12} className="text-yellow-500" /> Primary Login
-                    </h5>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <Field>
-                        <Label>Unlink Eligible Date</Label>
-                        <input type="date" className={inputClasses} {...register('primary_unlink_eligible_date')} />
-                      </Field>
-                      <Field>
-                        <Label>Unlink Expiry Date</Label>
-                        <input type="date" className={inputClasses} {...register('primary_unlink_expiry_date')} />
-                      </Field>
+                <p className="text-xs text-[var(--color-muted)] font-mono mb-8">Dates to track when logins can be safely unlinked from the account.</p>
+
+                {/* Vertical Stepper Timeline Layout */}
+                <div className="relative border-l border-white/10 ml-4 pl-6 sm:pl-8 space-y-8 py-2">
+                  
+                  {/* Step 1: Deal Closed Date Reference */}
+                  <div className="relative">
+                    <div className="absolute -left-[37px] sm:-left-[45px] top-1.5 bg-[#080a0f] border-2 border-emerald-500 text-emerald-400 w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] font-bold shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+                      1
+                    </div>
+                    <div className="glass-panel p-4 rounded-xl border border-white/5 bg-black/40 max-w-xl">
+                      <span className="text-[9px] uppercase tracking-widest text-emerald-400 font-bold font-mono">Stage 1: Deal Closed Reference</span>
+                      <div className="mt-2 text-xs flex justify-between items-center">
+                        <span className="text-white/70">Transaction Date</span>
+                        <span className="font-mono text-white font-semibold">{watch('transaction_date') ? new Date(watch('transaction_date')).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Secondary Unlink */}
-                  <div className="bg-black/30 rounded-xl p-5 border border-white/5">
-                    <h5 className="text-[11px] uppercase text-gray-300 font-bold tracking-widest mb-4 font-mono flex items-center gap-2">
-                      <Key size={12} className="text-[var(--color-muted)]" /> Secondary Login
-                    </h5>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <Field>
-                        <Label>Unlink Eligible Date</Label>
-                        <input type="date" className={inputClasses} {...register('secondary_unlink_eligible_date')} />
-                      </Field>
-                      <Field>
-                        <Label>Unlink Expiry Date</Label>
-                        <input type="date" className={inputClasses} {...register('secondary_unlink_expiry_date')} />
-                      </Field>
+                  {/* Step 2: Primary Login Unlink */}
+                  <div className="relative">
+                    <div className="absolute -left-[37px] sm:-left-[45px] top-1.5 bg-[#080a0f] border-2 border-yellow-500 text-yellow-500 w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] font-bold shadow-[0_0_12px_rgba(255,215,0,0.25)]">
+                      2
+                    </div>
+                    <div className="glass-panel p-5 rounded-xl border border-white/5 bg-black/40 max-w-xl space-y-4">
+                      <div className="flex items-center gap-2">
+                        <Key size={13} className="text-yellow-500" />
+                        <span className="text-[9px] uppercase tracking-widest text-yellow-500 font-bold font-mono">Stage 2: Primary Login Unlinking</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <Field>
+                          <Label>Unlink Eligible Date</Label>
+                          <input type="date" className={inputClasses} {...register('primary_unlink_eligible_date')} />
+                        </Field>
+                        <Field>
+                          <Label>Unlink Expiry Date</Label>
+                          <input type="date" className={inputClasses} {...register('primary_unlink_expiry_date')} />
+                        </Field>
+                      </div>
                     </div>
                   </div>
+
+                  {/* Step 3: Secondary Login Unlink */}
+                  <div className="relative">
+                    <div className="absolute -left-[37px] sm:-left-[45px] top-1.5 bg-[#080a0f] border-2 border-cyan-500 text-cyan-400 w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] font-bold shadow-[0_0_12px_rgba(6,182,212,0.25)]">
+                      3
+                    </div>
+                    <div className="glass-panel p-5 rounded-xl border border-white/5 bg-black/40 max-w-xl space-y-4">
+                      <div className="flex items-center gap-2">
+                        <Key size={13} className="text-cyan-400" />
+                        <span className="text-[9px] uppercase tracking-widest text-cyan-400 font-bold font-mono">Stage 3: Secondary Login Unlinking</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <Field>
+                          <Label>Unlink Eligible Date</Label>
+                          <input type="date" className={inputClasses} {...register('secondary_unlink_eligible_date')} />
+                        </Field>
+                        <Field>
+                          <Label>Unlink Expiry Date</Label>
+                          <input type="date" className={inputClasses} {...register('secondary_unlink_expiry_date')} />
+                        </Field>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </div>

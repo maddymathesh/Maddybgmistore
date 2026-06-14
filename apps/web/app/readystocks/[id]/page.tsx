@@ -1,16 +1,16 @@
-/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @next/next/no-img-element, @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { 
-  ArrowLeft, Lock, CheckCircle, Play, Send, 
-  Gamepad2, Mail, ExternalLink, Calendar, Info,
+  ArrowLeft, Lock, Play, Send, 
+  Gamepad2, Mail, ExternalLink, Info,
   ShieldCheck, AlertTriangle, ChevronRight, X
 } from "lucide-react";
-import { getProductById, getProducts } from "../../actions";
+import { getProductById } from "../../actions";
 import SkeletonLoader from "../../../components/SkeletonLoader";
 
 // YouTube embed helper
@@ -147,12 +147,10 @@ interface Product {
 
 export default function ProductDetails() {
   const params = useParams();
-  const router = useRouter();
   const { isSignedIn, isLoaded } = useUser();
   const [stock, setStock] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [related, setRelated] = useState<Product[]>([]);
   const [activeImg, setActiveImg] = useState<string | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
@@ -165,27 +163,11 @@ export default function ProductDetails() {
     getProductById(id).then((res) => {
       if (res.success && res.product) {
         setStock(res.product as any);
-        
-        // Fetch related accounts
-        getProducts().then((allRes) => {
-          if (allRes.success && allRes.products) {
-            const currentCat = res.product?.category;
-            const filtered = allRes.products
-              .filter((p: any) => p.id !== id)
-              .sort((a: any, b: any) => {
-                if (a.category === currentCat && b.category !== currentCat) return -1;
-                if (a.category !== currentCat && b.category === currentCat) return 1;
-                return 0;
-              })
-              .slice(0, 3) as any[];
-            setRelated(filtered);
-          }
-        });
       } else {
         setError(res.error || "Account details not found.");
       }
       setLoading(false);
-    }).catch((err) => {
+    }).catch((_err) => {
       setError("Failed to fetch product details.");
       setLoading(false);
     });

@@ -37,16 +37,7 @@ const navLinks = [
   { to: "/terms", label: "Terms & Conditions" },
 ];
 
-const tickerItems = [
-  { text: "Safe & Verified Accounts", emoji: "🛡️" },
-  { text: "2000+ Happy Buyers", emoji: "👑" },
-  { text: "₹60 Lakhs+ Worth Sold", emoji: "💰" },
-  { text: "Secure Single Logins", emoji: "🔒" },
-  { text: "UPI · Bank · USDT · Cash", emoji: "💳" },
-  { text: "Trusted Since 2019", emoji: "🌟" },
-  { text: "Budget to Premium Range", emoji: "⚡" },
-  { text: "Face-to-Face Deals Available", emoji: "🤝" },
-];
+
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -106,12 +97,8 @@ export default function Navbar() {
   const isAdmin = showAdminPanel || showTransactionsPanel;
   const displayRole = isPermanentAdmin ? "SUPER ADMIN" : userRole.replace("_", " ");
 
-  const doubled = [...tickerItems, ...tickerItems];
-
   const deskLinkStyle = "text-gray-300 hover:text-white font-sans text-[14px] font-medium tracking-wide px-4 py-2 transition-colors duration-200 inline-flex items-center cursor-pointer whitespace-nowrap rounded-full hover:bg-white/5";
   const activeLinkStyle = "text-white bg-white/10";
-
-  const mobileLinkStyle = "text-gray-300 text-[15px] font-sans font-medium px-4 py-3.5 rounded-xl block transition-colors duration-150 hover:bg-white/5";
 
   return (
     <header

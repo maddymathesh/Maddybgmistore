@@ -8,7 +8,7 @@ import {
   getPaginationRowModel,
   flexRender,
 } from '@tanstack/react-table';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, Eye, FileText, Download, Trash2, ChevronLeft, ChevronRight, FileOutput, Receipt, RefreshCw, Calendar, CalendarOff, Edit2 } from 'lucide-react';
 import { fetchAllTransactions, deleteTransaction } from '../../services/transactionService';
 
@@ -24,6 +24,7 @@ export default function TransactionsList({ onAddNew, onEdit }) {
   const [isLoading, setIsLoading] = useState(true);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [selectedTxForDetails, setSelectedTxForDetails] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
 
   const handleCustomerDownload = async (tx) => {
     await toast.promise(
@@ -78,6 +79,7 @@ export default function TransactionsList({ onAddNew, onEdit }) {
     try {
       const txs = await fetchAllTransactions(forceRefresh);
       setData(txs || []);
+      setSelectedIds([]); // Clear selection when data changes
       if (forceRefresh) toast.success('Transactions refreshed');
     } catch (error) {
       toast.error('Failed to load transactions');
@@ -112,8 +114,75 @@ export default function TransactionsList({ onAddNew, onEdit }) {
     exportToExcel(data, 'Transactions_Export');
   };
 
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (!window.confirm(`Are you sure you want to delete the ${selectedIds.length} selected transaction(s)?`)) return;
+
+    const idsToDelete = [...selectedIds];
+    const previousData = [...data];
+    setData(prev => prev.filter(tx => !idsToDelete.includes(tx.id) && !idsToDelete.includes(tx.transaction_id)));
+    setSelectedIds([]);
+
+    await toast.promise(
+      (async () => {
+        for (const id of idsToDelete) {
+          const tx = previousData.find(t => t.id === id || t.transaction_id === id);
+          if (tx) {
+            await deleteTransaction(tx);
+          }
+        }
+      })(),
+      {
+        loading: `Deleting ${idsToDelete.length} transactions...`,
+        success: 'Selected transactions deleted successfully! 🗑️',
+        error: 'Error occurred while deleting some transactions. ❌',
+      }
+    );
+  };
+
+  const handleBulkExport = () => {
+    const selectedData = data.filter(tx => selectedIds.includes(tx.id) || selectedIds.includes(tx.transaction_id));
+    exportToExcel(selectedData, 'Selected_Transactions_Export');
+  };
+
   const columns = useMemo(
     () => [
+      {
+        id: 'select',
+        header: () => (
+          <input
+            type="checkbox"
+            checked={filteredData.length > 0 && selectedIds.length === filteredData.length}
+            onChange={(e) => {
+              if (e.target.checked) {
+                setSelectedIds(filteredData.map(tx => tx.id || tx.transaction_id));
+              } else {
+                setSelectedIds([]);
+              }
+            }}
+            className="accent-yellow-500 h-4 w-4 rounded cursor-pointer border-white/10 bg-black/40"
+          />
+        ),
+        cell: ({ row }) => {
+          const tx = row.original;
+          const id = tx.id || tx.transaction_id;
+          const isSelected = selectedIds.includes(id);
+          return (
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setSelectedIds(prev => [...prev, id]);
+                } else {
+                  setSelectedIds(prev => prev.filter(x => x !== id));
+                }
+              }}
+              className="accent-yellow-500 h-4 w-4 rounded cursor-pointer border-white/10 bg-black/40"
+            />
+          );
+        }
+      },
       {
         accessorKey: 'transaction_id',
         header: 'Tx ID',
@@ -178,7 +247,7 @@ export default function TransactionsList({ onAddNew, onEdit }) {
         )
       }
     ],
-    []
+    [selectedIds, filteredData, onEdit]
   );
 
   const filteredData = useMemo(() => {
@@ -277,8 +346,8 @@ export default function TransactionsList({ onAddNew, onEdit }) {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="table-wrap glass-panel rounded-3xl overflow-hidden border border-white/5 shadow-2xl">
+      {/* Desktop Table */}
+      <div className="hidden md:block table-wrap glass-panel rounded-3xl overflow-hidden border border-white/5 shadow-2xl">
         <div className="overflow-x-auto scrollbar-thin">
           <table className="admin-table w-full">
             <thead>
@@ -325,7 +394,7 @@ export default function TransactionsList({ onAddNew, onEdit }) {
           </table>
         </div>
 
-        {/* Pagination */}
+        {/* Desktop Pagination */}
         <div className="px-5 py-4 border-t border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-md">
           <div className="text-xs text-[var(--color-muted)] font-mono font-medium">
             Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
@@ -349,6 +418,158 @@ export default function TransactionsList({ onAddNew, onEdit }) {
           </div>
         </div>
       </div>
+
+      {/* Mobile Card List */}
+      <div className="md:hidden space-y-4">
+        {isLoading && data.length === 0 ? (
+          Array.from({ length: 3 }).map((_, idx) => (
+            <div key={`skeleton-card-${idx}`} className="glass-panel p-5 rounded-2xl border border-white/5 space-y-3 animate-pulse">
+              <div className="flex justify-between">
+                <div className="h-4 w-24 bg-white/5 rounded" />
+                <div className="h-4 w-16 bg-white/5 rounded" />
+              </div>
+              <div className="h-3 w-32 bg-white/5 rounded" />
+              <div className="h-5 w-20 bg-white/5 rounded" />
+            </div>
+          ))
+        ) : table.getRowModel().rows.length === 0 ? (
+          <div className="glass-panel p-8 rounded-2xl text-center text-[var(--color-muted)] font-medium">
+            <Receipt size={40} className="mx-auto mb-3 opacity-10 text-white" />
+            No transactions found matching your criteria.
+          </div>
+        ) : (
+          <>
+            {table.getRowModel().rows.map((row) => {
+              const tx = row.original;
+              const id = tx.id || tx.transaction_id;
+              const isSelected = selectedIds.includes(id);
+              const sold = Number(tx.sold_price || 0);
+              const isPaid = tx.payment_status === 'Paid';
+              const type = tx.transaction_type;
+
+              let badgeColor = 'text-blue-400 bg-blue-500/10 border-blue-500/20';
+              if (type === 'Account') badgeColor = 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20';
+              else if (type === 'XSuit') badgeColor = 'text-purple-400 bg-purple-500/10 border-purple-500/20';
+              else if (type === 'Supercar') badgeColor = 'text-red-400 bg-red-500/10 border-red-500/20';
+
+              return (
+                <div 
+                  key={row.id} 
+                  className={`glass-panel p-5 rounded-2xl border transition-all duration-200 flex flex-col gap-4 relative overflow-hidden bg-black/30 ${
+                    isSelected ? 'border-yellow-500/30 bg-yellow-500/[0.02]' : 'border-white/5'
+                  }`}
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedIds(prev => [...prev, id]);
+                          } else {
+                            setSelectedIds(prev => prev.filter(x => x !== id));
+                          }
+                        }}
+                        className="accent-yellow-500 h-4 w-4 rounded cursor-pointer border-white/10 bg-black/40"
+                      />
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-blue-400 font-mono text-[12px] font-bold tracking-wider">#{String(tx.transaction_id).toUpperCase()}</span>
+                        <span className="text-[10px] text-white/50 font-mono">{new Date(tx.transaction_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                      </div>
+                    </div>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-wider ${badgeColor}`}>
+                      {type}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-baseline bg-white/[0.01] p-3 rounded-xl border border-white/5">
+                    <span className="text-[10px] text-white/40 uppercase tracking-wider font-mono">Amount</span>
+                    <span className="text-base font-bold text-white font-mono">₹{sold.toLocaleString()}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] text-white/40 uppercase font-mono tracking-wider">Customer Phone</span>
+                      <span className="text-xs text-white/80 font-mono font-medium">{tx.buyer_phone || 'N/A'}</span>
+                    </div>
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-wider ${isPaid ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/25' : 'text-yellow-500 bg-yellow-500/10 border-yellow-500/25'}`}>
+                      {tx.payment_status}
+                    </span>
+                  </div>
+
+                  <div className="flex gap-2 justify-end pt-2 border-t border-white/5">
+                    <button onClick={() => setSelectedTxForDetails(tx)} className="flex-1 py-2 rounded-lg text-xs font-semibold text-white bg-white/5 hover:bg-white/10 transition duration-200 border border-white/5 flex items-center justify-center gap-1.5"><Eye size={13} /> Details</button>
+                    <button onClick={() => onEdit && onEdit(tx)} className="flex-1 py-2 rounded-lg text-xs font-semibold text-blue-400 bg-blue-500/5 hover:bg-blue-500/10 transition duration-200 border border-blue-500/10 flex items-center justify-center gap-1.5"><Edit2 size={13} /> Edit</button>
+                    <button onClick={() => handleCustomerDownload(tx)} className="p-2 rounded-lg text-yellow-500 bg-yellow-500/5 border border-yellow-500/10 hover:bg-yellow-500/10 transition duration-200" title="Customer PDF"><FileText size={13} /></button>
+                    <button onClick={() => handleInternalDownload(tx)} className="p-2 rounded-lg text-orange-400 bg-orange-400/5 border border-orange-400/10 hover:bg-orange-400/10 transition duration-200" title="Internal PDF"><FileOutput size={13} /></button>
+                    <button onClick={() => handleDelete(tx)} className="p-2 rounded-lg text-red-400 bg-red-400/5 border border-red-400/10 hover:bg-red-400/10 transition duration-200" title="Delete"><Trash2 size={13} /></button>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Mobile Pagination Control */}
+            <div className="flex items-center justify-between p-4 glass-panel rounded-2xl bg-black/40 border border-white/5">
+              <span className="text-[11px] text-[var(--color-muted)] font-mono">
+                Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount() || 1}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}
+                  className="btn btn-outline border-white/5 px-3 py-1.5 text-xs rounded-lg hover:bg-white/5 disabled:opacity-50"
+                >
+                  Prev
+                </button>
+                <button
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                  className="btn btn-outline border-white/5 px-3 py-1.5 text-xs rounded-lg hover:bg-white/5 disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Floating Bulk Actions Bar */}
+      <AnimatePresence>
+        {selectedIds.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, y: 50, x: '-50%' }}
+            className="fixed bottom-6 left-1/2 bg-[#0e131f]/95 border border-yellow-500/30 px-6 py-4 rounded-2xl shadow-2xl backdrop-blur-md z-50 flex items-center gap-6 justify-between w-[90%] max-w-[600px]"
+          >
+            <span className="text-xs font-mono font-bold text-yellow-500 whitespace-nowrap">
+              {selectedIds.length} item(s) selected
+            </span>
+            <div className="flex gap-2 flex-wrap justify-end">
+              <button
+                onClick={handleBulkExport}
+                className="btn btn-outline border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/10 px-3 py-1.5 text-xs h-[32px] rounded-lg font-bold"
+              >
+                <Download size={13} /> Export
+              </button>
+              <button
+                onClick={handleBulkDelete}
+                className="btn btn-red px-3 py-1.5 text-xs h-[32px] bg-red-500 hover:bg-red-600 text-white font-bold rounded-lg"
+              >
+                <Trash2 size={13} /> Delete
+              </button>
+              <button
+                onClick={() => setSelectedIds([])}
+                className="btn btn-outline border-white/10 text-gray-400 hover:text-white px-2.5 py-1.5 text-xs h-[32px] rounded-lg"
+              >
+                Clear
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Transaction Details Modal */}
       {selectedTxForDetails && (() => {

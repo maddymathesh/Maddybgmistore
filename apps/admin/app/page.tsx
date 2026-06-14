@@ -8,18 +8,22 @@ import {
   Receipt, 
   ShieldAlert, 
   Loader2, 
-  Sparkles, 
   ArrowRight,
-  TrendingUp,
-  Gamepad2,
-  Users,
-  Shield
+  TrendingUp
 } from "lucide-react";
 import { getAdminMetrics } from "./actions";
 
+interface AdminMetrics {
+  totalViews?: number;
+  products?: { total: number; available: number; sold: number };
+  reviews?: { total: number; pending: number; approved: number };
+  feedback?: { unread: number };
+  analytics?: { count: number; revenue: number; profit: number };
+}
+
 export default function ControlCenterPage() {
   const { user, isLoaded } = useUser();
-  const [metrics, setMetrics] = useState<any>(null);
+  const [metrics, setMetrics] = useState<AdminMetrics | null>(null);
   const [loadingMetrics, setLoadingMetrics] = useState(true);
 
   // Compute admin status (client-side checks)
@@ -39,7 +43,7 @@ export default function ControlCenterPage() {
       if (isLoaded && user && isAuthorized) {
         try {
           const res = await getAdminMetrics();
-          if (res && res.success) {
+          if (res && res.success && res.metrics) {
             setMetrics(res.metrics);
           }
         } catch (err) {

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any, @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -6,11 +6,11 @@ import Link from "next/link";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import {
-  LayoutDashboard, Gamepad2, Star, MessageSquare, Link2, CreditCard,
+  LayoutDashboard, Gamepad2, Star, MessageSquare, CreditCard,
   Settings, Plus, Edit, Trash2, Check, X, ShieldAlert,
   Loader2, RefreshCw, MessageCircle, Copy,
   TrendingUp, Users, Zap, Camera, Key, User,
-  Menu, Coins, Gift, Car, FileCheck, History, Mail, Crown, Gem,
+  Menu, Coins, Gift, Car, FileCheck, History, Crown, Gem,
   Clock, Lock, AlertCircle, XCircle, CheckCircle, Slash, Tag,
   Sparkles, Flame, PlusCircle, Award, Timer, BadgeCheck, Trophy, Target,
   ShieldCheck, Archive, Eye, EyeOff, Search, ExternalLink,
@@ -274,6 +274,7 @@ export default function AdminDashboard() {
   // All hooks MUST be declared before any conditional returns (Rules of Hooks)
   const [activeTab, setActiveTab] = useState<ActiveTab>("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // States for DB data
@@ -785,7 +786,7 @@ export default function AdminDashboard() {
       if (xsuitImageFile) {
         try {
           finalImageUrl = await uploadToCloudinary(xsuitImageFile);
-        } catch (uploadErr: any) {
+        } catch {
           toast.error("Failed to upload image to Cloudinary");
           setUploadingXsuitImage(false);
           return;
@@ -861,7 +862,7 @@ export default function AdminDashboard() {
       if (supercarImageFile) {
         try {
           finalImageUrl = await uploadToCloudinary(supercarImageFile);
-        } catch (uploadErr: any) {
+        } catch {
           toast.error("Failed to upload image to Cloudinary");
           setUploadingSupercarImage(false);
           return;
@@ -930,7 +931,7 @@ export default function AdminDashboard() {
       if (proofImageFile) {
         try {
           finalImageUrl = await uploadToCloudinary(proofImageFile);
-        } catch (uploadErr: any) {
+        } catch {
           toast.error("Failed to upload proof image to Cloudinary");
           setUploadingProofImage(false);
           return;
@@ -1002,6 +1003,7 @@ export default function AdminDashboard() {
     if (!payLinkForm.transactionId) {
       setPayLinkForm(prev => ({ ...prev, transactionId: generateTxnId(prev.transactionType, prev.customType) }));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleCreatePayLink = async (e: React.FormEvent) => {
@@ -1281,7 +1283,7 @@ export default function AdminDashboard() {
     if (collectorMatch && collectorMatch[1]) collector = collectorMatch[1];
 
     // 7. Detect Logins
-    let logins: string[] = [];
+    const logins: string[] = [];
     const loginKeywords = ["facebook", "fb", "twitter", "x", "google", "gmail", "playgames", "apple", "gamecenter"];
     lines.forEach(line => {
       const lineLower = line.toLowerCase();
@@ -1487,7 +1489,7 @@ export default function AdminDashboard() {
     } else if (platform === "instagram") {
       formatted = rawDescription.split("\n").map(line => {
         if (!line.trim()) return "";
-        return line.replace(/[\*_]{1,2}/g, "");
+        return line.replace(/[*_]{1,2}/g, "");
       }).join("\n");
     }
 
@@ -1594,15 +1596,21 @@ export default function AdminDashboard() {
       )}
 
       {/* SIDEBAR SECTION */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-72 glass-panel border-r border-white/5 flex flex-col transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 glass-panel border-r border-white/5 flex flex-col transform transition-all duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static ${isSidebarCollapsed ? 'w-20' : 'w-72'}`}>
         <div className="p-6 border-b border-white/5 flex items-center justify-between">
           <div className="leading-tight">
-            <span className="font-h font-black tracking-wide text-2xl text-white flex items-center gap-2">
-              Admin <span className="text-gold">Panel</span>
-            </span>
-            <Link href="/" className="text-[10px] text-muted uppercase tracking-widest font-bold mt-1 flex items-center gap-1 hover:text-gold transition-colors">
-              <ArrowLeft size={10} /> Back to Control Center
-            </Link>
+            {!isSidebarCollapsed ? (
+              <>
+                <span className="font-h font-black tracking-wide text-2xl text-white flex items-center gap-2">
+                  Admin <span className="text-gold">Panel</span>
+                </span>
+                <Link href="/" className="text-[10px] text-muted uppercase tracking-widest font-bold mt-1 flex items-center gap-1 hover:text-gold transition-colors no-underline">
+                  <ArrowLeft size={10} /> Back to Control Center
+                </Link>
+              </>
+            ) : (
+              <span className="font-h font-black text-2xl text-gold animate-pulse">A</span>
+            )}
           </div>
           <button 
             onClick={() => setIsSidebarOpen(false)}
@@ -1616,20 +1624,27 @@ export default function AdminDashboard() {
         <div className="px-4 pt-4 pb-2">
           <Link
             href="/transactions"
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold tracking-wide text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/15 transition-all duration-200"
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold tracking-wide text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/15 transition-all duration-200 no-underline ${isSidebarCollapsed ? 'justify-center' : ''}`}
+            title="Transactions Panel"
           >
             <Receipt size={16} />
-            Transactions Panel
-            <ExternalLink size={12} className="ml-auto opacity-50" />
+            {!isSidebarCollapsed && (
+              <>
+                Transactions Panel
+                <ExternalLink size={12} className="ml-auto opacity-50" />
+              </>
+            )}
           </Link>
         </div>
 
         <div className="flex-1 overflow-y-auto py-4 px-4 space-y-6 scrollbar-thin">
           {SIDEBAR_CATEGORIES.map((cat, catIdx) => (
             <div key={catIdx} className="space-y-1.5">
-              <span className="px-4 text-[9px] font-black text-muted/60 tracking-[0.15em] uppercase block mb-2 font-h">
-                {cat.category}
-              </span>
+              {!isSidebarCollapsed && (
+                <span className="px-4 text-[9px] font-black text-muted/60 tracking-[0.15em] uppercase block mb-2 font-h">
+                  {cat.category}
+                </span>
+              )}
               <div className="space-y-1">
                 {cat.items
                   .filter(item => item.id !== "admin_controls" || isSuperAdmin)
@@ -1643,10 +1658,11 @@ export default function AdminDashboard() {
                         setActiveTab(item.id as ActiveTab);
                         setIsSidebarOpen(false);
                       }}
-                      className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 text-xs font-bold tracking-wide ${active ? 'bg-gold-dim text-gold shadow-inner border border-gold/15' : 'text-muted hover:bg-white/5 hover:text-white'}`}
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 text-xs font-bold tracking-wide ${active ? 'bg-gold-dim text-gold shadow-inner border border-gold/15' : 'text-muted hover:bg-white/5 hover:text-white'} ${isSidebarCollapsed ? 'justify-center' : ''}`}
+                      title={item.label}
                     >
                       <Icon size={16} />
-                      {item.label}
+                      {!isSidebarCollapsed && item.label}
                     </button>
                   );
                 })}
@@ -1656,10 +1672,18 @@ export default function AdminDashboard() {
         </div>
 
         <div className="p-6 border-t border-white/5 flex flex-col gap-3">
+          {/* Collapse toggle (Desktop only) */}
+          <button
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className="hidden lg:flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-xs font-bold text-muted hover:text-white hover:bg-white/5 transition-all duration-200"
+          >
+            {isSidebarCollapsed ? <ArrowLeft size={16} className="rotate-180" /> : <ArrowLeft size={16} />}
+            {!isSidebarCollapsed && "Collapse Sidebar"}
+          </button>
 
           <div className="w-full flex items-center justify-between bg-black/20 p-2 rounded-lg border border-white/5">
             <UserButton afterSignOutUrl="/login" />
-            <span className="text-[10px] text-muted font-bold">LOGGED IN</span>
+            {!isSidebarCollapsed && <span className="text-[10px] text-muted font-bold">LOGGED IN</span>}
           </div>
         </div>
       </aside>
@@ -2112,7 +2136,7 @@ export default function AdminDashboard() {
                     });
                   } else {
                     return text.split("\n").map((line, idx) => {
-                      const cleaned = line.replace(/[\*_]{1,2}/g, "");
+                      const cleaned = line.replace(/[*_]{1,2}/g, "");
                       return (
                         <span key={idx} className="block text-slate-300 font-sans">
                           {cleaned || "\u00A0"}

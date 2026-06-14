@@ -211,7 +211,7 @@ export async function getPaymentLink(paymentId: string) {
       const adminSettingsData = await db.query.adminPaymentSettings.findFirst({
         where: eq(adminPaymentSettings.id, 1),
       });
-      const { pin, ...publicLink } = link;
+      const { pin: _pin, ...publicLink } = link;
       let proofUrl = null;
       if (link.status === "paid") {
         const proofRecord = await db.query.proofs.findFirst({

@@ -1,4 +1,4 @@
-/* global document, window, alert, URL, File */
+/* global document, alert */
 /**
  * pdfGenerator.js
  * MBSx STORE — Premium Receipt Generator
@@ -50,16 +50,7 @@ function formatDate(raw) {
   }
 }
 
-function formatDateTime(raw) {
-  if (!raw) return '—';
-  try {
-    const d = new Date(raw);
-    if (isNaN(d)) return raw;
-    return `${formatDate(raw)}, ${d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}`;
-  } catch {
-    return raw;
-  }
-}
+
 
 function safeVal(v) {
   if (v === null || v === undefined || v === '') return '—';
@@ -216,7 +207,7 @@ function drawHeader(page, fonts, txId, txDate, isInternal) {
   return y - 30;
 }
 
-function drawHeroAmount(page, fonts, tx, y, isInternal) {
+function drawHeroAmount(page, fonts, tx, y, _isInternal) {
   const sold = Number(tx.sold_price || 0);
   const status = safeVal(tx.payment_status).toLowerCase();
   
@@ -324,7 +315,7 @@ async function buildPDF(tx, isInternal) {
   // Admin specifics
   if (isInternal) {
     y = drawFinancialSummary(page, fonts, filteredTx, y);
-    y = dataTable(page, fonts, 'Administrative Contacts', [
+    dataTable(page, fonts, 'Administrative Contacts', [
       ['Owner Phone', safeVal(filteredTx.owner_phone), false],
       ['Seller Phone', safeVal(filteredTx.seller_phone), false],
       ['Reseller Phone', safeVal(filteredTx.reseller_phone), false],

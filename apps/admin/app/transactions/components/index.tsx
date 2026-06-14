@@ -36,7 +36,9 @@ import {
   Loader2,
   LayoutDashboard,
   Receipt,
-  ArrowLeft
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 const SIDEBAR_ITEMS = [
@@ -52,11 +54,18 @@ const SIDEBAR_ITEMS = [
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
+interface TransactionData {
+  transaction_id?: string;
+  transaction_type: string;
+  [key: string]: unknown;
+}
+
 export default function TransactionsLayout() {
   const { user, isLoaded } = useUser();
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [editingTx, setEditingTx] = useState(null);
+  const [editingTx, setEditingTx] = useState<TransactionData | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   if (!isLoaded) {
     return (
@@ -103,7 +112,7 @@ export default function TransactionsLayout() {
       case 'transactions':
         return <TransactionsList 
                  onAddNew={() => setActiveTab('create_account')} 
-                 onEdit={(tx: any) => { 
+                 onEdit={(tx: TransactionData) => { 
                    setEditingTx(tx); 
                    setActiveTab(`edit_${tx.transaction_type.toLowerCase()}`); 
                  }} 
@@ -155,10 +164,13 @@ export default function TransactionsLayout() {
       />
 
       {/* Sidebar */}
-      <aside className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`}>
+      <aside className={`admin-sidebar ${isSidebarCollapsed ? 'collapsed' : ''} ${isSidebarOpen ? 'open' : ''}`}>
         <div className="admin-sidebar-logo flex items-center justify-between leading-tight">
-          <div>
+          <div className="logo-full-text">
             MBSx <br/><span className="text-sm text-white">Transaction Panel</span>
+          </div>
+          <div className="logo-collapsed-text hidden font-black text-xl text-yellow-500 tracking-wider">
+            MBS
           </div>
           <button 
             onClick={() => setIsSidebarOpen(false)}
@@ -180,14 +192,27 @@ export default function TransactionsLayout() {
         </div>
 
         <div className="flex-1 overflow-y-auto px-3">
+          {/* Collapse/Expand Toggle (Desktop only) */}
+          <button
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className="hidden lg:flex admin-nav-item w-full border-none bg-transparent rounded-lg mb-2 items-center gap-2 text-[13px] text-gray-400 hover:text-white hover:bg-white/5 px-4 py-2.5"
+            title={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          >
+            {isSidebarCollapsed ? (
+              <ChevronRight size={18} className="nav-icon text-yellow-500" />
+            ) : (
+              <ChevronLeft size={18} className="nav-icon text-yellow-500" />
+            )}
+            <span>Collapse Sidebar</span>
+          </button>
+
           {/* Back to Control Center */}
           <Link
             href="/"
-            className="admin-nav-item"
             className="admin-nav-item w-full border-none bg-transparent rounded-lg mb-2 flex items-center gap-2 text-[13px] text-yellow-500 hover:bg-yellow-500/10 no-underline px-4 py-2.5"
           >
             <ArrowLeft size={18} className="nav-icon" />
-            Back to Control Center
+            <span>Back to Control Center</span>
           </Link>
 
           {/* Admin Panel cross-navigation */}
@@ -197,7 +222,7 @@ export default function TransactionsLayout() {
               className="admin-nav-item w-full border-none bg-transparent rounded-lg mb-4 flex items-center gap-2 text-[13px] text-[#eaeaea] hover:bg-white/5 no-underline px-4 py-2.5 border-b border-white/5"
             >
               <LayoutDashboard size={18} className="nav-icon" />
-              Admin Panel
+              <span>Admin Panel</span>
             </Link>
           )}
 
@@ -214,7 +239,7 @@ export default function TransactionsLayout() {
                 className={`admin-nav-item w-full border-none rounded-lg mb-1 flex justify-start items-center gap-2 px-4 py-2.5 transition-colors ${isActive ? 'bg-yellow-500/10 text-yellow-500' : 'bg-transparent text-gray-400 hover:text-white hover:bg-white/5'}`}
               >
                 <Icon size={18} className="nav-icon" />
-                {item.label}
+                <span>{item.label}</span>
               </button>
             );
           })}

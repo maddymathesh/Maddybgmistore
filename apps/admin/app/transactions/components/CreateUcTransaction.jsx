@@ -208,7 +208,7 @@ export default function CreateUcTransaction({ onBack, initialData }) {
     }
   };
 
-  const inputClasses = "w-full bg-[#080a0f]/60 border border-white/5 rounded-xl py-3 px-4 text-xs font-mono text-white focus:outline-none focus:border-yellow-500/30 focus:ring-1 focus:ring-yellow-500/20 transition-all placeholder:text-gray-500";
+  const inputClasses = "w-full bg-[#080a0f]/60 border border-white/5 rounded-xl h-11 px-4 text-xs font-mono text-white focus:outline-none focus:border-yellow-500/30 focus:ring-1 focus:ring-yellow-500/20 transition-all placeholder:text-gray-500";
   const selectClasses = `${inputClasses} appearance-none cursor-pointer`;
 
   // ── Success ─────────────────────────────────────────────────────────────

@@ -336,27 +336,28 @@ export default function HomePage() {
           </div>
 
           <h1 className="hero-title">
-            Your Dream<br />
+            Your Dream <br className="hidden sm:inline" />
             <span className="g" style={{ filter: "drop-shadow(0 0 15px rgba(255,215,0,0.3))" }}>
               BGMI Account
-            </span>
-            <br />
+            </span>{" "}
+            <br className="hidden sm:inline" />
             Awaits
           </h1>
 
           <p className="hero-desc">
-            Buy and sell verified BGMI accounts safely — budget to premium.<br />
+            Buy and sell verified BGMI accounts safely — budget to premium.{" "}
+            <br className="hidden sm:inline" />
             Trusted by 2000+ players since 2019.
           </p>
 
           <div className="hero-btns">
             <Link href="/buy" id="cta-buy" className="btn-hero-gold">
               <ShoppingCart size={17} />
-              BUY AN ACCOUNT
+              <span>BUY ACCOUNT</span>
             </Link>
             <Link href="/sell" id="cta-sell" className="btn-hero-outline">
               <Banknote size={17} />
-              SELL YOUR ACCOUNT
+              <span>SELL ACCOUNT</span>
             </Link>
           </div>
 
@@ -364,13 +365,13 @@ export default function HomePage() {
             {[
               { icon: <CheckCircle size={14} />, label: "Verified Accounts" },
               { icon: <Zap size={14} />, label: "Fast Delivery" },
-              { icon: <Shield size={14} />, label: "Safe Single Logins" },
+              { icon: <Shield size={14} />, label: "Single Logins" },
               { icon: <Star size={14} />, label: "Since 2019" },
               { icon: <CheckCircle size={14} />, label: "2000+ Buyers" },
             ].map((t) => (
               <span key={t.label} className="trust-pill">
                 <span className="trust-icon">{t.icon}</span>
-                {t.label}
+                <span>{t.label}</span>
               </span>
             ))}
           </div>
@@ -563,19 +564,32 @@ export default function HomePage() {
         /* ── Hero ── */
         .hero-section {
           position: relative;
-          min-height: calc(100vh - 92px);
+          min-height: calc(100vh - 64px);
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
           text-align: center;
           overflow: hidden;
+          padding: 40px 20px;
+        }
+        @media (max-width: 768px) {
+          .hero-section {
+            min-height: calc(100svh - 64px);
+            padding: clamp(16px, 4svh, 40px) 16px;
+          }
         }
         .hero-bg {
           position: absolute; inset: 0;
           width: 100%; height: 100%;
           object-fit: cover; object-position: center top;
           z-index: 0;
+        }
+        @media (max-width: 768px) {
+          .hero-bg {
+            object-position: 70% center;
+            opacity: 0.5;
+          }
         }
         .hero-overlay {
           position: absolute; inset: 0; z-index: 1;
@@ -584,78 +598,110 @@ export default function HomePage() {
             rgba(8,10,15,0.65) 45%,
             rgba(8,10,15,0.97) 100%);
         }
+        @media (max-width: 768px) {
+          .hero-overlay {
+            background: linear-gradient(to bottom,
+              rgba(8,10,15,0.60) 0%,
+              rgba(8,10,15,0.85) 60%,
+              rgba(8,10,15,0.99) 100%);
+          }
+        }
         .hero-rays {
           position: absolute; inset: 0; z-index: 1;
         }
         .hero-content {
           position: relative; z-index: 2;
           max-width: 800px; margin: 0 auto;
-          padding: 0 20px;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
         }
         .hero-badge {
           display: inline-block;
           border: 1px solid rgba(255,215,0,0.35);
           color: var(--color-gold);
-          font-size: 11px; font-weight: 700;
+          font-size: clamp(9px, 2.5vw, 11px);
+          font-weight: 700;
           letter-spacing: 1.5px; text-transform: uppercase;
-          padding: 6px 18px; border-radius: 20px;
+          padding: clamp(4px, 1.2vw, 6px) clamp(12px, 3vw, 18px);
+          border-radius: 20px;
           background: rgba(255,215,0,0.06);
-          margin-bottom: 24px;
+          margin-bottom: clamp(14px, 4svh, 24px);
         }
         .hero-title {
           font-family: var(--font-h);
-          font-size: clamp(42px, 8vw, 88px);
+          font-size: clamp(2rem, 7.5vw, 5.5rem);
           font-weight: 900;
-          line-height: 1.05;
-          letter-spacing: 1px;
+          line-height: 1.1;
+          letter-spacing: 0.5px;
           color: #fff;
-          margin: 0 0 20px;
+          margin: 0 0 clamp(12px, 3svh, 20px);
           text-transform: uppercase;
           drop-shadow: 0 4px 15px rgba(0,0,0,0.85);
         }
         .hero-desc {
           color: var(--color-muted);
-          font-size: clamp(14px, 1.8vw, 17px);
-          max-width: 520px; margin: 0 auto 32px;
-          line-height: 1.7;
+          font-size: clamp(0.85rem, 2.2vw, 1.05rem);
+          max-width: 520px; margin: 0 auto clamp(18px, 4svh, 32px);
+          line-height: 1.6;
         }
         .hero-btns {
-          display: flex; gap: 16px; justify-content: center;
-          flex-wrap: wrap; margin-bottom: 36px;
+          display: flex;
+          gap: clamp(10px, 3vw, 16px);
+          justify-content: center;
+          width: 100%;
+          max-width: 480px;
+          margin: 0 auto clamp(20px, 5svh, 36px);
         }
         .btn-hero-gold {
-          display: inline-flex; align-items: center; gap: 8px;
+          flex: 1;
+          display: inline-flex; align-items: center; justify-content: center; gap: 8px;
           background: linear-gradient(135deg, #f5c518, #ffd700);
-          color: #000; font-size: 13px; font-weight: 800;
-          letter-spacing: 1.2px; text-transform: uppercase;
-          padding: 14px 28px; border-radius: 10px;
+          color: #000; font-size: clamp(11px, 2.2vw, 13px); font-weight: 800;
+          letter-spacing: 1px; text-transform: uppercase;
+          padding: clamp(10px, 3vw, 14px) clamp(14px, 4vw, 28px); border-radius: 10px;
           text-decoration: none; transition: transform .2s, box-shadow .2s;
           box-shadow: 0 4px 20px rgba(245,197,24,0.35);
+          min-height: 44px;
         }
         .btn-hero-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(245,197,24,0.5); }
         .btn-hero-outline {
-          display: inline-flex; align-items: center; gap: 8px;
+          flex: 1;
+          display: inline-flex; align-items: center; justify-content: center; gap: 8px;
           background: transparent;
-          color: #fff; font-size: 13px; font-weight: 800;
-          letter-spacing: 1.2px; text-transform: uppercase;
-          padding: 14px 28px; border-radius: 10px;
+          color: #fff; font-size: clamp(11px, 2.2vw, 13px); font-weight: 800;
+          letter-spacing: 1px; text-transform: uppercase;
+          padding: clamp(10px, 3vw, 14px) clamp(14px, 4vw, 28px); border-radius: 10px;
           border: 1.5px solid rgba(255,255,255,0.4);
           text-decoration: none; transition: transform .2s, border-color .2s;
+          min-height: 44px;
         }
         .btn-hero-outline:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.8); }
         .hero-trust-row {
-          display: flex; flex-wrap: wrap; gap: 12px;
+          display: flex; flex-wrap: wrap; gap: clamp(8px, 2vw, 12px);
           justify-content: center;
         }
         .trust-pill {
           display: inline-flex; align-items: center; gap: 6px;
-          color: rgba(255,255,255,0.65); font-size: 12px; font-weight: 600;
+          color: rgba(255,255,255,0.65);
+          font-size: clamp(10px, 2vw, 12px);
+          font-weight: 600;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          padding: 4px 10px;
+          border-radius: 20px;
         }
         .trust-icon { color: var(--color-gold); display: flex; }
         .hero-scroll-hint {
           position: absolute; bottom: 28px; left: 50%;
           transform: translateX(-50%); z-index: 2;
           color: var(--color-gold); opacity: 0.6;
+        }
+        @media (max-width: 768px) {
+          .hero-scroll-hint {
+            display: none;
+          }
         }
         @keyframes bounceY {
           0%,100% { transform: translateY(0); }

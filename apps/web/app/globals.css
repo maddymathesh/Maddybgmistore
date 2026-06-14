@@ -264,6 +264,26 @@ html, body {
   transform: translateX(0);
 }
 
+@media (max-width: 768px) {
+  .social-float-container {
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    right: calc(16px + env(safe-area-inset-right));
+    gap: 10px;
+  }
+  .social-float-btn {
+    width: 44px;
+    height: 44px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  }
+  .social-float-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+  .social-tooltip {
+    display: none !important;
+  }
+}
+
 /* ===== WHY US / TRUST SHARE STYLES ===== */
 .why-us-grid {
   display: grid;

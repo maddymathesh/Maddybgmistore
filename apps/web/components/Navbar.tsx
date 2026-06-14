@@ -239,35 +239,67 @@ export default function Navbar() {
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle menu"
         >
-          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+          <Menu size={24} />
         </button>
       </nav>
 
-      {/* Mobile Menu Panel */}
-      {mobileOpen && (
-        <div className="lg:hidden fixed top-[64px] left-0 right-0 bottom-0 bg-[#080a0f]/98 backdrop-blur-3xl border-t border-white/10 z-[999] overflow-y-auto px-6 py-6 transition-all duration-300 flex flex-col justify-between">
-          <div className="flex flex-col gap-2">
+      {/* Mobile Backdrop Overlay */}
+      <div
+        className={`lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[998] transition-opacity duration-300 ${
+          mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setMobileOpen(false)}
+      />
+
+      {/* Mobile Drawer Panel */}
+      <div
+        className={`lg:hidden fixed top-0 right-0 bottom-0 w-[85%] sm:w-[340px] bg-[#080a0f]/95 backdrop-blur-2xl border-l border-white/10 z-[999] overflow-y-auto px-6 py-6 transition-transform duration-300 ease-out flex flex-col justify-between shadow-[0_0_50px_rgba(0,0,0,0.8)] ${
+          mobileOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="flex flex-col gap-4">
+          {/* Drawer Header */}
+          <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
+            <Link href="/" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
+              <img
+                src="/logo.png"
+                alt="Maddy BGMI Store"
+                className="h-[32px] w-auto"
+              />
+            </Link>
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="text-gray-400 hover:text-white p-1.5 rounded-full hover:bg-white/5 transition-colors focus:outline-none"
+              aria-label="Close menu"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Navigation Links */}
+          <div className="flex flex-col gap-1">
             {navLinks.map((l) => (
-              <div key={l.label || l.to} className="border-b border-white/5 pb-2">
+              <div key={l.label || l.to} className="border-b border-white/5 pb-1">
                 {l.subLinks ? (
                   <>
                     <button
                       onClick={() => toggleMobileExpand(l.label)}
-                      className="w-full flex items-center justify-between text-gray-300 hover:text-white font-sans text-[16px] font-semibold py-3 px-2"
+                      className="w-full flex items-center justify-between text-gray-300 hover:text-white font-sans text-[15px] font-semibold py-2.5 px-2"
                     >
                       <span>{l.label}</span>
                       <ChevronDown
-                        size={16}
+                        size={15}
                         className={`transition-transform duration-200 ${mobileExpanded[l.label] ? "rotate-180" : ""}`}
                       />
                     </button>
                     {mobileExpanded[l.label] && (
-                      <div className="pl-4 flex flex-col gap-1.5 mt-1 animate-fade-in">
+                      <div className="pl-4 flex flex-col gap-1 mt-0.5 mb-2 animate-fade-in">
                         {l.subLinks.map((s) => (
                           <Link
                             key={s.to}
                             href={s.to}
-                            className={`text-gray-400 hover:text-white text-[14px] font-sans font-medium py-2 px-3 rounded-lg hover:bg-white/5 ${
+                            onClick={() => setMobileOpen(false)}
+                            className={`text-gray-400 hover:text-white text-[13.5px] font-sans font-medium py-1.5 px-3 rounded-lg hover:bg-white/5 ${
                               pathname === s.to ? "text-white bg-white/10" : ""
                             }`}
                           >
@@ -280,7 +312,8 @@ export default function Navbar() {
                 ) : (
                   <Link
                     href={l.to}
-                    className={`text-gray-300 hover:text-white font-sans text-[16px] font-semibold py-3 px-2 block rounded-lg hover:bg-white/5 ${
+                    onClick={() => setMobileOpen(false)}
+                    className={`text-gray-300 hover:text-white font-sans text-[15px] font-semibold py-2.5 px-2 block rounded-lg hover:bg-white/5 ${
                       pathname === l.to ? "text-white bg-white/10" : ""
                     }`}
                   >
@@ -291,24 +324,25 @@ export default function Navbar() {
             ))}
 
             {isAdmin && (
-              <div className="border-b border-white/5 pb-2">
+              <div className="border-b border-white/5 pb-1">
                 <button
                   onClick={() => toggleMobileExpand("Manage")}
-                  className="w-full flex items-center justify-between text-white font-sans text-[16px] font-semibold py-3 px-2"
+                  className="w-full flex items-center justify-between text-white font-sans text-[15px] font-semibold py-2.5 px-2"
                 >
                   <span>Manage</span>
                   <ChevronDown
-                    size={16}
+                    size={15}
                     className={`transition-transform duration-200 ${mobileExpanded["Manage"] ? "rotate-180" : ""}`}
                   />
                 </button>
                 {mobileExpanded["Manage"] && (
-                  <div className="pl-4 flex flex-col gap-1.5 mt-1">
+                  <div className="pl-4 flex flex-col gap-1 mt-0.5 mb-2">
                     <a
                       href={process.env.NODE_ENV === "development" ? "http://localhost:3001" : "https://admin.maddybgmistore.in"}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-gray-400 hover:text-white text-[14px] font-sans font-medium py-2 px-3 rounded-lg hover:bg-white/5 block"
+                      onClick={() => setMobileOpen(false)}
+                      className="text-gray-400 hover:text-white text-[13.5px] font-sans font-medium py-1.5 px-3 rounded-lg hover:bg-white/5 block"
                     >
                       Control Center
                     </a>
@@ -317,7 +351,8 @@ export default function Navbar() {
                         href={process.env.NODE_ENV === "development" ? "http://localhost:3001/panel" : "https://admin.maddybgmistore.in/panel"}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-gray-400 hover:text-white text-[14px] font-sans font-medium py-2 px-3 rounded-lg hover:bg-white/5 block"
+                        onClick={() => setMobileOpen(false)}
+                        className="text-gray-400 hover:text-white text-[13.5px] font-sans font-medium py-1.5 px-3 rounded-lg hover:bg-white/5 block"
                       >
                         Admin Panel
                       </a>
@@ -327,7 +362,8 @@ export default function Navbar() {
                         href={process.env.NODE_ENV === "development" ? "http://localhost:3001/transactions" : "https://admin.maddybgmistore.in/transactions"}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-gray-400 hover:text-white text-[14px] font-sans font-medium py-2 px-3 rounded-lg hover:bg-white/5 block"
+                        onClick={() => setMobileOpen(false)}
+                        className="text-gray-400 hover:text-white text-[13.5px] font-sans font-medium py-1.5 px-3 rounded-lg hover:bg-white/5 block"
                       >
                         Transactions Panel
                       </a>
@@ -337,40 +373,40 @@ export default function Navbar() {
               </div>
             )}
           </div>
-
-          {/* Mobile Auth Buttons / User Button */}
-          <div className="mt-8 pt-6 border-t border-white/10 pb-8 flex flex-col gap-4">
-            <SignedIn>
-              <div className="flex items-center gap-3 px-2">
-                <UserButton afterSignOutUrl="/" />
-                <div className="flex flex-col leading-none text-left">
-                  <span className="text-[14px] font-bold text-white font-h">
-                    {user?.firstName || user?.username || "User"}
-                  </span>
-                  <span className="text-[10px] text-gold uppercase font-bold tracking-[0.5px] mt-0.5">
-                    {displayRole}
-                  </span>
-                </div>
-              </div>
-            </SignedIn>
-
-            <SignedOut>
-              <div className="flex flex-col gap-3">
-                <SignInButton mode="modal">
-                  <button className="btn btn-outline w-full justify-center py-3 text-[13px] tracking-[1px]">
-                    Login
-                  </button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <button className="btn btn-gold w-full justify-center py-3 text-[13px] tracking-[1px]">
-                    Sign Up
-                  </button>
-                </SignUpButton>
-              </div>
-            </SignedOut>
-          </div>
         </div>
-      )}
+
+        {/* Mobile Auth Buttons / User Button */}
+        <div className="mt-8 pt-6 border-t border-white/10 pb-8 flex flex-col gap-4">
+          <SignedIn>
+            <div className="flex items-center gap-3 px-2">
+              <UserButton afterSignOutUrl="/" />
+              <div className="flex flex-col leading-none text-left">
+                <span className="text-[14px] font-bold text-white font-h">
+                  {user?.firstName || user?.username || "User"}
+                </span>
+                <span className="text-[10px] text-gold uppercase font-bold tracking-[0.5px] mt-0.5">
+                  {displayRole}
+                </span>
+              </div>
+            </div>
+          </SignedIn>
+
+          <SignedOut>
+            <div className="flex flex-col gap-3">
+              <SignInButton mode="modal">
+                <button className="btn btn-outline w-full justify-center py-2.5 text-[12px] tracking-[1px] font-sans">
+                  Login
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button className="btn btn-gold w-full justify-center py-2.5 text-[12px] tracking-[1px] font-sans">
+                  Sign Up
+                </button>
+              </SignUpButton>
+            </div>
+          </SignedOut>
+        </div>
+      </div>
     </header>
   );
 }

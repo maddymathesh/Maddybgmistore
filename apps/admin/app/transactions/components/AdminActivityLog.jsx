@@ -25,38 +25,28 @@ export default function AdminActivityLog() {
 
   const getIcon = (type) => {
     switch (type) {
-      case 'Downloads': return <Download size={14} style={{ color: 'var(--color-gold)' }} />;
-      case 'Settings': return <Settings size={14} style={{ color: '#3498db' }} />;
-      case 'Transactions': return <Plus size={14} style={{ color: '#2ecc71' }} />;
-      case 'Security': return <Key size={14} style={{ color: 'var(--color-red)' }} />;
-      default: return <FileText size={14} />;
+      case 'Downloads': return <Download size={14} className="text-gold" />;
+      case 'Settings': return <Settings size={14} className="text-[#3b82f6]" />;
+      case 'Transactions': return <Plus size={14} className="text-[#10b981]" />;
+      case 'Security': return <Key size={14} className="text-red-500" />;
+      default: return <FileText size={14} className="text-muted" />;
     }
   };
 
   return (
-    <div style={{ display: 'grid', gap: '24px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>Admin Audit Logs</h2>
-          <p style={{ fontSize: '12px', color: 'var(--color-muted)', margin: '4px 0 0' }}>Security trace timeline tracking administrative actions, configuration updates and downloads.</p>
+          <h2 className="text-xl font-bold tracking-tight text-white font-h">Admin Audit Logs</h2>
+          <p className="text-xs text-muted mt-1">Security trace timeline tracking administrative actions, configuration updates and downloads.</p>
         </div>
 
-        <div style={{ display: 'flex', gap: '6px', background: 'var(--color-bg2)', padding: '4px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+        <div className="flex gap-1.5 bg-neutral-900/50 p-1.5 rounded-lg border border-white/5 overflow-x-auto w-full md:w-auto">
           {['All', 'Transactions', 'Downloads', 'Settings', 'Security'].map(type => (
             <button
               key={type}
               onClick={() => setFilterType(type)}
-              className="btn"
-              style={{
-                padding: '6px 12px',
-                fontSize: '11px',
-                borderRadius: '6px',
-                background: filterType === type ? 'rgba(255, 215, 0, 0.12)' : 'transparent',
-                color: filterType === type ? 'var(--color-gold)' : 'var(--color-muted)',
-                border: filterType === type ? '1px solid var(--color-border-gold)' : '1px solid transparent',
-                fontWeight: filterType === type ? 700 : 500,
-                transition: 'all 0.15s'
-              }}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 whitespace-nowrap ${filterType === type ? 'bg-gold/10 text-gold border border-gold/20 shadow-[0_0_10px_rgba(255,215,0,0.1)]' : 'text-muted hover:text-white hover:bg-white/5 border border-transparent'}`}
             >
               {type}
             </button>
@@ -64,58 +54,42 @@ export default function AdminActivityLog() {
         </div>
       </div>
 
-      <div className="card" style={{ border: '1px solid var(--color-border)' }}>
-        <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '22px', color: '#eaeaea', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <History size={18} style={{ color: 'var(--color-gold)' }} /> Live Audit Timeline ({filteredLogs.length} events)
+      <div className="glass-panel p-6 rounded-xl border border-white/5 bg-white/[0.01] backdrop-blur-md">
+        <h3 className="text-base font-bold text-white mb-8 flex items-center gap-2 font-h uppercase tracking-wider">
+          <History size={16} className="text-gold" /> Live Audit Timeline ({filteredLogs.length} events)
         </h3>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', paddingLeft: '8px' }}>
+        <div className="flex flex-col space-y-6 relative pl-3">
+          {/* Timeline background vertical line */}
+          <div className="absolute top-2 bottom-4 left-3 w-px bg-gradient-to-b from-white/10 via-white/5 to-transparent z-0" />
+
           {filteredLogs.map((log, i) => (
             <div
               key={i}
-              style={{
-                display: 'flex',
-                gap: '14px',
-                alignItems: 'flex-start',
-                borderLeft: '2px solid var(--color-border)',
-                marginLeft: '10px',
-                paddingLeft: '20px',
-                position: 'relative',
-                paddingBottom: i === filteredLogs.length - 1 ? 0 : '8px'
-              }}
+              className="relative flex items-start gap-4 z-10 group"
             >
-              {/* Outer timeline indicator */}
-              <div style={{
-                position: 'absolute',
-                left: '-9px',
-                top: '4px',
-                width: '16px',
-                height: '16px',
-                borderRadius: '50%',
-                background: 'var(--color-bg)',
-                border: '2px solid var(--color-border)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
+              {/* Timeline indicator node */}
+              <div className="absolute -left-[18px] top-1 w-8 h-8 rounded-full bg-[#0a0a0a] border border-white/10 shadow-lg flex items-center justify-center transition-all duration-300 group-hover:border-gold/40 group-hover:bg-gold/5 group-hover:scale-110">
                 {getIcon(log.type)}
               </div>
 
-              <div style={{ flex: 1, marginTop: '2px' }}>
-                <p style={{ fontSize: '13px', color: '#eaeaea', margin: 0, fontWeight: 600 }}>{log.text}</p>
-                <div style={{ display: 'flex', gap: '10px', marginTop: '4px', fontSize: '11px', color: 'var(--color-muted)' }}>
-                  <span>Logged: <strong>{log.user}</strong></span>
-                  <span>·</span>
+              <div className="flex-1 ml-6 p-4 rounded-xl border border-transparent hover:border-white/5 hover:bg-white/[0.02] transition-colors duration-200">
+                <p className="text-sm text-white font-medium mb-1">{log.text}</p>
+                <div className="flex items-center gap-2 text-[11px] text-muted font-mono mt-2 flex-wrap">
+                  <span className="flex items-center gap-1.5">
+                    <Shield size={10} className="text-muted" /> {log.user}
+                  </span>
+                  <span className="opacity-50">•</span>
                   <span>{log.time}</span>
-                  <span>·</span>
-                  <span style={{ color: 'var(--color-gold)', fontWeight: 600 }}>{log.type}</span>
+                  <span className="opacity-50">•</span>
+                  <span className="font-bold text-gold tracking-wider">{log.type}</span>
                 </div>
               </div>
             </div>
           ))}
 
           {filteredLogs.length === 0 && (
-            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-muted)', fontSize: '12px' }}>
+            <div className="py-12 text-center text-muted text-sm border border-dashed border-white/10 rounded-xl">
               No system activity events matched your selected filter.
             </div>
           )}

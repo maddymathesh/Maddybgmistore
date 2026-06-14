@@ -8,7 +8,7 @@ import {
   Hash, Calendar, Car, DollarSign, Phone, Camera,
   FileText, FileOutput, Table, Search
 } from 'lucide-react';
-import { createSupercarTransaction, generateNextSupercarId } from '../../services/transactionService';
+import { createSupercarTransaction, updateSupercarTransaction, generateNextSupercarId } from '../../services/transactionService';
 import { generateCustomerPDF, generateInternalPDF } from '../../lib/pdfGenerator';
 import { exportToExcel } from '../../lib/excelExport';
 import { toast } from 'sonner';
@@ -26,8 +26,16 @@ const STEPS = [
   { id: 4, label: 'Contacts',      icon: Phone },
 ];
 
+const Label = ({ children }) => (
+  <label className="block text-[11px] uppercase tracking-widest font-bold text-[var(--color-muted)] mb-2.5 ml-1 font-mono">{children}</label>
+);
+
+const Field = ({ children, span }) => (
+  <div className={`flex flex-col ${span ? 'col-span-full' : ''}`}>{children}</div>
+);
+
 // ── Searchable Supercar Dropdown ─────────────────────────────────────────────
-function SupercarSelect({ value, onChange }) {
+function SupercarSelect({ value, onChange, selectClasses, inputClasses }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [custom, setCustom] = useState(false);
@@ -43,40 +51,38 @@ function SupercarSelect({ value, onChange }) {
 
   if (custom) {
     return (
-      <div style={{ display: 'flex', gap: '8px' }}>
-        <input className="input" placeholder="Enter custom supercar name..." value={value} onChange={e => onChange(e.target.value)} />
-        <button type="button" className="btn btn-outline" style={{ padding: '8px 12px', fontSize: '11px', whiteSpace: 'nowrap' }}
+      <div className="flex gap-2">
+        <input className={inputClasses} placeholder="Enter custom supercar name..." value={value} onChange={e => onChange(e.target.value)} />
+        <button type="button" className="btn btn-outline border-white/5 hover:border-yellow-500/30 px-4 py-2 text-xs"
           onClick={() => { setCustom(false); onChange(''); setQuery(''); }}>← List</button>
       </div>
     );
   }
 
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
-      <div className="input" style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', userSelect: 'none' }}
+    <div ref={ref} className="relative">
+      <div className={selectClasses} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', userSelect: 'none' }}
         onClick={() => setOpen(o => !o)}>
-        <span style={{ color: value ? '#eaeaea' : 'var(--color-muted)' }}>{value || 'Select Supercar...'}</span>
-        <Search size={15} style={{ color: 'var(--color-muted)', flexShrink: 0 }} />
+        <span className={value ? 'text-white' : 'text-gray-500 font-sans'}>{value || 'Select Supercar...'}</span>
+        <Search size={14} className="text-gray-500 flex-shrink-0" />
       </div>
       <AnimatePresence>
         {open && (
           <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
-            style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 100, background: 'var(--bg3)', border: '1px solid var(--color-border-gold)', borderRadius: 'var(--radius)', marginTop: '4px', overflow: 'hidden', boxShadow: '0 12px 40px rgba(0,0,0,0.5)' }}>
-            <div style={{ padding: '8px' }}>
-              <input className="input" style={{ fontSize: '13px', padding: '8px 12px' }} placeholder="Search supercar..." value={query}
+            className="absolute top-full left-0 right-0 z-50 bg-[#080a0f] border border-white/10 rounded-2xl mt-1 overflow-hidden shadow-2xl">
+            <div className="p-2">
+              <input className={inputClasses} placeholder="Search supercar..." value={query}
                 onChange={e => setQuery(e.target.value)} onClick={e => e.stopPropagation()} autoFocus />
             </div>
-            <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+            <div className="max-h-[180px] overflow-y-auto scrollbar-thin">
               {filtered.map(name => (
                 <div key={name} onClick={() => { onChange(name); setOpen(false); setQuery(''); }}
-                  style={{ padding: '10px 16px', cursor: 'pointer', fontSize: '14px', background: value === name ? 'var(--color-gold-dim)' : 'transparent', color: value === name ? 'var(--color-gold)' : '#eaeaea', transition: 'background .15s' }}
-                  onMouseEnter={e => { if (value !== name) e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
-                  onMouseLeave={e => { if (value !== name) e.currentTarget.style.background = 'transparent'; }}>
+                  className={`px-4 py-2.5 cursor-pointer text-xs font-bold transition-all ${value === name ? 'bg-yellow-500/10 text-yellow-500' : 'text-white hover:bg-white/5'}`}>
                   🚗 {name}
                 </div>
               ))}
               <div onClick={() => { setCustom(true); setOpen(false); onChange(''); }}
-                style={{ padding: '10px 16px', cursor: 'pointer', fontSize: '13px', color: 'var(--color-gold)', borderTop: '1px solid var(--color-border)', fontWeight: 600 }}>
+                className="px-4 py-2.5 cursor-pointer text-xs text-yellow-500 border-t border-white/5 font-bold hover:bg-white/5">
                 + Enter custom supercar name
               </div>
             </div>
@@ -87,15 +93,12 @@ function SupercarSelect({ value, onChange }) {
   );
 }
 
-// ── Main Component ────────────────────────────────────────────────────────────
-const Label = ({ children }) => <label className="slabel" style={{ display: 'block', marginBottom: '6px' }}>{children}</label>;
-
-export default function CreateSupercarTransaction({ onBack }) {
+export default function CreateSupercarTransaction({ onBack, initialData }) {
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [savedTransaction, setSavedTransaction] = useState(null);
   const [nextId, setNextId] = useState('Loading...');
-  const [supercarName, setSupercarName] = useState('');
+  const [supercarName, setSupercarName] = useState(initialData?.supercar_transactions?.[0]?.supercar_name || '');
   const [canSubmit, setCanSubmit] = useState(false);
 
   useEffect(() => {
@@ -106,19 +109,32 @@ export default function CreateSupercarTransaction({ onBack }) {
     }
   }, [step]);
 
-
+  const detail = initialData?.supercar_transactions?.[0] || {};
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
-    defaultValues: {
+    defaultValues: initialData ? {
+      ...initialData,
+      ...detail,
+      transaction_date: initialData.transaction_date ? new Date(initialData.transaction_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      delivery_date: detail.delivery_date ? new Date(detail.delivery_date).toISOString().split('T')[0] : '',
+      gifter_phone_countryCode: initialData.owner_phone ? (initialData.owner_phone.startsWith('+1') ? '+1' : initialData.owner_phone.startsWith('+44') ? '+44' : '+91') : '+91',
+      seller_phone_countryCode: initialData.seller_phone ? (initialData.seller_phone.startsWith('+1') ? '+1' : initialData.seller_phone.startsWith('+44') ? '+44' : '+91') : '+91',
+      reseller_phone_countryCode: initialData.reseller_phone ? (initialData.reseller_phone.startsWith('+1') ? '+1' : initialData.reseller_phone.startsWith('+44') ? '+44' : '+91') : '+91',
+      buyer_phone_countryCode: initialData.buyer_phone ? (initialData.buyer_phone.startsWith('+1') ? '+1' : initialData.buyer_phone.startsWith('+44') ? '+44' : '+91') : '+91',
+      gifter_phone: initialData.owner_phone ? initialData.owner_phone.replace(/^\+(91|1|44)/, '') : '',
+      seller_phone: initialData.seller_phone ? initialData.seller_phone.replace(/^\+(91|1|44)/, '') : '',
+      reseller_phone: initialData.reseller_phone ? initialData.reseller_phone.replace(/^\+(91|1|44)/, '') : '',
+      buyer_phone: initialData.buyer_phone ? initialData.buyer_phone.replace(/^\+(91|1|44)/, '') : '',
+    } : {
       transaction_date: new Date().toISOString().split('T')[0],
       mode_of_deal: 'WhatsApp',
       mode_of_payment: 'Full Payment via UPI / Bank Transfer',
-      payment_status: 'Fully Paid',
+      payment_status: 'Paid',
       supercar_card_tier: 'One Card',
       gift_status: 'Delivered',
-      gifter_phone: '+91',
-      seller_phone: '+91',
-      reseller_phone: '+91',
-      buyer_phone: '+91',
+      gifter_phone: '',
+      seller_phone: '',
+      reseller_phone: '',
+      buyer_phone: '',
       gifter_phone_countryCode: '+91',
       seller_phone_countryCode: '+91',
       reseller_phone_countryCode: '+91',
@@ -127,10 +143,14 @@ export default function CreateSupercarTransaction({ onBack }) {
   });
 
   useEffect(() => {
-    generateNextSupercarId()
-      .then(id => { setNextId(id); setValue('transaction_id', id); })
-      .catch(() => { setNextId('MBSSC001'); setValue('transaction_id', 'MBSSC001'); });
-  }, []);
+    if (initialData) {
+      setNextId(initialData.transaction_id);
+    } else {
+      generateNextSupercarId()
+        .then(id => { setNextId(id); setValue('transaction_id', id); })
+        .catch(() => { setNextId('MBSSC001'); setValue('transaction_id', 'MBSSC001'); });
+    }
+  }, [initialData, setValue]);
 
   const costPrice = parseFloat(watch('owner_price')) || 0;
   const soldPrice = parseFloat(watch('sold_price')) || 0;
@@ -149,8 +169,8 @@ export default function CreateSupercarTransaction({ onBack }) {
     try {
       const cleanPhone = (val, key) => {
         const prefix = countryCodes[key] || '+91';
-        if (!val || val === prefix) return '';
-        return val;
+        if (!val) return '';
+        return prefix + val.replace(/[^0-9]/g, '');
       };
       const mainData = {
         transaction_id: nextId,
@@ -178,9 +198,14 @@ export default function CreateSupercarTransaction({ onBack }) {
         delivery_time: data.delivery_time || null,
         gift_status: data.gift_status,
       };
-      const saved = await createSupercarTransaction(mainData, detailData);
+      let saved;
+      if (initialData) {
+        saved = await updateSupercarTransaction(initialData.id, mainData, detail.id, detailData);
+      } else {
+        saved = await createSupercarTransaction(mainData, detailData);
+      }
       setSavedTransaction({ ...saved, ...mainData, supercar_transactions: [detailData] });
-      toast.success(`Supercar Transaction ${nextId} saved!`);
+      toast.success(`Supercar Transaction ${nextId} ${initialData ? 'updated' : 'saved'}!`);
     } catch (err) {
       console.error(err);
       toast.error('Failed to save. Check console for details.');
@@ -189,54 +214,56 @@ export default function CreateSupercarTransaction({ onBack }) {
     }
   };
 
-
-  const grid = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' };
+  const inputClasses = "w-full bg-[#080a0f]/60 border border-white/5 rounded-xl py-3 px-4 text-xs font-mono text-white focus:outline-none focus:border-yellow-500/30 focus:ring-1 focus:ring-yellow-500/20 transition-all placeholder:text-gray-500";
+  const selectClasses = `${inputClasses} appearance-none cursor-pointer`;
 
   // ── SUCCESS SCREEN ──────────────────────────────────────────────────────────
   if (savedTransaction) {
     const det = savedTransaction.supercar_transactions?.[0] || {};
+    const profitMargin = soldPrice > 0 ? ((profit / soldPrice) * 100).toFixed(1) : "0.0";
     return (
-      <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
-        style={{ maxWidth: '700px', margin: '0 auto' }}>
-        <div className="card" style={{ padding: '48px 40px', textAlign: 'center' }}>
-          <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--color-gold), var(--color-orange))', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', color: '#000' }}>
-            <CheckCircle2 size={36} />
+      <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="max-w-[700px] mx-auto text-center">
+        <div className="glass-panel p-10 sm:p-14 rounded-3xl shadow-2xl border border-white/5 relative overflow-hidden">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-1/2 bg-yellow-500/5 blur-[100px] pointer-events-none"></div>
+
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center mx-auto mb-6 text-black shadow-[0_0_30px_rgba(234,179,8,0.3)]">
+            <CheckCircle2 size={40} />
           </div>
-          <h2 style={{ fontFamily: 'var(--font-h)', fontSize: '26px', fontWeight: 700, marginBottom: '6px' }}>Supercar Transaction Saved!</h2>
-          <div style={{ display: 'inline-block', background: 'var(--color-gold-dim)', border: '1px solid var(--color-border-gold)', borderRadius: '8px', padding: '8px 20px', marginBottom: '8px' }}>
-            <span style={{ fontFamily: 'monospace', fontSize: '18px', fontWeight: 700, color: 'var(--color-gold)' }}>#{savedTransaction.transaction_id}</span>
+          <h2 className="font-h text-3xl font-black text-white mb-2 uppercase tracking-wide">{initialData ? 'Supercar Updated!' : 'Supercar Saved!'}</h2>
+          <div className="inline-block bg-yellow-500/10 border border-yellow-500/15 rounded-xl px-6 py-2.5 mb-8 shadow-inner font-mono text-xl font-bold text-yellow-500">
+            <span>#{savedTransaction.transaction_id}</span>
           </div>
-          <p style={{ color: 'var(--color-muted)', marginBottom: '28px', fontSize: '14px' }}>
-            🚗 <strong style={{ color: '#eaeaea' }}>{det.supercar_name}</strong>
-            {det.supercar_card_tier && <span style={{ color: 'var(--color-muted)' }}> · {det.supercar_card_tier}</span>}
-            {' — Status: '}<strong style={{ color: det.gift_status === 'Delivered' ? 'var(--color-green)' : 'var(--color-gold)' }}>{det.gift_status}</strong>
+          <p className="text-xs text-[var(--color-muted)] mb-8 font-mono">
+            🚗 <strong className="text-white">{det.supercar_name}</strong>
+            {det.supercar_card_tier && <span className="text-gray-400"> · {det.supercar_card_tier}</span>}
+            {' — Status: '}<strong className={det.gift_status === 'Delivered' ? 'text-emerald-400' : 'text-yellow-500'}>{det.gift_status}</strong>
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '28px' }}>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
             {[
-              { label: 'Sold Price', val: `₹${soldPrice.toLocaleString('en-IN')}`, color: '#eaeaea' },
-              { label: 'Cost Price', val: `₹${costPrice.toLocaleString('en-IN')}`, color: 'var(--color-muted)' },
-              { label: 'Profit',     val: `₹${profit.toLocaleString('en-IN')}`,    color: profit >= 0 ? 'var(--color-green)' : 'var(--color-red)' },
+              { label: 'Sold Price', val: `₹${soldPrice.toLocaleString('en-IN')}`, color: 'text-emerald-400' },
+              { label: 'Cost Price', val: `₹${costPrice.toLocaleString('en-IN')}`, color: 'text-gray-400' },
+              { label: 'Profit (Margin)', val: `₹${profit.toLocaleString('en-IN')} (${profitMargin}%)`, color: profit >= 0 ? 'text-emerald-400' : 'text-red-400' },
             ].map(s => (
-              <div key={s.label} style={{ background: 'var(--color-bg2)', borderRadius: '10px', padding: '14px', border: '1px solid var(--color-border)' }}>
-                <div style={{ fontSize: '11px', color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>{s.label}</div>
-                <div style={{ fontSize: '18px', fontWeight: 700, color: s.color }}>{s.val}</div>
+              <div key={s.label} className="bg-black/40 rounded-2xl p-5 border border-white/5 shadow-inner">
+                <div className="text-[10px] text-[var(--color-muted)] uppercase tracking-wider font-bold mb-2 font-mono">{s.label}</div>
+                <div className={`text-xl font-black font-mono ${s.color}`}>{s.val}</div>
               </div>
             ))}
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '28px' }}>
-            <button className="btn btn-outline flex-col gap-1.5 py-3 px-2" onClick={() => generateCustomerPDF(savedTransaction)}><FileText size={20} style={{ color: 'var(--color-gold)' }} /><span className="text-[11px]">Customer PDF</span></button>
-            <button className="btn btn-outline flex-col gap-1.5 py-3 px-2" onClick={() => generateInternalPDF(savedTransaction)}><FileOutput size={20} style={{ color: 'var(--color-orange)' }} /><span className="text-[11px]">Internal PDF</span></button>
-            <button className="btn btn-outline flex-col gap-1.5 py-3 px-2" onClick={() => exportToExcel([savedTransaction], savedTransaction.transaction_id)}><Table size={20} style={{ color: 'var(--color-green)' }} /><span className="text-[11px]">Export Excel</span></button>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+            <button className="btn btn-outline border-white/5 hover:border-yellow-500/30 flex-col gap-3 py-5 rounded-2xl group transition-all" onClick={() => generateCustomerPDF(savedTransaction)}><FileText size={26} className="text-yellow-500 group-hover:scale-110 transition-transform" /><span className="text-[11px] font-bold text-white uppercase tracking-wider">Customer PDF</span></button>
+            <button className="btn btn-outline border-white/5 hover:border-orange-500/30 flex-col gap-3 py-5 rounded-2xl group transition-all" onClick={() => generateInternalPDF(savedTransaction)}><FileOutput size={26} className="text-orange-400 group-hover:scale-110 transition-transform" /><span className="text-[11px] font-bold text-white uppercase tracking-wider">Internal PDF</span></button>
+            <button className="btn btn-outline border-white/5 hover:border-emerald-500/30 flex-col gap-3 py-5 rounded-2xl group transition-all" onClick={() => exportToExcel([savedTransaction], savedTransaction.transaction_id)}><Table size={26} className="text-emerald-400 group-hover:scale-110 transition-transform" /><span className="text-[11px] font-bold text-white uppercase tracking-wider">Export Excel</span></button>
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-            <button className="btn btn-outline" onClick={() => {
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button className="btn btn-outline border-white/5 hover:bg-white/5 px-8 py-3 rounded-xl text-xs" onClick={() => {
               setSavedTransaction(null); setStep(0); setSupercarName('');
               generateNextSupercarId().then(id => { setNextId(id); setValue('transaction_id', id); });
             }}>+ New Supercar Transaction</button>
-            <button className="btn btn-gold" onClick={onBack}>Back to Transactions</button>
+            <button className="btn btn-gold px-8 py-3 rounded-xl text-xs bg-yellow-500 hover:bg-yellow-600 text-black font-bold" onClick={onBack}>Back to Transactions</button>
           </div>
         </div>
       </motion.div>
@@ -248,78 +275,95 @@ export default function CreateSupercarTransaction({ onBack }) {
     switch (step) {
       case 0:
         return (
-          <div style={grid}>
-            <div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <Field>
               <Label>Transaction ID</Label>
-              <div className="input" style={{ background: 'var(--color-bg2)', color: 'var(--color-gold)', fontFamily: 'monospace', fontWeight: 700, fontSize: '16px' }}>#{nextId}</div>
-            </div>
-            <div>
+              <div className="w-full bg-[#080a0f]/60 border border-white/5 rounded-xl py-3 px-4 text-sm font-mono font-bold text-yellow-500 shadow-inner flex items-center justify-between">
+                <span>#{nextId}</span>
+                <span className="text-[9px] uppercase tracking-widest text-[var(--color-muted)] font-black">Auto-Generated</span>
+              </div>
+            </Field>
+            <Field>
               <Label>Transaction Date</Label>
-              <input type="date" className="input" {...register('transaction_date', { required: true })} />
-            </div>
-            <div>
+              <input type="date" className={inputClasses} {...register('transaction_date', { required: true })} />
+            </Field>
+            <Field>
               <Label>Mode of Deal</Label>
-              <select className="input" {...register('mode_of_deal')}>
-                {['WhatsApp', 'Telegram', 'Instagram', 'Face to Face'].map(o => <option key={o}>{o}</option>)}
-              </select>
-            </div>
-            <div>
+              <div className="relative">
+                <select className={selectClasses} {...register('mode_of_deal')}>
+                  {['WhatsApp', 'Telegram', 'Instagram', 'Face to Face'].map(o => <option key={o} className="bg-[#0b0e14]">{o}</option>)}
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none border-l-[5px] border-r-[5px] border-t-[5px] border-l-transparent border-r-transparent border-t-[var(--color-muted)]"></div>
+              </div>
+            </Field>
+            <Field>
               <Label>Mode of Payment</Label>
-              <select className="input" {...register('mode_of_payment')}>
-                {['Full Payment via UPI / Bank Transfer', 'Full Payment in Cash', 'Half Payment in UPI / Bank Transfer & Half in Cash', 'Easy Monthly Instalment (EMI)'].map(o => <option key={o}>{o}</option>)}
-              </select>
-            </div>
-            <div>
+              <div className="relative">
+                <select className={selectClasses} {...register('mode_of_payment')}>
+                  {['Full Payment via UPI / Bank Transfer', 'Full Payment in Cash', 'Half Payment in UPI / Bank Transfer & Half in Cash', 'Easy Monthly Instalment (EMI)'].map(o => <option key={o} className="bg-[#0b0e14]">{o}</option>)}
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none border-l-[5px] border-r-[5px] border-t-[5px] border-l-transparent border-r-transparent border-t-[var(--color-muted)]"></div>
+              </div>
+            </Field>
+            <Field>
               <Label>Payment Status</Label>
-              <select className="input" {...register('payment_status')}>
-                {['Fully Paid', 'Pending', 'Pending EMI'].map(o => <option key={o}>{o}</option>)}
-              </select>
-            </div>
+              <div className="relative">
+                <select className={selectClasses} {...register('payment_status')}>
+                  {['Paid', 'Pending Payment', 'Disputed', 'Refunded', 'Cancelled'].map(o => <option key={o} className="bg-[#0b0e14]">{o}</option>)}
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none border-l-[5px] border-r-[5px] border-t-[5px] border-l-transparent border-r-transparent border-t-[var(--color-muted)]"></div>
+              </div>
+            </Field>
           </div>
         );
 
       case 1:
         return (
-          <div style={{ display: 'grid', gap: '24px' }}>
-            <div style={grid}>
-              <div>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <Field>
                 <Label>Supercar Name</Label>
-                <SupercarSelect value={supercarName} onChange={setSupercarName} />
-              </div>
-              <div>
+                <SupercarSelect value={supercarName} onChange={setSupercarName} selectClasses={selectClasses} inputClasses={inputClasses} />
+              </Field>
+              <Field>
                 <Label>Supercar Card Tier</Label>
-                <select className="input" {...register('supercar_card_tier')}>
-                  {['One Card', 'Two Card', 'Three Card'].map(o => <option key={o}>{o}</option>)}
-                </select>
-              </div>
+                <div className="relative">
+                  <select className={selectClasses} {...register('supercar_card_tier')}>
+                    {['One Card', 'Two Card', 'Three Card'].map(o => <option key={o} className="bg-[#0b0e14]">{o}</option>)}
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none border-l-[5px] border-r-[5px] border-t-[5px] border-l-transparent border-r-transparent border-t-[var(--color-muted)]"></div>
+                </div>
+              </Field>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-              <div style={{ background: 'var(--color-bg2)', border: '1px solid var(--color-border-gold)', borderRadius: 'var(--radius)', padding: '20px' }}>
-                <p className="slabel" style={{ marginBottom: '16px' }}><Camera size={14} style={{ display: 'inline', marginRight: '6px' }} />Gifter In-Game Details</p>
-                <div style={{ display: 'grid', gap: '14px' }}>
-                  <div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+              <div className="bg-black/20 border border-white/5 rounded-2xl p-6 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-1 h-full bg-yellow-500"></div>
+                <h4 className="text-xs uppercase text-yellow-500 font-bold tracking-widest mb-6 flex items-center gap-2 font-mono"><Camera size={14} /> Gifter In-Game Details</h4>
+                <div className="flex flex-col gap-4">
+                  <Field>
                     <Label>Gifter In-Game Name</Label>
-                    <input className="input" placeholder="In-Game Name" {...register('gifter_ig_name')} />
-                  </div>
-                  <div>
+                    <input className={inputClasses} placeholder="In-Game Name" {...register('gifter_ig_name')} />
+                  </Field>
+                  <Field>
                     <Label>Gifter In-Game ID (Numeric)</Label>
-                    <input className="input" placeholder="1234567890" {...register('gifter_ig_id')} />
-                  </div>
+                    <input className={inputClasses} placeholder="1234567890" {...register('gifter_ig_id')} />
+                  </Field>
                 </div>
               </div>
 
-              <div style={{ background: 'var(--color-bg2)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', padding: '20px' }}>
-                <p className="slabel" style={{ marginBottom: '16px' }}><Camera size={14} style={{ display: 'inline', marginRight: '6px' }} />Buyer In-Game Details</p>
-                <div style={{ display: 'grid', gap: '14px' }}>
-                  <div>
+              <div className="bg-black/20 border border-white/5 rounded-2xl p-6 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-1 h-full bg-gray-500"></div>
+                <h4 className="text-xs uppercase text-gray-400 font-bold tracking-widest mb-6 flex items-center gap-2 font-mono"><Camera size={14} /> Buyer In-Game Details</h4>
+                <div className="flex flex-col gap-4">
+                  <Field>
                     <Label>Buyer In-Game Name</Label>
-                    <input className="input" placeholder="In-Game Name" {...register('buyer_ig_name')} />
-                  </div>
-                  <div>
+                    <input className={inputClasses} placeholder="In-Game Name" {...register('buyer_ig_name')} />
+                  </Field>
+                  <Field>
                     <Label>Buyer In-Game ID (Numeric)</Label>
-                    <input className="input" placeholder="1234567890" {...register('buyer_ig_id')} />
-                  </div>
+                    <input className={inputClasses} placeholder="1234567890" {...register('buyer_ig_id')} />
+                  </Field>
                 </div>
               </div>
             </div>
@@ -328,53 +372,66 @@ export default function CreateSupercarTransaction({ onBack }) {
 
       case 2:
         return (
-          <div style={grid}>
-            <div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <Field>
               <Label>Delivery Date</Label>
-              <input type="date" className="input" {...register('delivery_date')} />
-            </div>
-            <div>
+              <input type="date" className={inputClasses} {...register('delivery_date')} />
+            </Field>
+            <Field>
               <Label>Delivery Time</Label>
-              <input type="time" className="input" {...register('delivery_time')} />
-            </div>
-            <div>
+              <input type="time" className={inputClasses} {...register('delivery_time')} />
+            </Field>
+            <Field>
               <Label>Gift Status</Label>
-              <select className="input" {...register('gift_status')}>
-                <option value="Delivered">Delivered</option>
-                <option value="Pending">Pending</option>
-              </select>
-            </div>
+              <div className="relative">
+                <select className={selectClasses} {...register('gift_status')}>
+                  <option value="Delivered" className="bg-[#0b0e14]">Delivered</option>
+                  <option value="Pending" className="bg-[#0b0e14]">Pending</option>
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none border-l-[5px] border-r-[5px] border-t-[5px] border-l-transparent border-r-transparent border-t-[var(--color-muted)]"></div>
+              </div>
+            </Field>
           </div>
         );
 
       case 3:
+        const marginPct = soldPrice > 0 ? ((profit / soldPrice) * 100).toFixed(1) : "0.0";
         return (
-          <div style={grid}>
-            <div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <Field>
               <Label>Cost Price (₹)</Label>
-              <input type="number" className="input" placeholder="0.00" {...register('owner_price')} />
-            </div>
-            <div>
-              <Label>Sold Price (₹)</Label>
-              <input type="number" className="input" placeholder="0.00" {...register('sold_price')} />
-            </div>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <Label>Net Profit (Auto-Calculated)</Label>
-              <div className="input" style={{
-                background: profit >= 0 ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
-                borderColor: profit >= 0 ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)',
-                color: profit >= 0 ? 'var(--color-green)' : 'var(--color-red)',
-                fontWeight: 700, fontSize: '22px',
-              }}>
-                ₹ {profit.toLocaleString('en-IN')}
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 font-bold font-mono text-xs">₹</span>
+                <input type="number" className={`${inputClasses} pl-8`} placeholder="0.00" {...register('owner_price')} />
               </div>
-            </div>
+            </Field>
+            <Field>
+              <Label>Sold Price (₹)</Label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 font-bold font-mono text-xs">₹</span>
+                <input type="number" className={`${inputClasses} pl-8`} placeholder="0.00" {...register('sold_price')} />
+              </div>
+            </Field>
+            <Field span>
+              <Label>Net Profit (Auto-Calculated)</Label>
+              <div className={`w-full border rounded-3xl py-8 px-10 text-4xl flex justify-between items-center font-black shadow-2xl tracking-wide font-mono relative overflow-hidden ${profit >= 0 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
+                <div className={`absolute top-0 right-0 w-64 h-64 rounded-full blur-[80px] pointer-events-none ${profit >= 0 ? 'bg-emerald-500/10' : 'bg-red-500/10'}`} />
+                <span className="relative z-10 flex items-center gap-3">
+                  ₹ {profit.toLocaleString('en-IN')}
+                  <span className="text-2xl opacity-60">{profit >= 0 ? '▲' : '▼'}</span>
+                </span>
+                <div className="relative z-10 text-right flex flex-col items-end">
+                  <span className={`text-[10px] uppercase font-bold tracking-widest mb-1 ${profit >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>Profit Margin</span>
+                  <span className="text-xl font-mono font-bold">{marginPct}%</span>
+                </div>
+              </div>
+            </Field>
           </div>
         );
 
       case 4:
         return (
-          <div style={grid}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {[
               { label: 'Gifter Phone Number',   key: 'gifter_phone' },
               { label: 'Seller Phone Number',   key: 'seller_phone' },
@@ -384,79 +441,47 @@ export default function CreateSupercarTransaction({ onBack }) {
               const prefix = countryCodes[key] || '+91';
               const prefixLen = prefix.length;
               return (
-                <div key={key}>
+                <Field key={key}>
                   <Label>{label}</Label>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    {/* Country Code Dropdown */}
-                    <select
-                      {...register(`${key}_countryCode`, {
-                        onChange: (e) => {
-                          const newPrefix = e.target.value;
-                          const currentPhone = watch(key) || '';
-                          const restDigits = currentPhone.replace(/^\+(91|1|44)/, '');
-                          setValue(key, newPrefix + restDigits);
-                        }
-                      })}
-                      style={{
-                        padding: '6px',
-                        backgroundColor: "#111520",
-                        color: "#fff",
-                        border: "1px solid var(--color-border)",
-                        borderRadius: "4px",
-                        opacity: 0.9,
-                        cursor: "pointer"
-                      }}
-                    >
-                      <option value="+91">+91</option>
-                      <option value="+1">+1</option>
-                      <option value="+44">+44</option>
-                    </select>
+                  <div className="flex items-center gap-2">
+                    <div className="relative w-24">
+                      <select
+                        {...register(`${key}_countryCode`)}
+                        className={`${selectClasses} px-3 text-center`}
+                      >
+                        <option value="+91" className="bg-[#0b0e14]">+91</option>
+                        <option value="+1" className="bg-[#0b0e14]">+1</option>
+                        <option value="+44" className="bg-[#0b0e14]">+44</option>
+                      </select>
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none border-l-[4px] border-r-[4px] border-t-[4px] border-l-transparent border-r-transparent border-t-[var(--color-muted)]"></div>
+                    </div>
 
-                    {/* Phone Number Input with Dynamic Locked prefix */}
                     <input
-                      className="input"
-                      placeholder="98765 09876"
-                      maxLength={prefixLen + 10}
-                      onKeyDown={(e) => {
-                        const selectionStart = e.target.selectionStart;
-                        if (e.key === 'Backspace' && selectionStart <= prefixLen) {
-                          e.preventDefault();
-                        }
-                        if (e.key === 'Delete' && selectionStart < prefixLen) {
-                          e.preventDefault();
-                        }
-                      }}
+                      className={`${inputClasses} flex-1`}
+                      placeholder="9876509876"
+                      maxLength={10}
                       {...register(key, {
                         required: false,
                         onChange: (e) => {
-                          let val = e.target.value;
-                          if (!val.startsWith(prefix)) {
-                            val = prefix + val.replace(/^\+?[0-9]*/, '');
-                          }
-                          const rest = val.substring(prefixLen).replace(/[^0-9]/g, '');
-                          val = prefix + rest;
-                          if (val.length > prefixLen + 10) {
-                            val = val.substring(0, prefixLen + 10);
-                          }
+                          let val = e.target.value.replace(/[^0-9]/g, '');
+                          if (val.length > 10) val = val.substring(0, 10);
                           e.target.value = val;
                           setValue(key, val);
                         },
                         validate: (val) => {
-                          if (!val || val === prefix) return true;
-                          const rest = val.substring(prefixLen);
-                          if (rest.length === 0) return true;
-                          if (rest.length === 10 && /^[0-9]+$/.test(rest)) return true;
-                          return `Enter a valid 10-digit number starting with ${prefix}`;
+                          if (!val) return true;
+                          if (val.length === 10 && /^[0-9]+$/.test(val)) return true;
+                          return `Enter a valid 10-digit number`;
                         }
                       })}
                     />
                   </div>
                   {errors[key] && (
-                    <p style={{ color: 'var(--color-red)', fontSize: '11px', marginTop: '4px' }}>
+                    <p className="text-[var(--color-red)] text-[11px] font-bold mt-1.5 ml-1">
                       {errors[key].message || 'This field is required'}
                     </p>
                   )}
-                </div>
+                </Field>
               );
             })}
           </div>
@@ -467,35 +492,36 @@ export default function CreateSupercarTransaction({ onBack }) {
   };
 
   return (
-    <div style={{ maxWidth: '900px', margin: '0 auto', display: 'grid', gap: '24px' }}>
-      <button onClick={onBack} className="btn btn-outline w-fit px-4 py-2 text-xs flex items-center gap-2">
-        <ArrowLeft size={15} /> Back to Transactions
+    <div className="max-w-[900px] mx-auto flex flex-col gap-8">
+      <button onClick={onBack} className="btn btn-outline border-white/5 text-[var(--color-muted)] hover:text-white hover:border-yellow-500/30 w-fit px-5 py-2.5 text-xs flex items-center gap-2 transition-all">
+        <ArrowLeft size={16} /> Back to Transactions
       </button>
 
       {/* Header */}
-      <div className="card" style={{ padding: '22px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div>
-          <h2 style={{ fontFamily: 'var(--font-h)', fontSize: '22px', fontWeight: 700, marginBottom: '2px' }}>
-            New Supercar Gift Transaction
+      <div className="glass-panel p-6 sm:p-8 rounded-3xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-white/5 shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/[0.01] rounded-full blur-3xl pointer-events-none" />
+        <div className="relative z-10">
+          <h2 className="font-h text-2xl font-black text-white mb-1 uppercase tracking-wide">
+            {initialData ? 'Edit Supercar Gift Transaction' : 'New Supercar Gift Transaction'}
           </h2>
-          <p style={{ color: 'var(--color-muted)', fontSize: '13px' }}>BGMI In-Game Supercar Gift — Step {step + 1} of {STEPS.length}</p>
+          <p className="text-[var(--color-muted)] text-xs font-mono">BGMI In-Game Supercar Gift — Step {step + 1} of {STEPS.length}</p>
         </div>
-        <div style={{ fontFamily: 'monospace', fontSize: '20px', fontWeight: 700, color: 'var(--color-gold)', background: 'var(--color-gold-dim)', padding: '8px 18px', borderRadius: '8px', border: '1px solid var(--color-border-gold)' }}>
+        <div className="font-mono text-xl font-bold text-yellow-500 bg-yellow-500/10 px-5 py-2 rounded-xl border border-yellow-500/15 shadow-inner relative z-10 font-mono">
           #{nextId}
         </div>
       </div>
 
       {/* Step Nav */}
-      <div style={{ display: 'flex', background: 'var(--card)', borderRadius: 'var(--radius)', border: '1px solid var(--color-border-gold)', overflow: 'hidden' }}>
+      <div className="flex flex-col sm:flex-row bg-[#080a0f] rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
         {STEPS.map((s, i) => {
           const Icon = s.icon;
           const isActive = step === i;
           const isDone = step > i;
           return (
             <button key={s.id} type="button" onClick={() => setStep(i)}
-              style={{ flex: 1, padding: '13px 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: isActive ? 'var(--color-gold-dim)' : 'transparent', borderRight: i < STEPS.length - 1 ? '1px solid var(--color-border-gold)' : 'none', cursor: 'pointer', borderBottom: isActive ? '2px solid var(--color-gold)' : '2px solid transparent', transition: 'all .2s' }}>
-              <Icon size={15} style={{ color: isDone ? 'var(--color-green)' : isActive ? 'var(--color-gold)' : 'var(--color-muted)' }} />
-              <span style={{ fontSize: '10px', fontWeight: 600, color: isDone ? 'var(--color-green)' : isActive ? 'var(--color-gold)' : 'var(--color-muted)', letterSpacing: '0.5px' }}>
+              className={`flex-1 p-5 flex flex-col items-center gap-2 transition-all cursor-pointer ${isActive ? 'bg-yellow-500/5 border-b-2 border-b-yellow-500' : 'bg-transparent border-b-2 border-b-transparent hover:bg-white/5'} ${i < STEPS.length - 1 ? 'sm:border-r border-r-white/5' : ''}`}>
+              <Icon size={16} className={isDone ? 'text-emerald-400' : isActive ? 'text-yellow-500' : 'text-[var(--color-muted)]'} />
+              <span className={`text-[9px] font-bold tracking-widest uppercase font-mono ${isDone ? 'text-emerald-400' : isActive ? 'text-yellow-500' : 'text-[var(--color-muted)]'}`}>
                 {isDone ? '✓ ' : ''}{s.label}
               </span>
             </button>
@@ -506,10 +532,12 @@ export default function CreateSupercarTransaction({ onBack }) {
       {/* Form */}
       <form onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }}>
         <AnimatePresence mode="wait">
-          <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.18 }} className="card" style={{ padding: '32px' }}>
-            <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '22px', paddingBottom: '14px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              {React.createElement(STEPS[step].icon, { size: 17, style: { color: 'var(--color-gold)' } })}
+          <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.18 }}
+            className="glass-panel rounded-3xl p-6 sm:p-10 border border-white/5 shadow-2xl">
+            <h3 className="text-sm font-bold text-white mb-8 pb-4 border-b border-white/5 flex items-center gap-3 font-h uppercase tracking-wider">
+              <span className="p-2 rounded-xl bg-yellow-500/10 border border-yellow-500/15">
+                {React.createElement(STEPS[step].icon, { size: 16, className: "text-yellow-500" })}
+              </span>
               {STEPS[step].label}
             </h3>
             {renderStep()}
@@ -517,23 +545,18 @@ export default function CreateSupercarTransaction({ onBack }) {
         </AnimatePresence>
 
         {/* Navigation */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '18px' }}>
-          <button type="button" onClick={() => setStep(s => Math.max(0, s - 1))} disabled={step === 0}
-            className={`btn btn-outline flex items-center gap-2 ${step === 0 ? 'opacity-40 cursor-not-allowed' : ''}`}>
+        <div className="flex justify-between items-center mt-6 pt-4 px-2">
+          <button type="button" onClick={() => setStep(s => Math.max(0, s - 1))} disabled={step === 0} className={`btn btn-outline border-white/5 text-white px-6 py-3 flex items-center gap-2 rounded-xl text-xs ${step === 0 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-white/5'}`}>
             <ChevronLeft size={16} /> Previous
           </button>
           {step < STEPS.length - 1 ? (
-            <button type="button" onClick={() => setStep(s => Math.min(STEPS.length - 1, s + 1))}
-              className="btn btn-gold flex items-center gap-2">
+            <button type="button" onClick={() => setStep(s => Math.min(STEPS.length - 1, s + 1))} className="btn btn-gold px-8 py-3 flex items-center gap-2 rounded-xl text-xs bg-yellow-500 hover:bg-yellow-600 text-black font-bold">
               Next Step <ChevronRight size={16} />
             </button>
           ) : (
-            <button
-              type="button"
-              onClick={handleSubmit(onSubmit)}
-              disabled={isSubmitting || !canSubmit} className="btn btn-gold" style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: (!canSubmit && !isSubmitting) ? 0.5 : 1 }}>
+            <button type="button" onClick={handleSubmit(onSubmit)} disabled={isSubmitting || !canSubmit} className={`btn btn-gold px-8 py-3 flex items-center gap-2 rounded-xl text-xs bg-yellow-500 hover:bg-yellow-600 text-black font-bold ${(!canSubmit && !isSubmitting) ? 'opacity-50 cursor-not-allowed' : ''}`}>
               {isSubmitting
-                ? <><span style={{ width: '15px', height: '15px', border: '2px solid rgba(0,0,0,0.3)', borderTopColor: '#000', borderRadius: '50%', display: 'inline-block', animation: 'spin .7s linear infinite' }} /> Saving...</>
+                ? <><span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin inline-block" /> Saving...</>
                 : <><Save size={16} /> Save Transaction</>}
             </button>
           )}

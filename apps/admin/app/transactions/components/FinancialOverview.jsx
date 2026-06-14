@@ -68,92 +68,102 @@ export default function FinancialOverview() {
   const netEarnings = stats.totalProfit - taxGtw;
 
   return (
-    <div style={{ display: 'grid', gap: '24px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div className="space-y-6">
+      {/* Header section */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>Financial Insights & Margins</h2>
-          <p style={{ fontSize: '12px', color: 'var(--color-muted)', margin: '4px 0 0' }}>Detailed cost structure, return on investment breakdown, and net profit earnings audits.</p>
+          <h2 className="text-xl font-bold tracking-tight text-white font-h">Financial Insights & Margins</h2>
+          <p className="text-xs text-muted mt-1">Detailed cost structure, return on investment breakdown, and net profit earnings audits.</p>
         </div>
         <button
           onClick={() => loadData(true)}
-          className="btn btn-outline"
-          style={{ padding: '8px 16px', fontSize: '12px', borderColor: 'var(--color-border-gold)', color: 'var(--color-gold)' }}
+          className="btn btn-outline flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-lg border border-gold/30 hover:border-gold text-gold transition-all duration-200"
+          disabled={isLoading}
         >
-          <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} style={{ marginRight: '6px' }} /> Refresh Sheets
+          <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />
+          Refresh Sheets
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
         {/* Margin Breaks Doughnut chart */}
-        <div className="card" style={{ border: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <div className="glass-panel p-6 rounded-xl border border-white/5 bg-white/[0.01] backdrop-blur-md flex flex-col justify-between hover:border-gold/20 transition-all duration-300">
           <div>
-            <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '14px', color: '#eaeaea' }}>ROI Profit Margins Share</h3>
-            <p style={{ fontSize: '12px', color: 'var(--color-muted)', marginBottom: '18px' }}>Comparison of profit rates and investment margins across BGMI store categories.</p>
+            <h3 className="text-base font-bold text-white mb-2 font-h">ROI Profit Margins Share</h3>
+            <p className="text-xs text-muted mb-6">Comparison of profit rates and investment margins across BGMI store categories.</p>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'center', position: 'relative', height: '140px', alignItems: 'center', marginBottom: '16px' }}>
-            <svg width="120" height="120" viewBox="0 0 42 42">
-              <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#2ecc71" strokeWidth="3" strokeDasharray="35 65" strokeDashoffset="25" />
-              <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="var(--color-gold)" strokeWidth="3" strokeDasharray="45 55" strokeDashoffset="90" />
-              <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#3498db" strokeWidth="3" strokeDasharray="20 80" strokeDashoffset="45" />
+          <div className="flex justify-center items-center relative h-36 mb-6">
+            <svg width="128" height="128" viewBox="0 0 42 42" className="transform -rotate-90 filter drop-shadow-[0_0_8px_rgba(255,215,0,0.15)]">
+              {/* Account margin: 45% */}
+              <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="var(--color-gold)" strokeWidth="3.2" strokeDasharray="45 55" strokeDashoffset="0" />
+              {/* Gifting margin: 35% */}
+              <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#10b981" strokeWidth="3.2" strokeDasharray="35 65" strokeDashoffset="-45" />
+              {/* UC packs margin: 20% */}
+              <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#3b82f6" strokeWidth="3.2" strokeDasharray="20 80" strokeDashoffset="-80" />
             </svg>
-            <div style={{ position: 'absolute', textAlign: 'center' }}>
-              <p style={{ fontSize: '10px', color: 'var(--color-muted)', margin: 0, textTransform: 'uppercase' }}>Avg ROI</p>
-              <p style={{ fontSize: '20px', fontWeight: 900, color: '#eaeaea', margin: 0 }}>
-                {roiPercent}%
-              </p>
+            <div className="absolute text-center flex flex-col items-center justify-center">
+              <span className="text-[10px] tracking-wider text-muted uppercase font-semibold">Avg ROI</span>
+              <span className="text-2xl font-black text-white mt-0.5 tracking-tight">{roiPercent}%</span>
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px solid var(--color-border)', paddingTop: '14px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span style={{ width: '8px', height: '8px', background: 'var(--color-gold)', borderRadius: '50%' }} /> Account Store sales ROI</span>
-              <span style={{ fontWeight: 700, color: '#eaeaea' }}>45% margin rate</span>
+          <div className="flex flex-col gap-3 border-t border-white/5 pt-4">
+            <div className="flex justify-between items-center text-xs">
+              <span className="flex items-center gap-2 text-muted">
+                <span className="w-2.5 h-2.5 bg-gold rounded-full shadow-[0_0_6px_var(--color-gold)]" /> Account Store sales ROI
+              </span>
+              <span className="font-bold text-white font-mono bg-gold/10 px-2 py-0.5 rounded-md text-[11px] border border-gold/15">45% margin rate</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span style={{ width: '8px', height: '8px', background: '#2ecc71', borderRadius: '50%' }} /> Gifting (Xsuit / Car) ROI</span>
-              <span style={{ fontWeight: 700, color: '#eaeaea' }}>35% margin rate</span>
+            <div className="flex justify-between items-center text-xs">
+              <span className="flex items-center gap-2 text-muted">
+                <span className="w-2.5 h-2.5 bg-[#10b981] rounded-full shadow-[0_0_6px_#10b981]" /> Gifting (Xsuit / Car) ROI
+              </span>
+              <span className="font-bold text-white font-mono bg-[#10b981]/10 px-2 py-0.5 rounded-md text-[11px] border border-[#10b981]/15">35% margin rate</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span style={{ width: '8px', height: '8px', background: '#3498db', borderRadius: '50%' }} /> UC Packs Store ROI</span>
-              <span style={{ fontWeight: 700, color: '#eaeaea' }}>20% margin rate</span>
+            <div className="flex justify-between items-center text-xs">
+              <span className="flex items-center gap-2 text-muted">
+                <span className="w-2.5 h-2.5 bg-[#3b82f6] rounded-full shadow-[0_0_6px_#3b82f6]" /> UC Packs Store ROI
+              </span>
+              <span className="font-bold text-white font-mono bg-[#3b82f6]/10 px-2 py-0.5 rounded-md text-[11px] border border-[#3b82f6]/15">20% margin rate</span>
             </div>
           </div>
         </div>
 
         {/* Detailed Profit/Cost statements list */}
-        <div className="card" style={{ border: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <div className="glass-panel p-6 rounded-xl border border-white/5 bg-white/[0.01] backdrop-blur-md flex flex-col justify-between hover:border-gold/20 transition-all duration-300">
           <div>
-            <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '14px', color: '#eaeaea' }}>Gross vs Net Profit Margins</h3>
-            <p style={{ fontSize: '12px', color: 'var(--color-muted)', marginBottom: '18px' }}>Store financial balance calculations of revenue cost margins and net merchant earnings.</p>
+            <h3 className="text-base font-bold text-white mb-2 font-h">Gross vs Net Profit Margins</h3>
+            <p className="text-xs text-muted mb-6">Store financial balance calculations of revenue cost margins and net merchant earnings.</p>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '10px', borderBottom: '1px solid var(--color-border)', fontSize: '13px' }}>
-              <span style={{ color: 'var(--color-muted)' }}>Gross Store Sales Revenue</span>
-              <span style={{ fontWeight: 800, color: '#eaeaea' }}>₹{stats.totalSales.toLocaleString('en-IN')}</span>
+          <div className="flex flex-col gap-3.5">
+            <div className="flex justify-between items-center pb-2 border-b border-white/5 text-sm">
+              <span className="text-muted text-xs uppercase tracking-wider">Gross Store Sales</span>
+              <span className="font-bold text-white font-mono">₹{stats.totalSales.toLocaleString('en-IN')}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '10px', borderBottom: '1px solid var(--color-border)', fontSize: '13px' }}>
-              <span style={{ color: 'var(--color-muted)' }}>Cost of Sales (Supplier / Loader cost)</span>
-              <span style={{ fontWeight: 800, color: '#eaeaea' }}>₹{costOfGoods.toLocaleString('en-IN')}</span>
+            <div className="flex justify-between items-center pb-2 border-b border-white/5 text-sm">
+              <span className="text-muted text-xs uppercase tracking-wider">Cost of Sales (Supplier/Loader)</span>
+              <span className="font-bold text-muted font-mono">₹{costOfGoods.toLocaleString('en-IN')}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '10px', borderBottom: '1px solid var(--color-border)', fontSize: '13px' }}>
-              <span style={{ color: 'var(--color-muted)' }}>Gross Profit Margin</span>
-              <span style={{ fontWeight: 800, color: '#2ecc71' }}>₹{stats.totalProfit.toLocaleString('en-IN')}</span>
+            <div className="flex justify-between items-center pb-2 border-b border-white/5 text-sm">
+              <span className="text-muted text-xs uppercase tracking-wider">Gross Profit Margin</span>
+              <span className="font-extrabold text-[#10b981] font-mono">₹{stats.totalProfit.toLocaleString('en-IN')}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '10px', borderBottom: '1px solid var(--color-border)', fontSize: '13px' }}>
-              <span style={{ color: 'var(--color-muted)' }}>Est. Payment gateway fees (2%)</span>
-              <span style={{ fontWeight: 800, color: 'var(--color-red)' }}>- ₹{taxGtw.toLocaleString()}</span>
+            <div className="flex justify-between items-center pb-2 border-b border-white/5 text-sm">
+              <span className="text-muted text-xs uppercase tracking-wider">Gateway transaction fee (2%)</span>
+              <span className="font-bold text-red-500 font-mono">- ₹{taxGtw.toLocaleString('en-IN')}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', paddingTop: '4px' }}>
-              <span style={{ color: '#eaeaea', fontWeight: 700 }}>Net Store Earnings</span>
-              <span style={{ fontWeight: 900, color: '#2ecc71', fontSize: '15px' }}>₹{netEarnings.toLocaleString('en-IN')}</span>
+            <div className="flex justify-between items-center pt-2 text-base">
+              <span className="text-white font-bold font-h text-sm uppercase tracking-wider">Net Store Earnings</span>
+              <span className="font-black text-[#10b981] font-mono text-lg filter drop-shadow-[0_0_6px_rgba(16,185,129,0.2)]">₹{netEarnings.toLocaleString('en-IN')}</span>
             </div>
           </div>
 
-          <div style={{ marginTop: '20px', padding: '10px 14px', background: 'rgba(46,204,113,0.08)', border: '1px solid rgba(46,204,113,0.2)', borderRadius: '6px', fontSize: '11px', color: '#eaeaea' }}>
-            💡 Net Store Earnings calculations are real-time, based on dynamic Sheet/Database fields configurations.
+          <div className="mt-6 p-3.5 bg-[#10b981]/5 border border-[#10b981]/10 rounded-lg text-[11px] text-muted-foreground leading-relaxed flex items-start gap-2">
+            <span className="text-xs">💡</span>
+            <span>Net Store Earnings calculations are real-time, based on dynamic Sheet/Database fields configurations.</span>
           </div>
         </div>
 

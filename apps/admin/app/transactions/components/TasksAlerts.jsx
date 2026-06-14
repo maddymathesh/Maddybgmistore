@@ -48,47 +48,50 @@ export default function TasksAlerts() {
   };
 
   return (
-    <div style={{ display: 'grid', gap: '24px' }}>
+    <div className="flex flex-col gap-6">
       <div>
-        <h2 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>System Alerts & Tasks</h2>
-        <p style={{ fontSize: '12px', color: 'var(--color-muted)', margin: '4px 0 0' }}>Track urgent actions, deal alerts, and daily responsibilities here.</p>
+        <h2 className="text-xl font-bold tracking-tight text-white font-h">System Alerts & Tasks</h2>
+        <p className="text-xs text-muted mt-1">Track urgent actions, deal alerts, and daily responsibilities here.</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Critical Alerts */}
-        <div className="card" style={{ border: '1px solid var(--color-border)' }}>
-          <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '20px', color: '#eaeaea', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <AlertCircle size={18} style={{ color: 'var(--color-red)' }} /> Urgent Pending System Alerts
+        <div className="glass-panel p-6 rounded-xl border border-white/5 bg-white/[0.01] backdrop-blur-md">
+          <h3 className="text-base font-bold text-white mb-6 flex items-center gap-2 font-h uppercase tracking-wider">
+            <AlertCircle size={16} className="text-red-500" /> Urgent Pending System Alerts
           </h3>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div style={{ background: 'rgba(231,76,60,0.1)', borderLeft: '3px solid var(--color-red)', padding: '14px', borderRadius: '6px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-              <AlertTriangle size={16} style={{ color: 'var(--color-red)', marginTop: '2px', flexShrink: 0 }} />
-              <div>
-                <p style={{ fontSize: '13px', fontWeight: 700, margin: 0, color: '#eaeaea' }}>Link Verification Expiration Alert</p>
-                <p style={{ fontSize: '11.5px', margin: '4px 0 0', color: 'var(--color-muted)', lineHeight: '1.4' }}>
-                  Transaction <strong>#TX8403</strong> (Account Store) requires manual double check for secondary login unlink safety period validation immediately.
+          <div className="flex flex-col gap-4">
+            <div className="bg-red-500/10 border-l-4 border-red-500 p-4 rounded-r-xl flex gap-3 items-start relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-16 h-16 bg-red-500/20 rounded-full blur-xl -mr-6 -mt-6 group-hover:scale-150 transition-transform duration-500" />
+              <AlertTriangle size={16} className="text-red-500 mt-0.5 shrink-0 relative z-10" />
+              <div className="relative z-10">
+                <p className="text-sm font-bold text-white m-0">Link Verification Expiration Alert</p>
+                <p className="text-xs mt-1 text-muted leading-relaxed">
+                  Transaction <strong className="text-white">#TX8403</strong> (Account Store) requires manual double check for secondary login unlink safety period validation immediately.
                 </p>
               </div>
             </div>
 
-            <div style={{ background: 'rgba(241,196,15,0.1)', borderLeft: '3px solid #f1c40f', padding: '14px', borderRadius: '6px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-              <Clock size={16} style={{ color: '#f1c40f', marginTop: '2px', flexShrink: 0 }} />
-              <div>
-                <p style={{ fontSize: '13px', fontWeight: 700, margin: 0, color: '#eaeaea' }}>UC Packet Manual Loading Queue</p>
-                <p style={{ fontSize: '11.5px', margin: '4px 0 0', color: 'var(--color-muted)', lineHeight: '1.4' }}>
-                  Order <strong>#TX8411</strong> has been pending for over 15 minutes due to manual loader confirmation delays. Please ping the loader.
+            <div className="bg-yellow-500/10 border-l-4 border-yellow-500 p-4 rounded-r-xl flex gap-3 items-start relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-16 h-16 bg-yellow-500/20 rounded-full blur-xl -mr-6 -mt-6 group-hover:scale-150 transition-transform duration-500" />
+              <Clock size={16} className="text-yellow-500 mt-0.5 shrink-0 relative z-10" />
+              <div className="relative z-10">
+                <p className="text-sm font-bold text-white m-0">UC Packet Manual Loading Queue</p>
+                <p className="text-xs mt-1 text-muted leading-relaxed">
+                  Order <strong className="text-white">#TX8411</strong> has been pending for over 15 minutes due to manual loader confirmation delays. Please ping the loader.
                 </p>
               </div>
             </div>
 
-            <div style={{ background: 'rgba(52,152,219,0.1)', borderLeft: '3px solid #3498db', padding: '14px', borderRadius: '6px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-              <Clock size={16} style={{ color: '#3498db', marginTop: '2px', flexShrink: 0 }} />
-              <div>
-                <p style={{ fontSize: '13px', fontWeight: 700, margin: 0, color: '#eaeaea' }}>Supplier Payments Verification</p>
-                <p style={{ fontSize: '11.5px', margin: '4px 0 0', color: 'var(--color-muted)', lineHeight: '1.4' }}>
-                  Confirm owner price payout of <strong>₹24,500</strong> to Supplier account <strong>MBS_Supplier_9</strong> for transaction ID #TX8401.
+            <div className="bg-blue-500/10 border-l-4 border-blue-500 p-4 rounded-r-xl flex gap-3 items-start relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-16 h-16 bg-blue-500/20 rounded-full blur-xl -mr-6 -mt-6 group-hover:scale-150 transition-transform duration-500" />
+              <Clock size={16} className="text-blue-500 mt-0.5 shrink-0 relative z-10" />
+              <div className="relative z-10">
+                <p className="text-sm font-bold text-white m-0">Supplier Payments Verification</p>
+                <p className="text-xs mt-1 text-muted leading-relaxed">
+                  Confirm owner price payout of <strong className="text-white">₹24,500</strong> to Supplier account <strong className="text-white">MBS_Supplier_9</strong> for transaction ID #TX8401.
                 </p>
               </div>
             </div>
@@ -96,86 +99,68 @@ export default function TasksAlerts() {
         </div>
 
         {/* Tasks List */}
-        <div className="card" style={{ border: '1px solid var(--color-border)' }}>
-          <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '20px', color: '#eaeaea', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <CheckCircle2 size={18} style={{ color: '#2ecc71' }} /> Interactive Admin Checklist
+        <div className="glass-panel p-6 rounded-xl border border-white/5 bg-white/[0.01] backdrop-blur-md">
+          <h3 className="text-base font-bold text-white mb-6 flex items-center gap-2 font-h uppercase tracking-wider">
+            <CheckCircle2 size={16} className="text-[#10b981]" /> Interactive Admin Checklist
           </h3>
 
-          <form onSubmit={handleAddTask} style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
+          <form onSubmit={handleAddTask} className="flex gap-2 mb-6">
             <input
               type="text"
-              className="input"
+              className="flex-1 h-10 px-4 bg-white/5 border border-white/10 rounded-lg text-xs text-white placeholder-white/30 focus:border-yellow-500/40 focus:ring-0 transition-all duration-200 outline-none"
               value={newTaskText}
               onChange={e => setNewTaskText(e.target.value)}
               placeholder="Add quick responsibility task..."
-              style={{ flex: 1, height: '38px', fontSize: '12px' }}
             />
             <select
               value={newTaskPriority}
               onChange={e => setNewTaskPriority(e.target.value)}
-              className="input"
-              style={{ width: '90px', height: '38px', fontSize: '12px' }}
+              className="w-24 h-10 px-3 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:border-yellow-500/40 focus:ring-0 transition-all duration-200 outline-none appearance-none cursor-pointer"
             >
-              <option value="High">High</option>
-              <option value="Medium">Medium</option>
-              <option value="Low">Low</option>
+              <option value="High" className="bg-[#0e1118]">High</option>
+              <option value="Medium" className="bg-[#0e1118]">Medium</option>
+              <option value="Low" className="bg-[#0e1118]">Low</option>
             </select>
-            <button type="submit" className="btn btn-gold" style={{ height: '38px', padding: '0 12px' }} title="Add Task">
+            <button type="submit" className="btn btn-gold h-10 px-4 rounded-lg flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(255,215,0,0.2)]" title="Add Task">
               <Plus size={16} />
             </button>
           </form>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '300px', overflowY: 'auto', paddingRight: '4px' }}>
+          <div className="flex flex-col gap-3 max-h-[300px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
             {tasks.map(task => (
               <div
                 key={task.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '10px 14px',
-                  background: 'var(--color-bg2)',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: '6px',
-                  transition: 'background 0.2s',
-                }}
+                className="flex items-center justify-between p-3.5 bg-white/[0.02] border border-white/5 rounded-lg transition-all duration-200 hover:bg-white/[0.04] hover:border-white/10 group"
               >
-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', flex: 1, userSelect: 'none' }}>
+                <label className="flex items-center gap-3 cursor-pointer flex-1 select-none">
                   <input
                     type="checkbox"
                     checked={task.done}
                     onChange={() => handleToggle(task.id)}
-                    style={{ accentColor: 'var(--color-gold)', width: '15px', height: '15px', cursor: 'pointer' }}
+                    className="w-4 h-4 rounded border-white/20 bg-black/40 accent-yellow-500 focus:ring-0 focus:ring-offset-0 cursor-pointer"
                   />
-                  <span style={{ fontSize: '12.5px', color: task.done ? 'var(--color-muted)' : '#eaeaea', textDecoration: task.done ? 'line-through' : 'none' }}>
+                  <span className={`text-xs ${task.done ? 'text-white/30 line-through' : 'text-white font-medium'} transition-all duration-200`}>
                     {task.text}
                   </span>
                 </label>
                 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{
-                    fontSize: '9px',
-                    background: task.priority === 'High' ? 'rgba(231,76,60,0.15)' : task.priority === 'Medium' ? 'rgba(241,196,15,0.15)' : 'rgba(255,255,255,0.06)',
-                    color: task.priority === 'High' ? 'var(--color-red)' : task.priority === 'Medium' ? '#f1c40f' : 'var(--color-muted)',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    fontWeight: 700
-                  }}>
+                <div className="flex items-center gap-3 ml-2">
+                  <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${task.priority === 'High' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : task.priority === 'Medium' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20' : 'bg-white/5 text-muted border border-white/10'}`}>
                     {task.priority}
                   </span>
                   
                   <button
                     onClick={() => handleDeleteTask(task.id)}
-                    style={{ background: 'none', border: 'none', color: 'var(--color-red)', opacity: 0.7, cursor: 'pointer', padding: 2 }}
+                    className="text-red-500/50 hover:text-red-500 hover:bg-red-500/10 p-1.5 rounded-md transition-all duration-200 opacity-0 group-hover:opacity-100"
                     title="Delete task"
                   >
-                    <Trash2 size={13} />
+                    <Trash2 size={14} />
                   </button>
                 </div>
               </div>
             ))}
             {tasks.length === 0 && (
-              <div style={{ padding: '30px', textAlign: 'center', color: 'var(--color-muted)', fontSize: '12px' }}>
+              <div className="p-8 text-center text-muted text-xs border border-dashed border-white/10 rounded-lg">
                 All clear! No tasks listed. Add a new task above.
               </div>
             )}

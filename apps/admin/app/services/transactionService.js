@@ -123,6 +123,52 @@ export const createUcTransaction = (mainData, detailData) =>
   createFullTransaction(mainData, detailData, 'uc_transactions');
 
 /**
+ * Generic update function to handle main + detail updates.
+ */
+const updateFullTransaction = async (mainId, mainData, detailId, detailData, detailSheet) => {
+  try {
+    const sanitizedMainData = { ...mainData };
+    const phoneFields = ['buyer_phone', 'owner_phone', 'seller_phone', 'reseller_phone'];
+    phoneFields.forEach(field => {
+      if (sanitizedMainData[field]) {
+        sanitizedMainData[field] = sanitizePhone(sanitizedMainData[field]);
+      }
+    });
+
+    // 1. Update main transaction
+    const transaction = await api.updateTransaction('transactions', mainId, {
+      ...sanitizedMainData,
+      updated_at: new Date().toISOString()
+    });
+
+    // 2. Update detail record
+    if (detailId && detailData && detailSheet) {
+      await api.updateTransaction(detailSheet, detailId, {
+        ...detailData,
+        updated_at: new Date().toISOString()
+      });
+    }
+
+    return transaction;
+  } catch (error) {
+    console.error(`Error updating transaction in ${detailSheet}:`, error);
+    throw error;
+  }
+};
+
+export const updateAccountTransaction = (mainId, mainData, detailId, detailData) => 
+  updateFullTransaction(mainId, mainData, detailId, detailData, 'account_transactions');
+
+export const updateXsuitTransaction = (mainId, mainData, detailId, detailData) => 
+  updateFullTransaction(mainId, mainData, detailId, detailData, 'xsuit_transactions');
+
+export const updateSupercarTransaction = (mainId, mainData, detailId, detailData) => 
+  updateFullTransaction(mainId, mainData, detailId, detailData, 'supercar_transactions');
+
+export const updateUcTransaction = (mainId, mainData, detailId, detailData) => 
+  updateFullTransaction(mainId, mainData, detailId, detailData, 'uc_transactions');
+
+/**
  * Delete a transaction by its ID.
  */
 export const deleteTransaction = async (txOrId) => {

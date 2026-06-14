@@ -55,9 +55,8 @@ const SIDEBAR_ITEMS = [
 export default function TransactionsLayout() {
   const { user, isLoaded } = useUser();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [editingTx, setEditingTx] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  // router is defined but currently unused
-  // const router = useRouter();
 
   if (!isLoaded) {
     return (
@@ -102,15 +101,25 @@ export default function TransactionsLayout() {
       case 'dashboard':
         return <Dashboard />;
       case 'transactions':
-        return <TransactionsList onAddNew={() => setActiveTab('create_account')} />;
+        return <TransactionsList 
+                 onAddNew={() => setActiveTab('create_account')} 
+                 onEdit={(tx: any) => { 
+                   setEditingTx(tx); 
+                   setActiveTab(`edit_${tx.transaction_type.toLowerCase()}`); 
+                 }} 
+               />;
       case 'create_account':
-        return <CreateTransaction onBack={() => setActiveTab('transactions')} />;
+      case 'edit_account':
+        return <CreateTransaction onBack={() => { setActiveTab('transactions'); setEditingTx(null); }} initialData={editingTx} />;
       case 'create_xsuit':
-        return <CreateXsuitTransaction onBack={() => setActiveTab('transactions')} />;
+      case 'edit_xsuit':
+        return <CreateXsuitTransaction onBack={() => { setActiveTab('transactions'); setEditingTx(null); }} initialData={editingTx} />;
       case 'create_supercar':
-        return <CreateSupercarTransaction onBack={() => setActiveTab('transactions')} />;
+      case 'edit_supercar':
+        return <CreateSupercarTransaction onBack={() => { setActiveTab('transactions'); setEditingTx(null); }} initialData={editingTx} />;
       case 'create_uc':
-        return <CreateUcTransaction onBack={() => setActiveTab('transactions')} />;
+      case 'edit_uc':
+        return <CreateUcTransaction onBack={() => { setActiveTab('transactions'); setEditingTx(null); }} initialData={editingTx} />;
       case 'insights':
         return <ProductInsights />;
       case 'tasks':
@@ -138,7 +147,7 @@ export default function TransactionsLayout() {
   };
 
   return (
-    <div className="admin-layout" style={{ background: 'var(--color-bg)', color: '#eaeaea', fontFamily: 'var(--font-b)' }}>
+    <div className="admin-layout min-h-screen bg-[#080a0f] text-[#eaeaea] font-[var(--font-b)]">
       {/* Sidebar Overlay Backdrop on Mobile */}
       <div 
         className={`admin-sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
@@ -147,9 +156,9 @@ export default function TransactionsLayout() {
 
       {/* Sidebar */}
       <aside className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`}>
-        <div className="admin-sidebar-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', lineHeight: 1.2 }}>
+        <div className="admin-sidebar-logo flex items-center justify-between leading-tight">
           <div>
-            MBSx <br/><span style={{ fontSize: '14px', color: '#fff' }}>Transaction Panel</span>
+            MBSx <br/><span className="text-sm text-white">Transaction Panel</span>
           </div>
           <button 
             onClick={() => setIsSidebarOpen(false)}
@@ -170,12 +179,12 @@ export default function TransactionsLayout() {
           </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0 12px' }}>
+        <div className="flex-1 overflow-y-auto px-3">
           {/* Back to Control Center */}
           <Link
             href="/"
             className="admin-nav-item"
-            style={{ width: '100%', border: 'none', background: 'transparent', borderRadius: '8px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--color-gold)', textDecoration: 'none', padding: '10px 16px' }}
+            className="admin-nav-item w-full border-none bg-transparent rounded-lg mb-2 flex items-center gap-2 text-[13px] text-yellow-500 hover:bg-yellow-500/10 no-underline px-4 py-2.5"
           >
             <ArrowLeft size={18} className="nav-icon" />
             Back to Control Center
@@ -185,8 +194,7 @@ export default function TransactionsLayout() {
           {isStoreAdmin && (
             <Link
               href="/panel"
-              className="admin-nav-item"
-              style={{ width: '100%', border: 'none', background: 'transparent', borderRadius: '8px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#eaeaea', textDecoration: 'none', padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+              className="admin-nav-item w-full border-none bg-transparent rounded-lg mb-4 flex items-center gap-2 text-[13px] text-[#eaeaea] hover:bg-white/5 no-underline px-4 py-2.5 border-b border-white/5"
             >
               <LayoutDashboard size={18} className="nav-icon" />
               Admin Panel
@@ -203,8 +211,7 @@ export default function TransactionsLayout() {
                   setActiveTab(item.id);
                   setIsSidebarOpen(false);
                 }}
-                className={`admin-nav-item ${isActive ? 'active' : ''}`}
-                style={{ width: '100%', border: 'none', background: isActive ? 'var(--color-gold-dim)' : 'transparent', borderRadius: '8px', marginBottom: '4px', justifyContent: 'flex-start' }}
+                className={`admin-nav-item w-full border-none rounded-lg mb-1 flex justify-start items-center gap-2 px-4 py-2.5 transition-colors ${isActive ? 'bg-yellow-500/10 text-yellow-500' : 'bg-transparent text-gray-400 hover:text-white hover:bg-white/5'}`}
               >
                 <Icon size={18} className="nav-icon" />
                 {item.label}
@@ -213,7 +220,7 @@ export default function TransactionsLayout() {
           })}
         </div>
 
-        <div style={{ padding: '24px', borderTop: '1px solid var(--color-border-gold)', marginTop: 'auto', display: 'flex', justifyContent: 'center' }}>
+        <div className="p-6 border-t border-yellow-500/20 mt-auto flex justify-center">
           <UserButton afterSignOutUrl="/" appearance={{ elements: { userButtonBox: "scale-125" } }} />
         </div>
       </aside>
@@ -221,7 +228,7 @@ export default function TransactionsLayout() {
       {/* Main Content Area */}
       <main className="admin-main">
         <div className="admin-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="flex items-center gap-3">
             <button 
               onClick={() => setIsSidebarOpen(true)} 
               className="mobile-sidebar-toggle" 
@@ -230,16 +237,16 @@ export default function TransactionsLayout() {
               <Menu size={20} />
             </button>
             <div>
-              <h1 className="admin-title">
+              <h1 className="admin-title capitalize">
                 {activeTab.replace('_', ' ')} <span style={{ color: 'var(--color-gold)' }}>Panel</span>
               </h1>
-              <p style={{ fontSize: '13px', color: 'var(--color-muted)', marginTop: '4px' }}>
+              <p className="text-[13px] text-gray-400 mt-1">
                 {new Date().toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
               </p>
             </div>
           </div>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }} className="admin-header-actions">
+          <div className="flex items-center gap-3 flex-wrap admin-header-actions">
             {(activeTab === 'transactions') && (
               <>
                 <button onClick={() => setActiveTab('create_account')} className="btn btn-gold px-4 py-2.5 text-xs">
@@ -256,8 +263,8 @@ export default function TransactionsLayout() {
                 </button>
               </>
             )}
-            <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--color-gold), var(--color-orange))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000' }} className="hide-mobile">
-              <ShieldCheck size={22} />
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-black hide-mobile">
+              <ShieldCheck size={20} />
             </div>
           </div>
         </div>

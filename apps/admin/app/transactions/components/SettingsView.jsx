@@ -1,116 +1,36 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Settings, Palette, Users, Shield, Phone, RefreshCw, CheckCircle2, FileText } from 'lucide-react';
+import React, { useState } from 'react';
+import { Users, Phone, RefreshCw, FileText, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import SettingsPDFControls from './SettingsPDFControls';
 
-const PRESET_THEMES = [
-  {
-    id: 'gold',
-    name: 'Premium Gold-Dark (Default)',
-    desc: 'The original premium BGMI Store aesthetic',
-    colors: {
-      gold: '#FFD700',
-      goldDim: 'rgba(255, 215, 0, 0.12)',
-      goldBorder: 'rgba(255, 215, 0, 0.2)',
-      orange: '#FF6B35',
-      orangeDim: 'rgba(255, 107, 53, 0.1)',
-      bg: '#080A0F',
-      bg2: '#0E1118',
-      bg3: '#131824',
-      card: '#111520',
-      borderGold: 'rgba(255, 215, 0, 0.18)'
-    }
-  },
-  {
-    id: 'cyberpunk',
-    name: 'Sleek Cyberpunk',
-    desc: 'Neon Cyberpunk interface with magenta accents',
-    colors: {
-      gold: '#00FFFF',
-      goldDim: 'rgba(0, 255, 255, 0.12)',
-      goldBorder: 'rgba(0, 255, 255, 0.2)',
-      orange: '#FF00FF',
-      orangeDim: 'rgba(255, 0, 255, 0.1)',
-      bg: '#0A0512',
-      bg2: '#140B24',
-      bg3: '#1F1135',
-      card: '#1B0F2E',
-      borderGold: 'rgba(0, 255, 255, 0.18)'
-    }
-  },
-  {
-    id: 'ocean',
-    name: 'Deep Ocean',
-    desc: 'Muted marine shades with sky blue highlights',
-    colors: {
-      gold: '#38BDF8',
-      goldDim: 'rgba(56, 189, 248, 0.12)',
-      goldBorder: 'rgba(56, 189, 248, 0.2)',
-      orange: '#0284C7',
-      orangeDim: 'rgba(2, 132, 199, 0.1)',
-      bg: '#030712',
-      bg2: '#0F172A',
-      bg3: '#1E293B',
-      card: '#151E31',
-      borderGold: 'rgba(56, 189, 248, 0.18)'
-    }
-  },
-  {
-    id: 'emerald',
-    name: 'Emerald Forest',
-    desc: 'Vibrant digital emerald and dark moss gradients',
-    colors: {
-      gold: '#10B981',
-      goldDim: 'rgba(16, 185, 129, 0.12)',
-      goldBorder: 'rgba(16, 185, 129, 0.2)',
-      orange: '#047857',
-      orangeDim: 'rgba(4, 120, 87, 0.1)',
-      bg: '#022C22',
-      bg2: '#064E3B',
-      bg3: '#0F766E',
-      card: '#0A4335',
-      borderGold: 'rgba(16, 185, 129, 0.18)'
-    }
-  }
-];
-
 export default function SettingsView() {
-  const [activeTheme, setActiveTheme] = useState(() => localStorage.getItem('mbs_theme') || 'gold');
-  const [whatsappSupport, setWhatsappSupport] = useState(() => localStorage.getItem('mbs_whatsapp') || '+91 90253 91516');
-  const [rolePermissions, setRolePermissions] = useState({
-    owner: { create: true, delete: true, viewProfit: true },
-    seller: { create: true, delete: false, viewProfit: false },
-    loader: { create: false, delete: false, viewProfit: false }
+  const [whatsappSupport, setWhatsappSupport] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('mbs_whatsapp') || '+91 90253 91516';
+    }
+    return '+91 90253 91516';
   });
 
-  // Apply theme dynamically to index.css :root variables
-  const applyTheme = (themeId) => {
-    const theme = PRESET_THEMES.find(t => t.id === themeId);
-    if (!theme) return;
-    
-    const root = document.documentElement;
-    Object.entries(theme.colors).forEach(([key, val]) => {
-      // Map JS camelCase variables to CSS variables with color- prefix
-      const cssKey = `--color-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
-      root.style.setProperty(cssKey, val);
-    });
-
-    setActiveTheme(themeId);
-    localStorage.setItem('mbs_theme', themeId);
-    toast.success(`Applied ${theme.name}!`);
-  };
+  const [rolePermissions, setRolePermissions] = useState({
+    super_admin: { create: true, edit: true, delete: true, viewProfit: true },
+    store_admin: { create: true, edit: true, delete: false, viewProfit: true },
+    transaction_manager: { create: true, edit: false, delete: false, viewProfit: false }
+  });
 
   const handleSaveSupport = () => {
-    localStorage.setItem('mbs_whatsapp', whatsappSupport);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('mbs_whatsapp', whatsappSupport);
+    }
     toast.success('WhatsApp Support Contact updated successfully');
   };
 
   const handleClearCache = () => {
-    localStorage.removeItem('cached_transactions');
-    localStorage.removeItem('cached_transactions_time');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('cached_transactions');
+      localStorage.removeItem('cached_transactions_time');
+    }
     toast.success('Local Storage caching cleared successfully!');
   };
 
@@ -122,116 +42,102 @@ export default function SettingsView() {
         [perm]: !prev[role][perm]
       }
     }));
-    toast.success(`Permission updated for ${role}`);
+    toast.success(`Permission updated for ${role.replace('_', ' ')}`);
+  };
+
+  const ROLES = [
+    { id: 'super_admin', label: 'Super Admin', desc: 'Full administrative and destructive access. Can oversee all store operations.' },
+    { id: 'store_admin', label: 'Store Admin', desc: 'Can manage transactions and view financials, but cannot delete records.' },
+    { id: 'transaction_manager', label: 'Transaction Manager', desc: 'Responsible for entering day-to-day deals without access to profit margins.' }
+  ];
+
+  const PERMISSION_LABELS = {
+    create: 'Create Transactions',
+    edit: 'Edit Transactions',
+    delete: 'Delete Transactions',
+    viewProfit: 'View Financials & Profits'
   };
 
   return (
-    <div className="space-y-6">
-      {/* Theme Picker */}
-      <div className="card" style={{ border: '1px solid var(--color-border-gold)' }}>
-        <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '18px', color: '#eaeaea', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Palette size={18} style={{ color: 'var(--color-gold)' }} /> Premium UI Themes
-        </h3>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
-          {PRESET_THEMES.map(theme => (
-            <div
-              key={theme.id}
-              onClick={() => applyTheme(theme.id)}
-              style={{
-                background: activeTheme === theme.id ? 'var(--color-gold-dim)' : 'var(--color-bg)',
-                border: activeTheme === theme.id ? '2px solid var(--color-gold)' : '1px solid var(--color-border)',
-                padding: '16px',
-                borderRadius: '10px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                position: 'relative'
-              }}
-            >
-              {activeTheme === theme.id && (
-                <CheckCircle2 size={16} style={{ position: 'absolute', top: '12px', right: '12px', color: 'var(--color-gold)' }} />
-              )}
-              <h4 style={{ fontWeight: 700, fontSize: '14px', color: '#fff' }}>{theme.name}</h4>
-              <p style={{ fontSize: '11px', color: 'var(--color-muted)', marginTop: '4px' }}>{theme.desc}</p>
-              
-              {/* Color dots preview */}
-              <div style={{ display: 'flex', gap: '6px', marginTop: '12px' }}>
-                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: theme.colors.gold }} />
-                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: theme.colors.orange }} />
-                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: theme.colors.bg }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
+    <div className="space-y-8 animate-fade-in">
+      
       {/* Role and Permissions Control */}
-      <div className="card" style={{ border: '1px solid var(--color-border)' }}>
-        <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '18px', color: '#eaeaea', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Users size={18} style={{ color: 'var(--color-orange)' }} /> Access Control & User Roles
+      <div className="glass-panel p-6 rounded-2xl border border-white/5 bg-white/[0.01] backdrop-blur-md relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+        <h3 className="text-base font-bold text-white mb-6 flex items-center gap-2 font-h uppercase tracking-wider relative z-10">
+          <Users size={16} className="text-amber-500" /> Role & Permission Matrix
         </h3>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-          {[
-            { id: 'owner', label: 'Owner / Administrator', desc: 'Full administrative access' },
-            { id: 'seller', label: 'Authorized Seller', desc: 'Can enter sales details' },
-            { id: 'loader', label: 'UC Loader Profile', desc: 'Can only fulfill active UC packs' }
-          ].map(role => (
-            <div key={role.id} style={{ background: 'var(--color-bg)', padding: '16px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
-              <strong style={{ display: 'block', fontSize: '14px', color: '#fff' }}>{role.label}</strong>
-              <span style={{ display: 'block', fontSize: '11px', color: 'var(--color-muted)', marginBottom: '12px' }}>{role.desc}</span>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
+          {ROLES.map(role => (
+            <div key={role.id} className="bg-white/[0.02] p-6 rounded-xl border border-white/5 hover:border-white/10 transition-colors duration-300 shadow-inner group">
+              <strong className="block text-base text-white font-bold tracking-wide font-h uppercase">{role.label}</strong>
+              <span className="block text-[11.5px] text-muted mb-6 mt-1.5 leading-relaxed">{role.desc}</span>
               
               {/* Permissions list toggles */}
-              <div style={{ display: 'grid', gap: '8px' }}>
-                {Object.entries(rolePermissions[role.id]).map(([perm, val]) => (
-                  <div key={perm} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
-                    <span style={{ textTransform: 'capitalize', color: 'var(--color-muted)' }}>{perm.replace(/([A-Z])/g, ' $1')}</span>
-                    <button
-                      onClick={() => togglePermission(role.id, perm)}
-                      className={`status ${val ? 'status-available' : 'status-sold'}`}
-                      style={{ fontSize: '10px', cursor: 'pointer', padding: '2px 10px' }}
-                    >
-                      {val ? 'Enabled' : 'Disabled'}
-                    </button>
-                  </div>
-                ))}
+              <div className="space-y-4">
+                {Object.keys(PERMISSION_LABELS).map((perm) => {
+                  const isEnabled = rolePermissions[role.id][perm];
+                  return (
+                    <div key={perm} className="flex justify-between items-center group/item">
+                      <span className="text-xs text-muted font-medium transition-colors group-hover/item:text-white/80">
+                        {PERMISSION_LABELS[perm]}
+                      </span>
+                      <button
+                        onClick={() => togglePermission(role.id, perm)}
+                        className={`w-11 h-6 rounded-full relative transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#080a0f] focus:ring-yellow-500/50 ${
+                          isEnabled ? 'bg-yellow-500/20 border border-yellow-500/30' : 'bg-white/5 border border-white/10'
+                        }`}
+                      >
+                        <span 
+                          className={`absolute top-[3px] left-[3px] w-[16px] h-[16px] rounded-full transition-transform duration-300 ${
+                            isEnabled ? 'translate-x-[20px] bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.5)]' : 'translate-x-0 bg-white/40'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Default Support configuration & Cache Clear */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Support configuration */}
-        <div className="card" style={{ border: '1px solid var(--color-border)' }}>
-          <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '16px', color: '#eaeaea', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Phone size={16} style={{ color: 'var(--color-gold)' }} /> Default Customer Support
+        <div className="glass-panel p-6 rounded-2xl border border-white/5 bg-white/[0.01] backdrop-blur-md relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/5 rounded-full blur-3xl pointer-events-none" />
+          <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2 font-h uppercase tracking-wider relative z-10">
+            <Phone size={16} className="text-yellow-500" /> Default Customer Support
           </h3>
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <p className="text-[11.5px] text-muted mb-5 relative z-10">
+            This contact number is utilized as the default support line across generated receipts and the main portal header.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 relative z-10">
             <input
               value={whatsappSupport}
               onChange={e => setWhatsappSupport(e.target.value)}
-              className="input-field"
-              style={{ flex: 1, height: '38px' }}
+              className="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-white/20 focus:border-yellow-500/40 focus:ring-0 transition-all duration-200 outline-none font-mono"
               placeholder="+91 90253 91516"
             />
-            <button onClick={handleSaveSupport} className="btn btn-gold h-[38px] px-4 text-xs">
+            <button onClick={handleSaveSupport} className="btn btn-gold px-6 py-2.5 text-xs font-bold rounded-xl shadow-lg shadow-yellow-500/20 hover:shadow-yellow-500/40 transition-all duration-300 whitespace-nowrap">
               Save Contact
             </button>
           </div>
         </div>
 
         {/* Caching panel */}
-        <div className="card" style={{ border: '1px solid var(--color-border)' }}>
-          <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '16px', color: '#eaeaea', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <RefreshCw size={16} style={{ color: 'var(--color-orange)' }} /> Data Refresh & Cache
+        <div className="glass-panel p-6 rounded-2xl border border-white/5 bg-white/[0.01] backdrop-blur-md relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full blur-3xl pointer-events-none transition-all duration-500 group-hover:bg-red-500/10" />
+          <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2 font-h uppercase tracking-wider relative z-10">
+            <RefreshCw size={16} className="text-red-400" /> Clear Local Data Cache
           </h3>
-          <p style={{ fontSize: '11px', color: 'var(--color-muted)', marginBottom: '16px' }}>
-            Clear local device cache for transactions sheets to pull live records immediately.
+          <p className="text-[11.5px] text-muted leading-relaxed mb-5 relative z-10">
+            Erase local device storage for the transaction matrix. Utilize this safely to force a completely fresh pull from the backend to resolve desynchronization.
           </p>
-          <button onClick={handleClearCache} className="btn btn-outline flex items-center gap-1.5 h-[38px] px-4 text-xs">
-            <RefreshCw size={12} /> Force Clear Local Cache
+          <button onClick={handleClearCache} className="w-full sm:w-auto px-6 py-2.5 flex items-center justify-center gap-2 text-xs font-bold rounded-xl border border-red-500/30 text-red-400 bg-red-500/10 hover:bg-red-500/20 hover:border-red-500/50 hover:text-red-300 transition-all duration-300 relative z-10">
+            <RefreshCw size={14} /> Force Clear Local Cache
           </button>
         </div>
       </div>

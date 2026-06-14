@@ -99,172 +99,130 @@ export default function GuaranteesList() {
     );
   }, [activeTab, activeGuarantees, voidGuarantees, searchQuery]);
 
+  const copyPhoneNumber = (phone) => {
+    if (!phone) return;
+    navigator.clipboard.writeText(phone);
+    toast.success('Phone number copied to clipboard');
+  };
+
   return (
     <div className="space-y-6">
       {/* Search and Tabs */}
-      <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+      <div className="glass-panel p-6 rounded-xl border border-white/5 bg-white/[0.01] backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3 flex-wrap">
           {/* Active/Void tabs */}
-          <div style={{ display: 'flex', background: 'var(--color-bg)', padding: '4px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+          <div className="flex bg-neutral-900/50 p-1 rounded-lg border border-white/5">
             <button
               onClick={() => setActiveTab('active')}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '6px',
-                fontSize: '13px',
-                fontWeight: 600,
-                color: activeTab === 'active' ? '#eaeaea' : 'var(--color-muted)',
-                background: activeTab === 'active' ? 'var(--color-bg2)' : 'transparent',
-                border: activeTab === 'active' ? '1px solid var(--color-border-gold)' : '1px solid transparent',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 ${activeTab === 'active' ? 'bg-white/5 text-white shadow-sm border border-white/10' : 'text-muted hover:text-white'}`}
             >
-              <ShieldCheck size={14} style={{ color: activeTab === 'active' ? '#34d399' : 'var(--color-muted)' }} />
+              <ShieldCheck size={13} className={activeTab === 'active' ? 'text-[#10b981]' : 'text-muted'} />
               Active Guarantees ({activeGuarantees.length})
             </button>
             <button
               onClick={() => setActiveTab('void')}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '6px',
-                fontSize: '13px',
-                fontWeight: 600,
-                color: activeTab === 'void' ? '#eaeaea' : 'var(--color-muted)',
-                background: activeTab === 'void' ? 'var(--color-bg2)' : 'transparent',
-                border: activeTab === 'void' ? '1px solid var(--color-border-gold)' : '1px solid transparent',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 ${activeTab === 'void' ? 'bg-white/5 text-white shadow-sm border border-white/10' : 'text-muted hover:text-white'}`}
             >
-              <ShieldAlert size={14} style={{ color: activeTab === 'void' ? 'var(--color-red)' : 'var(--color-muted)' }} />
+              <ShieldAlert size={13} className={activeTab === 'void' ? 'text-red-500' : 'text-muted'} />
               Void / Expired ({voidGuarantees.length})
             </button>
           </div>
+        </div>
 
-          <div style={{ position: 'relative', flex: 1, minWidth: '240px' }}>
-            <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-muted)' }} />
-            <input
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="input"
-              style={{ paddingLeft: '36px', height: '38px' }}
-              placeholder="Search by Tx ID, Phone, or Plan..."
-            />
-          </div>
+        <div className="relative w-full md:max-w-xs">
+          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
+          <input
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="input w-full pl-9 pr-4 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white placeholder-white/20 focus:border-gold/40 focus:ring-0 transition-all duration-200"
+            placeholder="Search Tx, Phone, or Plan..."
+          />
         </div>
       </div>
 
       {/* Guarantees List Display */}
       {isLoading ? (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--color-muted)' }}>
-          <div className="animate-spin" style={{ display: 'inline-block', width: '24px', height: '24px', border: '2px solid var(--color-gold)', borderTopColor: 'transparent', borderRadius: '50%', marginBottom: '12px' }} />
-          <p>Analyzing active guarantees...</p>
+        <div className="text-center py-16 text-muted">
+          <div className="animate-spin inline-block w-6 h-6 border-2 border-gold border-t-transparent rounded-full mb-3" />
+          <p className="text-xs font-semibold tracking-wide uppercase">Analyzing active guarantees...</p>
         </div>
       ) : displayedGuarantees.length === 0 ? (
-        <div className="card" style={{ textAlign: 'center', padding: '60px 0', color: 'var(--color-muted)' }}>
-          <Shield size={48} style={{ margin: '0 auto 16px', opacity: 0.2 }} />
-          No guarantees found under this category.
+        <div className="glass-panel p-16 rounded-xl border border-white/5 bg-white/[0.01] text-center text-muted">
+          <Shield size={40} className="mx-auto mb-4 opacity-20" />
+          <p className="text-sm">No guarantees found under this category.</p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '20px' }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {displayedGuarantees.map((guarantee, idx) => (
             <motion.div
               key={guarantee.transaction_id}
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: idx * 0.02 }}
-              className="card"
-              style={{
-                border: guarantee.isVoid ? '1px solid var(--color-border)' : '1px solid var(--color-border-gold)',
-                background: 'var(--color-bg2)',
-                position: 'relative',
-                overflow: 'hidden'
-              }}
+              className="glass-panel p-5 rounded-xl border border-white/5 bg-white/[0.01] backdrop-blur-sm relative overflow-hidden transition-all duration-300 hover:border-gold/20"
             >
               {/* Vertical side banner accent */}
-              <div style={{
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                bottom: 0,
-                width: '4px',
-                background: guarantee.isVoid ? 'var(--color-border)' : 'linear-gradient(180deg, #34d399, #10b981)'
-              }} />
+              <div className={`absolute left-0 top-0 bottom-0 w-1 ${guarantee.isVoid ? 'bg-white/10' : 'bg-gradient-to-b from-[#10b981] to-[#047857]'}`} />
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingLeft: '8px' }}>
+              <div className="flex justify-between items-start pl-2">
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '11px', color: 'var(--color-gold)', fontWeight: 700, fontFamily: 'monospace' }}>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[10px] text-gold font-bold">
                       {guarantee.transaction_id}
                     </span>
-                    <span style={{ fontSize: '11px', color: 'var(--color-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <Calendar size={11} /> {new Date(guarantee.transaction_date).toLocaleDateString()}
+                    <span className="text-[10px] text-muted flex items-center gap-1">
+                      <Calendar size={10} /> {new Date(guarantee.transaction_date).toLocaleDateString()}
                     </span>
                   </div>
-                  <h3 style={{ fontSize: '16px', fontWeight: 800, marginTop: '8px', color: '#eaeaea' }}>
+                  <h3 className="text-sm font-bold text-white mt-2 font-h">
                     {guarantee.plan}
                   </h3>
                 </div>
 
-                <div className={`status ${guarantee.isVoid ? 'status-sold' : 'status-available'}`} style={{ fontSize: '10px' }}>
-                  {guarantee.isVoid ? 'Void / Expired' : 'Active'}
-                </div>
+                <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded ${guarantee.isVoid ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-[#10b981]/10 text-[#10b981] border border-[#10b981]/20'}`}>
+                  {guarantee.isVoid ? 'Void' : 'Active'}
+                </span>
               </div>
 
               {/* Expiration stats / countdown */}
               {!guarantee.isVoid && (
-                <div style={{ marginTop: '16px', paddingLeft: '8px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '6px' }}>
-                    <span style={{ color: 'var(--color-muted)' }}>Time Remaining:</span>
-                    <span style={{ fontWeight: 700, color: '#34d399' }}>{guarantee.daysLeft} days left</span>
+                <div className="mt-4 pl-2">
+                  <div className="flex justify-between text-[11px] mb-1.5">
+                    <span className="text-muted">Guarantee Time Remaining:</span>
+                    <span className="font-bold text-[#10b981]">{guarantee.daysLeft} days left</span>
                   </div>
                   {/* Progress Bar */}
-                  <div style={{ width: '100%', height: '6px', background: 'var(--color-bg)', borderRadius: '3px', overflow: 'hidden' }}>
-                    <div style={{
-                      width: `${Math.min(100, (guarantee.daysLeft / 180) * 100)}%`,
-                      height: '100%',
-                      background: 'linear-gradient(90deg, #10b981, #34d399)',
-                      borderRadius: '3px'
-                    }} />
+                  <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-[#047857] to-[#10b981] rounded-full" 
+                      style={{ width: `${Math.min(100, (guarantee.daysLeft / 180) * 100)}%` }}
+                    />
                   </div>
                 </div>
               )}
 
               {/* Login Info Block */}
-              <div style={{
-                marginTop: '16px',
-                padding: '12px',
-                background: 'var(--color-bg)',
-                borderRadius: '8px',
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '12px',
-                fontSize: '12px',
-                border: '1px solid var(--color-border)',
-                marginLeft: '8px'
-              }}>
+              <div className="mt-4 p-3 bg-white/[0.02] rounded-lg border border-white/5 grid grid-cols-2 gap-3 text-xs pl-2.5">
                 <div>
-                  <span style={{ color: 'var(--color-muted)', display: 'block', fontSize: '10px', textTransform: 'uppercase' }}>Primary Login</span>
-                  <span style={{ fontWeight: 600, color: '#fff' }}>{guarantee.primaryLogin || 'N/A'}</span>
+                  <span className="text-[9px] text-muted block uppercase tracking-wider mb-0.5">Primary Login</span>
+                  <span className="font-bold text-white font-mono">{guarantee.primaryLogin || 'N/A'}</span>
                 </div>
                 <div>
-                  <span style={{ color: 'var(--color-muted)', display: 'block', fontSize: '10px', textTransform: 'uppercase' }}>Secondary Login</span>
-                  <span style={{ fontWeight: 600, color: '#fff' }}>{guarantee.secondaryLogin || 'N/A'}</span>
+                  <span className="text-[9px] text-muted block uppercase tracking-wider mb-0.5">Secondary Login</span>
+                  <span className="font-bold text-white font-mono">{guarantee.secondaryLogin || 'N/A'}</span>
                 </div>
               </div>
 
               {/* Footer contact */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', fontSize: '12px', paddingLeft: '8px' }}>
-                <span style={{ color: 'var(--color-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Phone size={12} /> {guarantee.buyer_phone || 'No Phone'}
-                </span>
-                <span style={{ fontSize: '11px', color: 'var(--color-muted)' }}>
-                  Void Date: {guarantee.primaryVoidDate ? new Date(guarantee.primaryVoidDate).toLocaleDateString() : 'N/A'}
+              <div className="flex justify-between items-center mt-4 text-[11px] pl-2">
+                <button 
+                  onClick={() => copyPhoneNumber(guarantee.buyer_phone)}
+                  className="text-muted hover:text-gold transition-colors duration-150 flex items-center gap-1 font-mono"
+                >
+                  <Phone size={10} /> {guarantee.buyer_phone || 'No Phone'}
+                </button>
+                <span className="text-muted text-[10px]">
+                  Expires: {guarantee.primaryVoidDate ? new Date(guarantee.primaryVoidDate).toLocaleDateString() : 'N/A'}
                 </span>
               </div>
             </motion.div>

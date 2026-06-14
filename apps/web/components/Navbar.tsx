@@ -26,6 +26,22 @@ const navLinks = [
     ],
   },
   {
+    label: "Company",
+    subLinks: [
+      { to: "/about", label: "About Us" },
+      { to: "/why-trust-us", label: "Why Trust Us" },
+      { to: "/success-stories", label: "Success Stories" },
+      { to: "/locations", label: "Our Locations" },
+    ],
+  },
+  {
+    label: "Guides",
+    subLinks: [
+      { to: "/blog", label: "Blog / Guides" },
+      { to: "/guides/valuation", label: "Account Valuation" },
+    ],
+  },
+  {
     label: "Reviews",
     subLinks: [
       { to: "/reviews", label: "Buyer Reviews" },
@@ -34,7 +50,6 @@ const navLinks = [
     ],
   },
   { to: "/connectwithus", label: "Connect" },
-  { to: "/terms", label: "Terms & Conditions" },
 ];
 
 

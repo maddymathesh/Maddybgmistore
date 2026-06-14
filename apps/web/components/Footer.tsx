@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { 
   ShoppingCart, Banknote, KeyRound, Star, Heart, Eye, 
-  Scale, Shield, RotateCcw, HelpCircle 
+  Scale, Shield, RotateCcw, HelpCircle, MapPin 
 } from "lucide-react";
 import { getOrIncrementViews } from "../app/actions";
 
@@ -186,6 +186,31 @@ export default function Footer() {
               { to: "/terms", label: "Terms & Conditions", icon: <Scale size={13} /> },
               { to: "/privacy", label: "Privacy Policy", icon: <Shield size={13} /> },
               { to: "/faq", label: "FAQs", icon: <HelpCircle size={13} /> },
+            ].map(l => (
+              <Link 
+                key={l.to} 
+                href={l.to} 
+                style={{ color: "var(--color-muted)", fontSize: "13px", textDecoration: "none", transition: "color .2s", display: "flex", alignItems: "center", gap: "7px" }}
+                onMouseEnter={e => e.currentTarget.style.color = "var(--foreground)"}
+                onMouseLeave={e => e.currentTarget.style.color = "var(--color-muted)"}
+              >
+                <span style={{ color: "var(--color-gold)", display: "flex", alignItems: "center" }}>{l.icon}</span>
+                {l.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Company & Trust */}
+        <div>
+          <div style={{ fontFamily: "var(--font-h)", fontSize: "12px", fontWeight: 700, color: "var(--color-gold)", letterSpacing: "2px", textTransform: "uppercase", marginBottom: "16px" }}>Company &amp; Trust</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            {[
+              { to: "/about", label: "About Us", icon: <ShoppingCart size={13} /> }, // placeholder icon or same, wait, let's use Shield or Star
+              { to: "/why-trust-us", label: "Why Trust Us", icon: <Shield size={13} /> },
+              { to: "/success-stories", label: "Success Stories", icon: <Star size={13} /> },
+              { to: "/locations", label: "Our Locations", icon: <MapPin size={13} /> },
+              { to: "/guides/valuation", label: "Account Valuation", icon: <HelpCircle size={13} /> },
             ].map(l => (
               <Link 
                 key={l.to} 

@@ -13,6 +13,7 @@ import LightRays from "../components/LightRays";
 import InitialPageLoader from "../components/InitialPageLoader";
 import EliteServices from "../components/EliteServices";
 import { getOrIncrementViews } from "./actions";
+import { FAQSchema } from "../components/SEO";
 
 // ── Social channels data ───────────────────────────────────────────────────────
 const connectChannels = [
@@ -271,6 +272,7 @@ function launchGoldenConfetti() {
 export default function HomePage() {
   const [showIntro, setShowIntro] = useState(false);
   const [celebrationUser, setCelebrationUser] = useState<number | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   useEffect(() => {
     const alreadySeen = sessionStorage.getItem("mbs_intro_complete");
@@ -527,18 +529,69 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ════════════════════ 6. WHY US ════════════════════ */}
-      <section className="section-padded section-alt">
-        <div className="section-label">WHY US</div>
-        <h2 className="section-title">Built on Trust</h2>
-        <p className="section-desc">Seven years, 2000+ happy buyers, and zero compromise on safety.</p>
+      {/* ════════════════════ 6.5. FAQs SECTION ════════════════════ */}
+      <section className="faq-section">
+        <FAQSchema
+          items={[
+            {
+              question: "Is it safe to buy a BGMI account from Maddy BGMI Store?",
+              answer: "Yes, 100%. Every BGMI account listed on our marketplace undergoes strict manual security audits. We verify and secure all links, provide an Unlink Guarantee, and support safe transaction methods (like Face-to-Face for high-value deals) to prevent recovery scams. Serving players since 2019.",
+            },
+            {
+              question: "Who is the most trusted BGMI account seller in Tamil Nadu?",
+              answer: "Maddy BGMI Store is South India's #1 trusted marketplace. We serve players across Tamil Nadu (Chennai, Coimbatore, Madurai, Trichy, Salem, Erode, Tirunelveli) and India, personalizing account sourcing based on your exact budget and skin preferences.",
+            },
+            {
+              question: "How can I buy or sell a BGMI account securely?",
+              answer: "To buy, browse our verified catalog on the Ready Stocks page and contact Maddy directly via WhatsApp or Telegram to close the transaction. To sell, navigate to our Sell page, enter your account details, and receive a fair market valuation instantly.",
+            },
+            {
+              question: "How do I purchase BGMI UC safely at cheap rates?",
+              answer: "We offer instant UC purchases via safe in-game gifting and secure login delivery. All packages are processed at cheap, competitive market prices directly into your character ID.",
+            },
+            {
+              question: "Can I exchange my old BGMI account for a premium one?",
+              answer: "Yes. We offer a secure exchange/trade program. We assess your account's market value and allow upgrades or downgrades with safe dual-handover escrow deals.",
+            },
+          ]}
+        />
+        <div className="text-center">
+          <div className="section-label">FAQS & GUIDES</div>
+          <h2 className="section-title">Frequently Asked Questions</h2>
+          <p className="section-desc">Got questions about buying, selling, or exchanging BGMI accounts? Find answers here.</p>
+        </div>
 
-        <div className="trust-grid">
-          {trustFeatures.map((f) => (
-            <div key={f.title} className="trust-card">
-              <div className="trust-card-icon">{f.icon}</div>
-              <h4 className="trust-card-title">{f.title}</h4>
-              <p className="trust-card-desc">{f.desc}</p>
+        <div className="faq-list">
+          {[
+            {
+              q: "Is it safe to buy a BGMI account from Maddy BGMI Store?",
+              a: "Yes, 100%. Every BGMI account listed on our marketplace undergoes strict manual security audits. We verify and secure all links, provide an Unlink Guarantee, and support safe transaction methods (like Face-to-Face for high-value deals) to prevent recovery scams. Serving players since 2019."
+            },
+            {
+              q: "Who is the most trusted BGMI account seller in Tamil Nadu?",
+              a: "Maddy BGMI Store is South India's #1 trusted marketplace. We serve players across Tamil Nadu (Chennai, Coimbatore, Madurai, Trichy, Salem, Erode, Tirunelveli) and India, personalizing account sourcing based on your exact budget and skin preferences."
+            },
+            {
+              q: "How can I buy or sell a BGMI account securely?",
+              a: "To buy, browse our verified catalog on the Ready Stocks page and contact Maddy directly via WhatsApp or Telegram to close the transaction. To sell, navigate to our Sell page, enter your account details, and receive a fair market valuation instantly."
+            },
+            {
+              q: "How do I purchase BGMI UC safely at cheap rates?",
+              a: "We offer instant UC purchases via safe in-game gifting and secure login delivery. All packages are processed at cheap, competitive market prices directly into your character ID."
+            },
+            {
+              q: "Can I exchange my old BGMI account for a premium one?",
+              a: "Yes. We offer a secure exchange/trade program. We assess your account's market value and allow upgrades or downgrades with safe dual-handover escrow deals."
+            }
+          ].map((item, idx) => (
+            <div key={idx} className={`faq-item ${openFaq === idx ? "active" : ""}`}>
+              <button className="faq-question" onClick={() => setOpenFaq(openFaq === idx ? null : idx)}>
+                <span>{item.q}</span>
+                <ChevronDown size={18} className="faq-icon" />
+              </button>
+              <div className="faq-answer">
+                <p>{item.a}</p>
+              </div>
             </div>
           ))}
         </div>
@@ -934,6 +987,66 @@ export default function HomePage() {
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(30px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── FAQs Section ── */
+        .faq-section {
+          padding: 80px 5%;
+          max-width: 900px;
+          margin: 0 auto;
+          width: 100%;
+        }
+        .faq-list {
+          margin-top: 40px;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+        .faq-item {
+          background: #0d1117;
+          border: 1px solid rgba(255,215,0,0.08);
+          border-radius: 12px;
+          overflow: hidden;
+          transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .faq-item:hover, .faq-item.active {
+          border-color: rgba(255,215,0,0.25);
+          box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .faq-question {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 22px 24px;
+          background: none;
+          border: none;
+          color: #fff;
+          font-family: var(--font-h);
+          font-weight: 700;
+          font-size: 16px;
+          text-align: left;
+          cursor: pointer;
+        }
+        .faq-answer {
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+          color: var(--color-muted);
+          font-size: 14px;
+          line-height: 1.7;
+          padding: 0 24px;
+        }
+        .faq-item.active .faq-answer {
+          max-height: 160px;
+          padding: 0 24px 22px;
+        }
+        .faq-icon {
+          color: var(--color-gold);
+          transition: transform 0.2s;
+        }
+        .faq-item.active .faq-icon {
+          transform: rotate(180deg);
         }
       `}</style>
     </>

@@ -17,7 +17,7 @@ async function verifyAdminAccess() {
   const claims = session.sessionClaims as Claims | undefined;
   const userRole = claims?.publicMetadata?.role || claims?.metadata?.role || "USER";
   
-  const validAdminRoles = ["SUPER_ADMIN", "ADMIN", "TRANSACTION_MANAGER", "CONTENT_MANAGER"];
+  const validAdminRoles = ["SUPER_ADMIN", "ADMIN", "TRANSACTION_MANAGER"];
   
   if (!userId) {
     throw new Error("Access Denied: Administrative privileges required. (No user ID)");
@@ -617,7 +617,7 @@ export async function getActiveAdmins() {
     const adminUsers = users.data.filter(u => {
       const role = u.publicMetadata?.role as string | undefined;
       const email = u.emailAddresses[0]?.emailAddress;
-      return (role === "SUPER_ADMIN" || role === "ADMIN" || role === "TRANSACTION_MANAGER" || role === "CONTENT_MANAGER") || 
+      return (role === "SUPER_ADMIN" || role === "ADMIN" || role === "TRANSACTION_MANAGER") || 
              email === "contact@maddybgmistore.in" || email === "maddybgmistoreog@gmail.com" || email === "r.mateshwaran.io@gmail.com";
     }).map(u => ({
       id: u.id,

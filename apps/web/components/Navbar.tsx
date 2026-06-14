@@ -101,7 +101,7 @@ export default function Navbar() {
     user?.primaryEmailAddress?.emailAddress === "contact@maddybgmistore.in" ||
     user?.primaryEmailAddress?.emailAddress === "maddybgmistoreog@gmail.com" ||
     user?.primaryEmailAddress?.emailAddress === "r.mateshwaran.io@gmail.com";
-  const showAdminPanel = isPermanentAdmin || ["SUPER_ADMIN", "ADMIN", "CONTENT_MANAGER"].includes(userRole);
+  const showAdminPanel = isPermanentAdmin || ["SUPER_ADMIN", "ADMIN"].includes(userRole);
   const showTransactionsPanel = isPermanentAdmin || ["SUPER_ADMIN", "ADMIN", "TRANSACTION_MANAGER"].includes(userRole);
   const isAdmin = showAdminPanel || showTransactionsPanel;
   const displayRole = isPermanentAdmin ? "SUPER ADMIN" : userRole.replace("_", " ");
@@ -183,12 +183,20 @@ export default function Navbar() {
                 Manage <ChevronDown size={14} className="ml-1 opacity-60 transition-transform group-hover/adminNav:rotate-180" />
               </div>
               <div className="absolute top-[calc(100%+4px)] right-0 hidden group-hover/adminNav:block bg-[#111520]/80 backdrop-blur-2xl border border-white/10 rounded-[18px] p-2 min-w-[180px] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.7)] animate-fade-in before:content-[''] before:absolute before:-top-4 before:left-0 before:right-0 before:h-4 z-50">
+                <a
+                  href={process.env.NODE_ENV === "development" ? "http://localhost:3001" : "https://admin.maddybgmistore.in"}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block px-4 py-2.5 text-[14px] font-sans font-medium text-gray-300 hover:text-white hover:bg-white/10 rounded-[10px] transition-all"
+                >
+                  Control Center
+                </a>
                 {showAdminPanel && (
                   <a
-                    href={process.env.NODE_ENV === "development" ? "http://localhost:3001" : "https://admin.maddybgmistore.in"}
+                    href={process.env.NODE_ENV === "development" ? "http://localhost:3001/panel" : "https://admin.maddybgmistore.in/panel"}
                     target="_blank"
                     rel="noreferrer"
-                    className="block px-4 py-2.5 text-[14px] font-sans font-medium text-gray-300 hover:text-white hover:bg-white/10 rounded-[10px] transition-all"
+                    className="block px-4 py-2.5 text-[14px] font-sans font-medium text-gray-300 hover:text-white hover:bg-white/10 rounded-[10px] transition-all mt-1"
                   >
                     Admin Panel
                   </a>
@@ -198,7 +206,7 @@ export default function Navbar() {
                     href={process.env.NODE_ENV === "development" ? "http://localhost:3001/transactions" : "https://admin.maddybgmistore.in/transactions"}
                     target="_blank"
                     rel="noreferrer"
-                    className={`block px-4 py-2.5 text-[14px] font-sans font-medium text-gray-300 hover:text-white hover:bg-white/10 rounded-[10px] transition-all ${showAdminPanel ? "mt-1" : ""}`}
+                    className="block px-4 py-2.5 text-[14px] font-sans font-medium text-gray-300 hover:text-white hover:bg-white/10 rounded-[10px] transition-all mt-1"
                   >
                     Transactions Panel
                   </a>
@@ -309,9 +317,17 @@ export default function Navbar() {
                 </button>
                 {mobileExpanded["Manage"] && (
                   <div className="pl-4 flex flex-col gap-1.5 mt-1">
+                    <a
+                      href={process.env.NODE_ENV === "development" ? "http://localhost:3001" : "https://admin.maddybgmistore.in"}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-gray-400 hover:text-white text-[14px] font-sans font-medium py-2 px-3 rounded-lg hover:bg-white/5 block"
+                    >
+                      Control Center
+                    </a>
                     {showAdminPanel && (
                       <a
-                        href={process.env.NODE_ENV === "development" ? "http://localhost:3001" : "https://admin.maddybgmistore.in"}
+                        href={process.env.NODE_ENV === "development" ? "http://localhost:3001/panel" : "https://admin.maddybgmistore.in/panel"}
                         target="_blank"
                         rel="noreferrer"
                         className="text-gray-400 hover:text-white text-[14px] font-sans font-medium py-2 px-3 rounded-lg hover:bg-white/5 block"

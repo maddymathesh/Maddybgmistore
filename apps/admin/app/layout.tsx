@@ -4,7 +4,7 @@ import { Toaster } from "sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Maddy BGMI Store - Admin Dashboard",
+  title: "Maddy BGMI Store - Admin Portal",
   description: "Management portal for Maddy BGMI Store catalog, reviews, payment links, and transactions.",
 };
 

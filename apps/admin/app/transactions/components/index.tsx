@@ -35,7 +35,8 @@ import {
   ShieldAlert,
   Loader2,
   LayoutDashboard,
-  Receipt
+  Receipt,
+  ArrowLeft
 } from 'lucide-react';
 
 const SIDEBAR_ITEMS = [
@@ -83,6 +84,7 @@ export default function TransactionsLayout() {
     user?.primaryEmailAddress?.emailAddress === "r.mateshwaran.io@gmail.com";
   const userRole = String((user?.publicMetadata as Record<string, unknown> | undefined)?.role || "USER");
   const isAdmin = isPermanentAdmin || ["SUPER_ADMIN", "ADMIN", "TRANSACTION_MANAGER"].includes(userRole);
+  const isStoreAdmin = isPermanentAdmin || ["SUPER_ADMIN", "ADMIN"].includes(userRole);
 
   if (!isAdmin) {
     return (
@@ -90,7 +92,7 @@ export default function TransactionsLayout() {
         <ShieldAlert size={48} style={{ color: 'var(--color-red)' }} />
         <h1 style={{ fontFamily: 'var(--font-h)', fontSize: '24px', fontWeight: 900, color: 'var(--color-red)' }}>Access Denied</h1>
         <p style={{ fontSize: '14px', color: 'var(--color-muted)', fontFamily: 'monospace' }}>You do not have administrative privileges to view this page.</p>
-        <Link href="/" className="btn btn-outline px-6 py-2.5 text-sm">← Return Home</Link>
+        <Link href="/" className="btn btn-outline px-6 py-2.5 text-sm">← Back to Control Center</Link>
       </div>
     );
   }
@@ -169,6 +171,28 @@ export default function TransactionsLayout() {
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '0 12px' }}>
+          {/* Back to Control Center */}
+          <Link
+            href="/"
+            className="admin-nav-item"
+            style={{ width: '100%', border: 'none', background: 'transparent', borderRadius: '8px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--color-gold)', textDecoration: 'none', padding: '10px 16px' }}
+          >
+            <ArrowLeft size={18} className="nav-icon" />
+            Back to Control Center
+          </Link>
+
+          {/* Admin Panel cross-navigation */}
+          {isStoreAdmin && (
+            <Link
+              href="/panel"
+              className="admin-nav-item"
+              style={{ width: '100%', border: 'none', background: 'transparent', borderRadius: '8px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#eaeaea', textDecoration: 'none', padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+            >
+              <LayoutDashboard size={18} className="nav-icon" />
+              Admin Panel
+            </Link>
+          )}
+
           {SIDEBAR_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;

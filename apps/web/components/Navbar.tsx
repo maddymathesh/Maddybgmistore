@@ -58,6 +58,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState<Record<string, boolean>>({});
   const [scrolled, setScrolled] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const pathname = usePathname();
   const { user } = useUser();
   const navRef = useRef<HTMLElement>(null);
@@ -74,6 +75,13 @@ export default function Navbar() {
   const toggleMobileOpen = () => {
     if (typeof window !== "undefined" && window.innerWidth >= 1024) return;
     setMobileOpen((prev) => !prev);
+  };
+
+  const handleTriggerClick = (label: string, e: React.MouseEvent) => {
+    const pointerType = (e.nativeEvent as PointerEvent).pointerType;
+    if (!pointerType || pointerType !== "mouse") {
+      setActiveDropdown((prev) => (prev === label ? null : label));
+    }
   };
 
   // Reset mobile menu state on window resize / orientation change to landscape/desktop
@@ -98,7 +106,26 @@ export default function Navbar() {
   useEffect(() => {
     setMobileOpen(false);
     setMobileExpanded({});
+    setActiveDropdown(null);
   }, [pathname]);
+
+  // Close desktop dropdown on outside click
+  useEffect(() => {
+    if (!activeDropdown) return;
+    const onClick = (e: Event) => {
+      const target = e.target as Node;
+      const clickedInsideNav = navRef.current && navRef.current.contains(target);
+      if (!clickedInsideNav) {
+        setActiveDropdown(null);
+      }
+    };
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("touchstart", onClick);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("touchstart", onClick);
+    };
+  }, [activeDropdown]);
 
   // Scroll detection
   useEffect(() => {
@@ -177,22 +204,58 @@ export default function Navbar() {
         {/* Desktop Links */}
         <ul className="ag-nav-desktop hidden lg:flex items-center gap-1.5 list-none m-0 p-0">
           {navLinks.map((l) => (
-            <li key={l.label || l.to} className="relative group/nav py-3">
+            <li
+              key={l.label || l.to}
+              className="relative py-3"
+              onPointerEnter={(e) => {
+                if (e.pointerType === "mouse") {
+                  setActiveDropdown(l.label);
+                }
+              }}
+              onPointerLeave={(e) => {
+                if (e.pointerType === "mouse") {
+                  setActiveDropdown(null);
+                }
+              }}
+            >
               {l.subLinks ? (
                 <>
-                  <div className={`${deskLinkStyle} group-hover/nav:text-white group-hover/nav:bg-white/5`}>
+                  <div
+                    id={`nav-dropdown-trigger-${l.label.toLowerCase().replace(/\s+/g, "-")}`}
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => handleTriggerClick(l.label, e)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setActiveDropdown((prev) => (prev === l.label ? null : l.label));
+                      }
+                    }}
+                    className={`${deskLinkStyle} ${
+                      activeDropdown === l.label ? "text-white bg-white/5" : ""
+                    }`}
+                  >
                     {l.label}
                     <ChevronDown
                       size={14}
-                      className="ml-1 opacity-60 flex-shrink-0 transition-transform group-hover/nav:rotate-180"
+                      className={`ml-1 opacity-60 flex-shrink-0 transition-transform ${
+                        activeDropdown === l.label ? "rotate-180" : ""
+                      }`}
                     />
                   </div>
                   {/* Dropdown Menu */}
-                  <div className="absolute top-[calc(100%+4px)] left-1/2 -translate-x-1/2 hidden group-hover/nav:block bg-[#111520]/80 backdrop-blur-2xl border border-white/10 rounded-[18px] p-2 min-w-[200px] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.7)] animate-fade-in before:content-[''] before:absolute before:-top-4 before:left-0 before:right-0 before:h-4 z-50">
+                  <div
+                    id={`nav-dropdown-menu-${l.label.toLowerCase().replace(/\s+/g, "-")}`}
+                    className={`absolute top-[calc(100%+4px)] left-1/2 -translate-x-1/2 ${
+                      activeDropdown === l.label ? "block" : "hidden"
+                    } bg-[#111520]/80 backdrop-blur-2xl border border-white/10 rounded-[18px] p-2 min-w-[200px] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.7)] animate-fade-in before:content-[''] before:absolute before:-top-4 before:left-0 before:right-0 before:h-4 z-50`}
+                  >
                     {l.subLinks.map((s) => (
                       <Link
                         key={s.to}
                         href={s.to}
+                        id={`nav-link-${s.label.toLowerCase().replace(/\s+/g, "-")}`}
+                        onClick={() => setActiveDropdown(null)}
                         className={`block px-4 py-2.5 text-[14px] font-sans font-medium text-gray-300 hover:text-white hover:bg-white/10 rounded-[10px] transition-all duration-150 ${
                           pathname === s.to ? "text-white bg-white/10" : ""
                         }`}
@@ -205,6 +268,7 @@ export default function Navbar() {
               ) : (
                 <Link
                   href={l.to}
+                  id={`nav-link-${l.label.toLowerCase().replace(/\s+/g, "-")}`}
                   className={`${deskLinkStyle} ${
                     pathname === l.to ? activeLinkStyle : ""
                   }`}
@@ -216,24 +280,65 @@ export default function Navbar() {
           ))}
 
           {isAdmin && (
-            <li className="relative group/adminNav py-3 ml-2">
-              <div className={`${deskLinkStyle} text-white font-semibold group-hover/adminNav:bg-white/5`}>
-                Manage <ChevronDown size={14} className="ml-1 opacity-60 transition-transform group-hover/adminNav:rotate-180" />
+            <li
+              className="relative py-3 ml-2"
+              onPointerEnter={(e) => {
+                if (e.pointerType === "mouse") {
+                  setActiveDropdown("Manage");
+                }
+              }}
+              onPointerLeave={(e) => {
+                if (e.pointerType === "mouse") {
+                  setActiveDropdown(null);
+                }
+              }}
+            >
+              <div
+                id="nav-dropdown-trigger-manage"
+                role="button"
+                tabIndex={0}
+                onClick={(e) => handleTriggerClick("Manage", e)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setActiveDropdown((prev) => (prev === "Manage" ? null : "Manage"));
+                  }
+                }}
+                className={`${deskLinkStyle} text-white font-semibold ${
+                  activeDropdown === "Manage" ? "bg-white/5" : ""
+                }`}
+              >
+                Manage{" "}
+                <ChevronDown
+                  size={14}
+                  className={`ml-1 opacity-60 transition-transform ${
+                    activeDropdown === "Manage" ? "rotate-180" : ""
+                  }`}
+                />
               </div>
-              <div className="absolute top-[calc(100%+4px)] right-0 hidden group-hover/adminNav:block bg-[#111520]/80 backdrop-blur-2xl border border-white/10 rounded-[18px] p-2 min-w-[180px] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.7)] animate-fade-in before:content-[''] before:absolute before:-top-4 before:left-0 before:right-0 before:h-4 z-50">
+              <div
+                id="nav-dropdown-menu-manage"
+                className={`absolute top-[calc(100%+4px)] right-0 ${
+                  activeDropdown === "Manage" ? "block" : "hidden"
+                } bg-[#111520]/80 backdrop-blur-2xl border border-white/10 rounded-[18px] p-2 min-w-[180px] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.7)] animate-fade-in before:content-[''] before:absolute before:-top-4 before:left-0 before:right-0 before:h-4 z-50`}
+              >
                 <a
+                  id="nav-link-control-center"
                   href={process.env.NODE_ENV === "development" ? "http://localhost:3001" : "https://admin.maddybgmistore.in"}
                   target="_blank"
                   rel="noreferrer"
+                  onClick={() => setActiveDropdown(null)}
                   className="block px-4 py-2.5 text-[14px] font-sans font-medium text-gray-300 hover:text-white hover:bg-white/10 rounded-[10px] transition-all"
                 >
                   Control Center
                 </a>
                 {showAdminPanel && (
                   <a
+                    id="nav-link-admin-panel"
                     href={process.env.NODE_ENV === "development" ? "http://localhost:3001/panel" : "https://admin.maddybgmistore.in/panel"}
                     target="_blank"
                     rel="noreferrer"
+                    onClick={() => setActiveDropdown(null)}
                     className="block px-4 py-2.5 text-[14px] font-sans font-medium text-gray-300 hover:text-white hover:bg-white/10 rounded-[10px] transition-all mt-1"
                   >
                     Admin Panel
@@ -241,9 +346,11 @@ export default function Navbar() {
                 )}
                 {showTransactionsPanel && (
                   <a
+                    id="nav-link-transactions-panel"
                     href={process.env.NODE_ENV === "development" ? "http://localhost:3001/transactions" : "https://admin.maddybgmistore.in/transactions"}
                     target="_blank"
                     rel="noreferrer"
+                    onClick={() => setActiveDropdown(null)}
                     className="block px-4 py-2.5 text-[14px] font-sans font-medium text-gray-300 hover:text-white hover:bg-white/10 rounded-[10px] transition-all mt-1"
                   >
                     Transactions Panel

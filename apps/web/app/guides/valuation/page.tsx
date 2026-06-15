@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { BookOpen, Calculator, DollarSign, HelpCircle } from "lucide-react";
+import { BookOpen, HelpCircle } from "lucide-react";
 import { FAQSchema } from "../../../components/SEO";
+import ValuationCalculator from "../../../components/ValuationCalculator";
 
 export const metadata: Metadata = {
   title: "How to Value a BGMI Account | Price Calculator Guide",
@@ -11,15 +12,6 @@ export const metadata: Metadata = {
 };
 
 export default function ValuationGuidePage() {
-  const multipliers = [
-    { skin: "M416 Glacier (Level 1)", type: "Upgradeable Weapon", multiplier: "₹1,500 - ₹2,500", keyFactor: "Base skin unlock" },
-    { skin: "M416 Glacier (Max Level)", type: "Upgradeable Weapon", multiplier: "₹18,000 - ₹25,000", keyFactor: "Requires 7 materials + tech parts" },
-    { skin: "Pharaoh X-Suit (Level 1)", type: "Premium Outfit", multiplier: "₹2,500 - ₹4,000", keyFactor: "Base unlock" },
-    { skin: "Pharaoh X-Suit (Max Level)", type: "Premium Outfit", multiplier: "₹30,000 - ₹50,000", keyFactor: "Level 6/7 final form" },
-    { skin: "Mythic Fashion Title", type: "Account Title", multiplier: "+ ₹3,000 - ₹8,000", keyFactor: "Requires 50+ mythic items" },
-    { skin: "Sports Car (Koenigsegg/Pagani)", type: "Vehicle Skin", multiplier: "+ ₹5,000 - ₹12,000", keyFactor: "Depends on key count and colors" },
-  ];
-
   const valuationFaqs = [
     {
       question: "What is the most valuable skin in BGMI?",
@@ -54,51 +46,12 @@ export default function ValuationGuidePage() {
       </section>
 
       {/* Guide Content */}
-      <section className="py-20 px-[5%] max-w-[900px] mx-auto space-y-12">
-        {/* Core Formula */}
-        <div className="card-glass p-8">
-          <h2 className="text-xl font-black font-h text-white uppercase flex items-center gap-3 mb-6">
-            <Calculator className="text-gold" size={20} /> The BGMI Valuation Formula
-          </h2>
-          <div className="bg-black/30 p-6 rounded-xl border border-white/5 font-mono text-center text-sm sm:text-base text-gold font-bold">
-            Account Price = Base Level + (Upgradeable Weapons × Level Multiplier) + X-Suits + Sports Cars + Bindings Premium
-          </div>
-          <p className="text-muted text-xs sm:text-sm mt-6 leading-relaxed">
-            Unlike standard accounts, premium BGMI account valuation is heavily skewed toward upgradeable assets. A character level 80 account with no upgrade skins might be worth ₹1,500, whereas a level 60 account with a Max Glacier M416 can easily fetch over ₹20,000 due to material upgrade costs.
-          </p>
-        </div>
-
-        {/* Multipliers Table */}
-        <div className="card-glass p-8">
-          <h2 className="text-xl font-black font-h text-white uppercase flex items-center gap-3 mb-6">
-            <DollarSign className="text-gold" size={20} /> Estimated Valuation Matrix (2026)
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs sm:text-sm">
-              <thead>
-                <tr className="border-b border-white/10 text-gold font-bold">
-                  <th className="py-3 px-4">Skin / Item Asset</th>
-                  <th className="py-3 px-4">Asset Type</th>
-                  <th className="py-3 px-4">Market Value range</th>
-                  <th className="py-3 px-4">Key Valuation Factor</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5 text-muted">
-                {multipliers.map((m, idx) => (
-                  <tr key={idx} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="py-3 px-4 text-white font-semibold">{m.skin}</td>
-                    <td className="py-3 px-4">{m.type}</td>
-                    <td className="py-3 px-4 text-gold font-bold">{m.multiplier}</td>
-                    <td className="py-3 px-4">{m.keyFactor}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+      <section className="py-20 px-[5%] max-w-[1200px] mx-auto space-y-16">
+        {/* Interactive Valuation Calculator */}
+        <ValuationCalculator />
 
         {/* Detailed FAQ */}
-        <div className="card-glass p-8">
+        <div className="card-glass p-8 max-w-[900px] mx-auto">
           <h2 className="text-xl font-black font-h text-white uppercase flex items-center gap-3 mb-8">
             <HelpCircle className="text-gold" size={20} /> Valuation &amp; Pricing FAQs
           </h2>
@@ -125,7 +78,7 @@ export default function ValuationGuidePage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: url('/guides-banner.jpg') no-repeat center center;
+          background: url('/valuation-banner.jpg') no-repeat center center;
           background-size: cover;
         }
         .guide-hero .overlay {
@@ -150,3 +103,4 @@ export default function ValuationGuidePage() {
     </div>
   );
 }
+

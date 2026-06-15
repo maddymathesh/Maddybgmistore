@@ -116,8 +116,9 @@ export default function Navbar() {
   const activeLinkStyle = "text-white bg-white/10";
 
   return (
-    <header
-      ref={navRef}
+    <>
+      <header
+        ref={navRef}
       className="fixed top-0 left-0 right-0 z-[1000] transition-all duration-300"
       style={{
         background: scrolled || mobileOpen ? "rgba(8, 10, 15, 0.95)" : "transparent",
@@ -257,8 +258,9 @@ export default function Navbar() {
           <Menu size={24} />
         </button>
       </nav>
+    </header>
 
-      {/* Mobile Backdrop Overlay */}
+    {/* Mobile Backdrop Overlay */}
       <div
         className={`lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[998] transition-opacity duration-300 ${
           mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
@@ -422,6 +424,6 @@ export default function Navbar() {
           </SignedOut>
         </div>
       </div>
-    </header>
+    </>
   );
 }

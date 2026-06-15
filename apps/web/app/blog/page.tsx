@@ -18,24 +18,25 @@ export const metadata: Metadata = {
 
 export default function BlogIndexPage() {
   return (
-    <div className="blog-index-page min-h-screen py-16 bg-[#080a0f] text-[#eaeaea]">
-      <div className="max-w-[1200px] mx-auto px-5">
-        
-        {/* Header Section */}
-        <div className="text-center mb-16">
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-yellow-500/25 bg-yellow-500/5 text-yellow-500 text-[10px] font-bold tracking-widest uppercase mb-4">
-            <BookOpen size={12} />
-            <span>LEARNING CENTER</span>
+    <div className="blog-index-page">
+      {/* Cinematic Hero Banner */}
+      <section className="blog-hero">
+        <div className="overlay" />
+        <div className="blog-hero-content text-center">
+          <span className="badge mb-4">
+            <BookOpen size={12} className="mr-1 text-gold" /> Learning Center
           </span>
-          <h1 className="font-h font-black text-3xl sm:text-5xl text-white uppercase tracking-tight leading-none mb-4">
-            Guides & <span className="g">Resources</span>
+          <h1 className="text-4xl sm:text-6xl font-black font-h uppercase text-white leading-none">
+            Guides &amp; <span className="g">Resources</span>
           </h1>
-          <p className="text-muted text-sm sm:text-base max-w-[600px] mx-auto leading-relaxed">
+          <p className="text-muted text-sm sm:text-base max-w-xl mx-auto mt-4 leading-relaxed">
             Everything you need to know about buying, selling, and exchanging BGMI IDs safely in South India.
           </p>
         </div>
+      </section>
 
-        {/* Articles Grid */}
+      {/* Articles Grid */}
+      <section className="py-20 px-5 max-w-[1200px] mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {BLOG_POSTS.map((post) => (
             <article 
@@ -91,13 +92,51 @@ export default function BlogIndexPage() {
             </article>
           ))}
         </div>
-      </div>
+      </section>
 
       <style>{`
+        .blog-index-page {
+          background: var(--color-bg);
+          color: #eaeaea;
+          min-height: 100vh;
+        }
+        .blog-hero {
+          position: relative;
+          min-height: 50vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: url('/guides-banner.jpg') no-repeat center center;
+          background-size: cover;
+        }
+        .blog-hero .overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to bottom, rgba(8,10,15,0.3) 0%, rgba(8,10,15,0.95) 100%);
+        }
+        .blog-hero-content {
+          position: relative;
+          z-index: 5;
+          padding: 0 20px;
+        }
         .g {
           background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
+        }
+        .badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 14px;
+          border-radius: 30px;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          background: rgba(255, 215, 0, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          color: #ffd700;
         }
       `}</style>
     </div>

@@ -74,7 +74,7 @@ const connectChannels = [
 // ── Stat items ────────────────────────────────────────────────────────────────
 const stats = [
   { value: 2000, suffix: "+", label: "HAPPY BUYERS" },
-  { prefix: "₹", value: 60, suffix: "L+", label: "ACCOUNTS SOLD" },
+  { prefix: "₹", value: 60, suffix: "L+", label: "OVERALL WORTH ACCOUNT SOLD" },
   { value: 7, suffix: " Yrs", label: "TRUSTED SINCE 2019" },
   { value: 4.7, suffix: " ★", label: "STAR RATED", decimals: 1 },
 ];

@@ -517,7 +517,7 @@ html, body {
   z-index: 9999 !important;
 }
 
-/* Antigravity Drawer Styles */
+/* Antigravity Drawer & Nav Breakpoint Styles */
 .ag-drawer-container {
   position: fixed !important;
   inset: 0 !important;
@@ -530,4 +530,18 @@ html, body {
   right: 0 !important;
   bottom: 0 !important;
   z-index: 9999 !important;
+}
+
+@media (max-width: 1023px) {
+  .ag-nav-desktop {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ag-nav-mobile,
+  .ag-drawer-container,
+  .ag-drawer {
+    display: none !important;
+  }
 }

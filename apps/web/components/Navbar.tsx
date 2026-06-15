@@ -64,11 +64,35 @@ export default function Navbar() {
   const drawerRef = useRef<HTMLDivElement>(null);
 
   const toggleMobileExpand = (label: string) => {
+    if (typeof window !== "undefined" && window.innerWidth >= 1024) return;
     setMobileExpanded((prev) => ({
       ...prev,
       [label]: !prev[label],
     }));
   };
+
+  const toggleMobileOpen = () => {
+    if (typeof window !== "undefined" && window.innerWidth >= 1024) return;
+    setMobileOpen((prev) => !prev);
+  };
+
+  // Reset mobile menu state on window resize / orientation change to landscape/desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (typeof window !== "undefined" && window.innerWidth >= 1024) {
+        setMobileOpen(false);
+        setMobileExpanded({});
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleResize);
+    // Call handler immediately on mount / orientation check
+    handleResize();
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
+    };
+  }, []);
 
   // Close menu on route change
   useEffect(() => {
@@ -151,7 +175,7 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Links */}
-        <ul className="hidden lg:flex items-center gap-1.5 list-none m-0 p-0">
+        <ul className="ag-nav-desktop hidden lg:flex items-center gap-1.5 list-none m-0 p-0">
           {navLinks.map((l) => (
             <li key={l.label || l.to} className="relative group/nav py-3">
               {l.subLinks ? (
@@ -263,7 +287,7 @@ export default function Navbar() {
         {/* Mobile Toggle Button */}
         <button
           className="lg:hidden text-gray-300 hover:text-white p-2 focus:outline-none transition-colors duration-200"
-          onClick={() => setMobileOpen(!mobileOpen)}
+          onClick={toggleMobileOpen}
           aria-label="Toggle menu"
         >
           <Menu size={24} />
@@ -272,7 +296,7 @@ export default function Navbar() {
     </header>
 
     {/* Mobile Navigation Drawer Wrapper */}
-    <div className={`ag-drawer-container lg:hidden fixed inset-0 z-[9999] layer-overlay transition-all duration-300 ${mobileOpen ? "opacity-100 pointer-events-auto visible" : "opacity-0 pointer-events-none invisible"}`}>
+    <div className={`ag-nav-mobile ag-drawer-container lg:hidden fixed inset-0 z-[9999] layer-overlay transition-all duration-300 ${mobileOpen ? "opacity-100 pointer-events-auto visible" : "opacity-0 pointer-events-none invisible"}`}>
       {/* Mobile Backdrop Overlay */}
       <div
         className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998] transition-opacity duration-300 ${

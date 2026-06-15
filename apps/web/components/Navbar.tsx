@@ -59,10 +59,17 @@ export default function Navbar() {
   const [mobileExpanded, setMobileExpanded] = useState<Record<string, boolean>>({});
   const [scrolled, setScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [hasHover, setHasHover] = useState(false);
   const pathname = usePathname();
   const { user } = useUser();
   const navRef = useRef<HTMLElement>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setHasHover(window.matchMedia("(hover: hover)").matches);
+    }
+  }, []);
 
   const toggleMobileExpand = (label: string) => {
     if (typeof window !== "undefined" && window.innerWidth >= 1024) return;
@@ -78,10 +85,9 @@ export default function Navbar() {
   };
 
   const handleTriggerClick = (label: string, e: React.MouseEvent) => {
-    const pointerType = (e.nativeEvent as PointerEvent).pointerType;
-    if (!pointerType || pointerType !== "mouse") {
-      setActiveDropdown((prev) => (prev === label ? null : label));
-    }
+    e.preventDefault();
+    e.stopPropagation();
+    setActiveDropdown((prev) => (prev === label ? null : label));
   };
 
   // Reset mobile menu state on window resize / orientation change to landscape/desktop
@@ -109,13 +115,14 @@ export default function Navbar() {
     setActiveDropdown(null);
   }, [pathname]);
 
-  // Close desktop dropdown on outside click
+  // Close desktop dropdown on outside click/tap
   useEffect(() => {
     if (!activeDropdown) return;
     const onClick = (e: Event) => {
       const target = e.target as Node;
-      const clickedInsideNav = navRef.current && navRef.current.contains(target);
-      if (!clickedInsideNav) {
+      const activeDropdownEl = document.querySelector(`[data-dropdown-group="${activeDropdown}"]`);
+      const clickedInsideDropdown = activeDropdownEl && activeDropdownEl.contains(target);
+      if (!clickedInsideDropdown) {
         setActiveDropdown(null);
       }
     };
@@ -134,10 +141,10 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close mobile menu on outside click
+  // Close mobile menu on outside click/tap
   useEffect(() => {
     if (!mobileOpen) return;
-    const onClick = (e: MouseEvent) => {
+    const onClick = (e: Event) => {
       const target = e.target as Node;
       const clickedInsideNav = navRef.current && navRef.current.contains(target);
       const clickedInsideDrawer = drawerRef.current && drawerRef.current.contains(target);
@@ -146,7 +153,11 @@ export default function Navbar() {
       }
     };
     document.addEventListener("mousedown", onClick);
-    return () => document.removeEventListener("mousedown", onClick);
+    document.addEventListener("touchstart", onClick);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("touchstart", onClick);
+    };
   }, [mobileOpen]);
 
   // Prevent body scroll when mobile menu open
@@ -207,16 +218,25 @@ export default function Navbar() {
             <li
               key={l.label || l.to}
               className="relative py-3"
-              onPointerEnter={(e) => {
-                if (e.pointerType === "mouse") {
-                  setActiveDropdown(l.label);
-                }
-              }}
-              onPointerLeave={(e) => {
-                if (e.pointerType === "mouse") {
-                  setActiveDropdown(null);
-                }
-              }}
+              data-dropdown-group={l.subLinks ? l.label : undefined}
+              onPointerEnter={
+                hasHover
+                  ? (e) => {
+                      if (e.pointerType === "mouse") {
+                        setActiveDropdown(l.label);
+                      }
+                    }
+                  : undefined
+              }
+              onPointerLeave={
+                hasHover
+                  ? (e) => {
+                      if (e.pointerType === "mouse") {
+                        setActiveDropdown(null);
+                      }
+                    }
+                  : undefined
+              }
             >
               {l.subLinks ? (
                 <>
@@ -224,6 +244,9 @@ export default function Navbar() {
                     id={`nav-dropdown-trigger-${l.label.toLowerCase().replace(/\s+/g, "-")}`}
                     role="button"
                     tabIndex={0}
+                    aria-haspopup="menu"
+                    aria-expanded={activeDropdown === l.label}
+                    aria-controls={`nav-dropdown-menu-${l.label.toLowerCase().replace(/\s+/g, "-")}`}
                     onClick={(e) => handleTriggerClick(l.label, e)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
@@ -246,6 +269,8 @@ export default function Navbar() {
                   {/* Dropdown Menu */}
                   <div
                     id={`nav-dropdown-menu-${l.label.toLowerCase().replace(/\s+/g, "-")}`}
+                    role="menu"
+                    aria-labelledby={`nav-dropdown-trigger-${l.label.toLowerCase().replace(/\s+/g, "-")}`}
                     className={`absolute top-[calc(100%+4px)] left-1/2 -translate-x-1/2 ${
                       activeDropdown === l.label ? "block" : "hidden"
                     } bg-[#111520]/80 backdrop-blur-2xl border border-white/10 rounded-[18px] p-2 min-w-[200px] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.7)] animate-fade-in before:content-[''] before:absolute before:-top-4 before:left-0 before:right-0 before:h-4 z-50`}
@@ -255,6 +280,7 @@ export default function Navbar() {
                         key={s.to}
                         href={s.to}
                         id={`nav-link-${s.label.toLowerCase().replace(/\s+/g, "-")}`}
+                        role="menuitem"
                         onClick={() => setActiveDropdown(null)}
                         className={`block px-4 py-2.5 text-[14px] font-sans font-medium text-gray-300 hover:text-white hover:bg-white/10 rounded-[10px] transition-all duration-150 ${
                           pathname === s.to ? "text-white bg-white/10" : ""
@@ -282,21 +308,33 @@ export default function Navbar() {
           {isAdmin && (
             <li
               className="relative py-3 ml-2"
-              onPointerEnter={(e) => {
-                if (e.pointerType === "mouse") {
-                  setActiveDropdown("Manage");
-                }
-              }}
-              onPointerLeave={(e) => {
-                if (e.pointerType === "mouse") {
-                  setActiveDropdown(null);
-                }
-              }}
+              data-dropdown-group="Manage"
+              onPointerEnter={
+                hasHover
+                  ? (e) => {
+                      if (e.pointerType === "mouse") {
+                        setActiveDropdown("Manage");
+                      }
+                    }
+                  : undefined
+              }
+              onPointerLeave={
+                hasHover
+                  ? (e) => {
+                      if (e.pointerType === "mouse") {
+                        setActiveDropdown(null);
+                      }
+                    }
+                  : undefined
+              }
             >
               <div
                 id="nav-dropdown-trigger-manage"
                 role="button"
                 tabIndex={0}
+                aria-haspopup="menu"
+                aria-expanded={activeDropdown === "Manage"}
+                aria-controls="nav-dropdown-menu-manage"
                 onClick={(e) => handleTriggerClick("Manage", e)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -318,6 +356,8 @@ export default function Navbar() {
               </div>
               <div
                 id="nav-dropdown-menu-manage"
+                role="menu"
+                aria-labelledby="nav-dropdown-trigger-manage"
                 className={`absolute top-[calc(100%+4px)] right-0 ${
                   activeDropdown === "Manage" ? "block" : "hidden"
                 } bg-[#111520]/80 backdrop-blur-2xl border border-white/10 rounded-[18px] p-2 min-w-[180px] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.7)] animate-fade-in before:content-[''] before:absolute before:-top-4 before:left-0 before:right-0 before:h-4 z-50`}
@@ -327,6 +367,7 @@ export default function Navbar() {
                   href={process.env.NODE_ENV === "development" ? "http://localhost:3001" : "https://admin.maddybgmistore.in"}
                   target="_blank"
                   rel="noreferrer"
+                  role="menuitem"
                   onClick={() => setActiveDropdown(null)}
                   className="block px-4 py-2.5 text-[14px] font-sans font-medium text-gray-300 hover:text-white hover:bg-white/10 rounded-[10px] transition-all"
                 >
@@ -338,6 +379,7 @@ export default function Navbar() {
                     href={process.env.NODE_ENV === "development" ? "http://localhost:3001/panel" : "https://admin.maddybgmistore.in/panel"}
                     target="_blank"
                     rel="noreferrer"
+                    role="menuitem"
                     onClick={() => setActiveDropdown(null)}
                     className="block px-4 py-2.5 text-[14px] font-sans font-medium text-gray-300 hover:text-white hover:bg-white/10 rounded-[10px] transition-all mt-1"
                   >
@@ -350,6 +392,7 @@ export default function Navbar() {
                     href={process.env.NODE_ENV === "development" ? "http://localhost:3001/transactions" : "https://admin.maddybgmistore.in/transactions"}
                     target="_blank"
                     rel="noreferrer"
+                    role="menuitem"
                     onClick={() => setActiveDropdown(null)}
                     className="block px-4 py-2.5 text-[14px] font-sans font-medium text-gray-300 hover:text-white hover:bg-white/10 rounded-[10px] transition-all mt-1"
                   >

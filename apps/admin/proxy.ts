@@ -1,10 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import type { NextRequest, NextFetchEvent } from "next/server";
 
 const isPublicRoute = createRouteMatcher(["/login(.*)", "/api/webhook/clerk(.*)"]);
 
-const handler = clerkMiddleware(async (auth, req) => {
+export default clerkMiddleware(async (auth, req) => {
   if (!isPublicRoute(req)) {
     const session = await auth();
     const userId = session.userId;
@@ -50,10 +49,6 @@ const handler = clerkMiddleware(async (auth, req) => {
   }
   return NextResponse.next();
 });
-
-export function proxy(request: NextRequest, event: NextFetchEvent) {
-  return handler(request, event);
-}
 
 export const config = {
   matcher: [

@@ -5,6 +5,7 @@ import { dark } from "@clerk/themes";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import SocialFloat from "../components/SocialFloat";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { LocalBusinessSchema } from "../components/SEO";
 
@@ -20,37 +21,47 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   metadataBase: new URL("https://maddybgmistore.in"),
   title: {
-    default: "Maddy BGMI Store - South India's Trusted BGMI Marketplace",
+    default: "Maddy BGMI Store — Buy & Sell BGMI Accounts | South India's #1",
     template: "%s | Maddy BGMI Store",
   },
-  description: "South India's most trusted BGMI account marketplace. Buy and sell verified BGMI accounts safely. Premium skins, Glacier M416, X-Suits, and UC purchase with instant secure delivery since 2019.",
+  description: "Buy and sell verified BGMI accounts safely. Budget to premium range. Glacier M416, X-Suits, supercar gifts, and UC purchases with instant secure delivery. 2000+ happy buyers since 2019. South India's most trusted BGMI marketplace.",
   keywords: [
+    "buy BGMI account",
+    "sell BGMI account",
+    "BGMI account marketplace",
+    "BGMI store India",
+    "verified BGMI accounts",
+    "cheap BGMI account",
+    "premium BGMI account",
+    "South India BGMI",
+    "Glacier M416",
+    "X-Suit",
+    "supercar gift",
+    "UC purchase",
+    "Maddy BGMI Store",
     "bgmi account",
     "bgmi accounts for sale",
-    "buy bgmi account",
-    "premium bgmi account",
     "bgmi account store tamil nadu",
     "bgmi account seller chennai",
     "trusted bgmi store",
     "bgmi uc purchase",
     "bgmi xsuit account",
     "bgmi account exchange",
-    "maddy bgmi store",
   ],
   alternates: {
     canonical: "./",
   },
   openGraph: {
-    title: "Maddy BGMI Store - South India's #1 Trusted BGMI Marketplace",
-    description: "Buy & sell verified BGMI accounts safely. Budget to premium accounts. Safe transaction guarantees since 2019.",
+    title: "Maddy BGMI Store — Buy & Sell BGMI Accounts",
+    description: "South India's most trusted BGMI marketplace. Buy verified accounts or sell yours safely. 2000+ happy buyers since 2019.",
     url: "https://maddybgmistore.in",
     siteName: "Maddy BGMI Store",
     images: [
       {
-        url: "/logo.png",
-        width: 800,
-        height: 600,
-        alt: "Maddy BGMI Store Logo",
+        url: "/og-image.webp",
+        width: 1200,
+        height: 630,
+        alt: "Maddy BGMI Store — Buy & Sell BGMI Accounts",
       },
     ],
     locale: "en_IN",
@@ -58,9 +69,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Maddy BGMI Store - South India's #1 Trusted BGMI Marketplace",
-    description: "Buy & sell verified BGMI accounts safely. Budget to premium accounts. Safe transaction guarantees since 2019.",
-    images: ["/logo.png"],
+    title: "Maddy BGMI Store — Buy & Sell BGMI Accounts",
+    description: "South India's most trusted BGMI marketplace. Buy verified accounts or sell yours safely. 2000+ happy buyers since 2019.",
+    images: ["/og-image.webp"],
   },
   robots: {
     index: true,
@@ -154,6 +165,7 @@ export default function RootLayout({
             <Footer />
           </div>
           <SocialFloat />
+          <Analytics />
         </ClerkProvider>
       </body>
     </html>

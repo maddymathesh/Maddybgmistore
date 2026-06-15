@@ -445,9 +445,9 @@ export default function ValuationCalculator() {
   };
 
   return (
-    <div className="w-full space-y-12">
+    <div className="w-full space-y-8 sm:space-y-12">
       {/* Description Parser Box - Paste Account Details */}
-      <div className="card-glass p-8 border border-gold/30 bg-[#0d1017] shadow-xl relative overflow-hidden">
+      <div className="card-glass p-5 sm:p-8 border border-gold/30 bg-[#0d1017] shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
           <FileText size={150} className="text-gold" />
         </div>
@@ -490,7 +490,7 @@ export default function ValuationCalculator() {
       </div>
 
       {/* Top Banner / Formula */}
-      <div className="card-glass p-8 relative overflow-hidden border border-white/5 shadow-lg">
+      <div className="card-glass p-5 sm:p-8 relative overflow-hidden border border-white/5 shadow-lg">
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-4">
             <span className="badge">OFFICIAL FORMULA</span>
@@ -520,13 +520,13 @@ export default function ValuationCalculator() {
       </div>
 
       {/* Calculator Body */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         
         {/* Left/Middle: Customizers */}
         <div className="lg:col-span-2 space-y-6">
           
           {/* Outfits & Core Tiers */}
-          <div className="card-glass p-6 space-y-6">
+          <div className="card-glass p-4 sm:p-6 space-y-6">
             <div className="flex items-center gap-2 pb-3 border-b border-white/5">
               <Crown className="text-gold" size={20} />
               <h3 className="text-base font-black font-h text-white uppercase tracking-wider">Mythics &amp; Outfits</h3>
@@ -608,7 +608,7 @@ export default function ValuationCalculator() {
           </div>
 
           {/* X-Suits List */}
-          <div className="card-glass p-6 space-y-6">
+          <div className="card-glass p-4 sm:p-6 space-y-6">
             <div className="flex items-center justify-between pb-3 border-b border-white/5">
               <div className="flex items-center gap-2">
                 <Crown className="text-gold" size={20} />
@@ -662,7 +662,7 @@ export default function ValuationCalculator() {
           </div>
 
           {/* Gun Labs List */}
-          <div className="card-glass p-6 space-y-6">
+          <div className="card-glass p-4 sm:p-6 space-y-6">
             <div className="flex items-center justify-between pb-3 border-b border-white/5">
               <div className="flex items-center gap-2">
                 <Sword className="text-gold" size={20} />
@@ -737,13 +737,13 @@ export default function ValuationCalculator() {
           </div>
 
           {/* Custom Vehicles Section */}
-          <div className="card-glass p-6 space-y-6">
+          <div className="card-glass p-4 sm:p-6 space-y-6">
             <div className="flex items-center justify-between pb-3 border-b border-white/5">
               <div className="flex items-center gap-2">
                 <Car className="text-gold" size={20} />
                 <h3 className="text-base font-black font-h text-white uppercase tracking-wider">Vehicles Configurator</h3>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <button 
                   onClick={() => addCar("legendary")}
                   className="btn btn-outline py-1.5 px-3 rounded-lg text-2xs uppercase tracking-wider flex items-center gap-1 border border-white/10 hover:border-gold/50"
@@ -821,7 +821,7 @@ export default function ValuationCalculator() {
 
         {/* Right Pane: Live Calculation Display */}
         <div className="space-y-6">
-          <div className="card-glass p-6 border-gold/30 sticky top-6 bg-gradient-to-b from-[#111520] to-[#0d1017] shadow-xl">
+          <div className="card-glass p-5 sm:p-6 border-gold/30 lg:sticky lg:top-6 bg-gradient-to-b from-[#111520] to-[#0d1017] shadow-xl">
             <h3 className="text-sm font-black font-h text-muted uppercase tracking-wider mb-6 flex items-center gap-2">
               <Info size={14} className="text-gold" /> Accounts Value Report
             </h3>
@@ -839,7 +839,7 @@ export default function ValuationCalculator() {
               <div className="space-y-2 text-xs text-muted max-h-[260px] overflow-y-auto pr-2 divide-y divide-white/5">
                 {valuationResult.breakdown.map((item, index) => (
                   <div key={index} className="flex justify-between py-2 items-center">
-                    <span className="max-w-[160px] truncate" title={item.name}>{item.name}</span>
+                    <span className="max-w-[120px] sm:max-w-[160px] truncate" title={item.name}>{item.name}</span>
                     <span className="text-white font-mono font-semibold">₹{item.value.toLocaleString('en-IN')}</span>
                   </div>
                 ))}
@@ -867,7 +867,7 @@ export default function ValuationCalculator() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6">
         
         {/* Adds Value Card */}
-        <div className="card-glass p-8 border-emerald-500/20 bg-emerald-950/5">
+        <div className="card-glass p-5 sm:p-8 border-emerald-500/20 bg-emerald-950/5">
           <h3 className="text-lg font-black font-h text-white uppercase tracking-wider mb-6 flex items-center gap-2">
             <CheckCircle2 className="text-emerald-500" size={20} /> Valued Assets (Adds Value)
           </h3>
@@ -903,7 +903,7 @@ export default function ValuationCalculator() {
         </div>
 
         {/* No Value Card */}
-        <div className="card-glass p-8 border-rose-500/20 bg-rose-950/5">
+        <div className="card-glass p-5 sm:p-8 border-rose-500/20 bg-rose-950/5">
           <h3 className="text-lg font-black font-h text-white uppercase tracking-wider mb-6 flex items-center gap-2">
             <XCircle className="text-rose-500" size={20} /> No Value Items (Does Not Add Value)
           </h3>

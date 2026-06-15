@@ -135,7 +135,7 @@ export default function Footer() {
 
   return (
     <footer style={{ background: "var(--color-bg2)", borderTop: "1px solid rgba(255,215,0,0.18)", padding: "60px 5% 20px" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: "40px", marginBottom: "40px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: "32px", marginBottom: "40px" }}>
         {/* Brand */}
         <div>
           <div style={{ fontFamily: "var(--font-h)", fontSize: "20px", fontWeight: 700, color: "var(--color-gold)", letterSpacing: "2px", marginBottom: "12px" }}>
@@ -286,12 +286,18 @@ export default function Footer() {
           </div>
         </div>
 
-        Made with <Heart size={11} fill="#ef4444" color="#ef4444" style={{ display: "inline", verticalAlign: "middle", margin: "0 2px" }} /> in South India &nbsp;·&nbsp; © 2026 <Link href="/" style={{ color: "var(--color-gold)", textDecoration: "none", transition: "opacity 0.2s" }} onMouseEnter={e => e.currentTarget.style.opacity = "0.8"} onMouseLeave={e => e.currentTarget.style.opacity = "1"}>Maddy BGMI Store</Link> &nbsp;&nbsp;
-        <Link href="/terms" style={{ color: "var(--color-muted)", textDecoration: "underline", margin: "0 5px", fontSize: "11px" }} onMouseEnter={e => e.currentTarget.style.color = "#fff"} onMouseLeave={e => e.currentTarget.style.color = "var(--color-muted)"}>Terms & Conditions</Link> | 
-        <Link href="/privacy" style={{ color: "var(--color-muted)", textDecoration: "underline", margin: "0 5px", fontSize: "11px" }} onMouseEnter={e => e.currentTarget.style.color = "#fff"} onMouseLeave={e => e.currentTarget.style.color = "var(--color-muted)"}>Privacy Policy</Link> | 
-        <Link href="/refund" style={{ color: "var(--color-muted)", textDecoration: "underline", margin: "0 5px", fontSize: "11px" }} onMouseEnter={e => e.currentTarget.style.color = "#fff"} onMouseLeave={e => e.currentTarget.style.color = "var(--color-muted)"}>Refund Policy</Link> | 
-        <Link href="/faq" style={{ color: "var(--color-muted)", textDecoration: "underline", margin: "0 5px", fontSize: "11px" }} onMouseEnter={e => e.currentTarget.style.color = "#fff"} onMouseLeave={e => e.currentTarget.style.color = "var(--color-muted)"}>FAQs</Link>
-        &nbsp;-&nbsp; Not affiliated with BGMI or Krafton.
+        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "4px 8px", fontSize: "11px", lineHeight: 1.8 }}>
+          <span>Made with <Heart size={11} fill="#ef4444" color="#ef4444" style={{ display: "inline", verticalAlign: "middle", margin: "0 2px" }} /> in South India</span>
+          <span>·</span>
+          <span>© 2026 <Link href="/" style={{ color: "var(--color-gold)", textDecoration: "none", transition: "opacity 0.2s" }} onMouseEnter={e => e.currentTarget.style.opacity = "0.8"} onMouseLeave={e => e.currentTarget.style.opacity = "1"}>Maddy BGMI Store</Link></span>
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "4px 12px", marginTop: "8px", fontSize: "11px" }}>
+          <Link href="/terms" style={{ color: "var(--color-muted)", textDecoration: "underline" }} onMouseEnter={e => e.currentTarget.style.color = "#fff"} onMouseLeave={e => e.currentTarget.style.color = "var(--color-muted)"}>Terms & Conditions</Link>
+          <Link href="/privacy" style={{ color: "var(--color-muted)", textDecoration: "underline" }} onMouseEnter={e => e.currentTarget.style.color = "#fff"} onMouseLeave={e => e.currentTarget.style.color = "var(--color-muted)"}>Privacy Policy</Link>
+          <Link href="/refund" style={{ color: "var(--color-muted)", textDecoration: "underline" }} onMouseEnter={e => e.currentTarget.style.color = "#fff"} onMouseLeave={e => e.currentTarget.style.color = "var(--color-muted)"}>Refund Policy</Link>
+          <Link href="/faq" style={{ color: "var(--color-muted)", textDecoration: "underline" }} onMouseEnter={e => e.currentTarget.style.color = "#fff"} onMouseLeave={e => e.currentTarget.style.color = "var(--color-muted)"}>FAQs</Link>
+        </div>
+        <div style={{ marginTop: "6px", fontSize: "10px", color: "var(--color-muted)" }}>Not affiliated with BGMI or Krafton.</div>
       </div>
     </footer>
   );

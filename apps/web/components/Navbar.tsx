@@ -61,6 +61,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const { user } = useUser();
   const navRef = useRef<HTMLElement>(null);
+  const drawerRef = useRef<HTMLDivElement>(null);
 
   const toggleMobileExpand = (label: string) => {
     setMobileExpanded((prev) => ({
@@ -86,7 +87,10 @@ export default function Navbar() {
   useEffect(() => {
     if (!mobileOpen) return;
     const onClick = (e: MouseEvent) => {
-      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      const clickedInsideNav = navRef.current && navRef.current.contains(target);
+      const clickedInsideDrawer = drawerRef.current && drawerRef.current.contains(target);
+      if (!clickedInsideNav && !clickedInsideDrawer) {
         setMobileOpen(false);
       }
     };
@@ -96,9 +100,16 @@ export default function Navbar() {
 
   // Prevent body scroll when mobile menu open
   useEffect(() => {
-    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+      document.body.style.height = "100vh";
+    } else {
+      document.body.style.overflow = "";
+      document.body.style.height = "";
+    }
     return () => {
       document.body.style.overflow = "";
+      document.body.style.height = "";
     };
   }, [mobileOpen]);
 
@@ -260,9 +271,11 @@ export default function Navbar() {
       </nav>
     </header>
 
-    {/* Mobile Backdrop Overlay */}
+    {/* Mobile Navigation Drawer Wrapper */}
+    <div className={`ag-drawer-container lg:hidden fixed inset-0 z-[9999] layer-overlay transition-all duration-300 ${mobileOpen ? "opacity-100 pointer-events-auto visible" : "opacity-0 pointer-events-none invisible"}`}>
+      {/* Mobile Backdrop Overlay */}
       <div
-        className={`lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[998] transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998] transition-opacity duration-300 ${
           mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
         onClick={() => setMobileOpen(false)}
@@ -270,7 +283,8 @@ export default function Navbar() {
 
       {/* Mobile Drawer Panel */}
       <div
-        className={`lg:hidden fixed top-0 right-0 bottom-0 w-[85%] sm:w-[340px] bg-[#080a0f]/95 backdrop-blur-2xl border-l border-white/10 z-[999] overflow-y-auto px-6 py-6 transition-transform duration-300 ease-out flex flex-col justify-between shadow-[0_0_50px_rgba(0,0,0,0.8)] ${
+        ref={drawerRef}
+        className={`ag-drawer fixed top-0 right-0 bottom-0 w-[85%] sm:w-[340px] bg-[#080a0f]/95 backdrop-blur-2xl border-l border-white/10 z-[9999] overflow-y-auto px-6 py-6 transition-transform duration-300 ease-out flex flex-col justify-between shadow-[0_0_50px_rgba(0,0,0,0.8)] ${
           mobileOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -409,14 +423,18 @@ export default function Navbar() {
           </SignedIn>
 
           <SignedOut>
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3" onClick={() => setMobileOpen(false)}>
               <SignInButton mode="modal">
-                <button className="btn btn-outline w-full justify-center py-2.5 text-[12px] tracking-[1px] font-sans">
+                <button
+                  className="btn btn-outline w-full justify-center py-2.5 text-[12px] tracking-[1px] font-sans"
+                >
                   Login
                 </button>
               </SignInButton>
               <SignUpButton mode="modal">
-                <button className="btn btn-gold w-full justify-center py-2.5 text-[12px] tracking-[1px] font-sans">
+                <button
+                  className="btn btn-gold w-full justify-center py-2.5 text-[12px] tracking-[1px] font-sans"
+                >
                   Sign Up
                 </button>
               </SignUpButton>
@@ -424,6 +442,7 @@ export default function Navbar() {
           </SignedOut>
         </div>
       </div>
+    </div>
     </>
   );
 }

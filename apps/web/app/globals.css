@@ -59,6 +59,13 @@ html, body {
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: #ffd700;
 }
+@media (max-width: 640px) {
+  .badge {
+    font-size: 9px;
+    padding: 5px 10px;
+    letter-spacing: 1px;
+  }
+}
 
 .badge-green {
   background: rgba(34, 197, 94, 0.05);
@@ -86,6 +93,14 @@ html, body {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
   text-transform: uppercase;
+  min-height: 44px;
+}
+@media (max-width: 640px) {
+  .btn {
+    padding: 10px 20px;
+    font-size: 12px;
+    gap: 6px;
+  }
 }
 
 .btn-gold {
@@ -155,7 +170,6 @@ html, body {
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Form inputs styling */
 .input-field {
   width: 100%;
   background: rgba(8, 10, 15, 0.8);
@@ -166,6 +180,13 @@ html, body {
   font-size: 14.5px;
   outline: none;
   transition: all 0.2s;
+}
+@media (max-width: 640px) {
+  .input-field {
+    padding: 10px 12px;
+    font-size: 13px;
+    border-radius: 8px;
+  }
 }
 .input-field:focus {
   border-color: #ffd700;
@@ -490,4 +511,23 @@ html, body {
   html {
     @apply font-sans;
   }
+}
+
+.layer-overlay {
+  z-index: 9999 !important;
+}
+
+/* Antigravity Drawer Styles */
+.ag-drawer-container {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+}
+
+.ag-drawer {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 9999 !important;
 }

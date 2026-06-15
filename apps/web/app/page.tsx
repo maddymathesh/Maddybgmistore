@@ -703,9 +703,16 @@ export default function HomePage() {
           display: flex;
           gap: clamp(10px, 3vw, 16px);
           justify-content: center;
+          flex-wrap: wrap;
           width: 100%;
           max-width: 480px;
           margin: 0 auto clamp(20px, 5svh, 36px);
+        }
+        @media (max-width: 400px) {
+          .hero-btns {
+            flex-direction: column;
+            align-items: stretch;
+          }
         }
         .btn-hero-gold {
           flex: 1;
@@ -787,7 +794,9 @@ export default function HomePage() {
         }
         @media (max-width: 640px) {
           .stats-bar { grid-template-columns: repeat(2, 1fr); }
-          .stat-cell { border-bottom: 1px solid rgba(255,255,255,0.06); }
+          .stat-cell { padding: 20px 12px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+          .stat-value { font-size: 24px; }
+          .stat-label { font-size: 9px; letter-spacing: 1px; }
         }
 
         /* ── Sections ── */
@@ -795,6 +804,9 @@ export default function HomePage() {
           padding: 80px 5%;
           max-width: 1320px; margin: 0 auto;
           width: 100%;
+        }
+        @media (max-width: 640px) {
+          .section-padded { padding: 48px 4%; }
         }
         .section-alt {
           background: #0d1117;
@@ -826,6 +838,11 @@ export default function HomePage() {
           gap: 24px;
         }
         @media (max-width: 1024px) { .service-cards-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 640px) {
+          .service-card { padding: 24px 18px; }
+          .service-card-title { font-size: 18px; }
+          .service-card-btn-full { font-size: 10px; letter-spacing: 0.8px; padding: 12px 14px; }
+        }
         .service-card {
           border: 1px solid; border-radius: 18px;
           padding: 36px 32px;
@@ -960,14 +977,24 @@ export default function HomePage() {
           background: linear-gradient(to bottom, #080a0f 0%, #0d1117 100%);
           border-top: 1px solid rgba(255,215,0,0.1);
         }
+        @media (max-width: 640px) {
+          .cta-section { padding: 60px 5%; }
+        }
         .cta-title {
           font-family: var(--font-h);
           font-size: clamp(30px, 5vw, 52px);
           font-weight: 900; color: #fff; margin: 0 0 14px;
         }
         .cta-desc { color: var(--color-muted); font-size: 16px; margin-bottom: 36px; }
+        @media (max-width: 640px) {
+          .cta-desc { font-size: 14px; margin-bottom: 24px; }
+        }
         .cta-btns {
           display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+        }
+        @media (max-width: 500px) {
+          .cta-btns { flex-direction: column; align-items: stretch; gap: 12px; padding: 0 5%; }
+          .cta-btns a { width: 100%; justify-content: center; }
         }
         .btn-cta-green {
           display: inline-flex; align-items: center; gap: 8px;
@@ -977,6 +1004,7 @@ export default function HomePage() {
           padding: 14px 28px; border-radius: 10px;
           text-decoration: none; transition: transform .2s, box-shadow .2s;
           box-shadow: 0 4px 20px rgba(34,197,94,0.3);
+          min-height: 48px;
         }
         .btn-cta-green:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(34,197,94,0.45); }
 
@@ -995,6 +1023,9 @@ export default function HomePage() {
           max-width: 900px;
           margin: 0 auto;
           width: 100%;
+        }
+        @media (max-width: 640px) {
+          .faq-section { padding: 48px 4%; }
         }
         .faq-list {
           margin-top: 40px;
@@ -1027,6 +1058,10 @@ export default function HomePage() {
           font-size: 16px;
           text-align: left;
           cursor: pointer;
+          min-height: 48px;
+        }
+        @media (max-width: 640px) {
+          .faq-question { padding: 16px 16px; font-size: 14px; gap: 12px; }
         }
         .faq-answer {
           max-height: 0;
@@ -1037,9 +1072,15 @@ export default function HomePage() {
           line-height: 1.7;
           padding: 0 24px;
         }
+        @media (max-width: 640px) {
+          .faq-answer { padding: 0 16px; font-size: 13px; }
+        }
         .faq-item.active .faq-answer {
-          max-height: 160px;
+          max-height: 300px;
           padding: 0 24px 22px;
+        }
+        @media (max-width: 640px) {
+          .faq-item.active .faq-answer { padding: 0 16px 16px; }
         }
         .faq-icon {
           color: var(--color-gold);

@@ -107,7 +107,7 @@ export default function AboutPage() {
           Have questions about a BGMI account trade, UC transfer, or middleman fee? Reach out directly to our verification team.
         </p>
 
-        <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
           <div className="card-glass p-6 flex flex-col items-center">
             <Phone className="text-gold mb-3" size={24} />
             <h4 className="text-white font-bold text-xs uppercase">WhatsApp Call/Text</h4>

@@ -386,6 +386,17 @@ export default function EliteServices() {
           gap: 12px;
           margin-bottom: 40px;
         }
+        @media (max-width: 640px) {
+          .elite-tabs-container {
+            justify-content: flex-start;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding-bottom: 4px;
+            gap: 8px;
+          }
+          .elite-tabs-container::-webkit-scrollbar { display: none; }
+        }
         .elite-tab {
           display: flex; align-items: center; gap: 8px;
           background: transparent;
@@ -397,6 +408,15 @@ export default function EliteServices() {
           border-radius: 8px;
           cursor: pointer;
           transition: all 0.2s;
+          white-space: nowrap;
+          min-height: 44px;
+        }
+        @media (max-width: 640px) {
+          .elite-tab {
+            font-size: 11px;
+            padding: 8px 14px;
+            flex-shrink: 0;
+          }
         }
         .elite-tab:hover {
           color: #fff;
@@ -425,6 +445,9 @@ export default function EliteServices() {
           border-radius: 16px;
           padding: 32px;
         }
+        @media (max-width: 640px) {
+          .elite-card { padding: 20px 16px; border-radius: 14px; }
+        }
         .elite-left {
           display: flex;
           flex-direction: column;
@@ -440,6 +463,9 @@ export default function EliteServices() {
           font-family: var(--font-h); font-size: 24px; font-weight: 800;
           color: #fff; margin: 0 0 16px;
           display: flex; align-items: center; gap: 10px;
+        }
+        @media (max-width: 640px) {
+          .elite-title { font-size: 18px; gap: 8px; }
         }
         .elite-desc {
           color: var(--color-muted); font-size: 14px; line-height: 1.7;
@@ -548,6 +574,12 @@ export default function EliteServices() {
           font-size: 12px; font-weight: 800; letter-spacing: 1px; border: 1px solid;
           padding: 14px 32px; border-radius: 10px; text-decoration: none;
           transition: all 0.2s;
+          min-height: 48px;
+          text-align: center;
+        }
+        @media (max-width: 640px) {
+          .elite-cta-btn { font-size: 11px; padding: 12px 20px; width: 100%; display: block; }
+          .elite-cta-container { padding: 0 4%; }
         }
         .elite-cta-btn:hover { background: rgba(255,255,255,0.05) !important; color: #fff !important; }
       `}</style>

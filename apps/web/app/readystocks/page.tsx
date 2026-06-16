@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { getProducts } from "../actions";
 import ReadyStocksClient from "./ReadyStocksClient";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Verified BGMI Accounts Catalog | Ready Stocks",
   description: "Browse South India's largest and most trusted inventory of verified BGMI accounts for sale. Find Glacier M416 IDs, X-Suit accounts, and supercar skins.",

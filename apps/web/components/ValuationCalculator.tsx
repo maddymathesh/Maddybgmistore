@@ -3,9 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { 
   Sparkles, 
-  HelpCircle, 
   Car, 
-  User, 
   Sword, 
   Crown, 
   Info, 
@@ -793,7 +791,7 @@ export default function ValuationCalculator() {
                           <span className="text-2xs text-muted uppercase">Release:</span>
                           <select 
                             value={car.recency} 
-                            onChange={(e) => updateCarRecency(car.id, e.target.value as any)}
+                            onChange={(e) => updateCarRecency(car.id, e.target.value as "old" | "standard" | "latest")}
                             className="bg-black/80 border border-white/10 text-gold font-mono text-xs rounded p-1"
                           >
                             <option value="old">Old Release (Lighter Value)</option>

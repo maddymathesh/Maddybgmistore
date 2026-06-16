@@ -5,6 +5,8 @@ import { getReviews } from "../actions";
 import ReviewsClient, { SerializedReview } from "./ReviewsClient";
 import { AggregateRatingSchema, BreadcrumbSchema } from "../../components/SEO";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Customer Reviews | Maddy BGMI Store Verified Trust Score",
   description: "Read real client reviews and successful middleman transaction ratings for Maddy BGMI Store. Safe account delivery and UC transfer verified by South Indian gamers.",

@@ -717,6 +717,99 @@ export default function SupercarGiftPage() {
           </div>
         )}
 
+        {/* SELL YOUR SUPERCAR SECTION */}
+        <section style={{ padding: "40px 5% 80px", maxWidth: "1000px", margin: "0 auto" }}>
+          <div style={{
+            background: "rgba(17, 21, 32, 0.45)",
+            border: "1px solid rgba(255, 215, 0, 0.2)",
+            borderRadius: "24px",
+            padding: "40px",
+            backdropFilter: "blur(12px)"
+          }}>
+            <h2 style={{
+              fontFamily: "var(--font-h)", fontSize: "clamp(24px, 3vw, 32px)",
+              fontWeight: 900, marginBottom: "16px", color: "#fff",
+              display: "flex", alignItems: "center", gap: "12px"
+            }}>
+              <span style={{ width: "6px", height: "30px", background: "var(--color-gold)", borderRadius: "4px" }} />
+              Sell Your Supercar Gifts
+            </h2>
+            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "15px", lineHeight: 1.6, marginBottom: "30px" }}>
+              Have a BGMI Supercar Gift Card that you want to sell? Maddy BGMI Store purchases genuine Supercar Gift Cards through a secure and transparent process.
+            </p>
+            
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "40px" }}>
+              <div>
+                <h3 style={{ color: "var(--color-gold)", fontFamily: "var(--font-h)", fontSize: "18px", fontWeight: 800, marginBottom: "16px" }}>
+                  How It Works
+                </h3>
+                <ol style={{ paddingLeft: "20px", color: "rgba(255,255,255,0.8)", fontSize: "14px", lineHeight: 1.7, display: "flex", flexDirection: "column", gap: "10px" }}>
+                  <li>Contact us and provide the details of your Supercar Gift Card.</li>
+                  <li>Once both parties agree on the price, your card will be reserved in our system.</li>
+                  <li>A refundable security token of <strong>₹1,000</strong> must be paid to confirm the booking.</li>
+                  <li>Deliver the Supercar Gift Card to our account.</li>
+                  <li>After successful delivery and verification, your full payment will be processed, and the <strong>₹1,000 security token will be refunded</strong>.</li>
+                </ol>
+              </div>
+
+              <div>
+                <h3 style={{ color: "var(--color-gold)", fontFamily: "var(--font-h)", fontSize: "18px", fontWeight: 800, marginBottom: "16px" }}>
+                  Why We Require a Security Token
+                </h3>
+                <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "14px", lineHeight: 1.7 }}>
+                  The refundable security token helps ensure that only serious sellers reserve inventory with us. It protects both parties from fake bookings and unnecessary cancellations. Once the transaction is completed successfully, the full <strong>₹1,000</strong> is refunded along with your payment.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ marginTop: "30px", padding: "20px", background: "rgba(255,255,255,0.03)", borderRadius: "16px", border: "1px solid rgba(255,255,255,0.05)" }}>
+              <h3 style={{ color: "#fff", fontFamily: "var(--font-h)", fontSize: "16px", fontWeight: 800, marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
+                <Info size={16} style={{ color: "#f87171" }} /> Important Rules
+              </h3>
+              <ul style={{ paddingLeft: "20px", color: "rgba(255,255,255,0.7)", fontSize: "13px", lineHeight: 1.6, display: "flex", flexDirection: "column", gap: "8px", listStyleType: "disc" }}>
+                <li><strong>Payment is made only after the Supercar Gift has been successfully delivered and verified.</strong></li>
+                <li>Once your Supercar Gift Card is booked with Maddy BGMI Store, <strong>it must not be sold, gifted, or reserved for anyone else</strong>, including friends or other buyers.</li>
+                <li>A <strong>refundable ₹1,000 security token</strong> is required to confirm the booking and prevent fake reservations or last-minute cancellations.</li>
+                <li><strong>Do not negotiate prices or discuss the deal with buyers inside the BGMI game.</strong> All communication must take place through our official WhatsApp or Telegram channels.</li>
+                <li>If you discuss pricing in-game, attempt to bypass the agreed process, or sell the booked card to another person, <strong>the deal will be cancelled and the ₹1,000 security token will be forfeited.</strong></li>
+                <li>Any attempt to scam, provide false information, or violate these rules may result in a permanent ban from future transactions with Maddy BGMI Store.</li>
+              </ul>
+            </div>
+            
+            <div style={{ marginTop: "30px", display: "flex", gap: "16px", flexWrap: "wrap" }}>
+               <a 
+                 href="https://wa.me/+919025391516?text=Hi Maddy! I want to sell my Supercar Gift Card." 
+                 target="_blank" 
+                 rel="noreferrer"
+                 className="social-btn-wa"
+                 style={{
+                   display: "flex", alignItems: "center", gap: "8px",
+                   padding: "12px 24px", borderRadius: "10px",
+                   background: "#25D366", color: "#fff",
+                   fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "13px",
+                   textDecoration: "none", transition: "all 0.25s ease"
+                 }}
+               >
+                 <MessageCircle size={16} /> Contact to Sell on WhatsApp
+               </a>
+               <a 
+                 href="https://t.me/MBSxMADDY17?text=Hi Maddy! I want to sell my Supercar Gift Card." 
+                 target="_blank" 
+                 rel="noreferrer"
+                 className="social-btn-tg"
+                 style={{
+                   display: "flex", alignItems: "center", gap: "8px",
+                   padding: "12px 24px", borderRadius: "10px",
+                   background: "#0088cc", color: "#fff",
+                   fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "13px",
+                   textDecoration: "none", transition: "all 0.25s ease"
+                 }}
+               >
+                 <Send size={16} /> Contact to Sell on Telegram
+               </a>
+            </div>
+          </div>
+        </section>
       </div>
 
       <style>{`

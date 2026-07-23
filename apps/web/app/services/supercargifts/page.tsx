@@ -128,7 +128,7 @@ export default function SupercarGiftPage() {
     return 0;
   });
 
-  const formatVehicle = (vehicle: string | null) => {
+  const formatVehicle = (vehicle?: string | null) => {
     if (!vehicle) return "UAZ";
     const v = vehicle.toUpperCase();
     if (["DACIA", "MIRADO", "COUPE", "ROADSTER"].includes(v) || v.includes("SEDEN") || v.includes("SEDAN")) {

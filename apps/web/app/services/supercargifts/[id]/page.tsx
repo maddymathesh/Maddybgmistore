@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 const contactText = (name: string, id: string) => 
   `Hi Maddy! I am interested in buying the ${name} Supercar (ID: ${id}) via your premium Gifting service. Please guide me.`;
 
-const formatVehicle = (vehicle: string | null) => {
+const formatVehicle = (vehicle?: string | null) => {
   if (!vehicle) return "UAZ";
   const v = vehicle.toUpperCase();
   if (["DACIA", "MIRADO", "COUPE", "ROADSTER"].includes(v) || v.includes("SEDEN") || v.includes("SEDAN")) {

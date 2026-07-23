@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { 
   MessageCircle, Send, Loader2, Info, CheckCircle, 
-  Car, ShieldCheck, Clock, Users, Smartphone, Zap, Flame
+  Car, ShieldCheck, Clock, Users, Smartphone, Zap, Flame, Calendar
 } from "lucide-react";
 import { getSupercarGifts } from "../../actions";
 
@@ -105,6 +105,27 @@ export default function SupercarGiftPage() {
             }}>
               Drive the ultimate supercars in BGMI. Fully authorized direct transmission to your account via secure in-game gifting logs.
             </p>
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: "12px",
+              marginTop: "28px", padding: "12px 24px",
+              background: "rgba(14, 17, 24, 0.65)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              border: "1px solid rgba(255, 215, 0, 0.35)",
+              borderRadius: "50px",
+              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
+              position: "relative",
+              overflow: "hidden"
+            }}>
+              <div style={{
+                position: "absolute", top: 0, left: 0, right: 0, height: "1px",
+                background: "linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.8), transparent)"
+              }} />
+              <Calendar size={18} style={{ color: "var(--color-gold)" }} />
+              <span style={{ color: "#fff", fontWeight: 600, letterSpacing: "0.5px", fontSize: "14px" }}>
+                Event Active: <span style={{ color: "var(--color-gold)", marginLeft: "4px", textShadow: "0 0 10px rgba(255, 215, 0, 0.4)" }}>16/07/2026 (5:30) — 08/09/2026 (5:29)</span>
+              </span>
+            </div>
           </div>
         </section>
 

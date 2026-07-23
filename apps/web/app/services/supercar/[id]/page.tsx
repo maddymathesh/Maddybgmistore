@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getSupercarGiftById } from "../../../../actions";
+import { getSupercarGiftById } from "../../../actions";
 import Link from "next/link";
 import { ArrowLeft, ChevronRight, ShieldCheck, CheckCircle, Zap, Send, MessageCircle } from "lucide-react";
 

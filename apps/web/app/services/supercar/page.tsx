@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { 
   MessageCircle, Send, Loader2, Info, CheckCircle, 
-  Car, ShieldCheck, Clock, Users, Smartphone, Zap, Flame, Calendar
+  Car, ShieldCheck, Clock, Users, Smartphone, Zap, Flame, Calendar, X
 } from "lucide-react";
 import { getSupercarGifts } from "../../actions";
 
@@ -24,6 +24,7 @@ export default function SupercarGiftPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedFilter, setSelectedFilter] = useState<string>("all"); // 'all', '1-card', '2-card', '3-card'
   const [timeLeft, setTimeLeft] = useState<{days: number, hours: number, minutes: number, seconds: number} | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useEffect(() => {
     // End date: September 8, 2026, 05:29 AM IST
@@ -83,6 +84,21 @@ export default function SupercarGiftPage() {
     if (selectedFilter === "all") return true;
     return getCardCategory(c.carType) === selectedFilter;
   });
+
+  const formatVehicle = (vehicle: string | null) => {
+    if (!vehicle) return "UAZ";
+    const v = vehicle.toUpperCase();
+    if (["DACIA", "MIRADO", "COUPE", "ROADSTER"].includes(v) || v.includes("SEDEN") || v.includes("SEDAN")) {
+      return `Sedan (${vehicle})`;
+    }
+    if (v.includes("UAZ")) {
+      return `UAZ (${vehicle})`;
+    }
+    if (v.includes("BUGGY")) {
+      return `Buggy`;
+    }
+    return vehicle;
+  };
 
   return (
     <>
@@ -449,10 +465,12 @@ export default function SupercarGiftPage() {
                           alt={c.supercarName}
                           loading="lazy"
                           className="hover-zoom"
+                          onClick={() => setSelectedImage(c.imageUrl!)}
                           style={{
                             width: "100%",
                             height: "100%",
-                            objectFit: "cover",
+                            objectFit: "contain",
+                            cursor: "zoom-in",
                             transition: "transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)"
                           }} 
                         />
@@ -551,8 +569,8 @@ export default function SupercarGiftPage() {
                       }}>
                         <Car size={13} style={{ color: "var(--color-gold)" }} />
                         <span>
-                          Fits: <strong style={{ color: "#fff", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                            {c.applicableVehicle || "UAZ"}
+                          Applicable Vehicle - <strong style={{ color: "#fff", textTransform: "capitalize", letterSpacing: "0.5px" }}>
+                            {formatVehicle(c.applicableVehicle)}
                           </strong>
                         </span>
                       </div>
@@ -625,6 +643,61 @@ export default function SupercarGiftPage() {
             </div>
           )}
         </section>
+
+        {/* FULL SCREEN IMAGE MODAL */}
+        {selectedImage && (
+          <div 
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0, 0, 0, 0.9)",
+              zIndex: 9999,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backdropFilter: "blur(8px)"
+            }}
+            onClick={() => setSelectedImage(null)}
+          >
+            <button 
+              onClick={() => setSelectedImage(null)}
+              style={{
+                position: "absolute",
+                top: "30px",
+                right: "30px",
+                background: "rgba(255,255,255,0.1)",
+                border: "none",
+                borderRadius: "50%",
+                padding: "12px",
+                color: "#fff",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "background 0.3s"
+              }}
+              onMouseOver={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.2)"}
+              onMouseOut={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
+            >
+              <X size={28} />
+            </button>
+            <img 
+              src={selectedImage} 
+              alt="Full Size Car" 
+              style={{
+                maxWidth: "90%",
+                maxHeight: "90vh",
+                objectFit: "contain",
+                borderRadius: "12px",
+                boxShadow: "0 10px 50px rgba(0,0,0,0.8)"
+              }} 
+              onClick={(e) => e.stopPropagation()} 
+            />
+          </div>
+        )}
 
       </div>
 

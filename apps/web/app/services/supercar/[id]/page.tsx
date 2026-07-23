@@ -63,13 +63,13 @@ export default async function SupercarDetailsPage({ params }: PageProps) {
     notFound();
   }
 
-  const stock = res.product;
-  const waLink = `https://wa.me/+919025391516?text=${encodeURIComponent(contactText(stock.supercarName, stock.id))}`;
-  const tgLink = `https://t.me/MBSxMADDY17?text=${encodeURIComponent(contactText(stock.supercarName, stock.id))}`;
+  const fullNameWithColour = stock.colour ? `${stock.supercarName} (${stock.colour})` : stock.supercarName;
+  const waLink = `https://wa.me/+919025391516?text=${encodeURIComponent(contactText(fullNameWithColour, stock.id))}`;
+  const tgLink = `https://t.me/MBSxMADDY17?text=${encodeURIComponent(contactText(fullNameWithColour, stock.id))}`;
   
   const sellContactText = (name: string) => `Hi Maddy! I have a ${name} Supercar Gift Card that I want to sell. Please guide me through the process.`;
-  const sellWaLink = `https://wa.me/+919025391516?text=${encodeURIComponent(sellContactText(stock.supercarName))}`;
-  const sellTgLink = `https://t.me/MBSxMADDY17?text=${encodeURIComponent(sellContactText(stock.supercarName))}`;
+  const sellWaLink = `https://wa.me/+919025391516?text=${encodeURIComponent(sellContactText(fullNameWithColour))}`;
+  const sellTgLink = `https://t.me/MBSxMADDY17?text=${encodeURIComponent(sellContactText(fullNameWithColour))}`;
 
   return (
     <div className="rs-details-container" style={{ padding: "80px 5% 100px", maxWidth: "1200px", margin: "0 auto" }}>
@@ -212,7 +212,7 @@ export default async function SupercarDetailsPage({ params }: PageProps) {
                 Want to sell this Supercar?
               </h3>
               <p className="text-xs text-muted mb-5 leading-relaxed">
-                Have a {stock.supercarName} gift card? We buy genuine supercar gifts through a secure process.
+                Have a {fullNameWithColour} gift card? We buy genuine supercar gifts through a secure process.
               </p>
               <div className="flex gap-2">
                 <a href={sellWaLink} target="_blank" rel="noreferrer" className="flex-1 bg-white/5 hover:bg-white/10 text-white text-xs font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition border border-white/10">

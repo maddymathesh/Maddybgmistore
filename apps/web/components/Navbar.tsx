@@ -22,7 +22,7 @@ const navLinks = [
     subLinks: [
       { to: "/services/uc", label: "UC Purchase" },
       { to: "/services/xsuit", label: "X-Suit Gift" },
-      { to: "/services/supercar", label: "Supercar Gift" },
+      { to: "/services/supercargifts", label: "Supercar Gift" },
     ],
   },
   {

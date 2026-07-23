@@ -39,7 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/connectwithus",
     "/services/uc",
     "/services/xsuit",
-    "/services/supercar",
+    "/services/supercargifts",
     "/blog",
     "/about",
     "/why-trust-us",

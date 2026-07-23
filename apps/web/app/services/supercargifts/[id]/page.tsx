@@ -77,12 +77,12 @@ export default async function SupercarDetailsPage({ params }: PageProps) {
       
       {/* Back navigation & Breadcrumbs */}
       <div className="back-nav mb-6">
-        <Link href="/services/supercar" className="back-link">
+        <Link href="/services/supercargifts" className="back-link">
           <ArrowLeft size={16} />
           <span>Back to Showroom</span>
         </Link>
         <div className="breadcrumbs">
-          <Link href="/services/supercar">Supercars</Link>
+          <Link href="/services/supercargifts">Supercars</Link>
           <ChevronRight size={14} />
           <span>{stock.carType || "Supercar"}</span>
           <ChevronRight size={14} />

@@ -58,7 +58,7 @@ export const metadata: Metadata = {
     siteName: "Maddy BGMI Store",
     images: [
       {
-        url: "/og-image.webp",
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "Maddy BGMI Store — Buy & Sell BGMI Accounts",
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Maddy BGMI Store — Buy & Sell BGMI Accounts",
     description: "South India's most trusted BGMI marketplace. Buy verified accounts or sell yours safely. 2000+ happy buyers since 2019.",
-    images: ["/og-image.webp"],
+    images: ["/og-image.jpg"],
   },
   robots: {
     index: true,

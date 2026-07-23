@@ -66,6 +66,10 @@ export default async function SupercarDetailsPage({ params }: PageProps) {
   const stock = res.product;
   const waLink = `https://wa.me/+919025391516?text=${encodeURIComponent(contactText(stock.supercarName, stock.id))}`;
   const tgLink = `https://t.me/MBSxMADDY17?text=${encodeURIComponent(contactText(stock.supercarName, stock.id))}`;
+  
+  const sellContactText = (name: string) => `Hi Maddy! I have a ${name} Supercar Gift Card that I want to sell. Please guide me through the process.`;
+  const sellWaLink = `https://wa.me/+919025391516?text=${encodeURIComponent(sellContactText(stock.supercarName))}`;
+  const sellTgLink = `https://t.me/MBSxMADDY17?text=${encodeURIComponent(sellContactText(stock.supercarName))}`;
 
   return (
     <div className="rs-details-container" style={{ padding: "80px 5% 100px", maxWidth: "1200px", margin: "0 auto" }}>
@@ -149,6 +153,23 @@ export default async function SupercarDetailsPage({ params }: PageProps) {
               </li>
             </ul>
           </div>
+
+          {/* Instructions to Buy */}
+          <div className="description-container glass-panel p-6 sm:p-8 mt-6">
+            <h2 className="section-title font-h font-black text-lg text-white uppercase tracking-wider mb-5 flex items-center gap-3">
+              <span className="h-5 w-1 bg-gold rounded-full" />
+              <span>How To Buy</span>
+            </h2>
+            <div className="text-sm leading-relaxed text-[#c5cdd6]">
+              <ol className="list-decimal list-inside flex flex-col gap-3">
+                <li>Click on <strong className="text-white">Order via WhatsApp</strong> or <strong className="text-white">Telegram</strong>.</li>
+                <li>Send the pre-filled message with the Supercar ID to our team.</li>
+                <li>Provide your BGMI Character ID for the gift transmission.</li>
+                <li>Complete the payment through our secure methods.</li>
+                <li>Receive the Supercar gift directly in your BGMI account instantly!</li>
+              </ol>
+            </div>
+          </div>
         </div>
 
         {/* Right Column: Sticky Purchasing and Bindings Sidebar */}
@@ -198,6 +219,25 @@ export default async function SupercarDetailsPage({ params }: PageProps) {
                 <p className="cta-note text-center text-muted text-[10px] uppercase tracking-wider mt-4">
                   * Must provide your BGMI Character ID for the gift transmission.
                 </p>
+              </div>
+            </div>
+            
+            {/* Sell Supercar Card */}
+            <div className="bindings-card p-6 mt-6">
+              <h3 className="font-h font-bold text-white text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
+                <ShieldCheck size={16} className="text-gold" />
+                Want to sell this Supercar?
+              </h3>
+              <p className="text-xs text-muted mb-5 leading-relaxed">
+                Have a {stock.supercarName} gift card? We buy genuine supercar gifts through a secure process.
+              </p>
+              <div className="flex gap-2">
+                <a href={sellWaLink} target="_blank" rel="noreferrer" className="flex-1 bg-white/5 hover:bg-white/10 text-white text-xs font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition border border-white/10">
+                  <WhatsAppLogo /> Sell via WA
+                </a>
+                <a href={sellTgLink} target="_blank" rel="noreferrer" className="flex-1 bg-white/5 hover:bg-white/10 text-white text-xs font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition border border-white/10">
+                  <Send size={14} /> Sell via TG
+                </a>
               </div>
             </div>
           </div>

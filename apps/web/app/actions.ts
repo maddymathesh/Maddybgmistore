@@ -102,21 +102,42 @@ export async function getSupercarGifts() {
   }
 }
 
-export async function getSupercarGiftById(id: string) {
+export function slugifySupercar(name: string, colour?: string | null): string {
+  const text = colour ? `${name} ${colour}` : name;
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+export async function getSupercarGiftById(idOrSlug: string) {
   try {
-    const data = await db
-      .select()
-      .from(supercarGifts)
-      .where(eq(supercarGifts.id, id))
-      .limit(1);
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrSlug);
     
-    if (!data.length) {
+    if (isUuid) {
+      const data = await db
+        .select()
+        .from(supercarGifts)
+        .where(eq(supercarGifts.id, idOrSlug))
+        .limit(1);
+      
+      if (data.length) {
+        return { success: true, product: data[0] };
+      }
+    }
+
+    const all = await db.select().from(supercarGifts);
+    const matched = all.find(c => slugifySupercar(c.supercarName, c.colour) === idOrSlug || c.id === idOrSlug);
+    
+    if (!matched) {
       return { success: false, message: "Supercar gift not found" };
     }
     
-    return { success: true, product: data[0] };
+    return { success: true, product: matched };
   } catch (error) {
-    console.error("Failed to fetch supercar gift by id:", error);
+    console.error("Failed to fetch supercar gift by id/slug:", error);
     return { success: false, message: "Internal server error" };
   }
 }

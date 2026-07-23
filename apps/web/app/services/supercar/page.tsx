@@ -7,7 +7,7 @@ import {
   Car, ShieldCheck, Clock, Users, Smartphone, Zap, Flame, Calendar, X, ExternalLink
 } from "lucide-react";
 import Link from "next/link";
-import { getSupercarGifts } from "../../actions";
+import { getSupercarGifts, slugifySupercar } from "../../actions";
 
 interface SupercarGift {
   id: string;
@@ -635,7 +635,7 @@ export default function SupercarGiftPage() {
                         display: "grid", gap: "10px", marginTop: "auto"
                       }}>
                         <Link 
-                          href={`/services/supercar/${c.id}`}
+                          href={`/services/supercar/${slugifySupercar(c.supercarName, c.colour)}`}
                           style={{
                             display: "flex", justifyContent: "center", alignItems: "center", gap: "8px",
                             padding: "12px", borderRadius: "10px",

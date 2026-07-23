@@ -7,7 +7,17 @@ import {
   Car, ShieldCheck, Clock, Users, Smartphone, Zap, Flame, Calendar, X, ExternalLink
 } from "lucide-react";
 import Link from "next/link";
-import { getSupercarGifts, slugifySupercar } from "../../actions";
+import { getSupercarGifts } from "../../actions";
+
+function slugifySupercar(name: string, colour?: string | null): string {
+  const text = colour ? `${name} ${colour}` : name;
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
 
 interface SupercarGift {
   id: string;

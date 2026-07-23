@@ -102,7 +102,7 @@ export async function getSupercarGifts() {
   }
 }
 
-export function slugifySupercar(name: string, colour?: string | null): string {
+function slugifySupercar(name: string, colour?: string | null): string {
   const text = colour ? `${name} ${colour}` : name;
   return text
     .toLowerCase()

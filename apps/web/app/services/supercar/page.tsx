@@ -23,6 +23,33 @@ export default function SupercarGiftPage() {
   const [cars, setCars] = useState<SupercarGift[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedFilter, setSelectedFilter] = useState<string>("all"); // 'all', '1-card', '2-card', '3-card'
+  const [timeLeft, setTimeLeft] = useState<{days: number, hours: number, minutes: number, seconds: number} | null>(null);
+
+  useEffect(() => {
+    // End date: September 8, 2026, 05:29 AM IST
+    const endDate = new Date("2026-09-08T05:29:00+05:30").getTime();
+    
+    const updateCountdown = () => {
+      const now = new Date().getTime();
+      const distance = endDate - now;
+
+      if (distance < 0) {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        return;
+      }
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      setTimeLeft({ days, hours, minutes, seconds });
+    };
+
+    updateCountdown();
+    const timerId = setInterval(updateCountdown, 1000);
+    return () => clearInterval(timerId);
+  }, []);
 
   useEffect(() => {
     const fetchCars = async () => {
@@ -106,25 +133,63 @@ export default function SupercarGiftPage() {
               Drive the ultimate supercars in BGMI. Fully authorized direct transmission to your account via secure in-game gifting logs.
             </p>
             <div style={{
-              display: "inline-flex", alignItems: "center", gap: "12px",
-              marginTop: "28px", padding: "12px 24px",
-              background: "rgba(14, 17, 24, 0.65)",
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
-              border: "1px solid rgba(255, 215, 0, 0.35)",
-              borderRadius: "50px",
-              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
+              display: "inline-flex", flexDirection: "column", gap: "10px",
+              marginTop: "28px", padding: "16px 30px",
+              background: "rgba(14, 17, 24, 0.75)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border: "1px solid rgba(255, 215, 0, 0.4)",
+              borderRadius: "24px",
+              boxShadow: "0 10px 40px rgba(0, 0, 0, 0.6)",
               position: "relative",
               overflow: "hidden"
             }}>
               <div style={{
-                position: "absolute", top: 0, left: 0, right: 0, height: "1px",
-                background: "linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.8), transparent)"
+                position: "absolute", top: 0, left: 0, right: 0, height: "2px",
+                background: "linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.9), transparent)"
               }} />
-              <Calendar size={18} style={{ color: "var(--color-gold)" }} />
-              <span style={{ color: "#fff", fontWeight: 600, letterSpacing: "0.5px", fontSize: "14px" }}>
-                Event Active: <span style={{ color: "var(--color-gold)", marginLeft: "4px", textShadow: "0 0 10px rgba(255, 215, 0, 0.4)" }}>16/07/2026 (5:30) — 08/09/2026 (5:29)</span>
-              </span>
+              
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", justifyContent: "center" }}>
+                <Calendar size={18} style={{ color: "var(--color-gold)" }} />
+                <span style={{ color: "#fff", fontWeight: 600, letterSpacing: "0.5px", fontSize: "14px" }}>
+                  Event Active: <span style={{ color: "var(--color-gold)", marginLeft: "4px", textShadow: "0 0 10px rgba(255, 215, 0, 0.4)" }}>16/07/2026 (5:30 AM) — 08/09/2026 (5:29 AM)</span>
+                </span>
+              </div>
+              
+              {timeLeft && (
+                <div style={{ 
+                  display: "flex", alignItems: "center", gap: "12px", justifyContent: "center",
+                  marginTop: "4px", paddingTop: "12px", borderTop: "1px solid rgba(255,255,255,0.1)" 
+                }}>
+                  <Clock size={16} style={{ color: "var(--color-gold)" }} className="animate-pulse" />
+                  <span style={{ color: "rgba(255,255,255,0.7)", fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px" }}>Ends In:</span>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    {[
+                      { label: "d", value: timeLeft.days },
+                      { label: "h", value: timeLeft.hours },
+                      { label: "m", value: timeLeft.minutes },
+                      { label: "s", value: timeLeft.seconds }
+                    ].map((item, idx) => (
+                      <div key={idx} style={{ 
+                        background: "rgba(255,215,0,0.1)", 
+                        border: "1px solid rgba(255,215,0,0.2)",
+                        borderRadius: "8px", 
+                        padding: "6px 10px",
+                        minWidth: "48px",
+                        textAlign: "center",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center"
+                      }}>
+                        <span style={{ color: "var(--color-gold)", fontWeight: 700, fontSize: "18px", lineHeight: "1" }}>
+                          {item.value.toString().padStart(2, '0')}
+                        </span>
+                        <span style={{ color: "rgba(255,255,255,0.5)", fontSize: "10px", marginTop: "2px", textTransform: "uppercase" }}>{item.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </section>

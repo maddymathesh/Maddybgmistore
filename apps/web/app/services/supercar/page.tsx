@@ -555,34 +555,13 @@ export default function SupercarGiftPage() {
                         {c.supercarName}
                       </h3>
                       
-                      {/* Vehicle and Colour Pills */}
                       <div style={{
                         display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
                         gap: "8px",
-                        flexWrap: "wrap",
-                        justifyContent: "center",
-                        marginBottom: "12px"
+                        marginBottom: "16px"
                       }}>
-                        <div style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: "6px",
-                          background: "rgba(255,255,255,0.04)",
-                          border: "1px solid rgba(255,255,255,0.08)",
-                          padding: "4px 12px",
-                          borderRadius: "8px",
-                          fontSize: "11px",
-                          color: "rgba(255,255,255,0.7)"
-                        }}>
-                          <Car size={13} style={{ color: "var(--color-gold)" }} />
-                          <span>
-                            Vehicle - <strong style={{ color: "#fff", textTransform: "capitalize", letterSpacing: "0.5px" }}>
-                              {formatVehicle(c.applicableVehicle)}
-                            </strong>
-                          </span>
-                        </div>
-                        
                         {c.colour && (
                           <div style={{
                             display: "inline-flex",
@@ -591,9 +570,9 @@ export default function SupercarGiftPage() {
                             gap: "6px",
                             background: "rgba(255,255,255,0.04)",
                             border: "1px solid rgba(255,255,255,0.08)",
-                            padding: "4px 12px",
+                            padding: "6px 16px",
                             borderRadius: "8px",
-                            fontSize: "11px",
+                            fontSize: "12px",
                             color: "rgba(255,255,255,0.9)"
                           }}>
                             <span>
@@ -603,6 +582,26 @@ export default function SupercarGiftPage() {
                             </span>
                           </div>
                         )}
+
+                        <div style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "6px",
+                          background: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          padding: "6px 16px",
+                          borderRadius: "8px",
+                          fontSize: "12px",
+                          color: "rgba(255,255,255,0.7)"
+                        }}>
+                          <Car size={13} style={{ color: "var(--color-gold)" }} />
+                          <span>
+                            Vehicle - <strong style={{ color: "#fff", textTransform: "capitalize", letterSpacing: "0.5px" }}>
+                              {formatVehicle(c.applicableVehicle)}
+                            </strong>
+                          </span>
+                        </div>
                       </div>
                       
                       <div style={{

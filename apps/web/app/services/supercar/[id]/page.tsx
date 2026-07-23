@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getSupercarGiftById } from "../../../actions";
 import Link from "next/link";
-import { ArrowLeft, ChevronRight, ShieldCheck, CheckCircle, Zap, Send, MessageCircle } from "lucide-react";
+import { ArrowLeft, ChevronRight, ShieldCheck, CheckCircle, Zap, Send, MessageCircle, Info, Clock, Users, Smartphone } from "lucide-react";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -153,23 +153,6 @@ export default async function SupercarDetailsPage({ params }: PageProps) {
               </li>
             </ul>
           </div>
-
-          {/* Instructions to Buy */}
-          <div className="description-container glass-panel p-6 sm:p-8 mt-6">
-            <h2 className="section-title font-h font-black text-lg text-white uppercase tracking-wider mb-5 flex items-center gap-3">
-              <span className="h-5 w-1 bg-gold rounded-full" />
-              <span>How To Buy</span>
-            </h2>
-            <div className="text-sm leading-relaxed text-[#c5cdd6]">
-              <ol className="list-decimal list-inside flex flex-col gap-3">
-                <li>Click on <strong className="text-white">Order via WhatsApp</strong> or <strong className="text-white">Telegram</strong>.</li>
-                <li>Send the pre-filled message with the Supercar ID to our team.</li>
-                <li>Provide your BGMI Character ID for the gift transmission.</li>
-                <li>Complete the payment through our secure methods.</li>
-                <li>Receive the Supercar gift directly in your BGMI account instantly!</li>
-              </ol>
-            </div>
-          </div>
         </div>
 
         {/* Right Column: Sticky Purchasing and Bindings Sidebar */}
@@ -239,6 +222,97 @@ export default async function SupercarDetailsPage({ params }: PageProps) {
                   <Send size={14} /> Sell via TG
                 </a>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Gifting Protocols & Conditions */}
+      <div className="gifting-protocols-container mt-12 glass-panel p-8 sm:p-10 border border-white/5 rounded-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-[100px] pointer-events-none" />
+        
+        <h2 className="section-title font-h font-black text-xl text-white tracking-wide mb-8 flex items-center gap-3">
+          <Info size={24} className="text-gold" />
+          <span>Gifting Protocols & Conditions</span>
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          {/* Left: Sourcing Sequence */}
+          <div className="sourcing-sequence relative">
+            <h3 className="text-gold font-bold text-sm tracking-widest uppercase mb-6">Sourcing Sequence</h3>
+            
+            <div className="sequence-steps flex flex-col gap-6 relative">
+              <div className="absolute left-[15px] top-8 bottom-4 w-px border-l border-dashed border-white/20" />
+              
+              <div className="step-item flex gap-4 relative z-10">
+                <div className="step-number w-8 h-8 rounded-full border-2 border-gold text-gold flex items-center justify-center font-bold text-sm bg-[#111318] shrink-0">1</div>
+                <div className="step-content pt-1">
+                  <h4 className="text-white font-bold text-sm mb-1">Select Token Spec</h4>
+                  <p className="text-[#8b949e] text-xs leading-relaxed">Choose your Supercar design and preferred token card requirement.</p>
+                </div>
+              </div>
+
+              <div className="step-item flex gap-4 relative z-10">
+                <div className="step-number w-8 h-8 rounded-full border-2 border-gold text-gold flex items-center justify-center font-bold text-sm bg-[#111318] shrink-0">2</div>
+                <div className="step-content pt-1">
+                  <h4 className="text-white font-bold text-sm mb-1">Share Game Details</h4>
+                  <p className="text-[#8b949e] text-xs leading-relaxed">Send us your numerical In-Game Character ID. No login credentials needed.</p>
+                </div>
+              </div>
+
+              <div className="step-item flex gap-4 relative z-10">
+                <div className="step-number w-8 h-8 rounded-full border-2 border-gold text-gold flex items-center justify-center font-bold text-sm bg-[#111318] shrink-0">3</div>
+                <div className="step-content pt-1">
+                  <h4 className="text-white font-bold text-sm mb-1">Accept friendship Lock</h4>
+                  <p className="text-[#8b949e] text-xs leading-relaxed">Accept friend requests sent from our premium merchant account.</p>
+                </div>
+              </div>
+
+              <div className="step-item flex gap-4 relative z-10">
+                <div className="step-number w-8 h-8 rounded-full border-2 border-gold text-gold flex items-center justify-center font-bold text-sm bg-[#111318] shrink-0">4</div>
+                <div className="step-content pt-1">
+                  <h4 className="text-white font-bold text-sm mb-1">72 Hours Buffer Wait</h4>
+                  <p className="text-[#8b949e] text-xs leading-relaxed">Wait the official cooldown period required to execute the gift link.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: BGMI Official Gifting Limits */}
+          <div className="gifting-limits bg-[#111318] rounded-xl border border-white/5 p-6 sm:p-8">
+            <h3 className="text-gold font-bold text-sm tracking-widest uppercase mb-6">BGMI Official Gifting Limits</h3>
+            
+            <div className="limits-list flex flex-col gap-6">
+              <div className="limit-item flex gap-4">
+                <div className="limit-icon mt-1 text-gold opacity-80"><Clock size={18} /></div>
+                <div className="limit-content">
+                  <h4 className="text-white font-bold text-sm mb-1">72 Hours Cooldown</h4>
+                  <p className="text-[#8b949e] text-xs leading-relaxed">Accounts must remain friends in-game for at least 72 hours before a gift can be processed.</p>
+                </div>
+              </div>
+
+              <div className="limit-item flex gap-4">
+                <div className="limit-icon mt-1 text-gold opacity-80"><Users size={18} /></div>
+                <div className="limit-content">
+                  <h4 className="text-white font-bold text-sm mb-1">50+ Synergy points</h4>
+                  <p className="text-[#8b949e] text-xs leading-relaxed">Requires at least 50 synergy. Easily generated by sending basic synergy gifts or playing matches.</p>
+                </div>
+              </div>
+
+              <div className="limit-item flex gap-4">
+                <div className="limit-icon mt-1 text-gold opacity-80"><Smartphone size={18} /></div>
+                <div className="limit-content">
+                  <h4 className="text-white font-bold text-sm mb-1">Level 10+ Requirement</h4>
+                  <p className="text-[#8b949e] text-xs leading-relaxed">Receiver BGMI account must be level 10 or above to accept legendary inventory items.</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-6 pt-5 border-t border-white/5 flex items-start gap-2">
+              <Zap size={12} className="text-gold mt-0.5 shrink-0" />
+              <p className="text-[#8b949e] text-[11px] italic">
+                * These limits are strictly enforced by BGMI game mechanics.
+              </p>
             </div>
           </div>
         </div>

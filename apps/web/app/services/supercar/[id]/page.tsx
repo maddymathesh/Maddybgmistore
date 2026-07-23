@@ -63,6 +63,7 @@ export default async function SupercarDetailsPage({ params }: PageProps) {
     notFound();
   }
 
+  const stock = res.product;
   const fullNameWithColour = stock.colour ? `${stock.supercarName} (${stock.colour})` : stock.supercarName;
   const waLink = `https://wa.me/+919025391516?text=${encodeURIComponent(contactText(fullNameWithColour, stock.id))}`;
   const tgLink = `https://t.me/MBSxMADDY17?text=${encodeURIComponent(contactText(fullNameWithColour, stock.id))}`;

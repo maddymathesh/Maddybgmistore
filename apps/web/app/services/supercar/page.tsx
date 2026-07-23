@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { 
   MessageCircle, Send, Loader2, Info, CheckCircle, 
-  Car, ShieldCheck, Clock, Users, Smartphone, Zap, Flame, Calendar, X, ExternalLink
+  Car, ShieldCheck, Clock, Users, Smartphone, Zap, Flame, Calendar, X, ExternalLink, Search, SlidersHorizontal, RotateCcw, Filter
 } from "lucide-react";
 import Link from "next/link";
 import { getSupercarGifts } from "../../actions";
@@ -35,6 +35,10 @@ export default function SupercarGiftPage() {
   const [cars, setCars] = useState<SupercarGift[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedFilter, setSelectedFilter] = useState<string>("all"); // 'all', '1-card', '2-card', '3-card'
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedVehicle, setSelectedVehicle] = useState<string>("all");
+  const [selectedModel, setSelectedModel] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("default");
   const [timeLeft, setTimeLeft] = useState<{days: number, hours: number, minutes: number, seconds: number} | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
@@ -91,10 +95,37 @@ export default function SupercarGiftPage() {
     return "other";
   };
 
-  // Filter cars based on selection
+  // Dynamic filter options extracted from loaded cars
+  const uniqueVehicles = Array.from(new Set(cars.map(c => c.applicableVehicle).filter(Boolean))) as string[];
+  const uniqueModels = Array.from(new Set(cars.map(c => c.supercarName.trim()).filter(Boolean))) as string[];
+
+  const isFilterActive = selectedFilter !== "all" || searchQuery !== "" || selectedVehicle !== "all" || selectedModel !== "all" || sortBy !== "default";
+
+  const resetAllFilters = () => {
+    setSelectedFilter("all");
+    setSearchQuery("");
+    setSelectedVehicle("all");
+    setSelectedModel("all");
+    setSortBy("default");
+  };
+
+  // Filter cars based on selection, model, vehicle, search, and sort
   const filteredCars = cars.filter(c => {
-    if (selectedFilter === "all") return true;
-    return getCardCategory(c.carType) === selectedFilter;
+    if (selectedFilter !== "all" && getCardCategory(c.carType) !== selectedFilter) return false;
+    if (selectedVehicle !== "all" && (c.applicableVehicle || "").toLowerCase() !== selectedVehicle.toLowerCase()) return false;
+    if (selectedModel !== "all" && c.supercarName.trim().toLowerCase() !== selectedModel.toLowerCase()) return false;
+    if (searchQuery.trim() !== "") {
+      const q = searchQuery.toLowerCase().trim();
+      const nameMatch = c.supercarName.toLowerCase().includes(q);
+      const colourMatch = (c.colour || "").toLowerCase().includes(q);
+      const vehicleMatch = (c.applicableVehicle || "").toLowerCase().includes(q);
+      if (!nameMatch && !colourMatch && !vehicleMatch) return false;
+    }
+    return true;
+  }).sort((a, b) => {
+    if (sortBy === "price-low") return parseFloat(a.offerPrice) - parseFloat(b.offerPrice);
+    if (sortBy === "price-high") return parseFloat(b.offerPrice) - parseFloat(a.offerPrice);
+    return 0;
   });
 
   const formatVehicle = (vehicle: string | null) => {
@@ -357,52 +388,208 @@ export default function SupercarGiftPage() {
 
         {/* INTERACTIVE SHOWROOM FILTER BAR */}
         <section style={{ padding: "0 5% 30px" }}>
-          <div style={{ maxWidth: "1200px", margin: "0 auto", textAlign: "center" }}>
-            <span style={{
-              fontSize: "11px", fontWeight: 700, color: "var(--color-gold)",
-              letterSpacing: "1.5px", textTransform: "uppercase", display: "block",
-              marginBottom: "12px", fontFamily: "var(--font-h)"
-            }}>
-              Interactive Filters
-            </span>
+          <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+            <div style={{ textAlign: "center", marginBottom: "16px" }}>
+              <span style={{
+                fontSize: "11px", fontWeight: 700, color: "var(--color-gold)",
+                letterSpacing: "1.5px", textTransform: "uppercase", display: "block",
+                marginBottom: "12px", fontFamily: "var(--font-h)"
+              }}>
+                Interactive Showroom Filters
+              </span>
+              
+              {/* Primary Card Tier Tabs */}
+              <div style={{
+                display: "inline-flex",
+                background: "rgba(17, 21, 32, 0.6)",
+                border: "1px solid rgba(255,255,255,0.06)",
+                borderRadius: "100px",
+                padding: "6px",
+                gap: "6px",
+                boxShadow: "0 8px 30px rgba(0,0,0,0.3)",
+                maxWidth: "100%",
+                overflowX: "auto"
+              }}>
+                {[
+                  { key: "all", label: "Showroom All" },
+                  { key: "1-card", label: "1-Card Models" },
+                  { key: "2-card", label: "2-Card Models" },
+                  { key: "3-card", label: "3-Card Models +" }
+                ].map(f => {
+                  const isActive = selectedFilter === f.key;
+                  return (
+                    <button
+                      key={f.key}
+                      onClick={() => setSelectedFilter(f.key)}
+                      style={{
+                        padding: "8px 20px",
+                        borderRadius: "100px",
+                        fontSize: "12.5px",
+                        fontWeight: 700,
+                        fontFamily: "var(--font-h)",
+                        color: isActive ? "#000" : "var(--color-muted)",
+                        background: isActive ? "linear-gradient(135deg, var(--color-gold), var(--color-orange))" : "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        transition: "all 0.25s ease",
+                        whiteSpace: "nowrap",
+                        boxShadow: isActive ? "0 4px 12px rgba(255, 215, 0, 0.25)" : "none"
+                      }}
+                    >
+                      {f.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Secondary Controls Bar: Search, Model Filter, Vehicle Filter, Sort, Reset */}
             <div style={{
-              display: "inline-flex",
-              background: "rgba(17, 21, 32, 0.6)",
-              border: "1px solid rgba(255,255,255,0.06)",
-              borderRadius: "100px",
-              padding: "6px",
-              gap: "6px",
-              boxShadow: "0 8px 30px rgba(0,0,0,0.3)"
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "12px",
+              justifyContent: "center",
+              alignItems: "center",
+              background: "rgba(13, 16, 23, 0.7)",
+              border: "1px solid rgba(255, 255, 255, 0.07)",
+              borderRadius: "16px",
+              padding: "12px 18px",
+              backdropFilter: "blur(10px)"
             }}>
-              {[
-                { key: "all", label: "Showroom All" },
-                { key: "1-card", label: "1-Card Models" },
-                { key: "2-card", label: "2-Card Models" },
-                { key: "3-card", label: "3-Card Models +" }
-              ].map(f => {
-                const isActive = selectedFilter === f.key;
-                return (
-                  <button
-                    key={f.key}
-                    onClick={() => setSelectedFilter(f.key)}
+              {/* Search Bar */}
+              <div style={{
+                position: "relative",
+                flex: "1 1 220px",
+                minWidth: "200px"
+              }}>
+                <Search size={16} style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", color: "var(--color-muted)" }} />
+                <input 
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search model or colour..."
+                  style={{
+                    width: "100%",
+                    background: "rgba(0, 0, 0, 0.4)",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                    borderRadius: "10px",
+                    padding: "8px 36px 8px 38px",
+                    color: "#fff",
+                    fontSize: "12.5px",
+                    outline: "none"
+                  }}
+                />
+                {searchQuery && (
+                  <button 
+                    onClick={() => setSearchQuery("")}
                     style={{
-                      padding: "8px 20px",
-                      borderRadius: "100px",
-                      fontSize: "12.5px",
-                      fontWeight: 700,
-                      fontFamily: "var(--font-h)",
-                      color: isActive ? "#000" : "var(--color-muted)",
-                      background: isActive ? "linear-gradient(135deg, var(--color-gold), var(--color-orange))" : "transparent",
-                      border: "none",
-                      cursor: "pointer",
-                      transition: "all 0.25s ease",
-                      boxShadow: isActive ? "0 4px 12px rgba(255, 215, 0, 0.25)" : "none"
+                      position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)",
+                      background: "none", border: "none", color: "var(--color-muted)", cursor: "pointer"
                     }}
                   >
-                    {f.label}
+                    <X size={14} />
                   </button>
-                );
-              })}
+                )}
+              </div>
+
+              {/* Model Dropdown */}
+              <div style={{ flex: "0 1 auto" }}>
+                <select
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                  style={{
+                    background: "rgba(0, 0, 0, 0.4)",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                    borderRadius: "10px",
+                    padding: "8px 14px",
+                    color: selectedModel !== "all" ? "var(--color-gold)" : "#ccc",
+                    fontSize: "12.5px",
+                    fontWeight: 600,
+                    outline: "none",
+                    cursor: "pointer"
+                  }}
+                >
+                  <option value="all" style={{ background: "#111318", color: "#fff" }}>All Models ({cars.length})</option>
+                  {uniqueModels.map(m => (
+                    <option key={m} value={m} style={{ background: "#111318", color: "#fff" }}>
+                      {m}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Vehicle Dropdown */}
+              <div style={{ flex: "0 1 auto" }}>
+                <select
+                  value={selectedVehicle}
+                  onChange={(e) => setSelectedVehicle(e.target.value)}
+                  style={{
+                    background: "rgba(0, 0, 0, 0.4)",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                    borderRadius: "10px",
+                    padding: "8px 14px",
+                    color: selectedVehicle !== "all" ? "var(--color-gold)" : "#ccc",
+                    fontSize: "12.5px",
+                    fontWeight: 600,
+                    outline: "none",
+                    cursor: "pointer"
+                  }}
+                >
+                  <option value="all" style={{ background: "#111318", color: "#fff" }}>All Vehicles</option>
+                  {uniqueVehicles.map(v => (
+                    <option key={v} value={v} style={{ background: "#111318", color: "#fff" }}>
+                      {formatVehicle(v)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Sort By Dropdown */}
+              <div style={{ flex: "0 1 auto" }}>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  style={{
+                    background: "rgba(0, 0, 0, 0.4)",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                    borderRadius: "10px",
+                    padding: "8px 14px",
+                    color: sortBy !== "default" ? "var(--color-gold)" : "#ccc",
+                    fontSize: "12.5px",
+                    fontWeight: 600,
+                    outline: "none",
+                    cursor: "pointer"
+                  }}
+                >
+                  <option value="default" style={{ background: "#111318", color: "#fff" }}>Sort: Featured</option>
+                  <option value="price-low" style={{ background: "#111318", color: "#fff" }}>Price: Low to High</option>
+                  <option value="price-high" style={{ background: "#111318", color: "#fff" }}>Price: High to Low</option>
+                </select>
+              </div>
+
+              {/* Reset Filters Button */}
+              {isFilterActive && (
+                <button
+                  onClick={resetAllFilters}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    background: "rgba(239, 68, 68, 0.15)",
+                    border: "1px solid rgba(239, 68, 68, 0.3)",
+                    color: "#ef4444",
+                    borderRadius: "10px",
+                    padding: "8px 14px",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    transition: "all 0.2s"
+                  }}
+                >
+                  <RotateCcw size={13} />
+                  <span>Reset Filters</span>
+                </button>
+              )}
             </div>
           </div>
         </section>

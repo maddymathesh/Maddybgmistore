@@ -536,13 +536,13 @@ export default function AdminDashboard() {
     const data = await response.json();
     return data.secure_url;
   };
-  const [supercarForm, setSupercarForm] = useState({ name: "", sellingPrice: "", offerPrice: "", type: "1-Card", imageUrl: "", tag: "None" });
+  const [supercarForm, setSupercarForm] = useState({ name: "", sellingPrice: "", offerPrice: "", type: "1-Card", imageUrl: "", tag: "None", applicableVehicle: "UAZ" });
   const [supercarImageFile, setSupercarImageFile] = useState<File | null>(null);
   const [uploadingSupercarImage, setUploadingSupercarImage] = useState(false);
   const [editingSupercar, setEditingSupercar] = useState<any | null>(null);
 
   const resetSupercarForm = () => {
-    setSupercarForm({ name: "", sellingPrice: "", offerPrice: "", type: "1-Card", imageUrl: "", tag: "None" });
+    setSupercarForm({ name: "", sellingPrice: "", offerPrice: "", type: "1-Card", imageUrl: "", tag: "None", applicableVehicle: "UAZ" });
     setSupercarImageFile(null);
     setEditingSupercar(null);
   };
@@ -875,7 +875,8 @@ export default function AdminDashboard() {
         offerPrice: supercarForm.offerPrice.replace(/,/g, ''),
         carType: supercarForm.type,
         imageUrl: finalImageUrl,
-        promoTag: supercarForm.tag
+        promoTag: supercarForm.tag,
+        applicableVehicle: supercarForm.applicableVehicle || "UAZ"
       };
 
       let res;
@@ -3101,6 +3102,83 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                       <div>
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">APPLICABLE VEHICLE</label>
+                        <div className="flex flex-col gap-2.5 bg-black/20 p-3 rounded-xl border border-border">
+                          {/* UAZ Vehicles */}
+                          <div>
+                            <span className="text-[9px] font-bold text-gold/80 uppercase tracking-wider block mb-1 font-mono">UAZ</span>
+                            <div className="grid grid-cols-2 gap-1.5">
+                              {[
+                                { id: "UAZ", label: "UAZ" },
+                                { id: "OPEN UAZ", label: "OPEN UAZ" }
+                              ].map((veh) => (
+                                <button
+                                  key={veh.id}
+                                  type="button"
+                                  onClick={() => setSupercarForm({ ...supercarForm, applicableVehicle: veh.id })}
+                                  className={`py-2 px-2 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all ${
+                                    supercarForm.applicableVehicle === veh.id
+                                      ? "bg-gold/15 border-gold text-gold font-extrabold shadow-md shadow-gold/5"
+                                      : "bg-black/30 border-border text-muted hover:border-white/20 hover:text-white"
+                                  }`}
+                                >
+                                  {veh.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Sedan Vehicles */}
+                          <div>
+                            <span className="text-[9px] font-bold text-gold/80 uppercase tracking-wider block mb-1 font-mono">SEDAN</span>
+                            <div className="grid grid-cols-2 gap-1.5">
+                              {[
+                                { id: "Dacia", label: "Dacia" },
+                                { id: "Mirado", label: "Mirado" },
+                                { id: "Coupe", label: "Coupe" },
+                                { id: "Roadster", label: "Roadster" }
+                              ].map((veh) => (
+                                <button
+                                  key={veh.id}
+                                  type="button"
+                                  onClick={() => setSupercarForm({ ...supercarForm, applicableVehicle: veh.id })}
+                                  className={`py-2 px-2 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all ${
+                                    supercarForm.applicableVehicle === veh.id
+                                      ? "bg-gold/15 border-gold text-gold font-extrabold shadow-md shadow-gold/5"
+                                      : "bg-black/30 border-border text-muted hover:border-white/20 hover:text-white"
+                                  }`}
+                                >
+                                  {veh.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Buggy */}
+                          <div>
+                            <span className="text-[9px] font-bold text-gold/80 uppercase tracking-wider block mb-1 font-mono">BUGGY</span>
+                            <div className="grid grid-cols-1 gap-1.5">
+                              {[
+                                { id: "Buggy", label: "Buggy" }
+                              ].map((veh) => (
+                                <button
+                                  key={veh.id}
+                                  type="button"
+                                  onClick={() => setSupercarForm({ ...supercarForm, applicableVehicle: veh.id })}
+                                  className={`py-2 px-2 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all ${
+                                    supercarForm.applicableVehicle === veh.id
+                                      ? "bg-gold/15 border-gold text-gold font-extrabold shadow-md shadow-gold/5"
+                                      : "bg-black/30 border-border text-muted hover:border-white/20 hover:text-white"
+                                  }`}
+                                >
+                                  {veh.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
                         <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">SUPERCAR IMAGE</label>
                         <div className="flex flex-col gap-3">
                           {(supercarForm.imageUrl || supercarImageFile) ? (
@@ -3186,9 +3264,12 @@ export default function AdminDashboard() {
                                 )}
                                 <div className="flex flex-col gap-0.5">
                                   <span className="font-bold text-white text-sm">{car.supercarName}</span>
-                                  <div className="flex gap-2 items-center">
+                                  <div className="flex gap-1.5 items-center flex-wrap">
                                     <span className="text-muted text-[9px] uppercase font-semibold">{car.carType}</span>
                                     {car.promoTag !== "None" && <span className="text-gold text-[9px] font-bold">{car.promoTag}</span>}
+                                    <span className="text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 text-[9px] font-bold px-1.5 py-0.5 rounded">
+                                      {car.applicableVehicle || "UAZ"}
+                                    </span>
                                   </div>
                                 </div>
                               </div>
@@ -3205,7 +3286,8 @@ export default function AdminDashboard() {
                                         offerPrice: car.offerPrice,
                                         type: car.carType,
                                         tag: car.promoTag,
-                                        imageUrl: car.imageUrl
+                                        imageUrl: car.imageUrl,
+                                        applicableVehicle: car.applicableVehicle || "UAZ"
                                       });
                                       setSupercarImageFile(null);
                                     }} 

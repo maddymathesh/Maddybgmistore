@@ -840,7 +840,7 @@ export async function getSupercars() {
   }
 }
 
-export async function createSupercar(data: { supercarName: string, sellingPrice: string, offerPrice: string, carType: string, imageUrl: string, promoTag?: string }) {
+export async function createSupercar(data: { supercarName: string, sellingPrice: string, offerPrice: string, carType: string, imageUrl: string, promoTag?: string, applicableVehicle?: string }) {
   await verifyAdminAccess();
   try {
     await db.insert(supercarGifts).values({
@@ -850,6 +850,7 @@ export async function createSupercar(data: { supercarName: string, sellingPrice:
       carType: data.carType,
       imageUrl: data.imageUrl,
       promoTag: data.promoTag || "None",
+      applicableVehicle: data.applicableVehicle || "UAZ",
     });
     await logAdminAction("Catalog", `Added new Supercar Gift: ${data.supercarName}`);
     return { success: true };
@@ -859,7 +860,7 @@ export async function createSupercar(data: { supercarName: string, sellingPrice:
   }
 }
 
-export async function updateSupercar(id: string, data: { supercarName: string, sellingPrice: string, offerPrice: string, carType: string, imageUrl: string, promoTag?: string }) {
+export async function updateSupercar(id: string, data: { supercarName: string, sellingPrice: string, offerPrice: string, carType: string, imageUrl: string, promoTag?: string, applicableVehicle?: string }) {
   await verifyAdminAccess();
   try {
     await db.update(supercarGifts).set({
@@ -869,6 +870,7 @@ export async function updateSupercar(id: string, data: { supercarName: string, s
       carType: data.carType,
       imageUrl: data.imageUrl,
       promoTag: data.promoTag || "None",
+      applicableVehicle: data.applicableVehicle || "UAZ",
       updatedAt: new Date(),
     }).where(eq(supercarGifts.id, id));
     await logAdminAction("Catalog", `Updated Supercar Gift: ${data.supercarName}`);

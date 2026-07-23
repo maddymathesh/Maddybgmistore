@@ -16,6 +16,7 @@ interface SupercarGift {
   carType: string | null;
   imageUrl: string | null;
   promoTag: string;
+  applicableVehicle?: string | null;
 }
 
 export default function SupercarGiftPage() {
@@ -447,6 +448,28 @@ export default function SupercarGiftPage() {
                       }}>
                         {c.supercarName}
                       </h3>
+                      
+                      {/* Applicable Vehicle Pill */}
+                      <div style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "6px",
+                        background: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        padding: "4px 12px",
+                        borderRadius: "8px",
+                        margin: "0 auto 12px auto",
+                        fontSize: "11px",
+                        color: "rgba(255,255,255,0.7)"
+                      }}>
+                        <Car size={13} style={{ color: "var(--color-gold)" }} />
+                        <span>
+                          Fits: <strong style={{ color: "#fff", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                            {c.applicableVehicle || "UAZ"}
+                          </strong>
+                        </span>
+                      </div>
                       
                       <div style={{
                         display: "flex",

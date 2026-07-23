@@ -102,6 +102,25 @@ export async function getSupercarGifts() {
   }
 }
 
+export async function getSupercarGiftById(id: string) {
+  try {
+    const data = await db
+      .select()
+      .from(supercarGifts)
+      .where(eq(supercarGifts.id, id))
+      .limit(1);
+    
+    if (!data.length) {
+      return { success: false, message: "Supercar gift not found" };
+    }
+    
+    return { success: true, product: data[0] };
+  } catch (error) {
+    console.error("Failed to fetch supercar gift by id:", error);
+    return { success: false, message: "Internal server error" };
+  }
+}
+
 export async function getReviews(page: number = 0) {
   try {
     const limit = 6;

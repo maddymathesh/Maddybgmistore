@@ -4,8 +4,9 @@
 import { useEffect, useState } from "react";
 import { 
   MessageCircle, Send, Loader2, Info, CheckCircle, 
-  Car, ShieldCheck, Clock, Users, Smartphone, Zap, Flame, Calendar, X
+  Car, ShieldCheck, Clock, Users, Smartphone, Zap, Flame, Calendar, X, ExternalLink
 } from "lucide-react";
+import Link from "next/link";
 import { getSupercarGifts } from "../../actions";
 
 interface SupercarGift {
@@ -68,7 +69,9 @@ export default function SupercarGiftPage() {
     fetchCars();
   }, []);
 
-  const contactText = (name: string) => `Hi Maddy! I am interested in buying the ${name} Supercar via your premium Gifting service. Please guide me.`;
+  }, []);
+
+  const contactText = (name: string, id: string) => `Hi Maddy! I am interested in buying the ${name} Supercar (ID: ${id}) via your premium Gifting service. Please guide me.`;
 
   // Helper to normalize card type strings for filtering
   const getCardCategory = (typeStr: string | null) => {
@@ -605,36 +608,53 @@ export default function SupercarGiftPage() {
                       <div style={{
                         display: "grid", gap: "10px", marginTop: "auto"
                       }}>
-                        <a 
-                          href={`https://wa.me/+919025391516?text=${encodeURIComponent(contactText(c.supercarName))}`} 
-                          target="_blank" 
-                          rel="noreferrer"
-                          className="social-btn-wa"
+                        <Link 
+                          href={`/services/supercar/${c.id}`}
                           style={{
                             display: "flex", justifyContent: "center", alignItems: "center", gap: "8px",
                             padding: "12px", borderRadius: "10px",
-                            background: "#25D366", color: "#fff",
+                            background: "rgba(255, 215, 0, 0.1)", color: "var(--color-gold)",
+                            border: "1px solid var(--color-border-gold)",
                             fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "13px",
                             textDecoration: "none", transition: "all 0.25s ease"
                           }}
+                          className="hover-gold-btn"
                         >
-                          <MessageCircle size={16} /> WhatsApp Deal
-                        </a>
-                        <a 
-                          href={`https://t.me/maddy_bgmistore?text=${encodeURIComponent(contactText(c.supercarName))}`} 
-                          target="_blank" 
-                          rel="noreferrer"
-                          className="social-btn-tg"
-                          style={{
-                            display: "flex", justifyContent: "center", alignItems: "center", gap: "8px",
-                            padding: "12px", borderRadius: "10px",
-                            background: "#0088cc", color: "#fff",
-                            fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "13px",
-                            textDecoration: "none", transition: "all 0.25s ease"
-                          }}
-                        >
-                          <Send size={16} /> Telegram Deal
-                        </a>
+                          <ExternalLink size={16} /> View Details
+                        </Link>
+                        
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                          <a 
+                            href={`https://wa.me/+919025391516?text=${encodeURIComponent(contactText(c.supercarName, c.id))}`} 
+                            target="_blank" 
+                            rel="noreferrer"
+                            className="social-btn-wa"
+                            style={{
+                              display: "flex", justifyContent: "center", alignItems: "center", gap: "8px",
+                              padding: "12px", borderRadius: "10px",
+                              background: "#25D366", color: "#fff",
+                              fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "12px",
+                              textDecoration: "none", transition: "all 0.25s ease"
+                            }}
+                          >
+                            <MessageCircle size={14} /> Buy on WhatsApp
+                          </a>
+                          <a 
+                            href={`https://t.me/maddy_bgmistore?text=${encodeURIComponent(contactText(c.supercarName, c.id))}`} 
+                            target="_blank" 
+                            rel="noreferrer"
+                            className="social-btn-tg"
+                            style={{
+                              display: "flex", justifyContent: "center", alignItems: "center", gap: "8px",
+                              padding: "12px", borderRadius: "10px",
+                              background: "#0088cc", color: "#fff",
+                              fontFamily: "var(--font-h)", fontWeight: 700, fontSize: "12px",
+                              textDecoration: "none", transition: "all 0.25s ease"
+                            }}
+                          >
+                            <Send size={14} /> Buy on Telegram
+                          </a>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -720,6 +740,11 @@ export default function SupercarGiftPage() {
         .social-btn-tg:hover {
           transform: translateY(-2px);
           box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
+        }
+
+        .hover-gold-btn:hover {
+          background: rgba(255, 215, 0, 0.2) !important;
+          transform: translateY(-2px);
         }
       `}</style>
     </>

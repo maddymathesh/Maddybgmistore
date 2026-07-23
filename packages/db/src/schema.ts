@@ -74,6 +74,7 @@ export const supercarGifts = pgTable("supercar_gifts", {
   imageUrl: text("image_url").notNull(),
   promoTag: text("promo_tag").default("None").notNull(),
   applicableVehicle: text("applicable_vehicle").default("UAZ").notNull(), // UAZ, SEDAN, Buggy
+  colour: text("colour"), // Added colour field
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });

@@ -536,13 +536,13 @@ export default function AdminDashboard() {
     const data = await response.json();
     return data.secure_url;
   };
-  const [supercarForm, setSupercarForm] = useState({ name: "", sellingPrice: "", offerPrice: "", type: "1-Card", imageUrl: "", tag: "None", applicableVehicle: "UAZ" });
+  const [supercarForm, setSupercarForm] = useState({ name: "", colour: "", sellingPrice: "", offerPrice: "", type: "1-Card", imageUrl: "", tag: "None", applicableVehicle: "UAZ" });
   const [supercarImageFile, setSupercarImageFile] = useState<File | null>(null);
   const [uploadingSupercarImage, setUploadingSupercarImage] = useState(false);
   const [editingSupercar, setEditingSupercar] = useState<any | null>(null);
 
   const resetSupercarForm = () => {
-    setSupercarForm({ name: "", sellingPrice: "", offerPrice: "", type: "1-Card", imageUrl: "", tag: "None", applicableVehicle: "UAZ" });
+    setSupercarForm({ name: "", colour: "", sellingPrice: "", offerPrice: "", type: "1-Card", imageUrl: "", tag: "None", applicableVehicle: "UAZ" });
     setSupercarImageFile(null);
     setEditingSupercar(null);
   };
@@ -876,7 +876,8 @@ export default function AdminDashboard() {
         carType: supercarForm.type,
         imageUrl: finalImageUrl,
         promoTag: supercarForm.tag,
-        applicableVehicle: supercarForm.applicableVehicle || "UAZ"
+        applicableVehicle: supercarForm.applicableVehicle || "UAZ",
+        colour: supercarForm.colour || ""
       };
 
       let res;
@@ -3036,8 +3037,12 @@ export default function AdminDashboard() {
                     </div>
                     <form className="flex flex-col gap-4" onSubmit={handleSupercarSubmit}>
                       <div>
-                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">SUPERCAR NAME</label>
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">SUPERCAR MODEL</label>
                         <input type="text" value={supercarForm.name} onChange={e => setSupercarForm({ ...supercarForm, name: e.target.value })} placeholder="e.g. Lamborghini Aventador" className="input-field" required />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">COLOUR</label>
+                        <input type="text" value={supercarForm.colour} onChange={e => setSupercarForm({ ...supercarForm, colour: e.target.value })} placeholder="e.g. Grigio Silverstone" className="input-field" />
                       </div>
                       <div>
                         <label className="block text-[10px] text-muted font-bold uppercase tracking-wider mb-2">SELLING PRICE (MARKET PRICE) (₹)</label>
@@ -3287,7 +3292,8 @@ export default function AdminDashboard() {
                                         type: car.carType,
                                         tag: car.promoTag,
                                         imageUrl: car.imageUrl,
-                                        applicableVehicle: car.applicableVehicle || "UAZ"
+                                        applicableVehicle: car.applicableVehicle || "UAZ",
+                                        colour: car.colour || ""
                                       });
                                       setSupercarImageFile(null);
                                     }} 

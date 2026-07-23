@@ -18,6 +18,7 @@ interface SupercarGift {
   imageUrl: string | null;
   promoTag: string;
   applicableVehicle?: string | null;
+  colour?: string | null;
 }
 
 export default function SupercarGiftPage() {
@@ -554,26 +555,54 @@ export default function SupercarGiftPage() {
                         {c.supercarName}
                       </h3>
                       
-                      {/* Applicable Vehicle Pill */}
+                      {/* Vehicle and Colour Pills */}
                       <div style={{
-                        display: "inline-flex",
-                        alignItems: "center",
+                        display: "flex",
+                        gap: "8px",
+                        flexWrap: "wrap",
                         justifyContent: "center",
-                        gap: "6px",
-                        background: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.08)",
-                        padding: "4px 12px",
-                        borderRadius: "8px",
-                        margin: "0 auto 12px auto",
-                        fontSize: "11px",
-                        color: "rgba(255,255,255,0.7)"
+                        marginBottom: "12px"
                       }}>
-                        <Car size={13} style={{ color: "var(--color-gold)" }} />
-                        <span>
-                          Applicable Vehicle - <strong style={{ color: "#fff", textTransform: "capitalize", letterSpacing: "0.5px" }}>
-                            {formatVehicle(c.applicableVehicle)}
-                          </strong>
-                        </span>
+                        <div style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "6px",
+                          background: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          padding: "4px 12px",
+                          borderRadius: "8px",
+                          fontSize: "11px",
+                          color: "rgba(255,255,255,0.7)"
+                        }}>
+                          <Car size={13} style={{ color: "var(--color-gold)" }} />
+                          <span>
+                            Vehicle - <strong style={{ color: "#fff", textTransform: "capitalize", letterSpacing: "0.5px" }}>
+                              {formatVehicle(c.applicableVehicle)}
+                            </strong>
+                          </span>
+                        </div>
+                        
+                        {c.colour && (
+                          <div style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "6px",
+                            background: "rgba(255,255,255,0.04)",
+                            border: "1px solid rgba(255,255,255,0.08)",
+                            padding: "4px 12px",
+                            borderRadius: "8px",
+                            fontSize: "11px",
+                            color: "rgba(255,255,255,0.9)"
+                          }}>
+                            <span>
+                              Colour - <strong style={{ color: "#fff", letterSpacing: "0.5px" }}>
+                                {c.colour}
+                              </strong>
+                            </span>
+                          </div>
+                        )}
                       </div>
                       
                       <div style={{

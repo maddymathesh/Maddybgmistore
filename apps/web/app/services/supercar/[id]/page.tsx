@@ -115,11 +115,16 @@ export default async function SupercarDetailsPage({ params }: PageProps) {
           <div className="info-header mb-8">
             <span className="tier-pill">{stock.carType || "Supercar"} Tier</span>
             <h1 className="details-title mt-4">{stock.supercarName}</h1>
-            <div className="badges-strip mt-4">
+            <div className="badges-strip mt-4 flex flex-wrap gap-3">
               <span className="unlink-badge">
                 <ShieldCheck size={14} />
                 <span>Applicable Vehicle: {formatVehicle(stock.applicableVehicle)}</span>
               </span>
+              {stock.colour && (
+                <span className="unlink-badge" style={{ borderColor: 'rgba(255,255,255,0.1)', color: '#fff' }}>
+                  <span>Colour: {stock.colour}</span>
+                </span>
+              )}
             </div>
           </div>
 

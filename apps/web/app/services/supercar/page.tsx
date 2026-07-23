@@ -69,8 +69,6 @@ export default function SupercarGiftPage() {
     fetchCars();
   }, []);
 
-  }, []);
-
   const contactText = (name: string, id: string) => `Hi Maddy! I am interested in buying the ${name} Supercar (ID: ${id}) via your premium Gifting service. Please guide me.`;
 
   // Helper to normalize card type strings for filtering
